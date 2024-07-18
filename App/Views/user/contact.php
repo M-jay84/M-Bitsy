@@ -1,0 +1,22 @@
+<div class="tt_blockcenter rounded">
+    <div class="tt_blockhead text-center">
+        <?= $V_title ?>
+    </div>
+    <div class="p-3">
+        <form method=post name=message action='<?= Url('contact/submit') ?>'>
+            <input type="hidden" name="csrf_token" value="<?= csrf_token() ?>" />
+            <p class='text-center'><?= Txt("LEAVE_EMAIL") ?></p>
+            <input id="subject" type="text" class="form-control fullwidth" name="subject" minlength="3" maxlength="200" placeholder="<?= Txt("SUBJECT") ?>" required autofocus><br>
+            <textarea class="form-control" id="msg" name="msg" rows="15"></textarea><br>
+            <div class="text-center">
+                <?php captcha_html() ?>
+                <button type="submit" class="btn ttbtn"><?= Txt("SUBMIT") ?></button>
+            </div>
+            <div class="margin-top20 text-center p-2">
+                <a href="<?= Url('login') ?>"><?= Txt("LOGIN") ?></a> |
+                <a href="<?= Url('signup') ?>"><?= Txt("SIGNUP") ?></a> |
+                <a href="<?= Url('recover') ?>"><?= Txt("RECOVER") ?></a> 
+            </div>
+        </form>
+    </div>
+</div>

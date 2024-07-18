@@ -1,0 +1,293 @@
+/* Body Style */
+body {
+    color: #adabac;
+    background-color: #000 !important;
+}
+
+/* Portal Layout Style */
+.portal_sidebar {
+    -ms-flex: 0 0 260px;
+    flex: 0 0 260px;
+    padding: 5px;
+    padding-left: 10px;
+    padding-right: 10px;
+}
+@media only screen and (max-width: 1300px) {
+    .portal_sidebar {
+        display: none !important;
+    }
+}
+.portalmain {
+    padding-top: 5px;
+    padding-left: 0px;
+    padding-right: 0px;
+}
+@media only screen and (min-width: 900px) {
+    .portalmain {
+        width: 100px;
+    }
+}
+
+/* Admin Layout Style */
+.default_sidebar {
+    position: fixed;
+    top: 68px;
+    left: 0;
+    bottom: 0;
+    width: 250px;
+    height: 100vh;
+    overflow-y: auto;
+    transition: 0.5s;
+    z-index: 999;
+}
+.content {
+    margin-left: 250px;
+    transition: 0.5s;
+}
+@media (min-width: 992px) {
+    .default_sidebar {
+        margin-left: 0;
+    }
+    .default_sidebar.open {
+        margin-left: -250px;
+    }
+    .content {
+        width: calc(100% - 250px);
+    }
+    .content.open {
+        width: 100%;
+        margin-left: 0;
+    }
+}
+@media (max-width: 991.98px) {
+    .default_sidebar {
+        margin-left: -250px;
+    }
+    .default_sidebar.open {
+        margin-left: 0;
+    }
+    .content {
+        width: 100%;
+        margin-left: 0;
+    }
+}
+
+/* Button Style */
+.ttbtn {
+    color: #ababad !IMPORTANT;
+    padding: .075rem .25rem;
+    border: 1px solid #c17b11 !important;
+    background-color: #262a33;
+}
+.ttbtnactive {
+    color: #ababad !IMPORTANT;
+    background-color: #191C24;
+    padding: .075rem .25rem;
+    border: 1px solid #ff0000 !important;
+}
+
+/* Alt Block Style */
+.tt_blockhead {
+    color: #f0a00c;
+    background-color: #b10000;
+    border: 2px solid #b10000;
+}
+.tt_block {
+    color: #ababad;
+    background-color: #191C24;
+    border: 2px solid #b10000;
+    margin-bottom: 15px;
+}
+
+/* Centered Block Style */
+.tt_blockcenter {
+    margin: 0 auto;
+    background-color: #191C24;
+    color: #ababad;
+    border: 2px solid #b10000;
+}
+@media only screen and (min-width: 1300px) {
+    .tt_blockcenter {
+        width: 50% !important;
+    }
+}
+@media only screen and (max-width: 1300px) {
+    .tt_blockcenter {
+        max-width: 95% !important;
+    }
+}
+
+/* Links Style */
+a {
+    color: #ffff00;
+}
+a:hover {
+    color: #ff9900;
+}
+
+/* Image Resize */
+.scaleA {
+    width: 100%;
+    max-width: max-content;
+}
+
+/* Icon Style */
+.tticon {
+    color: #ababad !important;
+    padding: .075rem .25rem;
+}
+.tticon-red {
+    color: #c17b11 !important;
+    padding: .075rem .25rem;
+}
+
+/* Form Input Style */
+.form-select {
+    background-color: #262a33;
+    color: #ababad;
+}
+.form-control {
+    color: #ababad !important;
+    background-color: #262a33 !important;
+}
+.list-group-item {
+    color: #ababad;
+    background-color: #191C24;
+}
+
+/* Table Style */
+.table {
+    color: #fff;
+}
+.table-striped>tbody>tr:nth-of-type(odd)>* {
+    color: #fff;
+    background-color: #262a33;
+}
+
+/* Navbar Style */
+.tt_navbar {
+    color: #ababad;
+    background-color: #b10000;
+}
+
+/* Make Full Width */
+.fullwidth {
+    width: 100%;
+    background-color: #000;
+}
+
+/* Drop Down Style */
+.dropdown-menu {
+    color: #ababad;
+    background-color: #191C24;
+    padding: 15px;
+}
+.dropdown-item {
+    color: #ababad;
+    background-color: #191C24;
+}
+.dropdown-item:hover {
+    color: #191C24;
+    background-color: #ababad;
+}
+
+/* Modal Style */
+.modal-content {
+    color: #ababad;
+    background-color: #191C24;
+}
+
+/* Pop-up Ballon Style */
+.ballooncolor {
+    color: #ababad;
+    background-color: #191C24;
+}
+.balloonheadercolor {
+    background-color: #191C24;
+    color: #ababad;
+}
+
+/* Accordian Style */
+.accordion {
+    --bs-accordion-btn-focus-box-shadow: 0;
+    --bs-accordion-btn-icon: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='white'%3e%3cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3e%3c/svg%3e");
+    --bs-accordion-btn-active-icon: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='white'%3e%3cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3e%3c/svg%3e");
+}
+.accordion-button:not(.collapsed) {
+    color: #ababad;
+    background-color: #000;
+}
+.accordion-button {
+    background-color: #191C24;
+    color: #ababad;
+}
+.accordion-body {
+    background-color: #141212;
+    color: #ababad;
+}
+
+/* Forum Style */
+.post-body {
+    background-color: #000;
+    color: #ababad;
+}
+.post-message {
+    background-color: #191C24;
+    color: #ababad;
+    border: 1px solid #b10000;
+    border-bottom: 2px solid orange;
+}
+
+/* Pagination Style */
+.page-link:hover {
+    background-color: #000;
+    color: #c17b11;
+}
+.page-link {
+    background-color: #191C24;
+    color: #ababad;
+}
+.active>.page-link, .page-link.active {
+    background-color: #000;
+    color: #c17b11;
+}
+.tt_disabled {
+    background-color: #191C24;
+    color: #ababad;
+}
+
+/* Carousel Style */
+@media (max-width: 667px) {
+    .carousel-inner .carousel-item>div {
+        display: none;
+    }
+
+    .carousel-inner .carousel-item>div:first-child {
+        display: block;
+    }
+}
+.carousel-inner .carousel-item.active,
+.carousel-inner .carousel-item-next,
+.carousel-inner .carousel-item-prev {
+    display: flex;
+}
+@media (min-width: 668px) {
+    .carousel-inner .carousel-item-end.active,
+    .carousel-inner .carousel-item-next {
+        transform: translateX(25%);
+    }
+    .carousel-inner .carousel-item-start.active,
+    .carousel-inner .carousel-item-prev {
+        transform: translateX(-25%);
+    }
+}
+.carousel-inner .carousel-item-end,
+.carousel-inner .carousel-item-start {
+    transform: translateX(0);
+}
+.carousel-control-prev-icon {
+    background-color: #c17b11;
+}
+.carousel-control-next-icon {
+    background-color: #c17b11;
+}

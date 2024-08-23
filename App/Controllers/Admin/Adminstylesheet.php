@@ -2,43 +2,53 @@
 
 namespace App\Controllers\Admin;
 
-use App\Libs\User;
+use App\Libs\Controller;
 use App\Models\StylesheetsModel;
 
 /*
 * Style Controller (Home Page)
 */
-class Adminstylesheet 
+class Adminstylesheet extends Controller
 {
+    public $current_user;
+
+    // Get Current User
+    public function __construct()
+    {
+        $this->current_user = $this->currentuser(2);
+        if ($this->current_user->class < CONFIG['_MODERATOR']) {
+            showMessage(CONFIG['URLROOT'], LANG["NO_PERMISSION"]);
+        }
+    }
+
     // Themes Default Page
     public function index()
     {
-        $USER = new User(_MODERATOR, 2);
+    
         // Get Themes Data
-        $styles = StylesheetsModel::fetchAll('*', '');
+        $styles = (new StylesheetsModel)->fetchAll('*', '');
 
-        // Init Data
+        // Data For View
         $data = [
-            'V_title' => Txt("THEMES"),
-            'V_styles' => $styles,
-            'USER' => $USER
+            'page_title' => LANG["THEMES"],
+            'V_styles' => $styles
         ];
 
         // Load View
-        template('stylesheet', $data, 'admin');
+        $this->view('stylesheet', $data, 'admin');
     }
 
     // Add Theme Default Page
     public function submit()
     {
-        $USER = new User(_MODERATOR, 2);
-        StylesheetsModel::insert();
+    
+        (new StylesheetsModel)->insert();
     }
 
     // Delete Theme Form Submit
     public function delete()
     {
-        $USER = new User(_MODERATOR, 2);
-        StylesheetsModel::delete();
+    
+        (new StylesheetsModel)->delete();
     }
 }

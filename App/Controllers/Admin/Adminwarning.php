@@ -2,39 +2,49 @@
 
 namespace App\Controllers\Admin;
 
-use App\Libs\User;
+use App\Libs\Controller;
 use App\Models\WarningsModel;
 
 /*
 * Warnings Controller
 */
-class Adminwarning 
+class Adminwarning extends Controller
 {
+    public $current_user;
+
+    // Get Current User
+    public function __construct()
+    {
+        $this->current_user = $this->currentuser(2);
+        if ($this->current_user->class < CONFIG['_MODERATOR']) {
+            showMessage(CONFIG['URLROOT'], LANG["NO_PERMISSION"]);
+        }
+    }
+
     // Warning Default Page
     public function index()
     {
-        $USER = new User(_MODERATOR, 2);
+    
         // Get Warnings
-        $warnings = WarningsModel::getAll($USER);
+        $warnings = (new WarningsModel)->getAll($this->current_user->id);
 
-        // Init Data
+        // Data For View
         $data = [
-            'V_title' => Txt("WARNINGS"),
+            'page_title' => LANG["WARNINGS"],
             'V_pager' => $warnings['pager'],
             'V_count' => $warnings['count'],
-            'V_warnings' => $warnings['stmt'],
-            'USER' => $USER
+            'V_warnings' => $warnings['stmt']
         ];
 
         // Load View
-        template('warning', $data, 'admin');
+        $this->view('warning', $data, 'admin');
     }
 
     // Warning Form Submit
     public function submit()
     {
-        $USER = new User(_MODERATOR, 2);
-        WarningsModel::deleteAllAdmin();
+    
+        (new WarningsModel)->deleteAllAdmin();
     }
     
 }

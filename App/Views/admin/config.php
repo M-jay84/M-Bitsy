@@ -1,16 +1,16 @@
-<?php block_begin($V_title) ?>
+<?php block_begin($page_title) ?>
 <form method="post" action="<?= Url('adminconfig/submit') ?>">
     
   <div class="rounded p-4">
     <p class='text-center'>
-      <b><?= Txt("Settings"); ?></b>
-      To Allow User, add username to _OWNERS setting manually at app/config/settings.php<br>
+      <b><?= LANG["Settings"]; ?></b>
+      To Allow User, add username to CONFIG['_OWNERS'] setting manually at app/config/settings.php<br>
       Like your Settings ? Make a backup before changing <a href='<?= Url('adminconfig/backup') ?>'> Here</a>
     </p>
   </div><br>
 
   <div class="row rounded m-0 p-2">
-    <p class="text-center"><b><?= Txt("Details"); ?></b></p>
+    <p class="text-center"><b><?= LANG["Details"]; ?></b></p>
     <div class="col-md-2">
       <label for="SITENAME">Site Name:</label><br>
       <input type="text" class="form-control fullwidth" id="SITENAME" name="SITENAME" value="<?= CONFIG['SITENAME'] ?>"><br>
@@ -54,7 +54,7 @@
   </div><br>
 
   <div class="row rounded m-0 p-2">
-    <p class="text-center"><b><?= Txt("Online, Welcome & Captcha"); ?></b></p>
+    <p class="text-center"><b><?= LANG["Online, Welcome & Captcha"]; ?></b></p>
     <div class="col-md-2">
       <label for="OFFLINEMSG">Site Online:</label><br>
       <?php $checked = CONFIG['SITE_ONLINE'] == 1;
@@ -110,7 +110,7 @@
   </div><br>
 
   <div class="row rounded m-0 p-2">
-    <p class="text-center"><b><?= Txt("Optons"); ?></b></p>
+    <p class="text-center"><b><?= LANG["Optons"]; ?></b></p>
     <div class="col-md-2">
       <label for="UPLOADSCRAPE">Upload Scrape:</label><br>
       <?php $checked = CONFIG['UPLOADSCRAPE'] == 1;
@@ -166,7 +166,7 @@
   </div><br>
 
   <div class="row rounded m-0 p-2">
-    <p class="text-center"><b><?= Txt("Max User, Bonus, Cache, Limits"); ?></b></p>
+    <p class="text-center"><b><?= LANG["Max User, Bonus, Cache, Limits"]; ?></b></p>
     <div class="col-md-2">
       <label for="ACCOUNTMAX">Account Max:</label><br>
       <input type="text" class="form-control" id="ACCOUNTMAX" name="ACCOUNTMAX" value="<?= CONFIG['ACCOUNTMAX'] ?>"><br>
@@ -184,12 +184,12 @@
       <input type="text" class="form-control" id="ADDBONUS" name="ADDBONUS" value="<?= CONFIG['ADDBONUS'] ?>"><br>
     </div>
     <div class="col-md-2">
-      <label for="CACHE_TYPE">Cache Type:</label><br>
-      <input type="text" class="form-control" id="CACHE_TYPE" name="CACHE_TYPE" value="<?= CONFIG['CACHE_TYPE'] ?>"><br>
-      <label for="MEMCACHE_HOST">Memcache Host:</label><br>
-      <input type="text" class="form-control" id="MEMCACHE_HOST" name="MEMCACHE_HOST" value="<?= CONFIG['MEMCACHE_HOST'] ?>"><br>
-      <label for="MEMCACHE_PORT">Memcache Port:</label><br>
-      <input type="text" class="form-control" id="MEMCACHE_PORT" name="MEMCACHE_PORT" value="<?= CONFIG['MEMCACHE_PORT'] ?>"><br>
+      <label for="CONFIG['CACHE']_TYPE">Cache Type:</label><br>
+      <input type="text" class="form-control" id="CONFIG['CACHE']_TYPE" name="CONFIG['CACHE']_TYPE" value="<?= CONFIG['CACHE_TYPE'] ?>"><br>
+      <label for="MEMCONFIG['CACHE']_HOST">Memcache Host:</label><br>
+      <input type="text" class="form-control" id="MEMCONFIG['CACHE']_HOST" name="MEMCONFIG['CACHE']_HOST" value="<?= CONFIG['MEMCACHE_HOST'] ?>"><br>
+      <label for="MEMCONFIG['CACHE']_PORT">Memcache Port:</label><br>
+      <input type="text" class="form-control" id="MEMCONFIG['CACHE']_PORT" name="MEMCONFIG['CACHE']_PORT" value="<?= CONFIG['MEMCACHE_PORT'] ?>"><br>
     </div>
     <div class="col-md-2">
       <label for="PEERLIMIT">Peer Limit:</label><br>
@@ -210,7 +210,7 @@
   </div><br>
   
   <div class="row rounded m-0 p-2">
-    <p class="text-center"><b><?= Txt("Email"); ?></b></p>
+    <p class="text-center"><b><?= LANG["Email"]; ?></b></p>
     <div class="col-md-2">
       <label for="mail_type">Mail Type:</label><br>
       <input type="text" class="form-control" id="mail_type" name="mail_type" value="<?= CONFIG['mail_type'] ?>"><br>
@@ -244,7 +244,7 @@
   </div><br>
   
   <div class="row rounded m-0 p-2">
-    <p class="text-center"><b><?= Txt("Hit & Run"); ?></b></p>
+    <p class="text-center"><b><?= LANG["Hit & Run"]; ?></b></p>
     <div class="col-md-2">
       <label for="HNR_ON">Hit & Run on/off:</label><br>
       <?php $checked = CONFIG['HNR_ON'] == 1;
@@ -272,7 +272,7 @@
   </div><br>
   
   <div class="row rounded m-0 p-2">
-    <p class="text-center"><b><?= Txt("Ratio Warn"); ?></b></p>
+    <p class="text-center"><b><?= LANG["Ratio Warn"]; ?></b></p>
     <div class="col-md-3">
       <label for="RATIOWARNENABLE">Ratio Warn Enable:</label><br>
       <?php $checked = CONFIG['RATIOWARNENABLE'] == 1;
@@ -320,7 +320,7 @@
   </div><br>
   
   <div class="row rounded m-0 p-2">
-    <p class="text-center"><b><?= Txt("Waiting Times"); ?></b></p>
+    <p class="text-center"><b><?= LANG["Waiting Times"]; ?></b></p>
     <div class="col-md-3">
       <label for="GIGSA">A Gigs:</label><br>
       <input type="text" class="form-control" id="GIGSA" name="GIGSA" value="<?= CONFIG['GIGSA'] ?>"><br>

@@ -2,35 +2,43 @@
 
 namespace App\Controllers\User;
 
-use App\Libs\User;
+use App\Libs\Controller;
 use App\Models\PeersModel;
 use App\Models\UsersModel;
 
 /*
 * Peers Controller
 */
-class Peer 
+class Peer extends Controller
 {
+    public $current_user;
+
+    // Get Current User
+    public function __construct()
+    {
+        $this->current_user = $this->currentuser(2);
+    }
+
     // No Default Page // todo
     public function index($type, $id)
     {
-        $USER = new User(0, 2);
+    
         // Check User Input
         $user =  UsersModel::fetchRow('id,username,privacy', ['id ='], [$id]);
-        $peers = PeersModel::getPeers($USER, $type, $id);
+        $peers = (new PeersModel)->getPeers($type, $id, $this->current_user);
 
-        // Init Data
+        // Data For View
         $data = [
             'V_id' => $id,
-            'V_title' => $peers['title'],
+            'page_title' => $peers['title'],
             'V_user' => $user,
             'V_count' => $peers['count'],
             'V_peers' => $peers['stmt'],
             'V_pager' => $peers['pager'],
-            'USER' => $USER
+            'current_user' => $this->current_user
         ];
 
         // Load View
-        template('peer', $data, 'user');
+        $this->view('peer', $data, 'user');
     }
 }

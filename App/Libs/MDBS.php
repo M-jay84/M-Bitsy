@@ -5,8 +5,6 @@ namespace App\Libs;
 use App\Libs\Tmdb;
 use App\Libs\OMDB;
 use App\Libs\Cache;
-use App\Models\TmdbModel;
-use App\Models\TorrentsModel;
 
 /**
 * Get TMDB/OMDB Data
@@ -29,11 +27,11 @@ class MDBS
         $film = $tmdb->getMovie($id_tmdb);
         // Get & Save Image
         $image_url = $tmdb->getImageURL('w300') . "" . $film->getPoster();
-        $image = $tmdb->saveImage($image_url, UPLOADDIR . "/tmdb/film/", $id_tmdb);
+        $image = $tmdb->saveImage($image_url, CONFIG['UPLOADDIR'] . "/tmdb/film/", $id_tmdb);
 		if (extension_loaded('gd')) {	
-            copyImage(UPLOADDIR . "/tmdb/film/$id_tmdb.jpg", UPLOADDIR . "/tmdb/film/$id_tmdb.webp");	
-            unlink(UPLOADDIR . "/tmdb/film/$id_tmdb.jpg");	
-            unlink(CACHE . "/tmdb/film/$id_tmdb.cache");	
+            copyImage(CONFIG['UPLOADDIR'] . "/tmdb/film/$id_tmdb.jpg", CONFIG['UPLOADDIR'] . "/tmdb/film/$id_tmdb.webp");	
+            unlink(CONFIG['UPLOADDIR'] . "/tmdb/film/$id_tmdb.jpg");	
+            unlink(CONFIG['CACHE'] . "/tmdb/film/$id_tmdb.cache");	
             $image = "$id_tmdb.webp";	
         }
         // Get Data
@@ -54,13 +52,13 @@ class MDBS
             $bdd .= "$casting_nom[$i]*$casting_role[$i]*$casting_img[$i]&";
         }
         // Insert Data
-        TmdbModel::insert([
+        DB::insert('tmdb', [
             'id_tmdb'=>$id_tmdb, 'title'=>$title, 'duration'=>$duration, 'producer'=>'not working',
             'genre'=>$genre, 'plot'=>$plot, 'actor'=>$bdd, 'trailer'=>$trailer, 'date'=>null,
             'image'=>$image, 'url'=>$url, 'type'=>'movie', 'torrentid'=>$id
         ]);
         // Return To Torrent
-        Redirect(Url("torrent/$id"));
+        Url(Url("torrent/$id"), true);
     }
 
     // Fetch Movie Data From Database or Cache
@@ -70,7 +68,7 @@ class MDBS
         $expires = 1728000; // Cache time in seconds
         if (($_data = $TTCache->Get("tmdb/film/$id_tmdb", $expires)) === false) {
             // Get Data From DB
-            $film = TmdbModel::fetchRow('*', ['id_tmdb =', 'type ='], [$id_tmdb,'movie']);
+            $film = DB::fetchRow('tmdb', '*', ['id_tmdb =', 'type ='], [$id_tmdb,'movie']);
             // Data
             $_data["title"] = $film["title"];
             $_data["duration"] = $film["duration"];
@@ -97,11 +95,11 @@ class MDBS
         $serie = $tmdb->getTVShow($id_tmdb);
         // Get & Save Image
         $image_url = $tmdb->getImageURL('w300') . "" . $serie->getPoster();
-        $image = $tmdb->saveImage($image_url, UPLOADDIR . "/tmdb/serie/", $id_tmdb);
+        $image = $tmdb->saveImage($image_url, CONFIG['UPLOADDIR'] . "/tmdb/serie/", $id_tmdb);
 		if (extension_loaded('gd')) {	
-            copyImage(UPLOADDIR . "/tmdb/serie/$id_tmdb.jpg", UPLOADDIR . "/tmdb/serie/$id_tmdb.jpg");	
-            //unlink(UPLOADDIR . "/tmdb/serie/$id_tmdb.jpg");	
-            unlink(CACHE . "/tmdb/serie/$id_tmdb.cache");	
+            copyImage(CONFIG['UPLOADDIR'] . "/tmdb/serie/$id_tmdb.jpg", CONFIG['UPLOADDIR'] . "/tmdb/serie/$id_tmdb.jpg");	
+            //unlink(CONFIG['UPLOADDIR'] . "/tmdb/serie/$id_tmdb.jpg");	
+            unlink(CONFIG['CACHE'] . "/tmdb/serie/$id_tmdb.cache");	
             $image = "$id_tmdb.webp";	
         }
         // Get Data
@@ -125,12 +123,12 @@ class MDBS
             $bdd .= "$casting_nom[$i]*$casting_role[$i]*$casting_img[$i]&";
         }
         // Insert Data
-        TmdbModel::insert([
+        DB::insert('tmdb', [
            'id_tmdb'=>$id_tmdb, 'title'=>$title, 'image'=>$image, 'season'=>$season, 'episodes'=>$episode, 'status'=>$status,
            'date'=>$date, 'creator'=>$creator, 'genre'=>$genre, 'plot'=>$plot, 'actor'=>str_replace("http:", "https:", $bdd,), 'url'=>$url, 'type'=>'show', 'torrentid'=>$id
         ]);
         // Return To Torrent
-        Redirect(Url("torrent/$id"));
+        Url(Url("torrent/$id"), true);
     }
 
     // Fetch Show Data From Database or Cache
@@ -140,7 +138,7 @@ class MDBS
         $expires = 1728000; // Cache time in seconds
         if (($_data = $TTCache->Get("tmdb/serie/$id_tmdb", $expires)) === false) {
             // Get Data From DB
-            $serie = TmdbModel::fetchRow('*', ['id_tmdb =', 'type ='], [$id_tmdb,'show']);
+            $serie = DB::fetchRow('tmdb', '*', ['id_tmdb =', 'type ='], [$id_tmdb,'show']);
             // Data
             $_data["poster"] = $serie["image"];
             $_data["title"] = $serie["title"];
@@ -177,7 +175,7 @@ class MDBS
         $bdd = $movie->actors;
         $date = date('Y-m-d H:i:s',strtotime($movie->released));;
          // Insert Data
-         TmdbModel::insert([
+         DB::insert('tmdb', [
             'id_tmdb'=>$id_tmdb, 'title'=>$title, 'duration'=>$duration, 'producer'=>'not working',
             'genre'=>$genre, 'plot'=>$plot, 'actor'=>$bdd, 'trailer'=>$trailer, 'date'=>$date,
             'image'=>$image, 'url'=>$url, 'type'=>$imdb_id, 'torrentid'=>$id
@@ -191,7 +189,7 @@ class MDBS
         $expires = 1728000; // Cache time in seconds
         if (($_data = $TTCache->Get("imdb/$id", $expires)) === false) {
             // Get Data From DB
-            $imdb = TmdbModel::fetchRow('*', ['torrentid ='], [$id]);
+            $imdb = DB::fetchRow('tmdb', '*', ['torrentid ='], [$id]);
             //var_dump($imdb);
             // Data
             $_data["title"] = $imdb["title"];
@@ -217,17 +215,17 @@ class MDBS
         if ($row["imdb"] != '') {
             $img =  $row["poster"];
         } elseif ($row["tmdb"] != '') {
-            if (in_array($row["cat_parent"], SerieCats)) {
+            if (in_array($row["cat_parent"], CONFIG['SerieCats'])) {
                 $img =  $row["poster"];
-            } elseif (in_array($row["cat_parent"], MovieCats)) {
+            } elseif (in_array($row["cat_parent"], CONFIG['MovieCats'])) {
                 $img =  $row["poster"];
             }
         } elseif ($row["image1"] != '') {
-            $img = data_uri(UPLOADDIR . "/images/" . $row["image1"], $row['image1']);
+            $img = data_uri(CONFIG['UPLOADDIR'] . "/images/" . $row["image1"], $row['image1']);
         } elseif ($row["image2"] != '') {
-            $img = data_uri(UPLOADDIR . "/images/" . $row["image2"], $row['image2']);
+            $img = data_uri(CONFIG['UPLOADDIR'] . "/images/" . $row["image2"], $row['image2']);
         } else {
-            $img = "" . URLROOT . "/assets/images/misc/default_avatar.webp";
+            $img = "" . CONFIG['URLROOT'] . "/assets/images/misc/default_avatar.webp";
         }
 		
         return $img;
@@ -238,7 +236,7 @@ class MDBS
         $DATA = array();
         if (!empty($stmt["imdb"])) {
 
-            $total = TmdbModel::fetchColumn('count(id)', ['torrentid ='], [$torrentid]);
+            $total = DB::fetchColumn('tmdb', 'count(id)', ['torrentid ='], [$torrentid]);
             $id_tmdb = MDBS::getId($stmt["imdb"]);
             if ($total == 0) {
                 MDBS::createImdb($id_tmdb, $torrentid, $stmt["imdb"]);
@@ -255,12 +253,12 @@ class MDBS
                 'POSTER' => $_data['poster']
             ];
 
-            TorrentsModel::update(['poster'], ['imdb='], [$_data['poster'], $stmt["imdb"]]);
+            DB::update('torrents', ['poster'], ['imdb='], [$_data['poster'], $stmt["imdb"]]);
 
-        } elseif (!empty($stmt["tmdb"]) && in_array($stmt["cat_parent"], SerieCats)) {
+        } elseif (!empty($stmt["tmdb"]) && in_array($stmt["cat_parent"], CONFIG['SerieCats'])) {
 
             $id_tmdb = MDBS::getId($stmt["tmdb"]);
-            $total = TmdbModel::fetchColumn('COUNT(id)', ['id_tmdb =', 'type ='], [$id_tmdb,'show']);
+            $total = DB::fetchColumn('tmdb', 'COUNT(id)', ['id_tmdb =', 'type ='], [$id_tmdb,'show']);
             if ($total == 0) {
                 MDBS::createSerie($id_tmdb, $torrentid, $stmt["tmdb"]);
             }
@@ -283,15 +281,15 @@ class MDBS
                 'CREATOR' => "<b> Creator : </b>$_data[creator]",
                 'GENRE' => "<b> Genre : </b>$_data[genre]",
                 'ACTORS' => "<div class='row'>$actorimage</div>",
-                'POSTER' => UPLOADDIR . "/tmdb/$_data[type]/$_data[poster]"
+                'POSTER' => CONFIG['UPLOADDIR'] . "/tmdb/$_data[type]/$_data[poster]"
             ];
-            $poster = data_uri(UPLOADDIR . "/tmdb/serie/$_data[poster]", UPLOADDIR . "/tmdb/serie/$_data[poster]");
-            TorrentsModel::update(['poster'], ['tmdb='], [$poster, $stmt["tmdb"]]);
+            $poster = data_uri(CONFIG['UPLOADDIR'] . "/tmdb/serie/$_data[poster]", CONFIG['UPLOADDIR'] . "/tmdb/serie/$_data[poster]");
+            DB::update('torrents', ['poster'], ['tmdb='], [$poster, $stmt["tmdb"]]);
 
-        } elseif (!empty($stmt["tmdb"]) && in_array($stmt["cat_parent"], MovieCats)) {
+        } elseif (!empty($stmt["tmdb"]) && in_array($stmt["cat_parent"], CONFIG['MovieCats'])) {
             
             $id_tmdb = MDBS::getId($stmt["tmdb"]);
-            $total = TmdbModel::fetchColumn('COUNT(id)', ['id_tmdb =', 'type ='], [$id_tmdb,'movie']);
+            $total = DB::fetchColumn('tmdb', 'COUNT(id)', ['id_tmdb =', 'type ='], [$id_tmdb,'movie']);
             if ($total == 0) {
                 MDBS::createFilm($id_tmdb, $torrentid, $stmt["tmdb"]);
             }
@@ -312,15 +310,15 @@ class MDBS
                 'GENRE' => "<b> Genre : </b>$_data[genre]",
                 'ACTORS' => "<div class='row'>$actorimage</div>",
                 'video' => "<embed src='https://www.youtube.com/v/" . str_replace("watch?v=", "v/", htmlspecialchars($_data["trailer"])) . "' type=\"application/x-shockwave-flash\"  height=\"410\" width='100%'></embed>",
-                'POSTER' => UPLOADDIR . "/tmdb/$_data[type]/$_data[poster]"
+                'POSTER' => CONFIG['UPLOADDIR'] . "/tmdb/$_data[type]/$_data[poster]"
             ];
-            $poster = data_uri(UPLOADDIR . "/tmdb/film/$_data[poster]", UPLOADDIR . "/tmdb/film/" . $_data['poster']);
-            TorrentsModel::update(['poster'], ['tmdb='], [$poster, $stmt["tmdb"]]);
+            $poster = data_uri(CONFIG['UPLOADDIR'] . "/tmdb/film/$_data[poster]", CONFIG['UPLOADDIR'] . "/tmdb/film/" . $_data['poster']);
+            DB::update('torrents', ['poster'], ['tmdb='], [$poster, $stmt["tmdb"]]);
 
         } else {
             $DATA = [
                 'TITLE' => "<p class='text-center'> <legend><b>$stmt[name]</b></legend></p>",
-                'PLOT' => "<b>". Txt("DESCRIPTION").":</b><br>".format_comment($stmt['descr']).""
+                'PLOT' => "<b>". LANG["DESCRIPTION"].":</b><br>".format_comment($stmt['descr']).""
             ];
         }
 

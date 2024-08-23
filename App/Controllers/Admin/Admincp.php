@@ -2,25 +2,36 @@
 
 namespace App\Controllers\Admin;
 
-use App\Libs\User;
+use App\Libs\Controller;
 
 /*
 * Admin Default Controller
 */
-class Admincp 
+class Admincp extends Controller
 {
+    public $current_user;
+
+    // Get Current User
+    public function __construct()
+    {
+        $this->current_user = $this->currentuser(2);
+        if ($this->current_user->class < CONFIG['_MODERATOR']) {
+            showMessage(CONFIG['URLROOT'], LANG["NO_PERMISSION"]);
+        }
+    }
+
     // Admincp Default Page
     public function index()
     {
-        $USER = new User(_MODERATOR, 2);
-        // Init Data
+    
+        // Data For View
         $data = [
-            'V_title' => Txt('STAFF'),
-            'USER' => $USER
+            'page_title' => LANG['STAFF'],
+            'current_user' => $this->current_user
         ];
 
         // Load View
-        template('shoutbox', $data, 'admin');
+        $this->view('admincp', $data, 'admin');
     }
     
 }

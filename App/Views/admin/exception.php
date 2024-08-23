@@ -1,6 +1,6 @@
-<?php block_begin($V_title) ?>
+<?php block_begin($page_title) ?>
 <p class="text-center">
-    <?= Txt('SEND_EXCEPTION') ?>
+    <?= LANG['SEND_EXCEPTION'] ?>
 </p>
 
 <form method="post">
@@ -10,7 +10,7 @@
         </textarea><br>
     </div>
     <p class="text-center">
-        <input type="submit" class="btn ttbtn btn-sm" value="<?= Txt("SUBMIT") ?>">
+        <input type="submit" class="btn ttbtn btn-sm" value="<?= LANG['SUBMIT'] ?>">
     </p>
 </form>
 <?php block_end() ?>

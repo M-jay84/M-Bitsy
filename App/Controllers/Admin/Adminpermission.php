@@ -2,33 +2,42 @@
 
 namespace App\Controllers\Admin;
 
-use App\Libs\User;
+use App\Libs\Controller;
 use App\Models\PermissionsModel;
 
 /*
 * Permission Controller
 */
-class Adminpermission 
+class Adminpermission extends Controller
 {
+    public $current_user;
+
+    // Get Current User
+    public function __construct()
+    {
+        $this->current_user = $this->currentuser(2);
+        if ($this->current_user->class < CONFIG['_MODERATOR']) {
+            showMessage(CONFIG['URLROOT'], LANG["NO_PERMISSION"]);
+        }
+    }
+
     // Permissions Default Page
     public function index()
     {
-        $USER = new User(_SUPERMODERATOR, 2);
         if (!empty($_POST)) {
-            PermissionsModel::insertOrUpdate();
+            (new PermissionsModel)->insertOrUpdate();
         } else {
             // Get Permissions Data
-            $permissions = PermissionsModel::fetchAll('*', '', 'ORDER BY permission_id'); 
+            $permissions = (new PermissionsModel)->fetchAll('*', '', 'ORDER BY permission_id'); 
 		
-            // Init Data
+            // Data For View
             $data = [
-                'V_title' => Txt("GROUP"),
-                'V_permissions' => $permissions,
-                'USER' => $USER
+                'page_title' => LANG["GROUP"],
+                'V_permissions' => $permissions
             ];
        
             // Load View
-            template('permission', $data, 'admin');
+            $this->view('permission', $data, 'admin');
         }
         
     }
@@ -36,8 +45,7 @@ class Adminpermission
     // Delete Permissions Submit
     public function delete($id)
     {
-        $USER = new User(_SUPERMODERATOR, 2);
-        PermissionsModel::delete($id);
+        (new PermissionsModel)->delete($id);
     }
 
 }

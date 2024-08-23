@@ -2,31 +2,41 @@
 
 namespace App\Controllers\Admin;
 
-use App\Libs\User;
+use App\Libs\Controller;
 use App\Models\CommentsModel;
 
 /*
 * Comment Controller
 */
-class Admincomment 
+class Admincomment extends Controller
 {
+    public $current_user;
+
+    // Get Current User
+    public function __construct()
+    {
+        $this->current_user = $this->currentuser(2);
+        if ($this->current_user->class < CONFIG['_MODERATOR']) {
+            showMessage(CONFIG['URLROOT'], LANG["NO_PERMISSION"]);
+        }
+    }
+
     // Comments Default Page
     public function index()
     {
-        $USER = new User(_MODERATOR, 2);
+    
         // Get Data
-        $comments = CommentsModel::grabAll();
+        $comments = (new CommentsModel)->grabAll();
         
-        // Init Data
+        // Data For View
         $data = [
-            'V_title' => Txt("COMMENT"),
+            'page_title' => LANG["COMMENT"],
             'V_comments' => $comments['stmt'],
-            'V_pager' => $comments['pager'],
-            'USER' => $USER
+            'V_pager' => $comments['pager']
         ];
 
         // Load View
-        template('comment', $data, 'admin');
+        $this->view('comment', $data, 'admin');
     }
 
 }

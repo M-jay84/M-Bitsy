@@ -2,51 +2,56 @@
 
 namespace App\Controllers\User;
 
-use App\Libs\User;
+use App\Libs\Controller;
 use App\Models\RulesModel;
 
 /*
 * Rules Controller
 */
-class Rule 
+class Rule extends Controller
 {
+    public $current_user;
+
+    // Get Current User
+    public function __construct()
+    {
+        $this->current_user = $this->currentuser(1);
+    }
+
     // Rules Page
     public function index()
     {
-        $USER = new User(0, 1);
         // Get Rules
-        $rules = RulesModel::gettAll();
+        $rules = (new RulesModel)->gettAll();
 
-        // Init Data
+        // Data For View
         $data = [
-            'V_title' => Txt('RULE'),
+            'page_title' => LANG['RULE'],
             'V_rules' => $rules,
-            'USER' => $USER
+            'current_user' => $this->current_user
         ];
 
         // Load View
-        template('rule', $data, 'user');
+        $this->view('rule', $data, 'user');
     }
 
     // Edit/Add Rule
     public function edit()
     {
-        $USER = new User(0, 1);
-        if (!$USER->isStaff()) {
-            Redirect(Url(), Txt("NO_PERMISSION"));
+        if (!$this->current_user->class > CONFIG['_MODERATOR']) {
+            showMessage(Url(), LANG["NO_PERMISSION"]);
         } else {
-            RulesModel::insertOrUpdate();
+            (new RulesModel)->insertOrUpdate($this->current_user->username);
         }
     }
 
     // Delete Rule
     public function delete($id)
     {
-        $USER = new User(0, 1);
-        if (!$USER->isStaff()) {
-            Redirect(Url(), Txt("NO_PERMISSION"));
+        if (!$this->current_user->class > CONFIG['_MODERATOR']) {
+            showMessage(Url(), LANG["NO_PERMISSION"]);
         } else {
-            RulesModel::delete($id);
+            (new RulesModel)->delete($id, $this->current_user->username);
         }
     }
 }

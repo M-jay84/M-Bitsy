@@ -1,14 +1,14 @@
 <?php
 
-use App\Models\UsersModel;
+use App\Libs\DB;
 
-$stmt = UsersModel::fetchAll(
+$stmt = DB::fetchAll('users', 
     'id,username,class,donated,warned,avatar', 
     ['enabled =', 'status =', 'privacy !=', "UNIX_TIMESTAMP(?) - UNIX_TIMESTAMP(users.last_access) <="],
     ['yes', 'confirmed', 'strong', get_date_time(), 86400]
 );
 
-block_begin(Txt('VISITED_USERS'));
+block_begin(LANG['VISITED_USERS']);
 foreach ($stmt as $row) {
     $avatar = htmlspecialchars($row["avatar"]);
     if (!$avatar) {

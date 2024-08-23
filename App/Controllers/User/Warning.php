@@ -2,46 +2,87 @@
 
 namespace App\Controllers\User;
 
-use App\Libs\User;
+use App\Libs\Controller;
 use App\Models\WarningsModel;
 
 /*
 * Warning Controller
 */
-class Warning 
+class Warning extends Controller
 {
-    // User Warn Default Page
-    public function index($id)
+    public $current_user;
+
+    // Get Current User
+    public function __construct()
     {
-        $USER = new User(0, 2);
-        // Get Warnings
-        $warnings = WarningsModel::getAll($USER, $id);
-        
-        // Init Data
-        $data = [
-            'V_title' => Txt("USER_DETAILS_FOR") . coloredname($id),
-            'V_warnings' => $warnings['stmt'],
-            'V_count' => $warnings['count'],
-            'V_id' => $id,
-            'USER' => $USER
-        ];
-        
-        // Load View
-        template('warning', $data, 'user');
+        $this->current_user = $this->currentuser(2);
     }
 
-    // User Warn Form Submit
+    // User Warnings Page
+    public function index($user_id)
+    {
+        // Check Current User
+        if (!$this->current_user->staff && $this->current_user->id != $user_id) {
+            showMessage(CONFIG['APPROOT'], LANG['NO_PERMISSION']);
+        }
+
+        // Get Warnings Data
+        $warnings = (new WarningsModel)->getByUserId($user_id);
+
+        // Data For View
+        $data = array(
+            'page_title' => LANG["USER_DETAILS_FOR"] . coloredname($user_id),
+            'user_id' => $user_id,
+            'warnings' => $warnings,
+            'current_user' => $this->current_user
+        );
+
+        // Load View
+        $this->view('warning', $data, 'user');
+    }
+
+    // Warnings Form Submit
     public function submit($userid)
     {
-        $USER = new User(0, 2);
-        WarningsModel::newwarn($USER, $userid);
+        // Check User Input
+        $data = [
+            'reason' => Input('reason'),
+            'expiry' => Input('expiry', 'int'),
+            'type' => Input('type'),
+            'current_user' => $this->current_user,
+            'userid' => $userid
+        ];
+
+        // Check Input
+        if (!$data['reason'] || !$data['expiry'] || !$data['type']) {
+            showMessage(Url("profile/$data[userid]"), LANG["MISSING_FORM_DATA"]);
+        }
+
+        // Check User
+        if (!$this->current_user->staff_page == 'yes') {
+            showMessage(Url("profile/$data[userid]"), LANG["NO_PERMISSION"]);
+        }
+
+        // Add New Warning
+        (new WarningsModel)->newwarn($data);
     }
 
     // Delete User Warning
-    public function delete($id)
+    public function delete($userid)
     {
-        $USER = new User(0, 2);
-        WarningsModel::deleteAll($USER, $id);
+        // Check User
+        if (!$this->current_user->staff_page == 'yes') {
+            showMessage(Url("profile/$userid"), LANG["NO_PERMISSION"]);
+        }
+
+        // Set Data
+        $data = [
+            'current_user' => $this->current_user,
+            'userid' => $userid,
+            'post_id' => multiIds("ids")
+        ];
+
+        // Delete Warning/s
+        (new WarningsModel)->deleteAll($data);
     }
-    
 }

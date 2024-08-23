@@ -1,17 +1,17 @@
-<?php block_begin($V_title) ?>
+<?php block_begin($page_title) ?>
 <div class="rounded">
     <div class="text-center">
-        <a type="button" class="model_form ttbtn btn-sm" href="<?= URLROOT ?>/adminforumcat"><?= Txt("BACK") ?></a>
-        <a type="button" class="model_form ttbtn btn-sm" data-bs-toggle="modal" data-bs-target="#forumModal"><?= Txt("ADD") ?></a>
+        <a type="button" class="model_form ttbtn btn-sm" href="<?= CONFIG['URLROOT'] ?>/adminforumcat"><?= LANG["BACK"] ?></a>
+        <a type="button" class="model_form ttbtn btn-sm" data-bs-toggle="modal" data-bs-target="#forumModal"><?= LANG["ADD"] ?></a>
     </div>
     <div class="table-responsive p-1">
         <table class="table table-striped">
             <thead>
                 <tr>
-                    <th><?= Txt("ID") ?></th>
-                    <th><?= Txt("TITLE") ?></th>
-                    <th><?= Txt("SORT") ?></th>
-                    <th><?= Txt("MOVE") ?></th>
+                    <th><?= LANG["ID"] ?></th>
+                    <th><?= LANG["TITLE"] ?></th>
+                    <th><?= LANG["SORT"] ?></th>
+                    <th><?= LANG["MOVE"] ?></th>
                     <th></th>
                 </tr>
             </thead>
@@ -28,9 +28,9 @@
                     <td>
                         <?php
                         $move = $row['sort'] == 1 ? 
-                            "<a href='".URLROOT."/adminforum/$row[category]/$row[id]/down/&sort=$row[sort]'><i class='fa fa-arrow-down'></i></a>" : 
-                            "<a href='".URLROOT."/adminforum/$row[category]/$row[id]/up/&sort=$row[sort]'><i class='fa fa-arrow-up'></i></a>  
-                            <a href='".URLROOT."/adminforum/$row[category]/$row[id]/down/&sort=$row[sort]'><i class='fa fa-arrow-down'></i></a>";
+                            "<a href='".CONFIG['URLROOT']."/adminforum/$row[category]/$row[id]/down/&sort=$row[sort]'><i class='fa fa-arrow-down'></i></a>" : 
+                            "<a href='".CONFIG['URLROOT']."/adminforum/$row[category]/$row[id]/up/&sort=$row[sort]'><i class='fa fa-arrow-up'></i></a>  
+                            <a href='".CONFIG['URLROOT']."/adminforum/$row[category]/$row[id]/down/&sort=$row[sort]'><i class='fa fa-arrow-down'></i></a>";
                         echo $move
                         ?>
                     </td>
@@ -39,7 +39,7 @@
                             <i class="fa fa-edit"></i>
                         </a>
                         <a href='<?= Url("adminforum/delete/$row[id]") ?>'>
-                            <i class='fa fa-trash tticon-red' title='<?= Txt("DEL")  ?>'></i>
+                            <i class='fa fa-trash tticon-red' title='<?= LANG["DEL"]  ?>'></i>
                         </a>
                     </td>
                 </tr><br>
@@ -76,41 +76,41 @@
                 <div class="modal-body">
                 <div class="form-floating mb-4">
                     <input type='hidden' name='id' id='id' />
-                    <?= Txt("NAME") ?>
+                    <?= LANG["NAME"] ?>
                     <input type='text' class="form-control fullwidth" name='name' id='name'>
-                    <?=  Txt("SORT") ?>
+                    <?=  LANG["SORT"] ?>
                     <input type='text' name='sort' id='sort' class="form-control fullwidth">
-                    <?= Txt("DESC") ?>
+                    <?= LANG["DESC"] ?>
                     <textarea name='description' id='description' class="form-control"></textarea>
-                    <?= Txt("CAT") ?>
+                    <?= LANG["CAT"] ?>
                     <select name='new_forum_cat' class='form-select'>
                         <?php foreach ($V_forumcat as $row) : ?>
                             <option value='<?= $row['id'] ?>'><?= $row['name'] ?></option>
                         <?php endforeach ?>
                     </select>
-                    <?= Txt("SUB_FORUM_HELP") ?>
+                    <?= LANG["SUB_FORUM_HELP"] ?>
                     <select name='sub' id='sub' class='form-select'>
-                        <option value=0><?= Txt("NONE") ?></option>
+                        <option value=0><?= LANG["NONE"] ?></option>
                         <?php foreach ($V_forumforum as $row) { ?>
                             <option value='<?= $row['id'] ?>'><?= $row['name'] ?></option>
                         <?php } ?>
                     </select>
-                    <?= Txt("MIN_CLASS_READ") ?>
+                    <?= LANG["MIN_CLASS_READ"] ?>
                     <select name='minclassread' id='minclassread' class='form-select'>
                         <?php foreach ($V_groups as $group) { ?>
                             <option value='<?= $group['group_id'] ?>'><?= $group['level'] ?></option>
                         <?php } ?>
                     </select>
-                    <?= Txt("MIN_CLASS_POST") ?>
+                    <?= LANG["MIN_CLASS_POST"] ?>
                     <select name='minclasswrite' id='minclasswrite' class='form-select'>
                          <option value='1'>Member</option>
                     </select>
-                    <?= Txt("FORUM_ALLOW_GUEST_READ") ?>
-                    <input type="radio" name="guest_read" id="guest_read" value="yes" checked='checked' /><?= Txt("YES") ?>, <input type="radio" name="guest_read" value="no" /> <?= Txt("NO") ?>
+                    <?= LANG["FORUM_ALLOW_GUEST_READ"] ?>
+                    <input type="radio" name="guest_read" id="guest_read" value="yes" checked='checked' /><?= LANG["YES"] ?>, <input type="radio" name="guest_read" value="no" /> <?= LANG["NO"] ?>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-sm ttbtn" data-bs-dismiss="modal"><?= Txt("CLOSE") ?></button>
-                    <button type="submit" class="btn btn-sm ttbtn"><?= Txt("SUBMIT"); ?></button>
+                    <button type="button" class="btn btn-sm ttbtn" data-bs-dismiss="modal"><?= LANG['CLOSE'] ?></button>
+                    <button type="submit" class="btn btn-sm ttbtn"><?= LANG['SUBMIT']; ?></button>
                 </div>
             </div>
         </div>

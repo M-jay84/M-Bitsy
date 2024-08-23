@@ -2,42 +2,51 @@
 
 namespace App\Controllers\Admin;
 
-use App\Libs\User;
+use App\Libs\Controller;
 use App\Models\BansModel;
 
 /*
 * Ban Controller
 */
-class Adminban
+class Adminban extends Controller
 {
+    public $current_user;
+
+    // Get Current User
+    public function __construct()
+    {
+        $this->current_user = $this->currentuser(2);
+        if (!$this->current_user->isStaff) {
+            showMessage(CONFIG['URLROOT'], LANG["NO_PERMISSION"]);
+        }
+    }
+
     // Email & IP Bans
     public function index($type = 'email')
     {
-        $USER = new User(_MODERATOR, 2);
         if (!empty($_POST)) {
-            BansModel::insert();
+            (new BansModel)->insert($this->current_user);
         } else {
             // Get Ban Data
-            $bans = BansModel::getAll($type);
+            $bans = (new BansModel)->getAll($type);
 
-            // Init Data
+            // Data For View
             $data = [
-                'V_title' => Txt("BANNED"),
+                'page_title' => LANG["BANNED"],
                 'V_type' => $type,
                 'V_bans' => $bans['bans'],
                 'V_pager' => $bans['pager'],
-                'USER' => $USER
+                'current_user' => $this->current_user
             ];
 
             // Load View
-            template('ban', $data, 'admin');
+            $this->view('ban', $data, 'admin');
         }
     }
 
     // Delete Bans
     public function delete()
     {
-        $USER = new User(_MODERATOR, 2);
-        BansModel::delete();
+        (new BansModel)->delete($this->current_user);
     }
 }

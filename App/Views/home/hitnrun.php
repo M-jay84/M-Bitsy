@@ -1,11 +1,10 @@
 <?php
-
-use App\Models\SnatchedModel;
+use App\Libs\DB;
 if (CONFIG['HNR_ON']) {
-    $count = SnatchedModel::fetchColumn('count(hnr)', ['uid=', 'hnr='], [$USER->has('id'), 'yes']);
-    $msg = sprintf(Txt('HIT&RUNNOTICE'), coloredname($USER->has('id')), $count, $USER->has('id'));
+    $count = DB::fetchColumn('snatched', 'count(hnr)', ['uid=', 'hnr='], [$current_user->id, 'yes']);
+    $msg = sprintf(LANG['HIT&RUNNOTICE'], coloredname($current_user->id), $count, $current_user->id);
     if ($count > 0) {
-        block_begin(Txt('HIT&RUN'));
+        block_begin(LANG['HIT&RUN']);
         ?>
         <div class="text-center">
             <?= $msg ?>

@@ -10,15 +10,8 @@ use App\Models\MessagesModel;
 */
 class StaffMessagesModel
 {
-    // Fetch Message Column
-    public static function fetchColumn($columns = '*', $where = '', $values = '', $other = '')
-    {
-        $stmt = DB::newSelect('staffmessages', $columns, $where, $values, $other)->fetchColumn();
-        return  $stmt;
-    }
-	
     // Admin Answer Message
-    public static function update()
+    public function update($current_userid)
     {
         $id = Input('id', 'int');
         $response = Input('response');
@@ -26,16 +19,16 @@ class StaffMessagesModel
 
         // Check Correct Input
         if (!is_numeric($id) || empty($response)) {
-            Redirect(Url('admincontact'), Txt("MISSING_DATA"));
+            showMessage(Url('admincontact'), LANG["MISSING_DATA"]);
         }
         
         // Take Answer
         if ($sender) {
-            MessagesModel::insert(['sender'=>$_SESSION['id'], 'receiver'=>$sender, 'added'=>get_date_time(), 'subject'=>'Reply to recent staff message', 'msg'=>$response, 'unread'=>'yes', 'location'=>'in']);
+            MessagesModel::insert(['sender'=>$current_userid, 'receiver'=>$sender, 'added'=>get_date_time(), 'subject'=>'Reply to recent staff message', 'msg'=>$response, 'unread'=>'yes', 'location'=>'in']);
         }
         // Take Answer
-        DB::update('staffmessages', ['answered','answeredby','answer'], ['id='], [1, $_SESSION['id'], $response, $id]);
-        Redirect(Url('admincontact'), "Staff Message $id has been answered.");
+        DB::update('staffmessages', ['answered','answeredby','answer'], ['id='], [1, $current_userid, $response, $id]);
+        showMessage(Url('admincontact'), "Staff Message $id has been answered.");
     }
 
     // Admin Get Messages
@@ -50,11 +43,11 @@ class StaffMessagesModel
     {
         $ids = multiIds('ids');
         DB::deleteByIds('staffmessages', 'id', $ids);
-        Redirect(Url('admincontact'), "Staff Message has been deleted.");
+        showMessage(Url('admincontact'), "Staff Message has been deleted.");
     }
 
     // Add Message
-    public static function insert()
+    public function insert($current_userid = 0)
     {
         // Check Input Else Return To Form
         if (csrf_check()) {
@@ -64,18 +57,17 @@ class StaffMessagesModel
 
             // Check Correct Input
             if (!$msg || !$subject) {
-                Redirect(Url(), Txt("MISSING_FORM_DATA"));
+                showMessage(Url(), LANG["MISSING_FORM_DATA"]);
             }
             if (strlen($msg) < 10 || strlen($subject) < 5) {
-                Redirect(Url(), Txt("SMALL_INPUT"));
+                showMessage(Url(), LANG["SMALL_INPUT"]);
             }
 
-            $userid = $_SESSION['id'] > 0 ? $_SESSION['id'] : 0;
-            DB::insert('staffmessages', ['sender' => $userid, 'added' => get_date_time(), 'msg' => $msg, 'subject' => $subject]);
-            Redirect(Url(), Txt("SUCCESS"));
+            DB::insert('staffmessages', ['sender' => $current_userid, 'added' => get_date_time(), 'msg' => $msg, 'subject' => $subject]);
+            showMessage(Url(), LANG["SUCCESS"]);
 
         } else {
-            Redirect(Url('contact'));
+            Url(Url('contact'), true);
         }
     }
 

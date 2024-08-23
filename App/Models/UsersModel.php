@@ -76,7 +76,7 @@ class UsersModel
     {
         $ids = multiIds('ids');
         DB::run("UPDATE `users` SET `status` = ? WHERE `status` = ? AND `invited_by` = ? AND `id` IN (?)", ['confirmed', 'pending', 0, $ids])->fetchAll();
-        Redirect(Url('adminconfirmreg'), Txt("ACTION_COMPLETE"));
+        showMessage(Url('adminconfirmreg'), LANG["ACTION_COMPLETE"]);
     }
 		
     // Confirm User Reg
@@ -134,11 +134,11 @@ class UsersModel
 
         // Pagination
         $count = DB::run("SELECT COUNT(*) FROM users WHERE $data[query]")->fetchcolumn();
-        list($pager, $limit) = pagination(25, $count, URLROOT . "/members?$data[q]&");
+        list($pager, $limit) = pagination(25, $count, CONFIG['URLROOT'] . "/members?$data[q]&");
         $results = DB::run("SELECT users.*, groups.level FROM users INNER JOIN `groups` ON groups.group_id=users.class WHERE $data[query] ORDER BY username $limit")->fetchAll();
 
         // Get Group Data
-        $res = GroupsModel::fetchAll('group_id, level', '', 'ORDER BY group_id ASC');
+        $res = (new GroupsModel)->fetchAll('group_id, level', '', 'ORDER BY group_id ASC');
 
         $array = [
             'groups' => $res,
@@ -153,13 +153,13 @@ class UsersModel
     public static function deleteUser($userid)
     {
         DB::delete('users', ['id' => $userid]);
-        WarningsModel::delete(['userid' => $userid]);
+        (new WarningsModel)->delete(['userid' => $userid]);
         DB::delete('ratings', ['user' => $userid]);
         DB::delete('peers', ['userid' => $userid]);
         DB::delete('completed', ['userid' => $userid]);
-        ReportsModel::delete(['addedby' => $userid]);
-        ReportsModel::delete(['votedfor' => $userid, 'type' => 'user']);
-        ReadModel::delete($userid);
+        (new ReportsModel)->delete(['addedby' => $userid]);
+        (new ReportsModel)->delete(['votedfor' => $userid, 'type' => 'user']);
+        (new ReadModel)->delete($userid);
         DB::delete('pollanswers', ['userid' => $userid]);
         DB::delete('snatched', ['uid' => $userid]);
     }
@@ -175,7 +175,7 @@ class UsersModel
     public static function avatarPagination()
     {
         $count = DB::fetchColumn('users','count(id)',['enabled=','avatar !='], ['yes', '']);
-        list($pager, $limit) = pagination(50, $count, URLROOT . '/adminavatar?');
+        list($pager, $limit) = pagination(50, $count, CONFIG['URLROOT'] . '/adminavatar?');
         $stmt = DB::fetchAll('users','username,id,avatar',['enabled=','avatar !='],['yes',''], $limit);
         $array = ['stmt' => $stmt, 'pager' => $pager];
         return $array;
@@ -213,7 +213,7 @@ class UsersModel
     {
         $count = DB::run("SELECT ip FROM users GROUP BY ip HAVING count(*) > 1")->rowCount();
         if ($count == 0) {
-            Redirect(Url('admincp'), Txt("NOTHING_FOUND"));
+            showMessage(Url('admincp'), LANG["NOTHING_FOUND"]);
         }
         list($pager, $limit) = pagination(25, $count, 'Adminduplicateip?');
         $stmt = DB::run("SELECT id, username, class, email, ip, added, last_access, COUNT(*) as count FROM users GROUP BY ip HAVING count(*) > 1 ORDER BY id ASC $limit")->fetchAll();
@@ -285,7 +285,7 @@ class UsersModel
 
         // Pagination
         $count = DB::run("SELECT COUNT(`id`) FROM `users` $where")->fetchcolumn();
-        list($pager, $limit) = pagination(25, $count, URLROOT . "/adminusersearch&");
+        list($pager, $limit) = pagination(25, $count, CONFIG['URLROOT'] . "/adminusersearch&");
         $results = DB::run("SELECT * FROM `users` $where $limit")->fetchAll();
         $array = [
             'results' => $results,
@@ -356,20 +356,20 @@ class UsersModel
             
         // Check Correct Input
         if ($username == "" || $password == "" || $email == "") {
-            Redirect(Url('adminuseradd'), Txt("MISSING_FORM_DATA"));
+            showMessage(Url('adminuseradd'), LANG["MISSING_FORM_DATA"]);
         }
 
         if ($password != $password2) {
-            Redirect(Url('adminuseradd'), Txt("PASSWORD_NOT_MATCH"));
+            showMessage(Url('adminuseradd'), LANG["PASSWORD_NOT_MATCH"]);
         }
             
         // Insert
         $count = UsersModel::fetchColumn('count(id)', ['username ='], [$username]);
         if ($count !=0) {
-            Redirect(Url('adminuseradd'), Txt("NAME_IN_USE"));
+            showMessage(Url('adminuseradd'), LANG["NAME_IN_USE"]);
         }
         UsersModel::insert(['added'=>get_date_time(), 'last_access'=>get_date_time(), 'secret'=>$secret, 'username'=>$username, 'password'=>$passhash, 'status'=>'confirmed', 'email'=>$email]);
-        Redirect(Url('adminuseradd'), Txt("SUCCESS"));
+        showMessage(Url('adminuseradd'), LANG["SUCCESS"]);
     }
 
 }

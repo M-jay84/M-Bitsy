@@ -3,15 +3,8 @@
 namespace App\Libs;
 
 use PDO;
-use App\Models\LogsModel;
-use App\Models\GroupsModel;
-use App\Models\WarningsModel;
 use App\Libs\DB;
 use App\Models\MessagesModel;
-use App\Models\SnatchedModel;
-use App\Models\TasksModel;
-use App\Models\TorrentsModel;
-use App\Models\UsersModel;
 
 /*
 * Clean Old Data (10 mins)
@@ -23,7 +16,7 @@ class Cleanup
     {
         $row = DB::fetchRow('tasks', 'last_time', ['task ='], ['cleanup']);
         if (!$row) {
-            TasksModel::insert(['task =','last_time ='], ['cleanup',gmtime()]);
+            DB::insert('taskS', ['task =','last_time ='], ['cleanup',gmtime()]);
             return;
         }
 
@@ -31,7 +24,7 @@ class Cleanup
             return;
         }
 
-        $planned_clean = TasksModel::update(['last_time'], ['task=', 'last_time ='], [gmtime(), 'cleanup', $row['last_time']]);
+        $planned_clean = DB::update('taskS', ['last_time'], ['task=', 'last_time ='], [gmtime(), 'cleanup', $row['last_time']]);
         if (!$planned_clean) {
             return;
         }
@@ -83,7 +76,7 @@ class Cleanup
     {
         $row = DB::fetchRow('tasks', 'last_time', ['task='], ['bonus']);
         if (!$row) {
-            TasksModel::insert([ 'task'=>'bonus','last_time'=>gmtime()]);
+            DB::insert('taskS', [ 'task'=>'bonus','last_time'=>gmtime()]);
         }
         if ($row['last_time'] + CONFIG['ADDBONUS'] < gmtime()) {
             $res1 = DB::run("SELECT DISTINCT userid as peer, (
@@ -102,10 +95,10 @@ class Cleanup
     // Reset VIP Until
     public static function vipUntil()
     {
-        $rowv1 = UsersModel::fetchAll('id, oldclass', ['vipuntil <', 'oldclass !='], [get_date_time(), 0]);
+        $rowv1 = DB::fetchAll('users', 'id, oldclass', ['vipuntil <', 'oldclass !='], [get_date_time(), 0]);
         foreach ($rowv1 as $rowv) {
             MessagesModel::insert(['sender'=>0, 'receiver'=>$rowv['id'], 'added'=>get_date_time(), 'subject'=> 'Your VIP class stay has just expired', 'msg'=>'Your VIP class stay has just expired']);
-            UsersModel::update(['class','oldclass','vipuntil'], 'vipuntil <', [$rowv['oldclass'], 0, null, get_date_time()]);
+            DB::update('users', ['class','oldclass','vipuntil'], 'vipuntil <', [$rowv['oldclass'], 0, null, get_date_time()]);
         }
     }
 
@@ -127,11 +120,11 @@ class Cleanup
     public static function freeleech()
     {
         if (CONFIG['FREELEECHGBON']);{
-            $query = TorrentsModel::fetchAll('id,name', ['banned =', 'freeleech =', 'size >='], ['no', 0, CONFIG['FREELEECHGB']]);
+            $query = DB::fetchAll('torrents', 'id,name', ['banned =', 'freeleech =', 'size >='], ['no', 0, CONFIG['FREELEECHGB']]);
             if ($query) {
                 foreach ($query as $row) {
-                    TorrentsModel::update(['freeleech'], ['id='], [1, $row['id']]);
-                    LogsModel::write("Freeleech added on  <a href='torrent/$row[id]'>$row[name]</a> because it is bigger than " . CONFIG['FREELEECHGB'] . "");
+                    DB::update('torrents', ['freeleech'], ['id='], [1, $row['id']]);
+                    DB::insert('log', ['added'=>get_date_time(), 'txt'=>"Freeleech added on  <a href='torrent/$row[id]'>$row[name]</a> because it is bigger than " . CONFIG['FREELEECHGB'] . ""]);
                 }
             }
         }
@@ -142,13 +135,13 @@ class Cleanup
     {
         $downloaded = CONFIG['RATIOWARN_MINGIGS'] * 1024 * 1024 * 1024;
         // ADD RATIO WARNING
-        $res = UsersModel::fetchAll('id,username', ['class <=', 'warned =', 'enabled=', 'uploaded / downloaded <', 'downloaded >='], [_UPLOADER, 'no', 'yes', CONFIG['RATIOWARNMINRATIO'], $downloaded]);
+        $res = DB::fetchAll('users', 'id,username', ['class <=', 'warned =', 'enabled=', 'uploaded / downloaded <', 'downloaded >='], [CONFIG['_UPLOADER'], 'no', 'yes', CONFIG['RATIOWARNMINRATIO'], $downloaded]);
         if ($res) {
             $reason = "Auto Leech warning has been added You have been warned because of having low ratio. You need to get a " . CONFIG['RATIOWARNMINRATIO'] . " before next " . CONFIG['RATIOWARN_DAYSTOWARN'] . " days or your account may be banned.";
             $expiretime = gmdate("Y-m-d H:i:s", gmtime() + (86400 * CONFIG['RATIOWARN_DAYSTOWARN']));
-            $msg = "".Txt('YOUVE_WARNED_BY')." " . $_SESSION['username'] . " - Reason: " . $reason . " - Expiry: " . $expiretime . "";
+            $msg = "".LANG['YOUVE_WARNED_BY']." " . $_SESSION['username'] . " - Reason: " . $reason . " - Expiry: " . $expiretime . "";
             foreach ($res as $arr) {
-                WarningsModel::insert(['userid'=>$arr['id'], 'reason'=>$reason, 'added'=>get_date_time(),'expiry'=>$expiretime,'warnedby'=>0,'type'=>'Poor Ratio']);
+                DB::insert('warnings', ['userid'=>$arr['id'], 'reason'=>$reason, 'added'=>get_date_time(),'expiry'=>$expiretime,'warnedby'=>0,'type'=>'Poor Ratio']);
             }
         }
         // REMOVE RATIO WARNING
@@ -157,7 +150,7 @@ class Cleanup
         if ($res1) {
             $reason = "Auto Leech warning has been removed Your warning of low ratio has been removed. We highly recommend you to keep a your ratio up to not be warned again.\n";
             foreach ($res1 as $arr1) {
-                WarningsModel::insert(['id'=>$arr1['id'], 'reason'=>$reason,'warned'=>'no']);
+                DB::insert('warnings', ['id'=>$arr1['id'], 'reason'=>$reason,'warned'=>'no']);
             }
         }
         // BAN RATIO WARNED USERS
@@ -166,8 +159,8 @@ class Cleanup
         if ($res) {
             foreach ($res as $arr) {
                 if (gmtime() - $arr["expiry"] >= 0) {
-                    UsersModel::update(['warned','enabled'], ['id='], ['no', 'no', $arr['id']]);
-                    LogsModel::write("User <a href='" . URLROOT . "/profile/" . $arr["id"] . "'>" . coloredname($arr["id"]) . "</a> has been banned (Auto Leech warning).");
+                    DB::update('users', ['warned','enabled'], ['id='], ['no', 'no', $arr['id']]);
+                    DB::insert('log', ['added'=>get_date_time(), 'txt'=>"User <a href='" . CONFIG['URLROOT'] . "/profile/" . $arr["id"] . "'>" . coloredname($arr["id"]) . "</a> has been banned (Auto Leech warning)."]);
                 }
             }
         }
@@ -181,9 +174,9 @@ class Cleanup
                     WHERE type != ? AND warned = ?  AND enabled=? AND warnings.active = ? AND warnings.expiry < ?", ['Poor Ratio', 'yes', 'yes', 'yes', get_date_time()])->fetchAll();
         if ($res) {
             foreach ($res as $arr1) {
-                UsersModel::update(['warned'], ['id='], ['no', $arr1['id']]);
+                DB::update('users', ['warned'], ['id='], ['no', $arr1['id']]);
                 DB::run("UPDATE warnings SET active = ? WHERE userid = ? AND expiry < ?", ['no', $arr1['id'], get_date_time()]);
-                LogsModel::write("Removed warning for $arr1[username]. Expiry: $arr1[expiry]");
+                DB::insert('log', ['added'=>get_date_time(), 'txt'=>"Removed warning for $arr1[username]. Expiry: $arr1[expiry]"]);
             }
         }
     }
@@ -201,7 +194,7 @@ class Cleanup
         $time = gmtime() - ($interval * 86400);
         $minlimit = $minlimit * 1024 * 1024 * 1024;
         $maxlimit = $maxlimit * 1024 * 1024 * 1024;
-        $res = UsersModel::fetchAll('id,username,class,invites',
+        $res = DB::fetchAll('users', 'id,username,class,invites',
                          ['enabled=', 'status =', 'downloaded >=', 'downloaded <', 'uploaded / downloaded >=', 'warned =', "UNIX_TIMESTAMP(invitedate) <="],
                         ['yes', 'confirmed', $minlimit, $maxlimit, $minratio, 'no', $time]);
         if ($res) {
@@ -214,7 +207,7 @@ class Cleanup
                     $invites = $maxninvites - $arr['invites'];
                 }
                 DB::run("UPDATE users SET invites = invites+$invites, invitedate = NOW() WHERE id=$arr[id]");
-                LogsModel::write("Gave $invites invites to '$arr[username]' - Class: " . GroupsModel::GetUserClassName($arr['class']) . "");
+                DB::insert('log', ['added'=>get_date_time(), 'txt'=>"Gave $invites invites to $arr[username]"]);
             }
         }
     }
@@ -236,52 +229,52 @@ class Cleanup
         DB::run("UPDATE `snatched` SET `hnr` = ? WHERE `hnr` = ? AND upload >= download", ['no', 'yes']);
         DB::run("UPDATE `snatched` SET `hnr` = ? WHERE `hnr` = ? AND last_time >= ?", ['no', 'yes', $seedtime]);
         // Do We Have Snatched
-        $a = SnatchedModel::fetchAll('DISTINCT uid', ['hnr =', 'done='], ['yes', 'no']);
+        $a = DB::fetchAll('snatched', 'DISTINCT uid', ['hnr =', 'done='], ['yes', 'no']);
         if ($a):
             foreach ($a as $b):
                 
                 // Check User
                 $user = $b['uid'];
-                $count = SnatchedModel::fetchColumn('count(hnr)', ['uid =', 'hnr ='], [$user, 'yes']);
+                $count = DB::fetchColumn('snatched', 'count(hnr)', ['uid =', 'hnr ='], [$user, 'yes']);
                 $expiretime = gmdate("Y-m-d H:i:s", $timenow + $length);
                 // Check Wrning
-                $f = WarningsModel::fetchRow('type, active', ['userid ='], [$user]);
+                $f = DB::fetchRow('warnings', 'type, active', ['userid ='], [$user]);
                 $type = $f['type'];
                 // Warn
                 if ($count >= CONFIG['HNR_WARN'] && $type != "HnR"):
-                    $reason = "" . Txt("CLEANUP_WARNING_FOR_ACCUMULATING") . " " . CONFIG['HNR_WARN'] . " H&R.";
-                    $subject = "" . Txt("CLEANUP_WARNING_FOR_H&R") . "";
-                    $msg = "" . Txt("CLEANUP_YOU_HAVE_BEEN_WARNEWD_ACCUMULATED") . " " . CONFIG['HNR_WARN'] . " " . Txt("CLEANUP_H&R_INVITE_CHECK_RULE") . "\n[color=red]" . Txt("CLEANUP_MSG_WARNING_7_DAYS_BANNED") . "[/color]";
-                    $rov = UsersModel::fetchRow('enabled', ['id ='], [$user]);
+                    $reason = "" . LANG["CLEANUP_WARNING_FOR_ACCUMULATING"] . " " . CONFIG['HNR_WARN'] . " H&R.";
+                    $subject = "" . LANG["CLEANUP_WARNING_FOR_H&R"] . "";
+                    $msg = "" . LANG["CLEANUP_YOU_HAVE_BEEN_WARNEWD_ACCUMULATED"] . " " . CONFIG['HNR_WARN'] . " " . LANG["CLEANUP_H&R_INVITE_CHECK_RULE"] . "\n[color=red]" . LANG["CLEANUP_MSG_WARNING_7_DAYS_BANNED"] . "[/color]";
+                    $rov = DB::fetchRow('users', 'enabled', ['id ='], [$user]);
 
                     if ($rov["enabled"] == "yes"):
-                        DB::update(' users', ['warned'], ['id='], ['yes', $user]);
-                        WarningsModel::delete(['userid'=>$user, 'reason'=>$reason, 'added'=>get_date_time(),'expiry'=>$expiretime,'warnedby'=>0,'type'=>'HnR']);
+                        DB::update('users', ['warned'], ['id='], ['yes', $user]);
+                        DB::delete('warnings', ['userid'=>$user, 'reason'=>$reason, 'added'=>get_date_time(),'expiry'=>$expiretime,'warnedby'=>0,'type'=>'HnR']);
                         MessagesModel::insert(['sender'=>0, 'receiver'=>$user, 'added'=>get_date_time(),'msg'=>$msg,'subject'=>$subject]);
                     endif;
                 endif;
                 // Unwarn
                 if ($count < CONFIG['HNR_WARN'] && $type == "HnR"):
-                    $subject = "" . Txt("CLEANUP_REMOVAL_OF_H&R_WARNING") . "";
-                    $msg = "" . Txt("CLEANUP_YOU_NOW_HAVE_LESS_THAN") . " " . CONFIG['HNR_WARN'] . " H&R.\n" . Txt("CLEANUP_YOUR_WARNING_FOR_H&R_HAS_REMOVED") . "";
-                    DB::update(' users', ['warned'], ['id='], ['no', $user]);
-                    WarningsModel::delete(['userid' =>$user, 'type' => 'HnR']);
+                    $subject = "" . LANG["CLEANUP_REMOVAL_OF_H&R_WARNING"] . "";
+                    $msg = "" . LANG["CLEANUP_YOU_NOW_HAVE_LESS_THAN"] . " " . CONFIG['HNR_WARN'] . " H&R.\n" . LANG["CLEANUP_YOUR_WARNING_FOR_H&R_HAS_REMOVED"] . "";
+                    DB::update('users', ['warned'], ['id='], ['no', $user]);
+                    DB::delete('warnings', ['userid' =>$user, 'type' => 'HnR']);
                     MessagesModel::insert(['sender'=>0, 'receiver'=>$user, 'added'=>get_date_time(),'msg'=>$msg,'subject'=>$subject]);
                 endif;
                 // Ban
                 if ($count >= CONFIG['HNR_BAN']):
-                    $h = UsersModel::fetchRow('username, email, modcomment', ['id ='], [$user]);
+                    $h = DB::fetchRow('users', 'username, email, modcomment', ['id ='], [$user]);
                     $modcomment = $h[2];
-                    $modcomment = gmdate("d/m/Y") . " - " . Txt("CLEANUP_BANNED_FOR") . " " . $count . " H&R.\n " . $modcomment;
+                    $modcomment = gmdate("d/m/Y") . " - " . LANG["CLEANUP_BANNED_FOR"] . " " . $count . " H&R.\n " . $modcomment;
                     DB::update(' users', ['enabled','warned','modcomment'], ['id='], ['no', 'no', $modcomment, $user]);
-                    WarningsModel::delete(['userid' =>$user, 'type' => 'HnR']);
-                    LogsModel::write(Txt("CLEANUP_THE_MEMBER") . " <a href='account-details.php?id=" . $user . "'>" . $h[0] . "</a> " . Txt("CLEANUP_HAS_BEEN_BANNED_REASON") . " " . $count . " H&R.");
-                    $sitename = URLROOT;
-                    $body = file_get_contents(EMAILDIR . "/hitnrunban.php");
+                    DB::delete('warnings', ['userid' =>$user, 'type' => 'HnR']);
+                    DB::insert('log', ['added'=>get_date_time(), 'txt'=>LANG["CLEANUP_THE_MEMBER"] . " <a href='account-details.php?id=" . $user . "'>" . $h[0] . "</a> " . LANG["CLEANUP_HAS_BEEN_BANNED_REASON"] . " " . $count . " H&R."]);
+                    $sitename = CONFIG['URLROOT'];
+                    $body = file_get_contents(CONFIG['EMAILDIR'] . "/hitnrunban.php");
                     $body = str_replace("%count%", $count, $body);
                     $body = str_replace("%sitename%", $sitename, $body);
                     $TTMail = new TTMail();
-                    $TTMail->Send($h[1], Txt("CLEANUP_HAS_BEEN_DISABLED"), "$body", "From: " . CONFIG['SITEEMAIL'] . "", "-f" . CONFIG['SITEEMAIL'] . "");
+                    $TTMail->Send($h[1], LANG["CLEANUP_HAS_BEEN_DISABLED"], "$body", "From: " . CONFIG['SITEEMAIL'] . "", "-f" . CONFIG['SITEEMAIL'] . "");
                 endif;
                 // Download Ban
                 if ($count >= CONFIG['HNR_STOP_DL']){
@@ -299,22 +292,22 @@ class Cleanup
         $delay2 = get_date_time(gmtime() - 1 * 1); # Joined > 1 month
         
         // auto promote by gb
-        $res = UsersModel::fetchAll(['id', 'username'], ['class =', 'uploaded / downloaded >'], [1, $minratio]);
+        $res = DB::fetchAll('users', ['id', 'username'], ['class =', 'uploaded / downloaded >'], [1, $minratio]);
         foreach ($res as $arr) {
-            $res_classname = GroupsModel::fetchRow('level', ['group_id ='], [_POWERUSER], 'LIMIT 1');
+            $res_classname = DB::fetchRow('groups', 'level', ['group_id ='], [CONFIG['_POWERUSER']], 'LIMIT 1');
             if ($res_classname->rowCount() == 1) {
                 $arr_classname = $res_classname;
                 $new_classname = "$arr_classname[level]";
             }
             $username = $arr['username'];
-            DB::update(' users', ['class'], ['id='], [_POWERUSER, $arr['id']]);
+            DB::update('users', ['class'], ['id='], [CONFIG['_POWERUSER'], $arr['id']]);
             $msgg = '[b]Congratulations[/b], you were automatically promoted to [b]Member[/b] class. Please note that if your ratio drops below [b]" . $minratio . "[/b] at any time,  you will be demoted to [b]Leecher[/b]';
             MessagesModel::insert(['sender'=>0, 'receiver'=>$arr['id'], 'added'=>get_date_time(),'msg'=>$msgg,'subject'=>"You have been promoted as " . $new_classname . ""]);
             unset($res, $arr, $res_classname, $arr_classname,$new_classname);
         }
 
         // auto demote to leecher
-        $res = UsersModel::fetchAll(['id','username','modcomment'], ['class <', 'uploaded / downloaded <'], [4, $minratio]);
+        $res = DB::fetchAll('users', ['id','username','modcomment'], ['class <', 'uploaded / downloaded <'], [4, $minratio]);
         foreach ($res as $arr) {
             $username = $arr['username'];
             $modcomment = $arr['modcomment'];
@@ -324,13 +317,13 @@ class Cleanup
             DB::run("UPDATE users SET class = 1, modcomment = CONCAT($modcom,modcomment) WHERE id = $arr[id]");
             $msgg = 'You were automatically demoted to [b]Leecher[/b]. That happened because your ratio dropped below [b]" . $minratio . "[/b]';
             MessagesModel::insert(['sender'=>0, 'receiver'=>$arr['id'], 'added'=>get_date_time(),'msg'=>$msgg,'subject'=> 'You have been demoted to Leecher']);
-            LogsModel::write("<a href=/account-details.php?id=$arr[id]><b>$username</b></a> has been demoted by System to <b>Leecher</b> class");
+            DB::insert('log', ['added'=>get_date_time(), 'txt'=>"<a href=/account-details.php?id=$arr[id]><b>$username</b></a> has been demoted by System to <b>Leecher</b> class"]);
         }
         
         // auto promote to class 3
         $res = DB::run("SELECT id, username FROM users WHERE (class = 1 || class = 2) AND warned = 'no' AND added < $delay2 AND uploaded >= $gigs AND uploaded >= downloaded");
         while ($arr = $res->fetch(PDO::FETCH_ASSOC)) {
-            $res_classname = GroupsModel::fetchRow('level', ['group_id ='], [3], 'LIMIT 1');
+            $res_classname = DB::fetchRow('groups', 'level', ['group_id ='], [3], 'LIMIT 1');
             if ($res_classname->rowCount() == 1) {
                 $arr_classname = $res_classname;
                 $new_classname = "$arr_classname[level]";
@@ -350,7 +343,7 @@ class Cleanup
                           GROUP BY torrents.owner");
         while ($UP = $query->fetch(PDO::FETCH_ASSOC)){
             if ($UP['counta'] > 3){
-                DB::update(' users', ['class'], ['id='], [_POWERUSER, $UP['owner']]);
+                DB::update(' users', ['class'], ['id='], [CONFIG['_POWERUSER'], $UP['owner']]);
                 $subject = 'Automatic Promotion To Uploader Status';
                 $msg = 'Hello you did 1 upload, you are promoted to Uploader, Bravo !!! ';
                 MessagesModel::insert(['sender'=>0, 'receiver'=>$UP['owner'], 'added'=>get_date_time(), 'subject'=> $subject,'msg'=>$msg, 'unread'=>'yes', 'location'=>'in']);

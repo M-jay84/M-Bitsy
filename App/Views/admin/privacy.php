@@ -1,21 +1,21 @@
-<?php block_begin($V_title) ?>
+<?php block_begin($page_title) ?>
 <div class="text-center tt_blockcenter rounded p-2">
-    <a href="<?= Url('adminprivacy/normal') ?>"><?= Txt("NORMAL") ?></a> | 
-    <a href="<?= Url('adminprivacy/strong') ?>"><?= Txt("STRONG") ?></a> |  
-    <a href="<?= Url('adminprivacy') ?>"><?= Txt("ALL") ?></a>
+    <a href="<?= Url('adminprivacy/normal') ?>"><?= LANG["NORMAL"] ?></a> | 
+    <a href="<?= Url('adminprivacy/strong') ?>"><?= LANG["STRONG"] ?></a> |  
+    <a href="<?= Url('adminprivacy') ?>"><?= LANG["ALL"] ?></a>
 </div><br>
 
 <div class='table-responsive  p-3'>
     <table class='table table-striped'>
         <thead>
             <tr>
-                <th><?= Txt("NAME") ?></th>
-                <th><?= Txt("CLASS") ?></th>
-                <th><?= Txt("PRIVACY") ?></th>
-                <th><?= Txt("EMAIL") ?></th>
-                <th><?= Txt("IP") ?></th>
-                <th><?= Txt("ADDED") ?></th>
-                <th><?= Txt("LAST_ACCESS") ?></th>
+                <th><?= LANG["NAME"] ?></th>
+                <th><?= LANG["CLASS"] ?></th>
+                <th><?= LANG["PRIVACY"] ?></th>
+                <th><?= LANG["EMAIL"] ?></th>
+                <th><?= LANG["IP"] ?></th>
+                <th><?= LANG["ADDED"] ?></th>
+                <th><?= LANG["LAST_ACCESS"] ?></th>
             </tr>
         </thead>
         <tbody> <?php

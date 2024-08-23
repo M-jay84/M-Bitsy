@@ -2,37 +2,43 @@
 
 namespace App\Controllers\User;
 
-use App\Libs\User;
+use App\Libs\Controller;
 use App\Models\TorrentsModel;
 
 /*
 * Need Seed Controller
 */
-class Needseed 
+class Needseed extends Controller
 {
+    public $current_user;
+
+    // Get Current User
+    public function __construct()
+    {
+        $this->current_user = $this->currentuser(1);
+    }
+
     // Search Need Seed Default Page
     public function index()
     {
-        $USER = new User(0, 1);
-        if (!$USER->permission('view_torrents')) {
-            Redirect(Url(), Txt("NO_TORRENT_VIEW"));
+        if ($this->current_user->view_torrents != "yes" && CONFIG['MEMBERSONLY']) {
+            showMessage(Url(), LANG["NO_TORRENT_VIEW"]);
         }
 
         // Get Torrent Data
         $torrents =  TorrentsModel::getAll("WHERE torrents.banned = ? AND torrents.leechers > 0 AND torrents.seeders <= 1 ORDER BY torrents.seeders", ['no']);
         if ($torrents['count'] == 0) {
-            Redirect(Url(), Txt("NOTHING_FOUND"));
+            showMessage(Url(), LANG["NOTHING_FOUND"]);
         }
 
-        // Init Data
+        // Data For View
         $data = [
-            'V_title' => Txt("TORRENT_NEED_SEED"),
-            'V_torrents' => $torrents['stmt'],
-            'USER' => $USER
+            'page_title' => LANG["TORRENT_NEED_SEED"],
+            'V_torrents' => $torrents['stmt']
         ];
 
         // Load View
-        template('needseed', $data, 'user');
+        $this->view('needseed', $data, 'user');
     }
 
 }

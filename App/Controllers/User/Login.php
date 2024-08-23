@@ -2,31 +2,36 @@
 
 namespace App\Controllers\User;
 
-use App\Libs\User;
+use App\Libs\Controller;
 use App\Models\AccountsModel;
 
 /*
 * Login Controller
 */
-class Login 
+class Login extends Controller
 {
+    public $current_user;
+
+    // Get Current User
+    public function __construct()
+    {
+        $this->current_user = $this->currentuser(0);
+    }
+
     // Login Page
     public function index()
     {
-        // Verify User/Guest
-        $USER = new User(0, 0);
-
         // User Already Logged In
-        if ($USER->has('id')) {
-            Redirect(Url(), Txt("ALREADY_LOGGED"));
+        if ($this->current_user->id) {
+            showMessage(Url(CONFIG['URLROOT']), LANG["ALREADY_LOGGED"]);
         }
+
         if (!empty($_POST) && csrf_check()) {
-            AccountsModel::login();
+            (new AccountsModel)->login();
         }
         $data = [
-            'V_title' => Txt("LOGIN"),
-            'USER' => $USER
+            'page_title' => LANG["LOGIN"]
         ];
-        template('login', $data, 'user');
+        $this->view('login', $data, 'user');
     }
 }

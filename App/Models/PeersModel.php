@@ -10,30 +10,23 @@ use App\Models\TorrentsModel;
 */
 class PeersModel
 {
-    // Fetch Peer Column
-    public static function fetchColumn($columns = '*', $where = '', $values = '', $other = '')
-    {
-        $stmt = DB::newSelect('peers', $columns, $where, $values, $other)->fetchColumn();
-		return $stmt;
-	}
-
     // Get Peers
-    public static function getPeers($USER, $type, $id, $pagination = false)
+    public function getPeers($type, $id, $current_user, $pagination = false)
     {
-        if ($USER->permission('view_users', $id) && $USER->has('class') < _UPLOADER && $type == ('seeding' || 'leeching')) {
-            Redirect(Url(), Txt("NO_USER_VIEW"));
+        if ($current_user->view_users != "yes" && $current_user->id != $id && $current_user->class < CONFIG['_UPLOADER'] && $type == ('seeding' || 'leeching')) {
+            showMessage(Url(), LANG["NO_USER_VIEW"]);
         }
 
-        $title = Txt("USER_DETAILS_FOR") . coloredname($id);
+        $title = LANG["USER_DETAILS_FOR" . coloredname($id)];
 
         if ($type == 'torrent') {
-            if ($USER->has('torrents') == "no" && $USER->has('id') != $id && $USER->has('class') < _UPLOADER) {
-                Redirect(Url(), Txt("NO_TORRENT_VIEW"));
+            if ($current_user->torrents == "no" && $current_user->id != $id && $current_user->class < CONFIG['_UPLOADER']) {
+                showMessage(Url(), LANG["NO_TORRENT_VIEW"]);
             }
             $where = 'peers.torrent = ?';
             $values = [$id];
-            $name = TorrentsModel::fetchRow('name', ['id ='], [$id]);
-            $title = Txt("TORRENT_DETAILS_FOR") . $name;
+            $name = (new TorrentsModel)->fetchRow('name', ['id ='], [$id]);
+            $title = LANG["TORRENT_DETAILS_FOR"] . $name;
         } elseif ($type == 'admin') {
             $where = 'torrents.id > ?';
             $values = [0];
@@ -52,7 +45,7 @@ class PeersModel
              WHERE $where", $values
         )->fetchColumn();
 
-        list($pager, $limit) = pagination(25, $count, URLROOT . "/$pagination&");
+        list($pager, $limit) = pagination(25, $count, CONFIG['URLROOT'] . "/$pagination&");
 
         $stmt = DB::run(
             "SELECT peers.id as pid, peers.torrent, peers.peer_id, peers.ip, peers.port, peers.uploaded, peers.downloaded,

@@ -2,29 +2,40 @@
 
 namespace App\Controllers\Admin;
 
-use App\Libs\User;
+use App\Libs\Controller;
 use App\Models\BlocksModel;
 
 /*
 * Portal Controller
 */
-class Adminblock 
+class Adminblock extends Controller
 {
+    public $current_user;
+
+    // Get Current User
+    public function __construct()
+    {
+        $this->current_user = $this->currentuser(2);
+        if ($this->current_user->class < CONFIG['_MODERATOR']) {
+            showMessage(CONFIG['URLROOT'], LANG["NO_PERMISSION"]);
+        }
+    }
+
     // Blocks Default Page
     public function index($edit = false)
     {
-        $USER = new User(_MODERATOR, 2);
+    
         // Check Input
         if ($edit) {
-            BlocksModel::editable();
+            (new BlocksModel)->editable();
         }
 
         // Get Block Data
-        $blocks = BlocksModel::getAll();
+        $blocks = (new BlocksModel)->getAll();
 
         // Check Dir
         $in_folder = array();
-        if ($folder = opendir(APPROOT . '/views/block')) {
+        if ($folder = opendir(CONFIG['APPROOT'] . '/views/block')) {
             while (false !== ($file = readdir($folder))) {
                 if ($file != "." && $file != ".." && !in_array($file, $blocks['files'])) {
                     if (preg_match("/_block.php/i", $file)) {
@@ -36,30 +47,29 @@ class Adminblock
             closedir($folder);
         }
 
-        // Init Data
+        // Data For View
         $data = [
-            'V_title' => Txt("PORTAL"),
+            'page_title' => LANG["PORTAL"],
             'V_blocks' => $blocks['res'],
-            'V_files' => $files,
-            'USER' => $USER
+            'V_files' => $files
         ];
         
         // Load View
-        template('blocks', $data, 'admin');
+        $this->view('blocks', $data, 'admin');
     }
 
     // Upload Block FormSubmit
     public function submit()
     {
-        $USER = new User(_MODERATOR, 2);
+    
         // Delete Block
         if ($_POST["deletepermanent"]) {
             foreach ($_POST["deletepermanent"] as $delpthis) {
-                unlink(APPROOT."/views/block/" . $delpthis);
-                if (file_exists(APPROOT . "/views/block/" . $delpthis)) {
-                    Redirect(Url('adminportal'), Txt("ACTION_FAILED"));
+                unlink(CONFIG['APPROOT']."/views/block/" . $delpthis);
+                if (file_exists(CONFIG['APPROOT'] . "/views/block/" . $delpthis)) {
+                    showMessage(Url('adminportal'), LANG["ACTION_FAILED"]);
                 } else {
-                    Redirect(Url('adminportal'), Txt("ACTION_COMPLETE"));
+                    showMessage(Url('adminportal'), LANG["ACTION_COMPLETE"]);
                 }
             }
         }
@@ -72,9 +82,9 @@ class Adminblock
                 $wantedname = $_POST["wantedname_$i"];
                 $name = str_replace("_block.php", "", $addblock);
                 $description = $_POST["wanteddescription_" . $i];
-                BlocksModel::insert(['named'=>$wantedname,'name'=>$name,'description'=>$description,'position'=>'left','enabled'=>0,'sort'=>0]);
+                (new BlocksModel)->insert(['named'=>$wantedname,'name'=>$name,'description'=>$description,'position'=>'left','enabled'=>0,'sort'=>0]);
             }
-            Redirect(Url('adminportal'), Txt("SUCCESS"));
+            showMessage(Url('adminportal'), LANG["SUCCESS"]);
         }
     }
 

@@ -1,4 +1,4 @@
-<?php block_begin($V_title) ?>
+<?php block_begin($page_title) ?>
 <?php
 forumheader();
 latestforumposts();
@@ -9,9 +9,9 @@ foreach ($V_forums as $country_id => $cat_info) : ?>
         <thead class='tt_blockhead'>
             <tr>
                 <th class="col-6"><?= htmlspecialchars($cat_info['c_name']) ?></th>
-                <th class="col-2"><?= Txt("TOPICS") ?></th>
-                <th class="col-2"><?= Txt("POSTS") ?></th>
-                <th class="col-2"><?= Txt("LAST") ?></th>
+                <th class="col-2"><?= LANG["TOPICS"] ?></th>
+                <th class="col-2"><?= LANG["POSTS"] ?></th>
+                <th class="col-2"><?= LANG["LAST"] ?></th>
             </tr>
         </thead>
         <tbody> <?php
@@ -42,9 +42,9 @@ foreach ($V_forums as $country_id => $cat_info) : ?>
 <?php endforeach; ?>
 
 <div class=" rounded p-1">
-    <i class='fa fa-file-text tticon-red'></i>&nbsp;<?= Txt("NEW_POST") ?>&nbsp;
-    <i class='fa fa-file-text'></i>&nbsp;<?= Txt("READ") ?>&nbsp;
-    <i class='fa fa-lock'></i>&nbsp;<?= Txt("LOCKED") ?>&nbsp;
-    <i class='fa fa-exclamation'></i>&nbsp;<?= Txt("STICKY") ?>
+    <i class='fa fa-file-text tticon-red'></i>&nbsp;<?= LANG["NEW_POST"] ?>&nbsp;
+    <i class='fa fa-file-text'></i>&nbsp;<?= LANG["READ"] ?>&nbsp;
+    <i class='fa fa-lock'></i>&nbsp;<?= LANG["LOCKED"] ?>&nbsp;
+    <i class='fa fa-exclamation'></i>&nbsp;<?= LANG["STICKY"] ?>
 </div>
 <?php block_end() ?>

@@ -2,27 +2,33 @@
 
 namespace App\Controllers\User;
 
-use App\Libs\User;
+use App\Libs\Controller;
 use App\Models\TorrentsModel;
 
 /*
 * Broswe Controller
 */
-class Browse
+class Browse extends Controller
 {
+    public $current_user;
+
+    // Get Current User
+    public function __construct()
+    {
+        $this->current_user = $this->currentuser(1);
+    }
+
     // Search Browse Default Page todo (tidy up)
     public function index()
     {
-        $USER = new User(0, 1);
-        
-        if (!$USER->permission('view_torrents')) {
-            Redirect(Url(), Txt("NO_TORRENT_VIEW"));
+        if ($this->current_user->view_torrents != "yes" && CONFIG['MEMBERSONLY']) {
+            showMessage(Url(), LANG["NO_TORRENT_VIEW"]);
         } else {
-            $browse = TorrentsModel::countBrowse();
+            $browse =(new TorrentsModel)->countBrowse();
 
-            // Init Data
+            // Data For View
             $data = [
-                'V_title' => Txt("BROWSE_TORRENTS"),
+                'page_title' => LANG["BROWSE_TORRENTS"],
                 'V_torrents' => $browse['res'],
                 'V_pager' => $browse['pagerbuttons'],
                 'V_catsquery' => $browse['catsquery'],
@@ -31,11 +37,11 @@ class Browse
                 'V_count' => $browse['count'],
                 'V_wherecatina' => $browse['search']['wherecatina'],
                 'V_cats' => $browse['cats'],
-                'USER' => $USER
+            'current_user' => $this->current_user
             ];
 
             // Load View
-            template('browse', $data, 'user');
+            $this->view('browse', $data, 'user');
         }
     }
 

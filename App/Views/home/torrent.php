@@ -1,26 +1,26 @@
 <?php
 
 use App\Models\TorrentsModel;
-use App\Models\UsersModel;
+use App\Libs\DB;
 
-block_begin(Txt('TORRENT'));
-if (CONFIG['MEMBERSONLY'] && !$data['USER']->has('id')) {
-    echo Txt('MEMBERS_ONLY');  
+block_begin(LANG['TORRENT']);
+if (CONFIG['MEMBERSONLY'] && !$current_user->id) {
+    echo LANG['MEMBERS_ONLY'];  
 } else {
     $res = TorrentsModel::getAll("WHERE visible = ? AND banned = ?", ['yes', 'no']); 
     if ($res['count'] > 0) {
         ?>
         <div class="text-center">
-            <a href='<?= Url('browse') ?>'><?= Txt("BROWSE_TORRENTS") ?></a> - 
-            <a href='<?= Url('search') ?>'><?= Txt("SEARCH_TORRENTS") ?></a>
+            <a href='<?= Url('browse') ?>'><?= LANG["BROWSE_TORRENTS"] ?></a> - 
+            <a href='<?= Url('search') ?>'><?= LANG["SEARCH_TORRENTS"] ?></a>
         </div>
         <?php
-        torrenttable($data['USER'], $res['stmt']);
+        torrenttable($res['stmt']);
     } else {
-        echo Txt('NO_TORRENT_FOUND');
+        echo LANG['NO_TORRENT_FOUND'];
     }
-    if ($data['USER']->has('id')) {
-        UsersModel::update(['last_browse'], ['id='], [gmtime(),$data['USER']->has('id')]);
+    if ($current_user->id) {
+        DB::update('users', ['last_browse'], ['id='], [gmtime(),$current_user->id]);
     }
 }
 block_end();

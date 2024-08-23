@@ -1,5 +1,5 @@
 <?php use App\Models\TorrentsModel; ?>
-<?php block_begin($V_title) ?>
+<?php block_begin($page_title) ?>
 <?php foreach ($V_cats as $cat) {
     $orderby = "ORDER BY torrents.sticky ASC, torrents.id DESC"; //Order
     $where = "WHERE banned = 'no' AND category='$cat[id]' AND visible='yes'";
@@ -9,7 +9,7 @@
     $numtor = $res->rowCount();
     if ($numtor != 0) {
         echo "<b><a href=" . Url("torrent/browse?cat=$cat[id]") . "'>$cat[name]</a></b>";
-        torrenttable($USER, $res);
+        torrenttable($res);
         echo "<br />";
     }
 } ?>

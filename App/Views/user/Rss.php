@@ -1,11 +1,11 @@
-<?php block_begin($V_title) ?>
+<?php block_begin($page_title) ?>
 <form action="<?= Url('rss/submit') ?>" method="post">
-	<?= Txt("CATS_LEAVE_BLANK_ALL") ?><br />
+	<?= LANG["CATS_LEAVE_BLANK_ALL"] ?><br />
 	<?php foreach ($V_cats as $row) : ?>
 		<input type="checkbox" name="cats[]" value="<?= $row['id'] ?>" /> <?= htmlspecialchars("$row[parent_cat] - $row[name]") ?><br />
 	<?php endforeach; ?><br>
-	<input type="number" name="user" /> <?= Txt("USER_id") ?><br><br>
-	<input type="checkbox" name="incldead" value="1" /> <?= Txt("INCLUDE_DEAD") ?><br><br>
+	<input type="number" name="user" /> <?= LANG["USER_id"] ?><br><br>
+	<input type="checkbox" name="incldead" value="1" /> <?= LANG["INCLUDE_DEAD"] ?><br><br>
 	<input type="submit" class='btn btn-sm ttbtn' value="Get Link" />
 </form>
 <br />

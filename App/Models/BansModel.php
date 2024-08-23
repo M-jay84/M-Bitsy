@@ -11,15 +11,8 @@ use App\Models\LogsModel;
 */
 class BansModel
 {
-    // Fetch All Bams
-    public static function fetchAll($columns = '*', $where = '', $values = '', $other = '')
-    {
-        $stmt = DB::newSelect('bans', $columns, $where, $values, $other);
-		return $stmt;
-	}
-	
     // Admin Delete Ban
-    public static function delete()
+    public function delete($dat)
     {
         // Get Input
         $ids = multiIds('ids');
@@ -27,14 +20,14 @@ class BansModel
         // Delete Ban
         $bans = DB::run("SELECT * FROM bans WHERE id IN ($ids)")->fetchAll();
         foreach ($bans as $row) {
-            Redirect(Url('adminban'), Txt("ACTION_COMPLETE"));
+            showMessage(Url('adminban'), LANG["ACTION_COMPLETE"]);
             $stmt = DB::delete('bans', ['id' => $row['id']], false);
-            LogsModel::write("Ban ($row[first] - $row[last]) was removed by " . $_SESSION['id'] . " (" . $_SESSION['username'] . ")");    
+            (new LogsModel)->write("Ban ($row[first] - $row[last]) was removed by " . $data['current_user']->id . " (" . $data['current_user']->username . ")");    
         }
     }
 
     // Admin Add Ban
-    public static function insert()
+    public function insert($current_user)
     {
         $first = Input('first');
         $last = Input('last');
@@ -42,20 +35,20 @@ class BansModel
         $type = Input('type');
 
         if ($first == "" || $type == "" || $comment == "") {
-            Redirect(Url('adminban'), Txt("MISSING_FORM_DATA"));
+            showMessage(Url('adminban'), LANG["MISSING_FORM_DATA"]);
         }
 
-        $stmt = DB::insert('bans', ['added'=>get_date_time(),' addedby'=>$_SESSION['id'], 'first'=>$first, 'last'=>$last, 'comment'=>$comment, 'type'=>$type]);
-        LogsModel::write(sprintf(Txt("BAN_ADDED"), $first, $_SESSION['username']));
-        Redirect(Url('adminban'), Txt("SUCCESS"));
+        $stmt = DB::insert('bans', ['added'=>get_date_time(),' addedby'=>$current_user->id, 'first'=>$first, 'last'=>$last, 'comment'=>$comment, 'type'=>$type]);
+        (new LogsModel)->write(sprintf(LANG["BAN_ADDED"], $first, $current_user->username));
+        showMessage(Url('adminban'), LANG["SUCCESS"]);
     }
 
     // Admin Get Bans
-    public static function getAll($type)
+    public function getAll($type)
     {
         if ($type == 'ip') {
             $count = UsersModel::fetchColumn('count(id)', '');
-            list($pager, $limit) = pagination(50, $count, URLROOT . "/adminban/ip"); // 50 per page
+            list($pager, $limit) = pagination(50, $count, CONFIG['URLROOT'] . "/adminban/ip"); // 50 per page
             $stmt = DB::run("SELECT bans.id, bans.added, bans.addedby, bans.first, bans.last,bans.comment,bans.type, users.username 
                          FROM bans 
                          LEFT JOIN users 
@@ -64,7 +57,7 @@ class BansModel
                          ORDER BY added $limit", ['ip'])->fetchAll();
         } elseif ($type == 'email') {
             $count = DB::fetchColumn('bans', 'count(id)', '');
-            list($pager, $limit) = pagination(40, $count, URLROOT . "/adminban/email");
+            list($pager, $limit) = pagination(40, $count, CONFIG['URLROOT'] . "/adminban/email");
             $stmt = DB::run("SELECT bans.id, bans.added, bans.addedby, bans.first, bans.last,bans.comment,bans.type, users.username 
                          FROM bans 
                          LEFT JOIN users 
@@ -82,21 +75,21 @@ class BansModel
     }
 
     // Check Email account/invite
-    public static function checkEmail($email)
+    public function checkEmail($email)
     {
         $maildomain = (substr($email, strpos($email, "@") + 1));
         $a = DB::fetchColumn('bans', 'COUNT(id)', ['first ='], [$email]);
         if ($a != 0) {
-            $message = sprintf(Txt("EMAIL_ADDRESS_BANNED_S"), $email);
+            $message = sprintf(LANG["EMAIL_ADDRESS_BANNED_S"], $email);
         }
         $a = DB::fetchColumn('bans', 'count(*)', 'first LIKE ', ['%$maildomain%']);
         if ($a != 0) {
-            $message = sprintf(Txt("EMAIL_ADDRESS_BANNED_S"), $email);
+            $message = sprintf(LANG["EMAIL_ADDRESS_BANNED_S"], $email);
         }
         // check if email addy is already in use
         $a = UsersModel::fetchColumn('COUNT(id)', ['email ='], [$email]);
         if ($a != 0) {
-            $message = sprintf(Txt("EMAIL_ADDRESS_INUSE_S"), $email);
+            $message = sprintf(LANG["EMAIL_ADDRESS_INUSE_S"], $email);
         }
         return $message;
     }

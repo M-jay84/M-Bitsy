@@ -11,13 +11,13 @@ class Parse
 {
 
     // Get Data From Torrent File
-    public function torr($path = "", $url = URLROOT)
+    public function torr($path = "", $url = CONFIG['URLROOT'])
     {
         // First Check File Is Torrent
         $torrent = explode(".", $path);
         $fileend = strtolower(end($torrent));
         if ($fileend != "torrent") {
-            Redirect($url, Txt('NOT_TORRENT'));
+            showMessage(Url(), LANG['NOT_TORRENT']);
         }
 
         // Set Array
@@ -27,7 +27,7 @@ class Parse
         try {
             $torrent = TorrentFile::load($path);
         } catch (\Exception $e) {
-            Redirect($url, Txt("ERROR_TORRENT"));
+            showMessage(Url(), LANG["ERROR_TORRENT"]);
         }
 
         // Get Data

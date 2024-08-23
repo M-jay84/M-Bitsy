@@ -1,4 +1,4 @@
-<?php block_begin($V_title) ?>
+<?php block_begin($page_title) ?>
 <?= $V_pager ?>
 
 <div class="container justify-content-md-center-2">

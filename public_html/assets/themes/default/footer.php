@@ -1,19 +1,11 @@
-<!-- Middle Block Start -->
-<?php if (CONFIG['MIDDLENAV']) : ?>
-  <?php column('middle', $data['USER']); ?>
-<?php endif; ?>
-
-</div>
-
-<!-- Right Block Start -->
-<?php if (CONFIG['RIGHTNAV']) : ?>
-<div class="col  portal_sidebar">
-    <?php column('right', $data['USER']); ?>
-</div>
-<?php endif; ?>
-
-</div>
-</div>
+         <?php column('middle'); ?>
+        </div>
+       <!-- Right Block Start -->
+      <div class="col  portal_sidebar">
+        <?php column('right'); ?>
+      </div>
+    </div>
+   </div>
 <!-- Content End -->
 
 <!-- Footer Start -->
@@ -29,7 +21,7 @@
                 M-BiTsy By <a href="https://github.com/M-jay84/M-BiTsy">M-jay</a>
                 <br>Support @ <a href="https://torrenttrader.uk" target="_blank">Torrent Trader</a><br>
                 <?php $totaltime = array_sum(explode(" ", microtime())) - $GLOBALS['tstart']; ?>
-                <?php printf(Txt("PAGE_GENERATED_IN"), $totaltime); ?>
+                <?php printf(LANG["PAGE_GENERATED_IN"], $totaltime); ?>
             </div>
         </div>
     </div>

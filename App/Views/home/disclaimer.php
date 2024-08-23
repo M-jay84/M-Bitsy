@@ -1,6 +1,6 @@
 <?php
 if (CONFIG['DISCLAIMERON']) {
-    block_begin(Txt('DISCLAIMER'));
-    echo Txt("DISCLAIMERTXT");
+    block_begin(LANG['DISCLAIMER']);
+    echo LANG["DISCLAIMERTXT"];
     block_end();
 }

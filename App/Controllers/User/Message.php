@@ -2,19 +2,27 @@
 
 namespace App\Controllers\User;
 
-use App\Libs\User;
+use App\Libs\Controller;
 use App\Models\MessagesModel;
 use App\Models\UsersModel;
 
 /*
 * Messages Controller
 */
-class Message 
+class Message extends Controller
 {
+    public $current_user;
+
+    // Get Current User
+    public function __construct()
+    {
+        $this->current_user = $this->currentuser(2);
+    }
+
     // Message Default Page
     public function index($id, $type = 'inbox')
     {
-        $USER = new User(0, 2);
+    
         // Set Button
         if ($type == 'templates' || $type == 'draft') {
             $button = "<a href='javascript:;' class='addAttr' data-bs-toggle='modal' data-bs-target='#editModal' '><button class='btn ttbtn m-2'><i class='fa fa-home me-2'></i>Edit</button></a>";
@@ -23,50 +31,51 @@ class Message
         }
         
         // Get Message
-        $messages = MessagesModel::getById($id);
-        $templates = MessagesModel::echoTemplates();
+        $messages = (new MessagesModel)->getById($id, $this->current_user->id);
+        $templates = (new MessagesModel)->echoTemplates($this->current_user->id);
 
         // Init Dta
         $data = [
-            'V_title' => Txt('MESSAGE'),
+            'page_title' => LANG['MESSAGE'],
             'V_button' => $button,
             'V_templates' => $templates,
             'V_messages' => $messages,
-            'USER' => $USER
+            'current_user' => $this->current_user
         ];
 
         // Load View
-        template('message', $data, 'user');
+        $this->view('message', $data, 'user');
     }
 
     // Mailbox Default Page
     public function mailbox($type = 'inbox')
     {
-        $USER = new User(0, 2);
+    
+        $data['current_user'] = $this->current_user;
         // Count All Messages
-        $count = MessagesModel::countMsg();
+        $count = (new MessagesModel)->countMsg($data);
 
         // Pagination
-        $messages = MessagesModel::msgPagination($type);
+        $messages = (new MessagesModel)->msgPagination($type, $this->current_user->id);
         
         // Init Dta
         $data = [
-            'V_title' => $type,
+            'page_title' => $type,
             'V_type' => $type,
             'V_messages' => $messages['messages'],
             'V_count' => $count,
             'V_pager' => $messages['pager'],
-            'USER' => $USER
+            'current_user' => $this->current_user
         ];
 
         // Load View
-        template('mailbox', $data, 'user');
+        $this->view('mailbox', $data, 'user');
     }
 
     // Ajax User search
 	function findUser()
     {
-        $USER = new User(0, 2);
+    
         if(!empty($_POST["keyword"])) {
             $result = UsersModel::getUserName();
             if(!empty($result)) {
@@ -84,39 +93,39 @@ class Message
     // Create Message Default Page
     public function create($id = 0)
     {
-        $USER = new User(0, 2);
-        $templates = MessagesModel::echoTemplates();
+    
+        $templates = (new MessagesModel)->echoTemplates($this->current_user->id);
 
         // Init Dta
         $data = [
-            'V_title' => Txt('MESSAGE'),
+            'page_title' => LANG['MESSAGE'],
             'V_id' => $id,
             'V_templates' => $templates,
-            'USER' => $USER
+            'current_user' => $this->current_user
         ];
 
         // Load View
-        template('message_create', $data, 'user');
+        $this->view('message_create', $data, 'user');
     }
 
     // Create/Reply Message Form Submit
     public function submit()
     {
-        $USER = new User(0, 2);
-        MessagesModel::insertByType();
+    
+        (new MessagesModel)->insertByType($this->current_user->id);
     }
 
     // Message Edit Default Page
     public function update($id)
     {
-        $USER = new User(0, 2);
-        MessagesModel::update($id);
+    
+        (new MessagesModel)->update($id, $this->current_user->id);
     }
 
     // Delete/MarkRead Message Submit
     public function delete($type)
     {
-        $USER = new User(0, 2);
-        MessagesModel::delete($type);
+    
+        (new MessagesModel)->delete($type, $this->current_user->id);
     }
 }

@@ -2,18 +2,29 @@
 
 namespace App\Controllers\Admin;
 
-use App\Libs\User;
+use App\Libs\Controller;
 use App\Models\TorrentsModel;
 
 /*
 * Torrent Controller
 */
-class Admintorrent 
+class Admintorrent extends Controller
 {
+    public $current_user;
+
+    // Get Current User
+    public function __construct()
+    {
+        $this->current_user = $this->currentuser(2);
+        if ($this->current_user->class < CONFIG['_MODERATOR']) {
+            showMessage(CONFIG['URLROOT'], LANG["NO_PERMISSION"]);
+        }
+    }
+
     // Torrents Default Page
     public function index($type = '') // todo like %?%
     {
-        $USER = new User(_MODERATOR, 2);
+    
         // Check User Input
         $search = (!empty($_GET["search"])) ? htmlspecialchars(trim($_GET["search"])) : "";
         $pattern = '%' . $search . '%';
@@ -29,31 +40,30 @@ class Admintorrent
             $torrents = TorrentsModel::getAll("WHERE torrents.id > ? $where ORDER BY name", array(0), 'admintorrent?');
         }
 
-        // Init Data
+        // Data For View
         $data = [
-            'V_title' => Txt("TORRENT"),
+            'page_title' => LANG["TORRENT"],
             'V_count'=> $torrents['count'],
             'V_pager' => $torrents['pager'],
             'V_torrents' =>$torrents['stmt'],
-            'V_search' => $search,
-            'USER' => $USER
+            'V_search' => $search
         ];
 
         // Load View
-        template('torrent', $data, 'admin');
+        $this->view('torrent', $data, 'admin');
     }
 
     // Torrents Delete
     public function delete()
     {
-        $USER = new User(_MODERATOR, 2);
+    
         if (!count($_POST["ids"])) {
-            Redirect(Url('admintorrent'), Txt("NOTHING_SELECTED"));
+            showMessage(Url('admintorrent'), LANG["NOTHING_SELECTED"]);
         }
         foreach ($_POST["ids"] as $id) {
-            TorrentsModel::deleteTorrent(intval($id));
+            (new TorrentsModel)->deleteTorrent(intval($id), $this->current_user->id);
         }
-        Redirect(Url('admintorrent'), Txt("DEL_COMPLETE"));
+        showMessage(Url('admintorrent'), LANG["DEL_COMPLETE"]);
     }
 
 }

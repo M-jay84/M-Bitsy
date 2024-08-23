@@ -4,18 +4,29 @@ namespace App\Controllers\Admin;
 
 use PDO;
 use App\Libs\TTMail;
-use App\Libs\User;
+use App\Libs\Controller;
 use App\Models\UsersModel;
 
 /*
 * Inactive User Controller
 */
-class Admininactive 
+class Admininactive extends Controller
 {
+    public $current_user;
+
+    // Get Current User
+    public function __construct()
+    {
+        $this->current_user = $this->currentuser(2);
+        if ($this->current_user->class < CONFIG['_MODERATOR']) {
+            showMessage(CONFIG['URLROOT'], LANG["NO_PERMISSION"]);
+        }
+    }
+
     // Inactive Users Default Page
     public function index()
     {
-        $USER = new User(_MODERATOR, 2);
+    
         // Inactivite Days
         $cday = Input('cday', 'int') ?? 30;
         $dt = get_date_time(gmtime() - ($cday * 86400));
@@ -25,25 +36,24 @@ class Admininactive
                                 ['last_access<','status=','enabled='] , [$dt, 'confirmed', 'yes'], "ORDER BY last_access DESC");
         $count = $users->rowCount();
 
-        // Init Data
+        // Data For View
         $data = [
-            'V_title' => Txt("INACTIVE"),
+            'page_title' => LANG["INACTIVE"],
             'V_cday' => $cday,
             'V_users' => $users,
-            'V_count' => $count,
-            'USER' => $USER
+            'V_count' => $count
         ];
         
         // Load View
-        template('inactive', $data, 'admin');
+        $this->view('inactive', $data, 'admin');
     }
 
     // Inactive Users Form Submit
     public function submit()
     {
-        $USER = new User(_MODERATOR, 2);
+    
         $sitename = CONFIG['SITENAME'];
-        $siteurl = URLROOT;
+        $siteurl = CONFIG['URLROOT'];
         
         if (!empty($_POST)) { // todo full file
             // Check User Input
@@ -53,11 +63,11 @@ class Admininactive
 
             // Check Correct Input
             if (!is_numeric($cday)) {
-                Redirect(Url('admininactive'), Txt("ACTION_FAILED"));
+                showMessage(Url('admininactive'), LANG["ACTION_FAILED"]);
             }
 
             if (empty($_POST["userid"]) && (($action == "deluser") || ($action == "mail") || ($action == "disable"))) {
-                Redirect(Url('admininactive'), ("NOTHING_SELECTED"));
+                showMessage(Url('admininactive'), ("NOTHING_SELECTED"));
             }
 
             if ($action == "cday" && ($cday > $days)) {
@@ -68,7 +78,7 @@ class Admininactive
             if ($action == "deluser" && (!empty($_POST["userid"]))) {
                 $ids = implode(", ", $_POST['userid']);
                 UsersModel::deleteByIds($ids);
-                Redirect(Url('admininactive'), Txt("SUCCESS"));
+                showMessage(Url('admininactive'), LANG["SUCCESS"]);
             }
 
             // Disable
@@ -76,12 +86,12 @@ class Admininactive
                 $res = UsersModel::selectWhereIn();
                 while ($arr = $res->fetch(PDO::FETCH_ASSOC)) {
                     $id = 0 + $arr["id"];
-                    $cname = $USER->has('username');
+                    $cname = $this->current_user->username;
                     $modcomment = $arr["modcomment"];
                     $modcomment = gmdate("Y-m-d") . " - Disabled for inactivity by $cname.n" . $modcomment;
                     UsersModel::update(['modcomment', 'enabled'], ['id='], [$modcomment,'no',$id]);
                 }
-                Redirect(Url('admininactive'), Txt("UPDATE_COMPLETE"));
+                showMessage(Url('admininactive'), LANG["UPDATE_COMPLETE"]);
             }
 
             // Email
@@ -96,7 +106,7 @@ class Admininactive
                     $subject = "Warning for inactive account on $sitename";
 
                     // Send Email
-                    $body = file_get_contents(EMAILDIR . "/changeemail.php");
+                    $body = file_get_contents(CONFIG['EMAILDIR'] . "/changeemail.php");
                     $body = str_replace("%username%", $username, $body);
                     $body = str_replace("%sitename%", $sitename, $body);
                     $body = str_replace("%siteurl%", $siteurl, $body);
@@ -108,9 +118,9 @@ class Admininactive
                 }
 
                 if ($mail) {
-                    Redirect(Url('admininactive'), "Messages sent.");
+                    showMessage(Url('admininactive'), "Messages sent.");
                 } else {
-                    Redirect(Url('admininactive'),  "Try again.");
+                    showMessage(Url('admininactive'),  "Try again.");
                 }
 
             }

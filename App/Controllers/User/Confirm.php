@@ -2,31 +2,37 @@
 
 namespace App\Controllers\User;
 
-use App\Libs\User;
+use App\Libs\Controller;
 use App\Models\AccountsModel;
 
 /*
 * Ban Controller
 */
-class Confirm
+class Confirm extends Controller
 {
+    public $current_user;
+
+    // Get Current User
+    public function __construct()
+    {
+        $this->current_user = $this->currentuser(0);
+    }
+
     public function index()
     {
-        Redirect(Url(), Txt("NOTHING_FOUND"));
+        showMessage(Url(), LANG["NOTHING_FOUND"]);
     }
 
     // Email Reset Confirm
     public function confirmpassword($id, $secret, $email)
     {
-        $USER = new User(0, 0);
-        AccountsModel::confirmpassword($id, $secret, $email);
+        (new AccountsModel)->confirmpassword($id, $secret, $email);
     }
 
     // Signup Email Confirm
     public function confirmemail($id, $secret)
     {
-        $USER = new User(0, 0);
-        AccountsModel::confirmemail($id, $secret);
+        (new AccountsModel)->confirmemail($id, $secret);
     }
 
 }

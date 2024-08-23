@@ -1,6 +1,6 @@
-<?php block_begin($V_title) ?>
+<?php block_begin($page_title) ?>
 <p class="text-center">
-    <a type="button" class="model_form ttbtn btn-sm" data-bs-toggle="modal" data-bs-target="#tagModal"><?= Txt('ADD') ?></a>
+    <a type="button" class="model_form ttbtn btn-sm" data-bs-toggle="modal" data-bs-target="#tagModal"><?= LANG['ADD'] ?></a>
 <p>
 
 <form id='delete' action='<?= Url('admintag/delete') ?>' method='post'>
@@ -9,8 +9,8 @@
             <thead>
                 <tr>
                     <th><input type="checkbox" name="checkall" onclick="checkAll(this.form.id)" /></th>
-                    <th><?= Txt('NAME') ?></th>
-                    <th><?= Txt('COLOUR') ?></th>
+                    <th><?= LANG['NAME'] ?></th>
+                    <th><?= LANG['COLOUR'] ?></th>
                 </tr>
             </thead>
             <tbody>
@@ -32,7 +32,7 @@
         </table>
     </div>
     <p class="text-center">
-        <button type="submit" class="btn btn-sm ttbtn"><?= Txt("DEL") ?></button>
+        <button type="submit" class="btn btn-sm ttbtn"><?= LANG["DEL"] ?></button>
     </p>
 </form>
 
@@ -55,14 +55,14 @@
             <div class="modal-content">
                 <div class="modal-body">
                     <input type='hidden' name='id' id="id" />
-                    <?= Txt("NAME") ?>
+                    <?= LANG["NAME"] ?>
                     <input id="name" type="text" class="form-control fullwidth" name="name" minlength="3" maxlength="200">
-                    <?= Txt("COLOUR") ?>
+                    <?= LANG["COLOUR"] ?>
                     <input id="colour" type="text" class="form-control fullwidth" name="colour" minlength="3" maxlength="200">
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-sm ttbtn" data-bs-dismiss="modal"><?= Txt('CLOSE') ?></button>
-                    <button type="submit" class="btn btn-sm ttbtn"><?= Txt("SUBMIT") ?></button>
+                    <button type="button" class="btn btn-sm ttbtn" data-bs-dismiss="modal"><?= LANG['CLOSE'] ?></button>
+                    <button type="submit" class="btn btn-sm ttbtn"><?= LANG['SUBMIT'] ?></button>
                 </div>
             </div>
         </div>

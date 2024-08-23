@@ -1,9 +1,9 @@
 <?php
 use App\Libs\MDBS;
 use App\Models\TorrentsModel;
-if ($data['USER']->permission('view_torrents')) {
+if ($current_user->view_torrents != "yes" && CONFIG['MEMBERSONLY']) {
     $stmt = TorrentsModel::getAll("WHERE visible = ? AND banned = ?", ['yes', 'no']);
-    block_begin(Txt('CAROUSEL')); ?>
+    block_begin(LANG['CAROUSEL']); ?>
     <div id="recipeCarousel" class="carousel slide" data-bs-ride="carousel">
         <div class="carousel-inner" role="listbox"> <?php
             $i = 0;

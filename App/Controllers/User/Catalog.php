@@ -2,20 +2,28 @@
 
 namespace App\Controllers\User;
 
-use App\Libs\User;
+use App\Libs\Controller;
 use App\Models\TorrentsModel;
 
 /*
 * Catalog Controller
 */
-class Catalog 
+class Catalog extends Controller
 {
+    public $current_user;
+
+    // Get Current User
+    public function __construct()
+    {
+        $this->current_user = $this->currentuser(2);
+    }
+
     // Catalog Default Page
     public function index()
     {
-        $USER = new User(0, 2);
-        if (!$USER->permission('view_torrents')) {
-            Redirect(Url(), Txt("NO_TORRENT_VIEW"));
+    
+        if ($this->current_user->view_torrents != "yes" && CONFIG['MEMBERSONLY']) {
+            showMessage(Url(), LANG["NO_TORRENT_VIEW"]);
         } else {
             $array = torrentsearch('torrents.name');
             $where = !$array ? '' : "$array[query] AND";
@@ -23,16 +31,16 @@ class Catalog
             // Pagination
             $torrents = TorrentsModel::getAll("WHERE $where visible != ?", array('no'), "catalog$array[url]");
     
-            // Init Data
+            // Data For View
             $data = [
-                'V_title' => Txt("CATALOGUE"),
+                'page_title' => LANG["CATALOGUE"],
                 'V_torrents' => $torrents['stmt'],
                 'V_pager' => $torrents['pager'],
-                'USER' => $USER
+            'current_user' => $this->current_user
             ];
     
             // Load View
-            template('catalog', $data, 'user');
+            $this->view('catalog', $data, 'user');
         }
     }
     

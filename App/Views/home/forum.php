@@ -2,13 +2,13 @@
 
 use App\Models\ForumsModel;
 use App\Models\PostsModel;
-use App\Models\TopicsModel;
+use App\Libs\DB;
 
 if (CONFIG['FORUMONINDEX']) {
     $forums_res = ForumsModel::getIndex();
-    block_begin(Txt('FORUM'));
+    block_begin(LANG['FORUM']);
     if ($forums_res->rowCount() == 0) {
-        echo Txt("NO fORUMS fOUND");
+        echo LANG["NO fORUMS fOUND"];
     } else {
         ?>
         <div class="p-4">
@@ -18,19 +18,19 @@ if (CONFIG['FORUMONINDEX']) {
                         <thead>
                             <tr>
                                 <th class="col-6"><?= htmlspecialchars($cat['name']) ?></th>
-                                <th class="col-2"><?= Txt("Topics") ?></th>
-                                <th class="col-2"><?= Txt("Posts") ?></th>
-                                <th class="col-2"><?= Txt("Last post") ?></th>
+                                <th class="col-2"><?= LANG["TOPICS"] ?></th>
+                                <th class="col-2"><?= LANG["POSTS"] ?></th>
+                                <th class="col-2"><?= LANG["LAST_POST"] ?></th>
                             </tr>
                         </thead>
                         <tbody>
                             <?php
-                            $stmt = ForumsModel::fetchAll('*', ['category='], [$cat['id']], 'ORDER BY sort, name');
+                            $stmt = DB::fetchAll('forum_forums', '*', ['category='], [$cat['id']], 'ORDER BY sort, name');
                             foreach ($stmt as $row) {
                                 $lastpostid = get_forum_last_post($row['id']);
                                 $detail = lastpostdetails($lastpostid);
                                 $postcount = PostsModel::postcount($row['id']);
-                                $topiccount = TopicsModel::fetchColumn('count(id)', ['forumid='], [$row['id']]); ?>
+                                $topiccount = DB::fetchColumn('forum_topics', 'count(id)', ['forumid='], [$row['id']]); ?>
                                 <tr>
                                     <td><?php
                                         echo $detail['img']; ?>&nbsp;

@@ -9,20 +9,20 @@ use App\Libs\DB;
 */
 class CountriesModel
 {
-    // Country Flag
+    // Country Flag //todo view
     public static function fetchRow($country, $pic = 0)
     { 
         $carr = DB::fetchRow('countries', 'name,flagpic', ['id='], [$country], 'LIMIT 1');
         if ($carr) {
-            $country = $pic == 1 ? "<img src='" . URLROOT . "/assets/images/languages/$carr[flagpic]' title='" . htmlspecialchars($carr['name']) . "' alt='" . htmlspecialchars($carr['name']) . "' />" : htmlspecialchars($carr['name']);
+            $country = $pic == 1 ? "<img src='" . CONFIG['URLROOT'] . "/assets/images/languages/$carr[flagpic]' title='" . htmlspecialchars($carr['name']) . "' alt='" . htmlspecialchars($carr['name']) . "' />" : htmlspecialchars($carr['name']);
         } else {
-            $country = $pic == 1 ? "<img src='" . URLROOT . "/assets/images/languages/unknown.webp' alt='Unknown' />" : "<b>Unknown</b>";
+            $country = $pic == 1 ? "<img src='" . CONFIG['URLROOT'] . "/assets/images/languages/unknown.webp' alt='Unknown' />" : "<b>Unknown</b>";
         }
         return $country;
     }
 
     //Country Dropdown
-    public static function dropdown($country = 0)
+    public function dropdown($country = 0)
     {
         $data = array();
         $stmt = DB::fetchAll('countries', 'id, name', '', 'ORDER BY name');

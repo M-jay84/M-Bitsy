@@ -19,7 +19,7 @@ class TorrentLangModel
             $lang[] = $row;
         }
         if (!$torrentlang) {
-            $langdropdown .= "<option value=\"0\">" . Txt("LANGUAGE") . "</option>\n";
+            $langdropdown .= "<option value=\"0\">" . LANG["LANGUAGE"] . "</option>\n";
         }
         foreach ($lang as $lang) {
             $langdropdown .= "<option value=\"" . $lang["id"] . "\"";
@@ -32,15 +32,8 @@ class TorrentLangModel
         return $langdropdown;
     }
 
-    // Fetch All Languages
-    public static function fetchAllLang($columns = '*', $where = '', $values = '', $other = '')
-    {
-        $stmt = DB::newSelect('languages', $columns, $where, $values, $other);
-		return $stmt;
-	}
-	
     // Fetch All Torrent Languages
-    public static function fetchAll()
+    public function fetchAll()
     {
         $sql = DB::newSelect('torrentlang', '*', '', 'ORDER BY sort_index ASC');
 
@@ -48,7 +41,7 @@ class TorrentLangModel
     }
 
     // Admin Lang Add/Insert
-    public static function insertOrUpdate()
+    public function insertOrUpdate()
     {
         $name=Input('name');
         $sort_index=Input('sort_index');
@@ -57,7 +50,7 @@ class TorrentLangModel
 
         // Check Correct Input
         if ($name == "") {
-            Redirect(Url('admintorrentlang'), Txt("MISSING_FORM_DATA"));
+            showMessage(Url('admintorrentlang'), LANG["MISSING_FORM_DATA"]);
         }
                 
         if (!$id) {
@@ -66,31 +59,31 @@ class TorrentLangModel
         } else {
             // Update Torrent Lang
             DB::update('torrentlang', ['name','sort_index','image'], ['id='], [$name, $sort_index, $image, $id]);
-            Redirect(Url('admintorrentlang'), Txt("UPDATE_COMPLETE"));
+            showMessage(Url('admintorrentlang'), LANG["UPDATE_COMPLETE"]);
         }
 
         if ($ins) {
-            Redirect(Url('admintorrentlang'), Txt("SUCCESS"));
+            showMessage(Url('admintorrentlang'), LANG["SUCCESS"]);
         } else {
-            Redirect(Url('admintorrentlang/add'), Txt("ACTION_FAILED"));
+            showMessage(Url('admintorrentlang/add'), LANG["ACTION_FAILED"]);
         }
     }
 
     // Admin Torrent Lang Update
-    public static function update($id, $sure)
+    public function update($id, $sure)
     {
         if ($sure == 'sure') {
             $newlangid = Input('newlangid', 'int');
             DB::update('torrents', ['torrentlang'], ['torrentlang='], [$newlangid, $id]);
         DB::delete('torrentlang', ['id' => $id]);
-            Redirect(Url('admintorrentlang'), Txt("ACTION_COMPLETE"));
+            showMessage(Url('admintorrentlang'), LANG["ACTION_COMPLETE"]);
         } else {
-            Redirect(
+            showMessage(
                 Url('admintorrentlang'), 
-                "<form method='post' action='". URLROOT ."/admintorrentlang/delete/$id/sure'>
-            <label for='newlangid'>".Txt("MOVE_LANG")."</label>
+                "<form method='post' action='". CONFIG['URLROOT'] ."/admintorrentlang/delete/$id/sure'>
+            <label for='newlangid'>".LANG["MOVE_LANG"]."</label>
             <input id='newlangid' type='text' class='form-control' name='newlangid'>
-            <input type='submit' class='btn btn-sm ttbtn' value='". Txt("SUBMIT")."' />
+            <input type='submit' class='btn btn-sm ttbtn' value='". LANG["SUBMIT"]."' />
             </form>");
         }
     }

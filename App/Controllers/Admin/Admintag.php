@@ -2,39 +2,47 @@
 
 namespace App\Controllers\Admin;
 
-use App\Libs\User;
+use App\Libs\Controller;
 use App\Models\TagsModel;
 
 /*
 * Tags Controller
 */
-class Admintag
+class Admintag extends Controller
 {
+  public $current_user;
+
+  // Get Current User
+  public function __construct()
+  {
+      $this->current_user = $this->currentuser(2);
+      if ($this->current_user->class < CONFIG['_MODERATOR']) {
+          showMessage(CONFIG['URLROOT'], LANG["NO_PERMISSION"]);
+      }
+  }
+
   // Tag Default Page
   public function index()
   {
-    $USER = new User(_MODERATOR, 2);
     if (!empty($_POST)) {
-      TagsModel::insertOrUpdate();
+      (new TagsModel)->insertOrUpdate();
     } else {
       // Get Tag Data
-      $tags = TagsModel::getAll();
+      $tags = (new TagsModel)->getAll();
 
-      // Init Data
+      // Data For View
       $data = [
-        'V_title' => Txt('TAGS'),
-        'V_tags' => $tags,
-        'USER' => $USER
+        'page_title' => LANG['TAGS'],
+        'V_tags' => $tags
       ];
 
       // Load View
-      template('tag', $data, 'admin');
+      $this->view('tag', $data, 'admin');
     }
   }
 
   public function delete()
   {
-    $USER = new User(_MODERATOR, 2);
-    TagsModel::delete();
+    (new TagsModel)->delete();
   }
 }

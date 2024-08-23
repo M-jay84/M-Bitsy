@@ -3,16 +3,17 @@
 namespace App\Libs;
 
 use App\Libs\Ip;
-use App\Models\PermissionsModel;
-use App\Models\UsersModel;
+use App\Libs\DB;
 
 /*
 * Check Visitor
 */
 class Auth
 {
+    public $data = array();
+    
     // Check User/Visitor & Set $_SESSION
-    public static function user($class = 0, $force = 0, $autoclean = false)
+    public function user($force = 0, $autoclean = false)
     {
         // Check Ip
         self::ipBanned();
@@ -23,6 +24,8 @@ class Auth
 
         // Check Cookies
         if (strlen($cookie_password) != 60 || !is_numeric($cookie_id)) {
+            $_SESSION["id"] = 0;
+            $_SESSION['class'] = 0;
             self::isClosed($session_class);
             self::isLoggedIn($force);
             return;
@@ -47,13 +50,13 @@ class Auth
                 // User Role Or Group Role
                 $role = $user['role_id'] == 1 ? $user['group_role_id'] : $user['role_id'];
                 // Now Get Permission
-                $permission = PermissionsModel::fetchRow('*', ['permission_id ='], [$role]);
+                $permission = DB::fetchRow('permissions', '*', ['permission_id ='], [$role]);
                 foreach ($permission as $key => $value) {
                     $data[$key] = $value;
                 }
             } catch (\Exception $e) {
                 destroy_cookies();
-                Redirect(Url('logout'), Txt('AUTH_ISSUE'));
+                showMessage(Url('logout'), LANG['AUTH_ISSUE']);
             }
 
             // Site closeed
@@ -61,13 +64,10 @@ class Auth
 
             // Now Compare Checks
             if ($data['password'] != $_COOKIE['password']) {
-                Redirect(Url('logout'));
+                showMessage(Url('logout'), true);
             }
             if ($data['id'] != $_COOKIE['id']) {
-                Redirect(Url('logout'));
-            }
-            if ($class != 0 && $class > $data['class']) {
-                Redirect(Url(), Txt("NO_PERMISSION"));
+                showMessage(Url('logout'), true);
             }
 
             // User So Update & Set Session
@@ -75,26 +75,26 @@ class Auth
                 if ($data['passkey'] == '') {
                     $rand = array_sum(explode(" ", microtime()));
                     $passkey = md5($data['username'] . $rand . $data['secret'] . ($rand * mt_rand()));
-                    UsersModel::update(['passkey','last_access','ip','page'], ['id='], [$passkey, get_date_time(), Ip::getIP(), $_SERVER['REQUEST_URI'], $data["id"]]);
+                    DB::update('users', ['passkey','last_access','ip','page'], ['id='], [$passkey, get_date_time(), Ip::getIP(), $_SERVER['REQUEST_URI'], $data["id"]]);
                 } else {
-                    UsersModel::update(['last_access','ip','page'], ['id='], [get_date_time(), Ip::getIP(), $_SERVER['REQUEST_URI'], $data["id"]]);
+                    DB::update('users', ['last_access','ip','page'], ['id='], [get_date_time(), Ip::getIP(), $_SERVER['REQUEST_URI'], $data["id"]]);
                 }
-				$GLOBALS["CURUSER"] = $data;
-                $_SESSION['stylesheet'] = $data['stylesheet'];
-                $_SESSION['language'] = $data['language'];
-                $_SESSION['tzoffset'] = $data['tzoffset'];
-                $_SESSION['id'] = $data['id'];
-                $_SESSION['class'] = $data['class'];
-                $_SESSION['privacy'] = $data['privacy'];
-                $_SESSION['username'] = $data['username'];
-                $_SESSION['avatar'] = $data['avatar'];
-                unset($data);
+				$_SESSION = $data;
+                $_SESSION['loggedin'] = true;
+                $data['loggedin'] = true;
+                if ($data['class'] >= CONFIG['_MODERATOR']) {
+                    $data['isStaff'] = true;
+                }
+                //$this->data = $data;
+                //unset($data);
             }
 
             // Run Cleanup
             if ($autoclean) {
                 Cleanup::autoClean();
             }
+
+            return (object) $data;
         }
     }
 
@@ -114,11 +114,11 @@ class Auth
         // If force 0 guest view, force 1 use config CONFIG['MEMBERSONLY'], force 2 always hidden from guest
         if ($force == 1 && CONFIG['MEMBERSONLY']) {
             if (!$_SESSION['id']) {
-                Redirect(Url('logout'));
+                showMessage(Url('logout'), true);
             }
         } elseif ($force == 2) {
             if (!$_SESSION['id']) {
-                Redirect(Url('login'));
+                showMessage(Url('login'), true);
             }
         }
     }
@@ -127,12 +127,12 @@ class Auth
     public static function isClosed($class = false)
     {
         if (!CONFIG['SITE_ONLINE']) {
-            if ($class < _MODERATOR) {
+            if ($class < CONFIG['_MODERATOR']) {
                 ob_start();
                 ob_clean();
-                require_once "assets/themes/" . ($USER->has('stylesheet') ?: CONFIG['DEFAULTTHEME']) . "/header.php";
+                require_once "assets/themes/" . ($_SESSION['stylesheet'] ?: CONFIG['DEFAULTTHEME']) . "/header.php";
                 echo '<div class="alert ttalert"><center>' . stripslashes(CONFIG['OFFLINEMSG']) . '</center></div>';
-                require_once "assets/themes/" . ($USER->has('stylesheet') ?: CONFIG['DEFAULTTHEME']) . "/footer.php";
+                require_once "assets/themes/" . ($_SESSION['stylesheet'] ?: CONFIG['DEFAULTTHEME']) . "/footer.php";
                 die();
             } else {
                 echo '<center>' . stripslashes(CONFIG['OFFLINEMSG']) . '</center>';

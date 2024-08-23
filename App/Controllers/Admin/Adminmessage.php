@@ -2,43 +2,54 @@
 
 namespace App\Controllers\Admin;
 
-use App\Libs\User;
+use App\Libs\Controller;
 use App\Models\MessagesModel;
 
 /*
 * Message Controller
 */
-class Adminmessage 
+class Adminmessage extends Controller
 {
+    public $current_user;
+
+    // Get Current User
+    public function __construct()
+    {
+        $this->current_user = $this->currentuser(2);
+        if ($this->current_user->class < CONFIG['_MODERATOR']) {
+            showMessage(CONFIG['URLROOT'], LANG["NO_PERMISSION"]);
+        }
+    }
+
     // Message Default Page
     public function index()
     {
-        $USER = new User(_MODERATOR, 2);
+    
         if (!empty($_POST)) {
-            MessagesModel::multiPM();
+            (new MessagesModel)->multiPM($this->current_user->id);
         } else {
             // Get Messages
-            $messages = MessagesModel::getAll();
+            $messages = (new MessagesModel)->getAll();
        
-            // Init Data
+            // Data For View
             $data = [
-                'V_title' => Txt("MESSAGE"),
+                'page_title' => LANG["MESSAGE"],
                 'V_messages' => $messages['res'],
                 'V_pager' => $messages['pager'],
                 'V_groups' => $messages['groups'],
-                'USER' => $USER
+            'current_user' => $this->current_user
             ];
        
             // Load View
-            template('message', $data, 'admin');
+            $this->view('message', $data, 'admin');
         }
     }
 
     // Message Form Submit
     public function delete()
     {
-        $USER = new User(_MODERATOR, 2);
-        MessagesModel::deleteByIds();
+    
+        (new MessagesModel)->deleteByIds();
     }
 
 }

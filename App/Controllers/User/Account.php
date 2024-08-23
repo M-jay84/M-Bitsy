@@ -2,46 +2,56 @@
 
 namespace App\Controllers\User;
 
-use App\Libs\User;
+use App\Libs\Controller;
 use App\Models\AccountsModel;
 
 /*
 * Accout Controller
 */
-class Account 
+class Account extends Controller
 {
+    public $current_user;
+
+    // Get Current User
+    public function __construct()
+    {
+        $this->current_user = $this->currentuser(2);
+    }
+
     public function index()
     {
-        Redirect(Url(), Txt("NO_PERMISSION"));
+        showMessage(CONFIG['URLROOT'], LANG["NO_PERMISSION"]);
     }
 
     // Profile Avatar Upload Submit
     public function avatar($id)
     {
-        $USER = new User(0, 2);
-        if ($USER->isStaff($id)) {
-            Redirect(Url(), Txt("NO_PERMISSION"));
+    
+        if ($this->current_user->class < CONFIG['_MODERATOR'] or $this->current_user->id != $id) {
+            showMessage(Url(), LANG["NO_PERMISSION"]);
         }
 
         if (isset($_FILES["upfile"])) {
-            AccountsModel::addavatar($id);
+            $data['current_user'] = $this->current_user;
+            $data['userid'] = $id;
+            (new AccountsModel)->addavatar($id);
         } else {
-            Redirect(Url("profile/$id"), Txt("ACTION_FAILED"));
+            showMessage(Url("profile/$id"), LANG["ACTION_FAILED"]);
         }
     }
 
     // Profile Change Password Submit
     public function changepassword($id)
     {
-        $USER = new User(0, 2);
-        if ($USER->isStaff($id)) {
-            Redirect(Url(), Txt("NO_PERMISSION"));
+    
+        if ($this->current_user->class < CONFIG['_MODERATOR'] or $this->current_user->id != $id) {
+            showMessage(Url(), LANG["NO_PERMISSION"]);
         }
 
         if (!empty($_POST)) {
-            AccountsModel::submitPassword($id);
+            (new AccountsModel)->submitPassword($id);
         } else {
-            Redirect(Url("profile/$id"), Txt("MISSING_FORM_DATA"));
+            showMessage(Url("profile/$id"), LANG["MISSING_FORM_DATA"]);
         }
 
     }
@@ -49,15 +59,17 @@ class Account
     // Profile Email Reset Submit
     public function changeemail($id)
     {
-        $USER = new User(0, 2);
-        if ($USER->isStaff($id)) {
-            Redirect(Url(), Txt("NO_PERMISSION"));
+    
+        if ($this->current_user->class < CONFIG['_MODERATOR'] or $this->current_user->id != $id) {
+            showMessage(Url(), LANG["NO_PERMISSION"]);
         }
 
         if (!empty($_POST)) {
-            AccountsModel::changeemail($id);
+            $data['current_user'] = $this->current_user;
+            $data['userid'] = $id;
+            (new AccountsModel)->changeemail($data);
         } else {
-            Redirect(Url("profile/$id"), Txt("MISSING_FORM_DATA"));
+            showMessage(Url("profile/$id"), LANG["MISSING_FORM_DATA"]);
         }
     }
 

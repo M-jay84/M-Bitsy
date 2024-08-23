@@ -1,20 +1,20 @@
-<?php block_begin($V_title) ?>
+<?php block_begin($page_title) ?>
 <p class="text-center">
-    <a type="button" class="model_form ttbtn btn-sm" data-bs-toggle="modal" data-bs-target="#groupModal"><?= Txt("ADD") ?></a>
+    <a type="button" class="model_form ttbtn btn-sm" data-bs-toggle="modal" data-bs-target="#groupModal"><?= LANG["ADD"] ?></a>
 <p>
 <div class='table-responsive p-3'>
     <table class='table table-striped'>
         <thead>
             <tr>
-                <th><?= Txt("PERMISSION_ID") ?></th>
-                <th><?= Txt("NAME") ?></th>
-                <th><?= Txt("TORRENTS") ?><br><?= Txt("VIEW_EDIT_DEL") ?></th>
-                <th><?= Txt("MEMBERS") ?><br><?= Txt("VIEW_EDIT_DEL") ?></th>
-                <th><?= Txt("NEWS") ?><br><?= Txt("VIEW_EDIT_DEL") ?></th>
-                <th><?= Txt("FORUM") ?><br><?= Txt("VIEW_EDIT_DEL") ?></th>
-                <th><?= Txt("UPLOAD") ?></th>
-                <th><?= Txt("DOWNLOAD") ?></th>
-                <th><?= Txt("DEL") ?></th>
+                <th><?= LANG["PERMISSION_ID"] ?></th>
+                <th><?= LANG["NAME"] ?></th>
+                <th><?= LANG["TORRENTS"] ?><br><?= LANG["VIEW_EDIT_DEL"] ?></th>
+                <th><?= LANG["MEMBERS"] ?><br><?= LANG["VIEW_EDIT_DEL"] ?></th>
+                <th><?= LANG["NEWS"] ?><br><?= LANG["VIEW_EDIT_DEL"] ?></th>
+                <th><?= LANG["FORUM"] ?><br><?= LANG["VIEW_EDIT_DEL"] ?></th>
+                <th><?= LANG["UPLOAD"] ?></th>
+                <th><?= LANG["DOWNLOAD"] ?></th>
+                <th><?= LANG["DEL"] ?></th>
             </tr>
         </thead>
         <tbody>
@@ -101,82 +101,82 @@
             <div class="modal-content">
                 <div class="modal-body">
                     <input type='hidden' name='permission_id' id="permission_id" />
-                    <?= Txt("NAME") ?>
+                    <?= LANG["NAME"] ?>
                     <input type="text" name="permission_name" id="permission_name" class="form-control fullwidth" /><br>
-                    <?= Txt("VIEW_TORRENTS") ?>
+                    <?= LANG["VIEW_TORRENTS"] ?>
                     <select name="view_torrents" id="view_torrents" class='form-select'>
-                        <option name="view_torrents" id="view_torrents" value="yes"><?= Txt("YES") ?></option>
-                        <option name="view_torrents" id="view_torrents" value="no"><?= Txt("NO") ?></option>
+                        <option name="view_torrents" id="view_torrents" value="yes"><?= LANG["YES"] ?></option>
+                        <option name="view_torrents" id="view_torrents" value="no"><?= LANG["NO"] ?></option>
                     </select><br>
-                    <?= Txt("EDIT_TORRENTS") ?>
+                    <?= LANG["EDIT_TORRENTS"] ?>
                     <select name="edit_torrents" id="edit_torrents" class='form-select'>
-                        <option name="edit_torrents" id="edit_torrents" value="yes"><?= Txt("YES") ?></option>
-                        <option name="edit_torrents" id="edit_torrents" value="no"><?= Txt("NO") ?></option>
+                        <option name="edit_torrents" id="edit_torrents" value="yes"><?= LANG["YES"] ?></option>
+                        <option name="edit_torrents" id="edit_torrents" value="no"><?= LANG["NO"] ?></option>
                     </select><br>
-                    <?= Txt("DELETE_TORRENTS") ?>
+                    <?= LANG["DELETE_TORRENTS"] ?>
                     <select name="delete_torrents" id="delete_torrents" class='form-select'>
-                        <option name="delete_torrents" id="delete_torrents" value="yes"><?= Txt("YES") ?></option>
-                        <option name="delete_torrents" id="delete_torrents" value="no"><?= Txt("NO") ?></option>
+                        <option name="delete_torrents" id="delete_torrents" value="yes"><?= LANG["YES"] ?></option>
+                        <option name="delete_torrents" id="delete_torrents" value="no"><?= LANG["NO"] ?></option>
                     </select><br>
-                    <?= Txt("VIEW_USERS") ?>
+                    <?= LANG["VIEW_USERS"] ?>
                     <select name="view_users" id="view_users" class='form-select'>
-                        <option name="view_users" id="view_users" value="yes"><?= Txt("YES") ?></option>
-                        <option name="view_users" id="view_users" value="no"><?= Txt("NO") ?></option>
+                        <option name="view_users" id="view_users" value="yes"><?= LANG["YES"] ?></option>
+                        <option name="view_users" id="view_users" value="no"><?= LANG["NO"] ?></option>
                     </select><br>
-                    <?= Txt("EDIT_USERS") ?>
+                    <?= LANG["EDIT_USERS"] ?>
                     <select name="edit_users" id="edit_users" class='form-select'>
-                        <option name="edit_users" id="edit_users" value="yes"><?= Txt("YES") ?></option>
-                        <option name="edit_users" id="edit_users" value="no"><?= Txt("NO") ?></option>
+                        <option name="edit_users" id="edit_users" value="yes"><?= LANG["YES"] ?></option>
+                        <option name="edit_users" id="edit_users" value="no"><?= LANG["NO"] ?></option>
                     </select><br>
-                    <?= Txt("DELETE_USERS") ?>
+                    <?= LANG["DELETE_USERS"] ?>
                     <select name="delete_users" id="delete_users" class='form-select'>
-                        <option name="delete_users" id="delete_users" value="yes"><?= Txt("YES") ?></option>
-                        <option name="delete_users" id="delete_users" value="no"><?= Txt("NO") ?></option>
+                        <option name="delete_users" id="delete_users" value="yes"><?= LANG["YES"] ?></option>
+                        <option name="delete_users" id="delete_users" value="no"><?= LANG["NO"] ?></option>
                     </select><br>
-                    <?= Txt("VIEW_NEWS") ?>
+                    <?= LANG["VIEW_NEWS"] ?>
                     <select name="view_news" id="view_news" class='form-select'>
-                        <option name="view_news" id="view_news" value="yes"><?= Txt("YES") ?></option>
-                        <option name="View news:" id="view_news" value="no"><?= Txt("NO") ?></option>
+                        <option name="view_news" id="view_news" value="yes"><?= LANG["YES"] ?></option>
+                        <option name="View news:" id="view_news" value="no"><?= LANG["NO"] ?></option>
                     </select><br>
-                    <?= Txt("EDIT_NEWS") ?>
+                    <?= LANG["EDIT_NEWS"] ?>
                     <select name="edit_news" id="edit_news" class='form-select'>
-                        <option name="edit_news" id="edit_news" value="yes"><?= Txt("YES"); ?></option>
-                        <option name="edit_news" id="edit_news" value="no"><?= Txt("NO"); ?></option>
+                        <option name="edit_news" id="edit_news" value="yes"><?= LANG["YES"]; ?></option>
+                        <option name="edit_news" id="edit_news" value="no"><?= LANG["NO"]; ?></option>
                     </select><br>
-                    <?= Txt("DELETE_NEWS") ?>
+                    <?= LANG["DELETE_NEWS"] ?>
                     <select name="delete_news" id="delete_news" class='form-select'>
-                        <option name="delete_news" id="delete_news" value="yes"><?= Txt("YES"); ?></option>
-                        <option name="delete_news" id="delete_news" value="no"><?= Txt("NO"); ?></option>
+                        <option name="delete_news" id="delete_news" value="yes"><?= LANG["YES"]; ?></option>
+                        <option name="delete_news" id="delete_news" value="no"><?= LANG["NO"]; ?></option>
                     </select><br>
-                    <?= Txt("VIEW_FORUM") ?>
+                    <?= LANG["VIEW_FORUM"] ?>
                     <select name="view_forum" id="view_forum" class='form-select'>
-                        <option name="view_forum" id="view_forum" value="yes"><?= Txt("YES") ?></option>
-                        <option name="view_forum" id="view_forum" value="no"><?= Txt("NO") ?></option>
+                        <option name="view_forum" id="view_forum" value="yes"><?= LANG["YES"] ?></option>
+                        <option name="view_forum" id="view_forum" value="no"><?= LANG["NO"] ?></option>
                     </select><br>
-                    <?= Txt("EDIT_FORUM") ?>
+                    <?= LANG["EDIT_FORUM"] ?>
                     <select name="edit_forum" id="edit_forum" class='form-select'>
-                        <option name="edit_forum" id="edit_forum" value="yes"><?= Txt("YES") ?></option>
-                        <option name="edit_forum" id="edit_forum" value="no"><?= Txt("NO") ?></option>
+                        <option name="edit_forum" id="edit_forum" value="yes"><?= LANG["YES"] ?></option>
+                        <option name="edit_forum" id="edit_forum" value="no"><?= LANG["NO"] ?></option>
                     </select><br>
-                    <?= Txt("DELETE_FORUM") ?>
+                    <?= LANG["DELETE_FORUM"] ?>
                     <select name="delete_forum" id="delete_forum" class='form-select'>
-                        <option name="delete_forum" id="delete_forum" value="yes"><?= Txt("YES") ?></option>
-                        <option name="" id="delete_forum" value="no"><?= Txt("NO") ?></option>
+                        <option name="delete_forum" id="delete_forum" value="yes"><?= LANG["YES"] ?></option>
+                        <option name="" id="delete_forum" value="no"><?= LANG["NO"] ?></option>
                     </select><br>
-                    <?= Txt("CAN_UPLOAD") ?>
+                    <?= LANG["CAN_UPLOAD"] ?>
                     <select name="can_upload" id="can_upload" class='form-select'>
-                        <option name="can_upload" id="can_upload" value="yes"><?= Txt("YES") ?></option>
-                        <option name="can_upload" id="can_upload" value="no"><?= Txt("NO") ?></option>
+                        <option name="can_upload" id="can_upload" value="yes"><?= LANG["YES"] ?></option>
+                        <option name="can_upload" id="can_upload" value="no"><?= LANG["NO"] ?></option>
                     </select><br>
-                    <?= Txt("CAN_DOWNLOAD") ?>
+                    <?= LANG["CAN_DOWNLOAD"] ?>
                     <select name="can_download" id="can_download" class='form-select'>
-                        <option name="can_download" id="can_download" value="yes"><?= Txt("YES") ?></option>
-                        <option name="can_download" id="can_download" value="no"><?= Txt("NO") ?></option>
+                        <option name="can_download" id="can_download" value="yes"><?= LANG["YES"] ?></option>
+                        <option name="can_download" id="can_download" value="no"><?= LANG["NO"] ?></option>
                     </select>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-sm ttbtn" data-bs-dismiss="modal"><?= Txt("CLOSE") ?></button>
-                    <button type="submit" class="btn btn-sm ttbtn"><?= Txt("SAVE") ?></button>
+                    <button type="button" class="btn btn-sm ttbtn" data-bs-dismiss="modal"><?= LANG['CLOSE'] ?></button>
+                    <button type="submit" class="btn btn-sm ttbtn"><?= LANG["SAVE"] ?></button>
                 </div>
             </div>
         </div>

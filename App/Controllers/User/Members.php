@@ -2,37 +2,44 @@
 
 namespace App\Controllers\User;
 
-use App\Libs\User;
+use App\Libs\Controller;
 use App\Models\UsersModel;
 
 /*
 * Members Controller
 */
-class Members 
+class Members extends Controller
 {
+    public $current_user;
+
+    // Get Current User
+    public function __construct()
+    {
+        $this->current_user = $this->currentuser(2);
+    }
+
     // Members Page
     public function index()
     {
-        $USER = new User(0, 2);
+    
         // Check User
-        if (!$USER->permission('view_users', 0)) {
-            Redirect(Url(), Txt("NO_USER_VIEW"));
+        if ($this->current_user->view_users != "yes" && $this->current_user->class <= CONFIG['_MODERATOR']) {
+            showMessage(Url(), LANG["NO_USER_VIEW"]);
         }
 
         // Search Users
         $results = UsersModel::getMembers();
 
-        // Init Data
+        // Data For View
         $data = [
-            'V_title' => 'Members',
+            'page_title' => 'Members',
             'V_groups' => $results['groups'],
             'V_users' => $results['array'],
-            'V_pager' => $results['pager'],
-            'USER' => $USER
+            'V_pager' => $results['pager']
         ];
 
         // Load View
-        template('member', $data, 'user');
+        $this->view('member', $data, 'user');
     }
 
 }

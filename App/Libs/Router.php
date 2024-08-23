@@ -31,7 +31,7 @@ class Router
             $classname = $this->currentController;
             $namespace = "App\\Controllers\\Admin\\$classname";
         } else {
-            Redirect(Url(), Txt('Page not found'));
+            showMessage(Url(), LANG['Page not found']);
         }
         
         // Instantiate the current controller

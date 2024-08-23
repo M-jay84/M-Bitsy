@@ -11,7 +11,7 @@ use App\Libs\Ip;
 class GuestsModel
 {
     // Add Guest
-    public static function add()
+    public function add()
     {
         $time = gmtime();
         DB::run(
@@ -22,7 +22,7 @@ class GuestsModel
     }
 
     // Delete Guest
-    public static function clean()
+    public function clean()
     {
         $past = (gmtime() - 2400);
         DB::run("DELETE FROM `guests` WHERE `time` < ?", [$past]);

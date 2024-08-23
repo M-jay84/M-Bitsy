@@ -2,7 +2,7 @@
 
 namespace App\Controllers\User;
 
-use App\Libs\User;
+use App\Libs\Controller;
 use App\Libs\Ip;
 use App\Models\AccountsModel;
 use App\Models\CountriesModel;
@@ -10,17 +10,22 @@ use App\Models\CountriesModel;
 /*
 * Signup Controller
 */
-class Signup 
+class Signup extends Controller
 {
+    public $current_user;
+
+    // Get Current User
+    public function __construct()
+    {
+        $this->current_user = $this->currentuser(0);
+    }
+
     // Verify User/Guest
     public function index()
     {
-        // Verify User/Guest
-        $USER = new User(0, 0);
-        
         // Verify User Already Logged In
-        if ($USER->has('id')) {
-            Redirect(Url(), Txt("ALREADY_LOGGED"));
+        if ($this->current_user->id) {
+            showMessage(Url(), LANG["ALREADY_LOGGED"]);
         }
 
         // Check IP
@@ -30,17 +35,16 @@ class Signup
 
         // Check Input Else Return To Form
         if (!empty($_POST) && csrf_check()) {
-            AccountsModel::signupUser();
+            (new AccountsModel)->signupUser();
         } else {
-            $invite_row = AccountsModel::checkinvite();
+            $invite_row = (new AccountsModel)->checkinvite();
         
             $data = [
-                'V_title' => Txt("SIGNUP"),
+                'page_title' => LANG["SIGNUP"],
                 'V_invite' => $invite_row,
-                'V_country' => CountriesModel::dropdown(),
-                'USER' => $USER
+                'V_country' => (new CountriesModel)->dropdown()
             ];
-            template('signup', $data, 'user');
+            $this->view('signup', $data, 'user');
         }
     }
 

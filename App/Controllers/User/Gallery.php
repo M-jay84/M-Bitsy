@@ -2,26 +2,33 @@
 
 namespace App\Controllers\User;
 
-use App\Libs\User;
+use App\Libs\Controller;
 use App\Models\UsersModel;
 
 /*
 * Gallery Controller
 */
-class Gallery 
+class Gallery extends Controller
 {
+    public $current_user;
+
+    // Get Current User
+    public function __construct()
+    {
+        $this->current_user = $this->currentuser(1);
+    }
+
     // No Default Page
     public function index()
     {
-        Redirect(Url(), Txt("NOTHING_FOUND"));
+        showMessage(Url(), LANG["NOTHING_FOUND"]);
     }
 
     // View Image Page
     public function images($file_hash)
     {
-        $USER = new User(0, 1);
         // Open Image
-        $view_image = UPLOADDIR . "/attachment/$file_hash.data";
+        $view_image = CONFIG['UPLOADDIR'] . "/attachment/$file_hash.data";
         if (file_exists($view_image)) {
             echo '<img src="'. data_uri($view_image, $file_hash) .'">';
         }
@@ -30,20 +37,18 @@ class Gallery
     // View Avatars Page
     public function avatar()
     {
-        $USER = new User(0, 1);
         // Get Data
         $avatars = UsersModel::avatarPagination();
 
-        // Init Data
+        // Data For View
         $data = [
-            'V_title' => Txt("AVATARS"),
+            'page_title' => LANG["AVATARS"],
             'V_avatars' => $avatars['stmt'],
-            'V_pager' => $avatars['pager'],
-            'USER' => $USER
+            'V_pager' => $avatars['pager']
         ];
 
         // Load View
-        template('gallery', $data, 'user');
+        $this->view('gallery', $data, 'user');
     }
 
 }

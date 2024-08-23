@@ -1,23 +1,18 @@
 <?php
 
-use App\Models\CountriesModel;
-use App\Models\ForumsModel;
-use App\Models\PostsModel;
-use App\Models\ReadModel;
-use App\Models\TopicsModel;
-use App\Models\UsersModel;
+use App\Libs\DB;
 
 // Setup Forum Header
 function forumheader($location = '')
 {
     echo "<div class='rounded p-2'>
-    <i class='fa fa-question' title='Help'></i>&nbsp;<a href='" . URLROOT . "/faq'>" . Txt("FAQ") . "</a>&nbsp; &nbsp;&nbsp;
-    <i class='fa fa-search' title='Search'></i>&nbsp;<a href='" . URLROOT . "/forum/search'>" . Txt("SEARCH") . "</a>&nbsp; &nbsp;
-    <b>" . Txt("FORUM_CONTROL") . "</b>
-    &middot; <a href='" . URLROOT . "/forum/viewunread'>" . Txt("FORUM_NEW_POSTS") . "</a>
-    &middot; <a href='" . URLROOT . "/forum/viewunread/true'>" . Txt("FORUM_MARK_READ") . "</a>
+    <i class='fa fa-question' title='Help'></i>&nbsp;<a href='" . CONFIG['URLROOT'] . "/faq'>" . LANG["FAQ"] . "</a>&nbsp; &nbsp;&nbsp;
+    <i class='fa fa-search' title='Search'></i>&nbsp;<a href='" . CONFIG['URLROOT'] . "/forum/search'>" . LANG["SEARCH"] . "</a>&nbsp; &nbsp;
+    <b>" . LANG["FORUM_CONTROL"] . "</b>
+    &middot; <a href='" . CONFIG['URLROOT'] . "/forum/viewunread'>" . LANG["FORUM_NEW_POSTS"] . "</a>
+    &middot; <a href='" . CONFIG['URLROOT'] . "/forum/viewunread/true'>" . LANG["FORUM_MARK_READ"] . "</a>
     </div><br />";
-    print("<div class='rounded p-1 g-4'>" . Txt("YOU_ARE_IN") . ": &nbsp;<a href='" . URLROOT . "/forum'>" . Txt("FORUM") . "</a> <b style='vertical-align:middle'>/ $location</b></div><br>");
+    print("<div class='rounded p-1 g-4'>" . LANG["YOU_ARE_IN"] . ": &nbsp;<a href='" . CONFIG['URLROOT'] . "/forum'>" . LANG["FORUM"] . "</a> <b style='vertical-align:middle'>/ $location</b></div><br>");
 }
 
 // Mark all forums as read
@@ -27,16 +22,16 @@ function catch_up()
         return;
     }
     $userid = $_SESSION['id'];
-    $res = TopicsModel::fetchAll('id, lastpost', '');
+    $res = DB::fetchAll('forum_topics', 'forum_topics', 'id, lastpost', '');
     foreach ($res as $arr) {
         $topicid = $arr["id"];
         $postid = $arr["lastpost"];
-        $r = ReadModel::fetchRow('id,lastpostread', ['userid =', 'topicid ='], [$userid,$topicid]);
+        $r = DB::fetchRow('forum_readposts', 'id,lastpostread', ['userid =', 'topicid ='], [$userid,$topicid]);
         if ($r->rowCount() == 0) {
-            ReadModel::insert(['userid' => $userid, 'topicid' => $topicid, 'lastpostread' => $postid]);
+            DB::insert('forum_readposts', ['userid' => $userid, 'topicid' => $topicid, 'lastpostread' => $postid]);
         } else {
             if ($r["lastpostread"] < $postid) {
-                ReadModel::update(['lastpostread'], ['id='], [$postid, $r["id"]]);
+                DB::update('forum_readposts', ['lastpostread'], ['id='], [$postid, $r["id"]]);
             }
         }
     }
@@ -45,7 +40,7 @@ function catch_up()
 // Returns The ID Of A Last Post In A Forum Or Otherwise 0
 function get_forum_last_post($forumid)
 {
-    $res = TopicsModel::fetchColumn('lastpost', ['forumid ='], [$forumid], 'ORDER BY lastpost DESC LIMIT 1');
+    $res = DB::fetchColumn('forum_topics', 'lastpost', ['forumid ='], [$forumid], 'ORDER BY lastpost DESC LIMIT 1');
     if ($res) {
         return $res;
     } else {
@@ -71,23 +66,23 @@ function latestforumposts($sub_id = 0)
             <tbody>
                 <?php
                 // HERE GOES THE QUERY TO RETRIEVE DATA FROM THE DATABASE AND WE START LOOPING ///
-                $for = TopicsModel::fetchAll('*', '', 'ORDER BY lastpost DESC LIMIT 8');
+                $for = DB::fetchAll('forum_topics', '*', '', 'ORDER BY lastpost DESC LIMIT 8');
                 if ($for->rowCount() == 0) {
                     print("<b>No Latest Topics</b>");
                 }
                 foreach ($for as $topicarr) {
                     // Set minclass
-                    $forum = ForumsModel::fetchRow('name,minclassread,guest_read', ['id ='], [$topicarr['forumid']]);
+                    $forum = DB::fetchRow('forum_forums', 'name,minclassread,guest_read', ['id ='], [$topicarr['forumid']]);
                     if ($forum && $_SESSION['class'] >= $forum["minclassread"] || $forum["guest_read"] == "yes") {
                         
-                        $posts = PostsModel::fetchColumn('count(id)', ['topicid ='], [$topicarr["id"]]);
+                        $posts = DB::fetchColumn('forum_posts', 'count(id)', ['topicid ='], [$topicarr["id"]]);
                         $replies = max(0, $posts - 1);                    
-                        $arr = PostsModel::fetchRow('added,userid', ['topicid ='], [$topicarr["id"]], 'ORDER BY id DESC LIMIT 1');
+                        $arr = DB::fetchRow('forum_posts', 'added,userid', ['topicid ='], [$topicarr["id"]], 'ORDER BY id DESC LIMIT 1');
                         ?>
                         
                         <tr>
                             <td>
-                                <b><a href='<?= URLROOT ?>/post/<?= $topicarr["id"] ?>/last/#last'><?= stripslashes(encodehtml($topicarr["subject"])) ?></a></b>
+                                <b><a href='<?= CONFIG['URLROOT'] ?>/post/<?= $topicarr["id"] ?>/last/#last'><?= stripslashes(encodehtml($topicarr["subject"])) ?></a></b>
                             </td>
                             <td>
                                 <?= $replies ?>
@@ -101,7 +96,7 @@ function latestforumposts($sub_id = 0)
                                 </b>
                             </td>
                             <td>
-                                <small><b><a href='<?= URLROOT ?>/post/<?= $topicarr["id"] ?>/last/#last'><?= stripslashes(encodehtml($topicarr["subject"])) ?></a></b>&nbsp;
+                                <small><b><a href='<?= CONFIG['URLROOT'] ?>/post/<?= $topicarr["id"] ?>/last/#last'><?= stripslashes(encodehtml($topicarr["subject"])) ?></a></b>&nbsp;
                                     by&nbsp;<b><?= coloredname($arr["userid"]) ?></b></small><br><small style='white-space: nowrap'><b><?= utc_to_tz($arr["added"]) ?></b></small>
                             </td>
                         <tr>
@@ -117,20 +112,20 @@ function latestforumposts($sub_id = 0)
 // Get last post info in a array return img & lastpost
 function lastpostdetails($lastpostid)
 {
-    $post_res = PostsModel::fetchRow('added,topicid,userid', ['id ='], [$lastpostid]);
+    $post_res = DB::fetchRow('forum_posts', 'added,topicid,userid', ['id ='], [$lastpostid]);
     if ($post_res) {
-        $post_arr = $post_res or Redirect(Url('forum'), "Bad forum last_post");
+        $post_arr = $post_res or showMessage(Url('forum'), "Bad forum last_post");
         $lastposterid = $post_arr["userid"];
         $lastpostdate = utc_to_tz($post_arr["added"]);
         $lasttopicid = $post_arr["topicid"];
         $lastposter = coloredname($lastposterid);
-        $topic_arr = TopicsModel::fetchRow('subject', ['id ='], [$lasttopicid]);
+        $topic_arr = DB::fetchRow('forum_topics', 'subject', ['id ='], [$lasttopicid]);
         $lasttopic = stripslashes(htmlspecialchars($topic_arr['subject']));
         //cut last topic
         $latestleng = 10;
-        $lastpost = "<small><a href='" . URLROOT . "/post/$lasttopicid/last/#last'><b>" . CutName($lasttopic, $latestleng) . "</b></a> by <a href='" . URLROOT . "/profile/$lastposterid'><b>$lastposter</b></a><br />$lastpostdate</small>";
+        $lastpost = "<small><a href='" . CONFIG['URLROOT'] . "/post/$lasttopicid/last/#last'><b>" . CutName($lasttopic, $latestleng) . "</b></a> by <a href='" . CONFIG['URLROOT'] . "/profile/$lastposterid'><b>$lastposter</b></a><br />$lastpostdate</small>";
         if ($_SESSION['id']) {
-            $a = ReadModel::fetchColumn('lastpostread', ['userid =', 'topicid ='], [$_SESSION['id'],$lasttopicid]);
+            $a = DB::fetchColumn('forum_readposts', 'lastpostread', ['userid =', 'topicid ='], [$_SESSION['id'],$lasttopicid]);
         }
         //define the images for new posts or not on index
         if ($a && $a == $lastpostid) {
@@ -155,47 +150,47 @@ function modoptions($topicid, $subject, $forumid, $locked, $sticky)
 {   
     ?>
     <div class='tt_blockcenter rounded p-2'> 
-        <p class='text-center'><?= Txt("FORUMS_MOD_OPTIONS") ?></p>
-        <form method='post' action='<?= URLROOT ?>/topic/rename/<?= $topicid ?>'>
-           <p class='text-center'><?= Txt("RENAME") ?></p>
+        <p class='text-center'><?= LANG["FORUMS_MOD_OPTIONS"] ?></p>
+        <form method='post' action='<?= CONFIG['URLROOT'] ?>/topic/rename/<?= $topicid ?>'>
+           <p class='text-center'><?= LANG["RENAME"] ?></p>
            <input class='form-control fullwidth' type='text' name='subject' value='<?= stripslashes(htmlspecialchars($subject)) ?>' />
-           <p class='text-center'><input type='submit'class='btn btn-sm ttbtn' value='<?= Txt("SUBMIT") ?>' /></p>
+           <p class='text-center'><input type='submit'class='btn btn-sm ttbtn' value='<?= LANG["SUBMIT"] ?>' /></p>
         </form><br>
-        <form method='post' action='<?= URLROOT ?>/topic/move/<?= $topicid ?>'>
-           <p class='text-center'><?= Txt("MOVE") ?></p>
+        <form method='post' action='<?= CONFIG['URLROOT'] ?>/topic/move/<?= $topicid ?>'>
+           <p class='text-center'><?= LANG["MOVE"] ?></p>
             <select name='forumid' class='form-select'>
-                <?php $res = ForumsModel::fetchAll('id,name,minclasswrite', '', 'ORDER BY name'); ?>
+                <?php $res = DB::fetchAll('forum_forums', 'id,name,minclasswrite', '', 'ORDER BY name'); ?>
                 <?php foreach ($res as $arr) : ?>
                     <?php if ($arr["id"] != $forumid && $_SESSION['class'] >= $arr["minclasswrite"]) : ?>
                        <option value='<?= $arr["id"] ?>'><?= $arr["name"] ?></option>
                     <?php endif; ?>
                <?php endforeach; ?>
             </select>
-            <p class='text-center'><input type='submit'class='btn btn-sm ttbtn' value='<?= Txt("SUBMIT") ?>' /></p>
+            <p class='text-center'><input type='submit'class='btn btn-sm ttbtn' value='<?= LANG["SUBMIT"] ?>' /></p>
         </form>
 
     <?php
     print("<p class='text-center'>\n");
     if ($locked) {
-        print(Txt("LOCKED") . ": <a href='" . URLROOT . "/topic/action/$forumid/$topicid/unlock' title='Unlock'><i class='fa fa-unlock tticon-red' title='UnLock Topic'></i></a>\n");
+        print(LANG["LOCKED"] . ": <a href='" . CONFIG['URLROOT'] . "/topic/action/$forumid/$topicid/unlock' title='Unlock'><i class='fa fa-unlock tticon-red' title='UnLock Topic'></i></a>\n");
     } else {
-        print(Txt("LOCKED") . ": <a href='" . URLROOT . "/topic/action/$forumid/$topicid/lock' title='Lock'><i class='fa fa-lock tticon' title='Lock Topic'></i></a>\n");
+        print(LANG["LOCKED"] . ": <a href='" . CONFIG['URLROOT'] . "/topic/action/$forumid/$topicid/lock' title='Lock'><i class='fa fa-lock tticon' title='Lock Topic'></i></a>\n");
     }
-    print("Delete Entire Topic: <a href='" . URLROOT . "/topic/delete/$topicid' title='Delete'><i class='fa fa-trash tticon-red' title='Delete Topic'></i></a>\n");
+    print("Delete Entire Topic: <a href='" . CONFIG['URLROOT'] . "/topic/delete/$topicid' title='Delete'><i class='fa fa-trash tticon-red' title='Delete Topic'></i></a>\n");
     if ($sticky) {
-        print(Txt("STICKY") . ": <a href='" . URLROOT . "/topic/action/$forumid/$topicid/unsticky' title='UnStick'><i class='fa fa-exclamation tticon-red' title='Unstick Topic'></i></a>\n");
+        print(LANG["STICKY"] . ": <a href='" . CONFIG['URLROOT'] . "/topic/action/$forumid/$topicid/unsticky' title='UnStick'><i class='fa fa-exclamation tticon-red' title='Unstick Topic'></i></a>\n");
     } else {
-        print(Txt("STICKY") . ": <a href='" . URLROOT . "/topic/action/$forumid/$topicid/sticky' title='Stick'><i class='fa fa-exclamation tticon' title='stick Topic'></i></a>\n");
+        print(LANG["STICKY"] . ": <a href='" . CONFIG['URLROOT'] . "/topic/action/$forumid/$topicid/sticky' title='Stick'><i class='fa fa-exclamation tticon' title='stick Topic'></i></a>\n");
     }
     print("</p>");
     print("</div>");
 }
 
 // Get Poster Details
-function posterdetails($USER, $userid)
+function posterdetails($userid)
 {
-    $forumposts = PostsModel::fetchColumn('COUNT(id)', ['userid ='], [$userid]);
-    $arr2 = UsersModel::fetchRow('*', ['id ='], [$userid]);
+    $forumposts = DB::fetchColumn('forum_posts', 'COUNT(id)', ['userid ='], [$userid]);
+    $arr2 = DB::fetchRow('users', '*', ['id ='], [$userid]);
     $postername = coloredname($userid);
     $quotename = $arr2["username"];
     if ($postername == "") {
@@ -218,13 +213,13 @@ function posterdetails($USER, $userid)
         if (!$arr2["country"]) {
             $usercountry = "unknown";
         } else {
-            $usercountry = CountriesModel::fetchRow($arr2['country']);
+            $usercountry = DB::fetchRow('countries', $arr2['country']);
         }
         $title = format_comment($arr2["title"]);
         $donated = $arr2['donated'];
-        $by = "<a href='" . URLROOT . "/profile/$userid'>$postername</a>" . ($donated > 0 ? "<i class='fa fa-star' aria-hidden='true' style='color:orange' title='Donated'></i>" : "") . "";
+        $by = "<a href='" . CONFIG['URLROOT'] . "/profile/$userid'>$postername</a>" . ($donated > 0 ? "<i class='fa fa-star' aria-hidden='true' style='color:orange' title='Donated'></i>" : "") . "";
         //hide stats, but not from staff
-        if ($privacylevel == "strong" && $USER->has('control_panel') != "yes") {
+        if ($privacylevel == "strong" && $_SESSION['control_panel'] != "yes") {
             $useruploaded = "---";
             $userdownloaded = "---";
             $userratio = "---";
@@ -233,7 +228,7 @@ function posterdetails($USER, $userid)
         }
     }
     if (!$avatar) {
-        $avatar = URLROOT . "/assets/images/misc/default_avatar.webp";
+        $avatar = CONFIG['URLROOT'] . "/assets/images/misc/default_avatar.webp";
     }
 
     $details = [

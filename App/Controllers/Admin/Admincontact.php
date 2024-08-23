@@ -2,41 +2,51 @@
 
 namespace App\Controllers\Admin;
 
-use App\Libs\User;
+use App\Libs\Controller;
 use App\Models\StaffMessagesModel;
 
 /*
 * Contact Controller
 */
-class Admincontact 
+class Admincontact extends Controller
 {
+    public $current_user;
+
+    // Get Current User
+    public function __construct()
+    {
+        $this->current_user = $this->currentuser(2);
+        if ($this->current_user->class < CONFIG['_MODERATOR']) {
+            showMessage(CONFIG['URLROOT'], LANG["NO_PERMISSION"]);
+        }
+    }
+
     // Contact Staff Default Page
     public function index()
     {
-        $USER = new User(_MODERATOR, 2);
+    
         if (!empty($_POST)) {
-            StaffMessagesModel::update();
+            (new StaffMessagesModel)->update($this->current_user->id);
         } else {
             // Get Contact Staff Data
-            $messages = StaffMessagesModel::select();
+            $messages = (new StaffMessagesModel)->select();
        
-            // Init Data
+            // Data For View
             $data = [
-                'V_title' => Txt('STAFF_PMS'),
-                'V_messages' => $messages,
-                'USER' => $USER
+                'page_title' => LANG['STAFF_PMS'],
+                'V_messages' => $messages
             ];
        
             // Load View
-            template('contact', $data, 'admin');
+            $this->view('contact', $data, 'admin');
         }
     }
 
     // Delete Message Default Page
     public function delete()
     {
-        $USER = new User(_MODERATOR, 2);
-        StaffMessagesModel::delete();
+    
+        (new StaffMessagesModel)->delete();
     }
 
 }

@@ -1,4 +1,4 @@
-<?php block_begin($V_title) ?>
+<?php block_begin($page_title) ?>
 <?php forumheader('New Topics'); ?>
 
 <div class="p-4">
@@ -6,9 +6,9 @@
         <table class="table table-striped">
             <thead>
                 <tr>
-                    <th><?= Txt('READ') ?></th>
-                    <th><?= Txt('TOPIC') ?></th>
-                    <th><?= Txt('FORUM') ?></th>
+                    <th><?= LANG['READ'] ?></th>
+                    <th><?= LANG['TOPIC'] ?></th>
+                    <th><?= LANG['FORUM'] ?></th>
                 </tr>
             </thead>
             <tbody>
@@ -16,7 +16,7 @@
                     if ($row['lastpostread'] == $row['lastpost']) {
                         continue;
                     }
-                    if ($USER->has('class') < $row['minclassread'] && $row["guest_read"] == "no") {
+                    if ($current_user->class < $row['minclassread'] && $row["guest_read"] == "no") {
                         continue;
                     } ?>
                     <tr>

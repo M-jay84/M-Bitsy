@@ -2,32 +2,42 @@
 
 namespace App\Controllers\Admin;
 
-use App\Libs\User;
+use App\Libs\Controller;
 use App\Models\PeersModel;
 
 /*
 * Peers Controller
 */
-class Adminpeer 
+class Adminpeer extends Controller
 {
+    public $current_user;
+
+    // Get Current User
+    public function __construct()
+    {
+        $this->current_user = $this->currentuser(2);
+        if ($this->current_user->class < CONFIG['_MODERATOR']) {
+            showMessage(CONFIG['URLROOT'], LANG["NO_PERMISSION"]);
+        }
+    }
+
     // Peers Default Page
     public function index()
     {
-        $USER = new User(_MODERATOR, 2);
+    
         // Get Data
-        $peers = PeersModel::getPeers($USER, 'admin', $id, 'adminpeer?');
+        $peers = (new PeersModel)->getPeers('admin', $id, $this->current_user, 'adminpeer?');
 
-        // Init Data
+        // Data For View
         $data = [
-            'V_title' => Txt("_PEERS"),
+            'page_title' => LANG["_PEERS"],
             'V_count' => $peers['count'],
             'V_pager' => $peers['pager'],
-            'V_peers' => $peers['stmt'],
-            'USER' => $USER
+            'V_peers' => $peers['stmt']
         ];
         
         // Load View
-        template('peer', $data, 'admin');
+        $this->view('peer', $data, 'admin');
    }
 
 }

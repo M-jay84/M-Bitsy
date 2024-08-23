@@ -72,9 +72,9 @@ $opt = array(
     PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
     PDO::ATTR_EMULATE_PREPARES => false,
 );
-$dsn = 'mysql:host=' . DB_HOST . ';dbname=' . DB_NAME . ';charset=' . DB_CHAR;
+$dsn = 'mysql:host=' . CONFIG['DB_HOST'] . ';dbname=' . CONFIG['DB_NAME'] . ';charset=' . CONFIG['DB_CHAR'];
 try {
-    $pdo = new PDO($dsn, DB_USER, DB_PASS, $opt);
+    $pdo = new PDO($dsn, CONFIG['DB_USER'], CONFIG['DB_PASS'], $opt);
 } catch (\Exception $e) {
     die(response('The Database Details Are Incorrect'));
 }
@@ -171,9 +171,9 @@ if (!$peer) {
         if ($slot >= $user['maxslots']) {
             die(response("Maximum Slot exceeded! You may only download $slot torrent at a time."));
         }
-        pdo($pdo, "INSERT INTO `snatched` (`uid`, `tid`, `start_time`, `upload_time`, `completed`) VALUES (?,?,?,?,?) ON DUPLICATE KEY UPDATE `upload_time` = ?", [$user['id'], $torrent['id'], strtotime(TT_DATE), strtotime(TT_DATE), $client['seeder'], strtotime(TT_DATE)]);
+        pdo($pdo, "INSERT INTO `snatched` (`uid`, `tid`, `start_time`, `upload_time`, `completed`) VALUES (?,?,?,?,?) ON DUPLICATE KEY UPDATE `upload_time` = ?", [$user['id'], $torrent['id'], strtotime(CONFIG['TT_DATE']), strtotime(CONFIG['TT_DATE']), $client['seeder'], strtotime(CONFIG['TT_DATE'])]);
     }
-    pdo($pdo, "INSERT INTO peers (connectable, torrent, peer_id, ip, passkey, port, uploaded, downloaded, to_go, started, last_action, seeder, userid, client)VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?) ON DUPLICATE KEY UPDATE last_action = ?", ['yes', $torrent['id'], $client['peer_id'], $client['ip'], $client['passkey'], $client['port'], $client['uploaded'], $client['downloaded'], $client['left'], TT_DATE, TT_DATE, $client['seeder'], $user['id'], $agent, TT_DATE]);
+    pdo($pdo, "INSERT INTO peers (connectable, torrent, peer_id, ip, passkey, port, uploaded, downloaded, to_go, started, last_action, seeder, userid, client)VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?) ON DUPLICATE KEY UPDATE last_action = ?", ['yes', $torrent['id'], $client['peer_id'], $client['ip'], $client['passkey'], $client['port'], $client['uploaded'], $client['downloaded'], $client['left'], CONFIG['TT_DATE'], CONFIG['TT_DATE'], $client['seeder'], $user['id'], $agent, CONFIG['TT_DATE']]);
 } else {
     // Update Peer
     $elapsed = ($peer['seeder'] == 'yes') ? ANNOUNCEINTERVAL - floor(($peer['ez'] - time()) / 60) : 0;
@@ -182,19 +182,19 @@ if (!$peer) {
     if (($upthis > 0 || $downthis > 0 || $elapsed > 0) && (is_int($user['id']) && $user['id'] > 0)) {
         if ($torrent["freeleech"] == 1) {
             pdo($pdo, "UPDATE users SET uploaded = uploaded + ? WHERE id=?", [$upthis, $userid]);
-            pdo($pdo,  "UPDATE `snatched` SET `upload` = `upload` + '$upthis', `upload_time` = ?, `last_time` = `last_time` + '$elapsed', completed = ? WHERE `tid` = ? AND `uid` = ?", [strtotime(TT_DATE), $client['seeder'], $torrent['id'], $user['id']]);
+            pdo($pdo,  "UPDATE `snatched` SET `upload` = `upload` + '$upthis', `upload_time` = ?, `last_time` = `last_time` + '$elapsed', completed = ? WHERE `tid` = ? AND `uid` = ?", [strtotime(CONFIG['TT_DATE']), $client['seeder'], $torrent['id'], $user['id']]);
         } else {
             pdo($pdo, "UPDATE users SET uploaded = uploaded + ?, downloaded = downloaded + ? WHERE id=?", [$upthis, $downthis, $user['id']]);
-            pdo($pdo, "UPDATE `snatched` SET `upload` = `upload` + '$upthis', `download` = `download` + '$downthis', `upload_time` = ?, `last_time` = `last_time` + '$elapsed', completed = ? WHERE `tid` = ? AND `uid` = ?", [strtotime(TT_DATE), $client['seeder'], $torrent['id'], $user['id']]);
+            pdo($pdo, "UPDATE `snatched` SET `upload` = `upload` + '$upthis', `download` = `download` + '$downthis', `upload_time` = ?, `last_time` = `last_time` + '$elapsed', completed = ? WHERE `tid` = ? AND `uid` = ?", [strtotime(CONFIG['TT_DATE']), $client['seeder'], $torrent['id'], $user['id']]);
         }
     }
-    pdo($pdo, "UPDATE peers SET ip = ?, passkey = ?, port = ?, uploaded = ?, downloaded = ?, to_go = ?, last_action = ?, client = ?, seeder = ? WHERE torrent = ? AND peer_id = ?", [$client['ip'], $client['passkey'], $client['port'], $client['uploaded'], $client['downloaded'], $client['left'], TT_DATE, $agent, $client['seeder'], $torrent['id'], $client['peer_id']]);
+    pdo($pdo, "UPDATE peers SET ip = ?, passkey = ?, port = ?, uploaded = ?, downloaded = ?, to_go = ?, last_action = ?, client = ?, seeder = ? WHERE torrent = ? AND peer_id = ?", [$client['ip'], $client['passkey'], $client['port'], $client['uploaded'], $client['downloaded'], $client['left'], CONFIG['TT_DATE'], $agent, $client['seeder'], $torrent['id'], $client['peer_id']]);
 }
 
 // Event Completed
 if ($client['event'] == "completed") {
     if (MEMBERSONLY) {
-        pdo($pdo, "INSERT INTO completed (userid, torrentid, date) VALUES (?,?,?) ON DUPLICATE KEY UPDATE date = ?", [$user['id'], $torrent['id'], TT_DATE, TT_DATE]);
+        pdo($pdo, "INSERT INTO completed (userid, torrentid, date) VALUES (?,?,?) ON DUPLICATE KEY UPDATE date = ?", [$user['id'], $torrent['id'], CONFIG['TT_DATE'], CONFIG['TT_DATE']]);
         pdo($pdo, "UPDATE `snatched`  SET `completed` = ? WHERE `tid` = ? AND `uid` = ?", [1, $torrent['id'], $user['id']]);
     }
     $torrent['times_completed']++;
@@ -220,7 +220,7 @@ foreach ($all_peers as $peer) {
 }
 
 // Update Torrent
-pdo($pdo, "UPDATE torrents SET last_action = ?, leechers = ?, seeders = ?, times_completed = ?, visible = ? WHERE id=?", [TT_DATE, $leechers, $seeders, $torrent['times_completed'], 'yes', $torrent['id']]);
+pdo($pdo, "UPDATE torrents SET last_action = ?, leechers = ?, seeders = ?, times_completed = ?, visible = ? WHERE id=?", [CONFIG['TT_DATE'], $leechers, $seeders, $torrent['times_completed'], 'yes', $torrent['id']]);
 
 // Show Response
 die(response($response_array, $seeders, $leechers));

@@ -1,14 +1,11 @@
 <?php
 
-use App\Models\GroupsModel;
-use App\Models\PollsAnswerModel;
-use App\Models\PollsModel;
-use App\Models\UsersModel;
+use App\Libs\DB;
 
 // Get Group Name
 function get_user_class_name($i)
 {
-    $res = GroupsModel::fetchRow('level', ['group_id ='], [$i]);
+    $res = DB::fetchRow('groups', 'level', ['group_id ='], [$i]);
     $row = $res;
     if ($i == $_SESSION['class']) {
         return  $row['level'];
@@ -20,16 +17,21 @@ function get_user_class_name($i)
 function pollresults($id)
 {
     $array = array();
-    $poll = PollsAnswerModel::getAnswers($id);
+    $poll = DB::run("SELECT pollanswers.pollid, pollanswers.userid, pollanswers.selection FROM pollanswers  
+    LEFT OUTER JOIN polls 
+    ON pollanswers.pollid=polls.id
+    WHERE polls.id=?
+    ORDER BY pollid DESC",
+    [$id])->fetchAll();
     $i = 0;
     foreach ($poll as $res) {
         $option = "option" . $res["selection"];
         if ($res["selection"] < 255) {
-            $vote = PollsModel::fetchRow($option, ['id ='], [$res['pollid']]);
+            $vote = DB::fetchRow('polls', $option, ['id ='], [$res['pollid']]);
         } else {
             $vote['option255'] = 'Blank vote';
         }
-        $sond = PollsModel::fetchRow('question', ['id ='], [$res['pollid']]);
+        $sond = DB::fetchRow('polls', 'question', ['id ='], [$res['pollid']]);
         $array[$i] = ['userid' => $res['userid'], 'question' => $sond['question'], 'vote' => $vote["$option"]];
         $i++;
     }
@@ -48,34 +50,34 @@ function activelink($page, $message = '')
 }
 
 // Profile Navbar
-function usermenu($USER, $id, $page = false)
+function usermenu($id, $page = false)
 {
     $messageactive = $page == 'messages' ? 'ttbtnactive' : 'btn btn-sm ttbtn';
     ?>
     <p>
-        <a href='<?php echo URLROOT; ?>/profile/<?= $id ?>'><button type="button" class="<?= activelink('profile') ?>"><?= Txt("PROFILE") ?></button></a>
-        <?php if ($USER->has('id') == $id) : ?>
-            <a href='<?= URLROOT ?>/message/mailbox'><button type="button" class="<?= $messageactive ?>"><?= Txt('MESSAGES') ?></button></a>
+        <a href='<?php echo CONFIG['URLROOT']; ?>/profile/<?= $id ?>'><button type="button" class="<?= activelink('profile') ?>"><?= LANG["PROFILE"] ?></button></a>
+        <?php if ($_SESSION['id'] == $id) : ?>
+            <a href='<?= CONFIG['URLROOT'] ?>/message/mailbox'><button type="button" class="<?= $messageactive ?>"><?= LANG['MESSAGES'] ?></button></a>
         <?php else : ?>
-            <a href="<?= Url("message/create/$id") ?>"><button type="button" class="<?= activelink("message/create/$id") ?>"><?= Txt("PM") ?></button></a>
+            <a href="<?= Url("message/create/$id") ?>"><button type="button" class="<?= activelink("message/create/$id") ?>"><?= LANG["PM"] ?></button></a>
         <?php endif; ?>
-        <?php if ($USER->permission('view_users', $id)) { ?>
-            <a href='<?= URLROOT ?>/friend/<?= $id ?>'><button type="button" class="<?= activelink("friend/$id") ?>"><?= Txt('FRIENDS') ?></button></a>
+        <?php if ($_SESSION['view_users'] != "yes" && $_SESSION['id'] != $id) { ?>
+            <a href='<?= CONFIG['URLROOT'] ?>/friend/<?= $id ?>'><button type="button" class="<?= activelink("friend/$id") ?>"><?= LANG['FRIENDS'] ?></button></a>
         <?php } ?>
 
-        <?php if ($USER->has('id') == $id) { ?>
-            <a href='<?= URLROOT ?>/bookmark/<?= $id ?>'><button type="button" class="<?= activelink('bookmark') ?>"><?= Txt("BOOKMARKS") ?></button></a>
+        <?php if ($_SESSION['id'] == $id) { ?>
+            <a href='<?= CONFIG['URLROOT'] ?>/bookmark/<?= $id ?>'><button type="button" class="<?= activelink('bookmark') ?>"><?= LANG["BOOKMARKS"] ?></button></a>
         <?php } ?>
 
-        <?php if ($USER->permission('view_torrents')) { ?>
-            <a href='<?= URLROOT ?>/peer/seeding/<?= $id ?>'><button type="button" class="<?= activelink("peer/seeding/$id") ?>"><?= Txt("SEEDING") ?></button></a>
-            <a href='<?= URLROOT ?>/peer/leeching/<?= $id ?>'><button type="button" class="<?= activelink("peer/leeching/$id") ?>"><?= Txt("DOWNLOADING") ?></button></a>
+        <?php if ($_SESSION['view_torrents'] != "yes" && CONFIG['MEMBERSONLY']) { ?>
+            <a href='<?= CONFIG['URLROOT'] ?>/peer/seeding/<?= $id ?>'><button type="button" class="<?= activelink("peer/seeding/$id") ?>"><?= LANG["SEEDING"] ?></button></a>
+            <a href='<?= CONFIG['URLROOT'] ?>/peer/leeching/<?= $id ?>'><button type="button" class="<?= activelink("peer/leeching/$id") ?>"><?= LANG["DOWNLOADING"] ?></button></a>
         <?php } ?>
         <span style="float:right;">
         <?php $profile = $_GET['url']; ?>
         <?php if ($profile == "profile/$id") { ?>
-                <a href="#" data-bs-toggle="modal" data-bs-target="#reportModal"><button type="button" class="<?= activelink('report') ?>"><?= Txt('REPORT') ?></button></a>
-                <a href='<?= URLROOT ?>/warning/<?= $id ?>'><button type="button" class="<?= activelink('warning') ?>"><?= Txt('WARN') ?></button></a>
+                <a href="#" data-bs-toggle="modal" data-bs-target="#reportModal"><button type="button" class="<?= activelink('report') ?>"><?= LANG['REPORT'] ?></button></a>
+                <a href='<?= CONFIG['URLROOT'] ?>/warning/<?= $id ?>'><button type="button" class="<?= activelink('warning') ?>"><?= LANG['WARN'] ?></button></a>
         <?php } ?>
         </span>
     </p>
@@ -86,10 +88,10 @@ function usermenu($USER, $id, $page = false)
 function torrentmenu($id, $external = 'no')
 {
      ?>
-    <a href='<?= URLROOT ?>/torrent/<?= $id ?>'><button type="button" class="<?= activelink('torrent') ?>"><?= Txt("BACK") ?></button></a>
+    <a href='<?= CONFIG['URLROOT'] ?>/torrent/<?= $id ?>'><button type="button" class="<?= activelink('torrent') ?>"><?= LANG["BACK"] ?></button></a>
 
     <?php if ($external != 'yes') { ?>
-        <a href='<?= URLROOT ?>/peer/torrent/<?= $id ?>'><button type="button" class="<?= activelink("peer/torrent/$id") ?>"><?= Txt("PEERS") ?></button></a>
+        <a href='<?= CONFIG['URLROOT'] ?>/peer/torrent/<?= $id ?>'><button type="button" class="<?= activelink("peer/torrent/$id") ?>"><?= LANG["PEERS"] ?></button></a>
     <?php }
     ?>
     <br><br>
@@ -101,11 +103,11 @@ function messagemenu()
 {
     ?>
     <center>
-        <a href="<?= URLROOT ?>/message/mailbox/inbox"><button type="button" class="<?= activelink('inbox', 'inbox') ?>"><?= Txt("INBOX") ?></button></a>&nbsp;
-        <a href="<?= URLROOT ?>/message/mailbox/outbox"><button type="button" class="<?= activelink('outbox', 'outbox') ?>"><?= Txt("OUTBOX") ?></button></a>&nbsp;
-        <a href="<?= URLROOT ?>/message/mailbox/draft"><button type="button" class="<?= activelink('draft', 'draft') ?>"><?= Txt("DRAFT") ?></button></a>&nbsp;
-        <a href="<?= URLROOT ?>/message/mailbox/templates"><button type="button" class="<?= activelink('templates', 'templates') ?>"><?= Txt("TEMPLATES") ?></button></a>&nbsp;
-        <a href="<?= URLROOT ?>/message/create"><button type="button" class="<?= activelink('messages/create') ?>"><?= Txt("COMPOSE") ?></button></a>
+        <a href="<?= CONFIG['URLROOT'] ?>/message/mailbox/inbox"><button type="button" class="<?= activelink('inbox', 'inbox') ?>"><?= LANG["INBOX"] ?></button></a>&nbsp;
+        <a href="<?= CONFIG['URLROOT'] ?>/message/mailbox/outbox"><button type="button" class="<?= activelink('outbox', 'outbox') ?>"><?= LANG["OUTBOX"] ?></button></a>&nbsp;
+        <a href="<?= CONFIG['URLROOT'] ?>/message/mailbox/draft"><button type="button" class="<?= activelink('draft', 'draft') ?>"><?= LANG["DRAFT"] ?></button></a>&nbsp;
+        <a href="<?= CONFIG['URLROOT'] ?>/message/mailbox/templates"><button type="button" class="<?= activelink('templates', 'templates') ?>"><?= LANG["TEMPLATES"] ?></button></a>&nbsp;
+        <a href="<?= CONFIG['URLROOT'] ?>/message/create"><button type="button" class="<?= activelink('messages/create') ?>"><?= LANG["COMPOSE"] ?></button></a>
     </center><br>
     <?php
 }
@@ -119,27 +121,27 @@ function msgdetails($type, $arr = [])
     } elseif (Id($arr["sender"])) {
         $sender = "<a href=\"/profile/$arr[sender]\">" . ($arr["sender"] ? coloredname($arr["sender"]) : "[Deleted]") . "</a>";
     } else {
-        $sender = Txt("SYSTEM");
+        $sender = LANG["SYSTEM"];
     }
 
     // Whos Reciever
     if ($arr["receiver"] == $_SESSION['id']) {
         $receiver = "Yourself";
     } elseif (Id($arr["receiver"])) {
-        $receiver = "<a href=\"" . URLROOT . "/profile/$arr[receiver]\">" . ($arr["receiver"] ? coloredname($arr["receiver"]) : "[" . Txt('DEL') . "]") . "</a>";
+        $receiver = "<a href=\"" . CONFIG['URLROOT'] . "/profile/$arr[receiver]\">" . ($arr["receiver"] ? coloredname($arr["receiver"]) : "[" . LANG['DEL'] . "]") . "</a>";
     } else {
-        $receiver = Txt("SYSTEM");
+        $receiver = LANG["SYSTEM"];
     }
 
     // Subject
-    $subject = "<a href='" . URLROOT . "/message/$arr[id]/$type'><b>" . format_comment($arr["subject"]) . "</b></a>";
+    $subject = "<a href='" . CONFIG['URLROOT'] . "/message/$arr[id]/$type'><b>" . format_comment($arr["subject"]) . "</b></a>";
     $added = utc_to_tz($arr["added"]);
 
     // Unread
     if ($arr["unread"] == "yes") {
-        $unread = "<i class='fa fa-file-text tticon-red' title='" . Txt('UNREAD') . "'></i>";
+        $unread = "<i class='fa fa-file-text tticon-red' title='" . LANG['UNREAD'] . "'></i>";
     } else {
-        $unread = "<i class='fa fa-file-text' title='" . Txt('READ') . "'></i>";
+        $unread = "<i class='fa fa-file-text' title='" . LANG['READ'] . "'></i>";
     }
 
     // Return In Array
@@ -154,7 +156,7 @@ function msgdetails($type, $arr = [])
 }
 
 // Get Comment Details
-function userpostdetails($USER, $row, $type = null)
+function userpostdetails($row, $type = null)
 {
     $postername = coloredname($row["id"]);
     if ($postername == "System") {
@@ -176,21 +178,21 @@ function userpostdetails($USER, $row, $type = null)
     $commenttext = $row["body"] != '' ? format_comment($row["body"]) : format_comment($row["text"]);
 
     if (!$avatar) {
-        $avatar = URLROOT . "/assets/images/misc/default_avatar.webp";
+        $avatar = CONFIG['URLROOT'] . "/assets/images/misc/default_avatar.webp";
     }
 
     $edit = null;
-    if ($USER->permission('edit_torrents') || $USER->permission('edit_news') || $USER->has('id') == $row['user']) {
+    if ($_SESSION['edit_torrents'] == 'yes' || $_SESSION['edit_news'] == 'yes' || $_SESSION['id'] == $row['user']) {
         $edit = '<a href="javascript:;" class="editAttr" data-bs-toggle="modal" data-bs-target="#editModal" data-body="' . $commenttext . '" data-postid="' . $row['id'] . '"><i class="fa fa-edit"></i></a>';
     }
 
     $delete = null;
-    if ($USER->permission('delete_torrents') || $USER->permission('delete_news')) {
-        $delete = '<a href="' . URLROOT . '/post/delete/' . $row['id'] . '"><i class="fa fa-trash" title="' . Txt('DEL') . '" aria-hidden="true"></i></a>&nbsp;';
+    if ($_SESSION['delete_torrents'] == 'yes' || $_SESSION['delete_news'] == 'yes') {
+        $delete = '<a href="' . CONFIG['URLROOT'] . '/post/delete/' . $row['id'] . '"><i class="fa fa-trash" title="' . LANG['DEL'] . '" aria-hidden="true"></i></a>&nbsp;';
     }
 
     $editcomment = null;
-    if ($type == "torrent" && $USER->permission('edit_torrents') || $type == "news"  || $type == "req" && $USER->permission('edit_news') || $USER->has('id') == $row['user']) {
+    if ($type == "torrent" && $_SESSION['edit_torrents'] == 'yes' || $type == "news"  || $type == "req" && $_SESSION['edit_news'] == 'yes' || $_SESSION['id'] == $row['user']) {
         $editcomment = '<a href="javascript:;" class="addAttr" data-bs-toggle="modal" data-bs-target="#addModal" 
         data-id=' . $row['id'] . '
         data-text=' . $row['text'] . ' >
@@ -199,8 +201,8 @@ function userpostdetails($USER, $row, $type = null)
     }
 
     $deletecomment = null;
-    if ($type == "torrent" && $USER->permission('delete_torrents') || $type == "req" || $type == "news" && $USER->permission('delete_news')) {
-        $deletecomment = '<a href="' . URLROOT . '/comment/delete/' . $row["id"] . '/' . $type . '"><i class="fa fa-trash" title="' . Txt('DEL') . '" aria-hidden="true"></i></a>&nbsp;';
+    if ($type == "torrent" && $_SESSION['delete_torrents'] == 'yes' || $type == "req" || $type == "news" && $_SESSION['delete_news'] == 'yes') {
+        $deletecomment = '<a href="' . CONFIG['URLROOT'] . '/comment/delete/' . $row["id"] . '/' . $type . '"><i class="fa fa-trash" title="' . LANG['DEL'] . '" aria-hidden="true"></i></a>&nbsp;';
     }
 
     $data = [
@@ -242,22 +244,30 @@ function letters()
 // Display Username
 function coloredname($id, $array = null)
 {
-    $classy = UsersModel::quickuser($id);
+    $classy = DB::run(
+        "SELECT u.class, u.id, u.username, u.last_access, u.country, u.age, u.gender, 
+        u.avatar,  u.donated, u.warned, u.enabled, 
+        g.Color, g.level, u.uploaded, u.downloaded 
+        FROM `users` `u` 
+        INNER JOIN `groups` `g` 
+        ON g.group_id=u.class 
+        WHERE id ='" . $id . "'"
+    )->fetch();
 
     if ($classy) {
         $gcolor = $classy['Color'];
         if ($classy['donated'] > 0) {
-            $star = "<i class='fa fa-star' aria-hidden='true' style='color:orange' title='" . Txt('DONATED') . "'></i>";
+            $star = "<i class='fa fa-star' aria-hidden='true' style='color:orange' title='" . LANG['DONATED'] . "'></i>";
         } else {
             $star = "";
         }
         if ($classy['warned'] == "yes") {
-            $warn = "<img src='" . URLROOT . "/assets/images/misc/warn.webp' alt='" . Txt('WARN') . "' border='0'>";
+            $warn = "<img src='" . CONFIG['URLROOT'] . "/assets/images/misc/warn.webp' alt='" . LANG['WARN'] . "' border='0'>";
         } else {
             $warn = "";
         }
         if ($classy['enabled'] == "no") {
-            $disabled = "<img src='" . URLROOT . "/assets/images/misc/disabled.webp' title='" . Txt('DISABLED') . "' border='0'>";
+            $disabled = "<img src='" . CONFIG['URLROOT'] . "/assets/images/misc/disabled.webp' title='" . LANG['DISABLED'] . "' border='0'>";
         } else {
             $disabled = "";
         }
@@ -266,16 +276,16 @@ function coloredname($id, $array = null)
 
         $avatar = htmlspecialchars($classy["avatar"]);
         if (!$avatar) {
-            $avatar = URLROOT . "/assets/images/misc/default_avatar.webp";
+            $avatar = CONFIG['URLROOT'] . "/assets/images/misc/default_avatar.webp";
         }
 
-        //if ($array != null && $USER->permission('view_users', $id)) {
-        //    return stripslashes("<a href='" . URLROOT . "/profile/" . $classy['id'] . "'  onMouseover=\"return overlib('<table class=ballooncolor border=1 width=300px align=center><tr valign=top><td class=ballooncolor align=center><img border=0 height=200 width=120 src=$avatar></td><td width=80%  class=ballooncolor><div align=left><b>" . Txt('CLASS') . ": </b><font color=" . $gcolor . ">" . $classy["level"] . "</font><br /><b>" . Txt('DONATED') . ": </b>" . $classy["donated"] . "<br /><b>" . Txt('AGE') . ": </b>" . $classy["age"] . "<br /><b>" . Txt('LAST_VISIT') . ": </b><font color=green>" . utc_to_tz($classy["last_access"]) . "</font><br /><b>" . Txt('DOWNLOADED') . ": </b><font color=red>" . mksize($classy["downloaded"]) . "</font><br /><b>" . Txt('UPLOADED') . ": </b>" . mksize($classy['uploaded']) . "</div></td></tr></table>', CENTER, HEIGHT, 200, WIDTH, 300)\"; onMouseout=\"return nd()\"><font color='" . $gcolor . "'>" . $name . "" . $star . "" . $warn . "" . $disabled . "</font></a>");
+        //if ($array != null && $_SESSION['view_users'] != "yes" && $_SESSION['id'] != $id) {
+        //    return stripslashes("<a href='" . CONFIG['URLROOT'] . "/profile/" . $classy['id'] . "'  onMouseover=\"return overlib('<table class=ballooncolor border=1 width=300px align=center><tr valign=top><td class=ballooncolor align=center><img border=0 height=200 width=120 src=$avatar></td><td width=80%  class=ballooncolor><div align=left><b>" . LANG['CLASS') . ": </b><font color=" . $gcolor . ">" . $classy["level"] . "</font><br /><b>" . LANG['DONATED') . ": </b>" . $classy["donated"] . "<br /><b>" . LANG['AGE') . ": </b>" . $classy["age"] . "<br /><b>" . LANG['LAST_VISIT') . ": </b><font color=green>" . utc_to_tz($classy["last_access"]) . "</font><br /><b>" . LANG['DOWNLOADED') . ": </b><font color=red>" . mksize($classy["downloaded"]) . "</font><br /><b>" . LANG['UPLOADED') . ": </b>" . mksize($classy['uploaded']) . "</div></td></tr></table>', CENTER, HEIGHT, 200, WIDTH, 300)\"; onMouseout=\"return nd()\"><font color='" . $gcolor . "'>" . $name . "" . $star . "" . $warn . "" . $disabled . "</font></a>");
         //} else {
-            return stripslashes("<a href='" . URLROOT . "/profile/" . $classy['id'] . "'><font color='#" . $gcolor . "'>" . $name . "" . $star . "" . $warn . "" . $disabled . "</font></a>");
+            return stripslashes("<a href='" . CONFIG['URLROOT'] . "/profile/" . $classy['id'] . "'><font color='#" . $gcolor . "'>" . $name . "" . $star . "" . $warn . "" . $disabled . "</font></a>");
         //}
     } else {
-        return Txt('SYSTEM');
+        return LANG['SYSTEM'];
     }
 }
 

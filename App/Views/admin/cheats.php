@@ -1,19 +1,19 @@
 <div class="tt_blockcenter rounded">
     <div class="tt_blockhead text-center">
-        <?= $V_title ?>
+        <?= $page_title ?>
     </div>
     <div class="p-3">
         <form action='<?= Url('admincheat') ?>' method='post'>
-            <input type='number' class="form-control fullwidth" maxlength='4' name='daysago' placeholder="<?= Txt("NO_OF_DAYS") ?>" /><br>
-            <input type='text' class="form-control fullwidth" maxlength='60' name='megabts' placeholder="<?= Txt("MB_UPLOADED") ?>" /><br>
+            <input type='number' class="form-control fullwidth" maxlength='4' name='daysago' placeholder="<?= LANG["NO_OF_DAYS"] ?>" /><br>
+            <input type='text' class="form-control fullwidth" maxlength='60' name='megabts' placeholder="<?= LANG["MB_UPLOADED"] ?>" /><br>
             <div class="text-center">
-                <input type='submit' class='btn btn-sm ttbtn' value='<?= Txt("SUBMIT") ?>' />
+                <input type='submit' class='btn btn-sm ttbtn' value='<?= LANG['SUBMIT'] ?>' />
             </div>
         </form>
     </div>
 </div><br>
 
-<?php block_begin($V_title) ?>
+<?php block_begin($page_title) ?>
 <div class='text-center'>
     <?= $V_message ?>
 </div>
@@ -21,13 +21,13 @@
     <table class='table table-striped'>
         <thead>
             <tr>
-                <th><?= Txt("USERNAME") ?></th>
-                <th><?= Txt("UPLOADED") ?></th>
-                <th><?= Txt("DOWNLOADED") ?></th>
-                <th><?= Txt("RATIO") ?></th>
-                <th><?= Txt("AVG_UPLOAD") ?></th>
-                <th><?= Txt("PM") ?></th>
-                <th><?= Txt("JOINED") ?></th>
+                <th><?= LANG['USERNAME'] ?></th>
+                <th><?= LANG["UPLOADED"] ?></th>
+                <th><?= LANG["DOWNLOADED"] ?></th>
+                <th><?= LANG["RATIO"] ?></th>
+                <th><?= LANG["AVG_UPLOAD"] ?></th>
+                <th><?= LANG["PM"] ?></th>
+                <th><?= LANG["JOINED"] ?></th>
             </tr>
         </thead>
         <tbody>

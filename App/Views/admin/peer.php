@@ -1,23 +1,23 @@
-<?php block_begin($V_title) ?>
+<?php block_begin($page_title) ?>
 <p class="text-center">
-    <?php echo sprintf(Txt('MANY_PEERS'), $V_count); ?>
+    <?php echo sprintf(LANG['MANY_PEERS'], $V_count); ?>
 </p>
 <?= $pager ?>
 <div class='table  p-3'>
     <table class='table table-striped'>
         <thead>
             <tr>
-                <th><?= Txt('USER') ?></th>
-                <th><?= Txt('NAME') ?></th>
-                <th><?= Txt('IP') ?></th>
-                <th><?= Txt('PORT') ?></th>
-                <th><?= Txt('UPLOADED') ?></th>
-                <th><?= Txt('DOWNLOADED') ?></th>
-                <th><?= Txt('PEER_ID') ?></th>
-                <th><?= Txt('CONNECTED') ?></th>
-                <th><?= Txt('SEEDING') ?></th>
-                <th><?= Txt('STARTED') ?></th>
-                <th><?= Txt('LAST_ACTION') ?></th>
+                <th><?= LANG['USER'] ?></th>
+                <th><?= LANG['NAME'] ?></th>
+                <th><?= LANG['IP'] ?></th>
+                <th><?= LANG['PORT'] ?></th>
+                <th><?= LANG['UPLOADED'] ?></th>
+                <th><?= LANG['DOWNLOADED'] ?></th>
+                <th><?= LANG['PEER_ID'] ?></th>
+                <th><?= LANG['CONNECTED'] ?></th>
+                <th><?= LANG['SEEDING'] ?></th>
+                <th><?= LANG['STARTED'] ?></th>
+                <th><?= LANG['LAST_ACTION'] ?></th>
             </tr>
         </thead>
         <tbody>

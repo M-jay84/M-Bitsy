@@ -1,9 +1,9 @@
 <?php
 use App\Libs\MDBS;
 use App\Models\TorrentsModel;
-if ($data['USER']->permission('view_torrents')) {
+if ($current_user->view_torrents != "yes" && CONFIG['MEMBERSONLY']) {
     $stmt = TorrentsModel::getAll("WHERE visible = ? AND banned = ?", ['yes', 'no']);
-    block_begin(Txt('GRID'));
+    block_begin(LANG['GRID']);
     ?>
     <div class="row"> <?php
         foreach ($stmt['stmt'] as $row) { ?>

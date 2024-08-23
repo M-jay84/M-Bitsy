@@ -2,19 +2,26 @@
 
 namespace App\Controllers\User;
 
-use App\Libs\User;
+use App\Libs\Controller;
 use App\Models\RatingsModel;
 
 /*
 * Rating Controller
 */
-class Rating 
+class Rating extends Controller
 {
+    public $current_user;
+
+    // Get Current User
+    public function __construct()
+    {
+        $this->current_user = $this->currentuser(2);
+    }
+
     // Torrent Rating Submit
     public function index($id)
     {
-        $USER = new User(0, 2);
-        RatingsModel::addRating($id);
+        (new RatingsModel)->addRating($id, $this->current_user->id);
     }
 
 }

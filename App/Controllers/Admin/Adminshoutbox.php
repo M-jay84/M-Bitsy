@@ -2,75 +2,86 @@
 
 namespace App\Controllers\Admin;
 
-use App\Libs\User;
+use App\Libs\Controller;
 use App\Models\ShoutboxModel;
 
 /*
 * Shoutbox Controller
 */
-class Adminshoutbox 
+class Adminshoutbox extends Controller
 {
+    public $current_user;
+
+    // Get Current User
+    public function __construct()
+    {
+        $this->current_user = $this->currentuser(2);
+        if ($this->current_user->class < CONFIG['_MODERATOR']) {
+            showMessage(CONFIG['URLROOT'], LANG["NO_PERMISSION"]);
+        }
+    }
+
     // Shoutbox Default Page
     public function index()
     {
-        $USER = new User(_MODERATOR, 2);
-        // Init Data
+    
+        // Data For View
         $data = [
-            'V_title' => Txt('SHOUTBOX'),
-            'USER' => $USER
+            'page_title' => LANG['SHOUTBOX']
         ];
 
         // Load View
-        template('shoutbox', $data, 'admin');
+        $this->view('shoutbox', $data, 'admin');
     }
 
     // Ajax Shoutbox Load
     public function loadchat()
     {
-        $USER = new User(_MODERATOR, 2);
+    
         // Get Shoutbox Data
-        $shouts = ShoutboxModel::shouts(20, 1);
+        $shouts = (new ShoutboxModel)->shouts(20, 1);
 
-        // Init Data
+        // Data For View
         $data = [
-            'V_title' => Txt('SHOUTBOX'),
+            'page_title' => LANG['SHOUTBOX'],
             'V_shouts' => $shouts,
-            'USER' => $USER
+            'current_user' => $this->current_user
         ];
+        
         // Load View
-        template('shoutboxload', $data, 'home');
+        $this->view('shoutboxload', $data);
     }
 
     // Shoutbox History Default Page
     public function history()
     {
-        $USER = new User(_MODERATOR, 2);
+    
         // Get Shoutbox Data
-        $shouts = ShoutboxModel::shouts(80, 1);
+        $shouts = (new ShoutboxModel)->shouts(80, 1);
 
-        // Init Data
+        // Data For View
         $data = [
-            'V_title' => Txt('HISTORY'),
+            'page_title' => LANG['HISTORY'],
             'V_shouts' => $shouts,
-            'USER' => $USER
+            'current_user' => $this->current_user
         ];
 
         // Load View
-        template('shoutbox_history', $data, 'admin');
+        $this->view('shoutbox_history', $data, 'admin');
     }
 
     // Add Shout Form Submit
     public function add()
     {
-        $USER = new User(_MODERATOR, 2);
-        ShoutboxModel::add($USER, 1);
+    
+        (new ShoutboxModel)->add(1);
     }
 
     // Clear Shoutbox Default Page
     public function clear($sure = '')
     {
-        $USER = new User(_MODERATOR, 2);
-        ShoutboxModel::truncate($sure);
+    
+        (new ShoutboxModel)->truncate($sure);
     }
 
 }

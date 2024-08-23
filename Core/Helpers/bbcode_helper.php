@@ -201,7 +201,7 @@ function shoutbbcode($form, $name, $content = "")
     print("<a data-bs-toggle='collapse' data-bs-target='#collapseExample' aria-expanded='false' aria-controls='collapseExample'><img <img style='margin-bottom:16px;height:20px; width:20px;' src='" . Url('assets/images/smilies/grin.webp') . "' alt='' /></a>&nbsp;&nbsp;"); 
     
     // History & Staff
-    echo "<a href=" . Url('shoutbox/history') . "><small><b>" . Txt("HISTORY") . "</b></small></a>&nbsp;&nbsp;";
+    echo "<a href=" . Url('shoutbox/history') . "><small><b>" . LANG["HISTORY"] . "</b></small></a>&nbsp;&nbsp;";
 
     // Choose the colour
     print("<select name='color' style='padding-bottom:3px;height:24px; width:100px;' onChange='bbcouleur(this.value);' title='Colour'>");
@@ -268,7 +268,7 @@ function shoutbbcode($form, $name, $content = "")
         <input id="message" class="form-control" type='text' size='100%' name="<?= $name ?>"><?= $content ?>
     </div>
     <div class="col-md-1">
-        <center><input type='submit' name='submit' value='<?= Txt("SUBMIT") ?>' class='btn btn-sm ttbtn' /></center>
+        <center><input type='submit' name='submit' value='<?= LANG["SUBMIT"] ?>' class='btn btn-sm ttbtn' /></center>
     </div>
 
     </div>

@@ -2,31 +2,39 @@
 
 namespace App\Controllers\User;
 
-use App\Libs\User;
+use App\Libs\Controller;
 use App\Models\GroupsModel;
 
 /*
 * Staff Controller
 */
-class Staff 
+class Staff extends Controller
 {
+    public $current_user;
+
+    // Get Current User
+    public function __construct()
+    {
+        $this->current_user = $this->currentuser(2);
+    }
+
     // Staff Page
     public function index()
     {
-        $USER = new User(0, 2);
+        $data['current_user'] = $this->current_user;
+    
         // Get Staff Data
-        $staff = GroupsModel::getStaffTable($USER);
+        $staff = (new GroupsModel)->getStaffTable();
 
-        // Init Data
+        // Data For View
         $data = [
-            'V_title' =>  Txt("STAFF"),
+            'page_title' =>  LANG["STAFF"],
             'V_staff' => $staff['res'],
-            'V_table' => $staff['table'],
-            'USER' => $USER
+            'V_table' => $staff['table']
         ];
 
         // Load View
-        template('staff', $data, 'user');
+        $this->view('staff', $data, 'user');
     }
 
 }

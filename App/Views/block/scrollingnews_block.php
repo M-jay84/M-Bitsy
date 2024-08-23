@@ -1,11 +1,11 @@
 <?php
 
-use App\Models\NewsModel;
+use App\Libs\DB;
 
-if ($USER->has('id')) {
-    if ($USER->permission('view_news')) { //check news is turned on first
-		block_begin(Txt("LATEST_NEWS"));
-        $res = NewsModel::fetchAll('*', '', 'ORDER BY added DESC LIMIT 10'); ?>
+if ($_SESSION['id']) {
+    if ($_SESSION['view_users'] != "yes" && $_SESSION['class'] <= CONFIG['_MODERATOR']) { //check news is turned on first
+		block_begin(LANG["LATEST_NEWS"]);
+        $res = DB::fetchAll('news', '*', '', 'ORDER BY added DESC LIMIT 10'); ?>
 	    <style type="text/css">
 		#marqueecontainer{
 			position: relative;
@@ -62,11 +62,11 @@ if ($USER->has('id')) {
     if ($res->rowCount()) { ?>
      	<dl>
     	<?php foreach ($res as $array) {?>
-			<dt><a href='<?= Url("comment/$array[id]/news") ?>'><strong><?= $array['title']; ?></strong></a></dt><dd><strong><?= Txt("POSTED"); ?>:</strong> <?php echo gmdate("d-M-y", utc_to_tz_time($array["added"])); ?><dd>
+			<dt><a href='<?= Url("comment/$array[id]/news") ?>'><strong><?= $array['title']; ?></strong></a></dt><dd><strong><?= LANG["POSTED"]; ?>:</strong> <?php echo gmdate("d-M-y", utc_to_tz_time($array["added"])); ?><dd>
 		<?php }?>
 	    </dl><?php
 	} else { ?>
-	    <p class="text-center"><?= Txt("NO_NEWS"); ?></p>
+	    <p class="text-center"><?= LANG["NO_NEWS"]; ?></p>
 	    <?php
 	} ?>
     </div>

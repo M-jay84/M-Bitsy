@@ -2,22 +2,29 @@
 
 namespace App\Controllers\User;
 
-use App\Libs\User;
+use App\Libs\Controller;
 use App\Models\TorrentsModel;
 
 /*
 * Reseed Controller
 */
-class Reseed 
+class Reseed extends Controller
 {
+    public $current_user;
+
+    // Get Current User
+    public function __construct()
+    {
+        $this->current_user = $this->currentuser(1);
+    }
+
     // Request Reseed Form Submit todo (tidy up)
     public function index($id)
     {
-        $USER = new User(0, 1);
-        if (!$USER->permission('view_torrents')) {
-            Redirect(Url(), Txt("NO_TORRENT_VIEW"));
+        if ($this->current_user->view_torrents != "yes" && CONFIG['MEMBERSONLY']) {
+            showMessage(Url(), LANG["NO_TORRENT_VIEW"]);
         }
-        TorrentsModel::reseed($id);
+        (new TorrentsModel)->reseed($id, $this->current_user);
     }
 
 }

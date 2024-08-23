@@ -12,13 +12,13 @@ class Cache
 
     public function __construct()
     {
-        $this->cachedir = CACHE;
+        $this->cachedir = CONFIG['CACHE'];
         $this->type = strtolower(trim(CONFIG['CACHE_TYPE']));
         // Cache Connection
         switch ($this->type) {
             case "memcache":
                 $this->obj = new Memcache;
-                if (!@$this->obj->Connect(CONFIG['MEMCACHE_HOSTE'], CONFIG['MEMCACHE_PORT'])) {
+                if (!@$this->obj->Connect(CONFIG['MEMCACHE_HOST'], CONFIG['MEMCACHE_PORT'])) {
                     $this->type = "disk";
                 }
                 break;

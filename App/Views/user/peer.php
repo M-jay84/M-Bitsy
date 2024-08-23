@@ -1,6 +1,6 @@
-<?php block_begin($V_title) ?>
-<?php usermenu($USER, $V_id);
-if ($V_user['privacy'] != "strong" || ($USER->has('control_panel') == "yes") || ($USER->has('id') == $V_user['id'])) {
+<?php block_begin($page_title) ?>
+<?php usermenu($V_id);
+if ($V_user['privacy'] != "strong" || ($current_user->control_panel == "yes") || ($current_user->id == $V_user['id'])) {
     echo peerstable($V_peers);
 }
 block_end();

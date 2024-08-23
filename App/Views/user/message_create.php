@@ -1,9 +1,9 @@
-<?php block_begin($V_title) ?>
-<?php usermenu($USER, $USER->has('id'), 'messages');
+<?php block_begin($page_title) ?>
+<?php usermenu($current_user->id, 'messages');
 echo messagemenu(); ?><br>
 <form name="form" action="<?= Url('message/submit') ?>" method="post">
     <div class="row tt_blockcenter rounded p-3">
-        <?= Txt("RECEIVER") ?>
+        <?= LANG["RECEIVER"] ?>
 
         <?php if ($V_id) : ?>
             <input type="hidden" name="receiver" value="<?= $V_id; ?>" />
@@ -13,19 +13,19 @@ echo messagemenu(); ?><br>
             <div id="suggesstion-box"></div><br>
         <?php endif; ?>
 
-        <?= Txt("TEMPLATE") ?>
+        <?= LANG["TEMPLATE"] ?>
         <select name="template" class='form-select'>
             <?= $V_templates ?>
         </select><br>
-        <?= Txt("SUBJECT") ?>
-        <input type="text" name="subject" class="form-control fullwidth" placeholder="<?= Txt("SUBJECT") ?>" id="subject"><br><br>
+        <?= LANG["SUBJECT"] ?>
+        <input type="text" name="subject" class="form-control fullwidth" placeholder="<?= LANG["SUBJECT"] ?>" id="subject"><br><br>
         <?php print textbbcode("form", "body"); ?><br>
         <div class="text-center">
-            <button type="submit" class="btn btn-sm ttbtn" name="Update" value="create"><?= Txt("SEND") ?></button>&nbsp;
-            <label><?= Txt("SAVE_COPY") ?></label>
+            <button type="submit" class="btn btn-sm ttbtn" name="Update" value="create"><?= LANG["SEND"] ?></button>&nbsp;
+            <label><?= LANG["SAVE_COPY"] ?></label>
             <input type="checkbox" name="save" checked='Checked'>&nbsp;
-            <button type="submit" class="btn btn-sm ttbtn" name="Update" value="draft"><?= Txt("DRAFT") ?></button>
-            <button type="submit" class="btn btn-sm ttbtn" name="Update" value="template"><?= Txt("TEMPLATE") ?></button>
+            <button type="submit" class="btn btn-sm ttbtn" name="Update" value="draft"><?= LANG["DRAFT"] ?></button>
+            <button type="submit" class="btn btn-sm ttbtn" name="Update" value="template"><?= LANG["TEMPLATE"] ?></button>
         </div>
     </div>
 </form>

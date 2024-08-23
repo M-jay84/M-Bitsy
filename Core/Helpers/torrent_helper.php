@@ -1,8 +1,6 @@
 <?php
 
-use App\Models\CatagoriesModel;
-use App\Models\LikesModel;
-use App\Models\TorrentTagModel;
+use App\Libs\DB;
 
 // Function That Returns The Health Level Of A Torrent
 function health($leechers, $seeders)
@@ -39,17 +37,17 @@ function health($leechers, $seeders)
 // Return Tags
 function get_tags($id) 
 {
-    $tag =  TorrentTagModel::fetchRow('type1, type2, type3', ['torrentid ='], [$id]);
+    $tag =  DB::fetchRow('torrenttag', 'type1, type2, type3', ['torrentid ='], [$id]);
 
     $tags = '';
     if (!empty($tag['type1'])) {
-        $tags .= "&nbsp;<a href=".URLROOT."/tag/$tag[type1]><span class='badge border ttbtn'>$tag[type1]</span></a>&nbsp;";
+        $tags .= "&nbsp;<a href=".CONFIG['URLROOT']."/tag/$tag[type1]><span class='badge border ttbtn'>$tag[type1]</span></a>&nbsp;";
     }
     if (!empty($tag['type2'])) {
-        $tags .= "<a href=".URLROOT."/tag/$tag[type2]><span class='badge border ttbtn'>$tag[type2]</span></a>&nbsp;";
+        $tags .= "<a href=".CONFIG['URLROOT']."/tag/$tag[type2]><span class='badge border ttbtn'>$tag[type2]</span></a>&nbsp;";
     }
     if (!empty($tag['type3'])) {
-        $tags .= "<a href=".URLROOT."/tag/$tag[type3]><span class='badge border ttbtn'>$tag[type3]</span></a>&nbsp;";
+        $tags .= "<a href=".CONFIG['URLROOT']."/tag/$tag[type3]><span class='badge border ttbtn'>$tag[type3]</span></a>&nbsp;";
     }
     
     return $tags;
@@ -94,7 +92,7 @@ function ratingpic($num)
         return;
     }
 
-    return "<img src=\"" . URLROOT . "/assets/images/rating/$r.webp\" border=\"0\" alt=\"rating: $num/5\" title=\"rating: $num/5\" />";
+    return "<img src=\"" . CONFIG['URLROOT'] . "/assets/images/rating/$r.webp\" border=\"0\" alt=\"rating: $num/5\" title=\"rating: $num/5\" />";
 }
 
 // Sort Torrent Table By Column
@@ -219,7 +217,7 @@ function search()
     // browse
     $wherecatina = array();
     $wherecatin = "";
-    $res = CatagoriesModel::fetchAll('id', '');
+    $res = DB::fetchAll('categories', 'id', '');
     foreach ($res as $row) {
         if (isset($_GET["c$row[id]"])) {
             $wherecatina[] = $row["id"];
@@ -290,7 +288,7 @@ function torrentsearch($searchwhat)
 function gettorrentfiles()
 {
     $files = array();
-    $dh = opendir(UPLOADDIR."/import/");
+    $dh = opendir(CONFIG['UPLOADDIR']."/import/");
     while (false !== ($file = readdir($dh))) {
         if (preg_match("/\.torrent$/i", $file)) {
             $files[] = $file;
@@ -304,34 +302,34 @@ function gettorrentfiles()
 function anon($data)
 {
     if ($data["anon"] == "yes" && !$data['owned']) {
-        echo Txt("ANON");
+        echo LANG["ANON"];
     } elseif ($data["username"]) { ?>
         <a href='profile/<?php echo $data["owner"]; ?>'><?= coloredname($data["owner"]) ?></a> <?php
     } else { ?>
-        <?= Txt("SYSTEM") ?> <?php
+        <?= LANG["SYSTEM"] ?> <?php
     }
 }
 
 // Get Magnet Link
-function magnetlink($USER, $data)
+function magnetlink($data)
 {
-    if (!CONFIG['FORCETHANKS'] && $data["external"] == 'yes' || $data["external"] == 'yes' && $data["vip"] == 'yes' && $USER->has('class') >= _VIP) {
-        print("&nbsp;<a href=\"magnet:?xt=urn:btih:" . $data["info_hash"] . "&dn=" . $data["filename"] . "&tr=udp://tracker.openbittorrent.com&tr=udp://tracker.publicbt.com\"><i class='fa fa-magnet fa-1x' style='color:green' title='" . Txt("DOWNLOADED") . "'></i></a>&nbsp;");
+    if (!CONFIG['FORCETHANKS'] && $data["external"] == 'yes' || $data["external"] == 'yes' && $data["vip"] == 'yes' && $_SESSION['class'] >= CONFIG['_VIP']) {
+        print("&nbsp;<a href=\"magnet:?xt=urn:btih:" . $data["info_hash"] . "&dn=" . $data["filename"] . "&tr=udp://tracker.openbittorrent.com&tr=udp://tracker.publicbt.com\"><i class='fa fa-magnet fa-1x' style='color:green' title='" . LANG["DOWNLOADED"] . "'></i></a>&nbsp;");
     } else {
-        $like = LikesModel::fetchRow('user', ['liked =', 'type =', 'user ='], [$data['id'], 'torrent', $USER->has('id')]);
+        $like = DB::fetchRow('likes', ['liked =', 'type =', 'user ='], [$data['id'], 'torrent', $_SESSION['id']]);
         if ($like) {
             if ($data["external"] == 'yes') {
-                if ($USER->permission('can_download')) {
-                    print("&nbsp;<a href=\"magnet:?xt=urn:btih:" . $data["info_hash"] . "&dn=" . $data["filename"] . "&tr=udp://tracker.openbittorrent.com&tr=udp://tracker.publicbt.com\"><i class='fa fa-magnet fa-1x' style='color:green' title='" . Txt("DOWNLOADED") . "'></i></a>&nbsp;");
+                if ($_SESSION['can_download'] == 'yes') {
+                    print("&nbsp;<a href=\"magnet:?xt=urn:btih:" . $data["info_hash"] . "&dn=" . $data["filename"] . "&tr=udp://tracker.openbittorrent.com&tr=udp://tracker.publicbt.com\"><i class='fa fa-magnet fa-1x' style='color:green' title='" . LANG["DOWNLOADED"] . "'></i></a>&nbsp;");
                 }
             }
         } else {
-            if ($USER->has('id') != $data["owner"]) {
-                print("<a href='" . URLROOT . "/like/$data[stmt][id]/torrent'><button  class='btn btn-sm ttbtn'>" . Txt("THANKS") . "</button></a><br>");
-            } elseif ($data["vip"] == 'yes' && $USER->has('class') <= _VIP) {
+            if ($_SESSION['id'] != $data["owner"]) {
+                print("<a href='" . CONFIG['URLROOT'] . "/like/$data[stmt][id]/torrent'><button  class='btn btn-sm ttbtn'>" . LANG["THANKS"] . "</button></a><br>");
+            } elseif ($data["vip"] == 'yes' && $_SESSION['class'] <= CONFIG['_VIP']) {
 
             } elseif ($data["external"] == 'yes') {
-                print("&nbsp;<a href=\"magnet:?xt=urn:btih:" . $data["info_hash"] . "&dn=" . $data["filename"] . "&tr=udp://tracker.openbittorrent.com&tr=udp://tracker.publicbt.com\"><i class='fa fa-magnet fa-1x' style='color:green' title='" . Txt("DOWNLOADED") . "'></i></a>&nbsp;");
+                print("&nbsp;<a href=\"magnet:?xt=urn:btih:" . $data["info_hash"] . "&dn=" . $data["filename"] . "&tr=udp://tracker.openbittorrent.com&tr=udp://tracker.publicbt.com\"><i class='fa fa-magnet fa-1x' style='color:green' title='" . LANG["DOWNLOADED"] . "'></i></a>&nbsp;");
             }
         }
     }
@@ -375,7 +373,7 @@ function my_nfo_translate($nfo)
 // DISPLAY NFO BLOCK
 function displaynfo($id)
 {
-    $nfofilelocation = UPLOADDIR . "/nfos/$id.nfo";
+    $nfofilelocation = CONFIG['UPLOADDIR'] . "/nfos/$id.nfo";
     $filegetcontents = file_get_contents($nfofilelocation);
     $nfo = $filegetcontents;
     if ($nfo) {
@@ -383,6 +381,6 @@ function displaynfo($id)
         echo "<p class='text-center'><b>NFO:</b></p>";
         print("<textarea class='form-control' style='min-width:700px;height:700px;' readonly='readonly'>" . stripslashes($nfo) . "</textarea>");
     } else {
-        print(Txt("NO_NFO_ERROR") );
+        print(LANG["NO_NFO_ERROR"] );
     }
 }

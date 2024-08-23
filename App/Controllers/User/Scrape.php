@@ -2,7 +2,7 @@
 
 namespace App\Controllers\User;
 
-use App\Libs\User;
+use App\Libs\Controller;
 use App\Libs\Parse;
 use App\Libs\Scraper;
 use App\Models\TorrentsModel;
@@ -10,13 +10,16 @@ use App\Models\TorrentsModel;
 /*
 * Scrape Controller
 */
-class Scrape 
+class Scrape extends Controller
 {
-    // Verify User/Guest
+    public $current_user;
+
+    // Get Current User
     public function __construct()
     {
-        $USER = new User(0, 0);
+        $this->current_user = $this->currentuser(2);
     }
+
     
     // Scrape Torrent Submit
     public function index()
@@ -54,7 +57,7 @@ class Scrape
         }
 
         $hashes = join(",", $infohash);
-        $query = TorrentsModel::scrapeInfo($hashes);
+        $query = (new TorrentsModel)->scrapeInfo($hashes);
         $result = "d5:filesd";
 
             $result .= "20:" . hex2bin($$query['info_hash']) . "d";
@@ -75,13 +78,13 @@ class Scrape
     {
         $id = (isset($_GET['id'])) ? (int) $_GET['id'] : 0;
 
-        $resu = TorrentsModel::fetchRow('id, info_hash, announce, announcelist', ['external =','id ='], ['yes',$id]);
+        $resu = (new TorrentsModel)->fetchRow('id, info_hash, announce, announcelist', ['external =','id ='], ['yes',$id]);
         
         while ($rowu = $resu) {
             // No need parsing but lets update any old torrents first
             if ($rowu['announcelist'] == '') {
                 $torInfo = new Parse();
-                $tor = $torInfo->torr(UPLOADDIR."/torrents/$rowu[id].torrent");
+                $tor = $torInfo->torr(CONFIG['UPLOADDIR']."/torrents/$rowu[id].torrent");
                 $infohash = $tor['hash'];
                 $infohash2 = $tor['hash2'];
                 $annlist = $tor['announce-list'];
@@ -97,7 +100,7 @@ class Scrape
 
             if ( $scraper->has_errors() ) {
                 $error = implode(",", $scraper->get_errors());
-                Redirect(Url("torrent/$id"), Txt($error));
+                showMessage(Url("torrent/$id"), LANG[$error]);
             }
 
             $myarray = array_shift($scraped);
@@ -115,19 +118,19 @@ class Scrape
 
             if ($seeders !== 0) {
                 // Update the Torrent
-                TorrentsModel::update(['leechers','seeders','times_completed','last_action','visible','announcelist'], ['id ='],
+                (new TorrentsModel)->update(['leechers','seeders','times_completed','last_action','visible','announcelist'], ['id ='],
                 [$leechers, $seeders, $completed, get_date_time(), 'yes', $newannouncelist, $rowu['id']]);
 
             } else {
                 // Its Dead :(
-                TorrentsModel::update(['last_action'], ['id='], [get_date_time(), $rowu['id']]);
+                    (new TorrentsModel)->update(['last_action'], ['id='], [get_date_time(), $rowu['id']]);
             }
 
             // Redirect with message
             if ($seeders !== 0) {
-                Redirect(Url("torrent/$id"), Txt("UPDATE_COMPLETE"));
+                showMessage(Url("torrent/$id"), LANG["UPDATE_COMPLETE"]);
             } else {
-                Redirect(Url("torrent/$id"), Txt("SCRAPE_DEAD"));
+                showMessage(Url("torrent/$id"), LANG["SCRAPE_DEAD"]);
             }
         }
     }

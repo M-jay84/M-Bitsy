@@ -2,52 +2,63 @@
 
 namespace App\Controllers\User;
 
-use App\Libs\User;
+use App\Libs\Controller;
 use App\Models\PostsModel;
 use App\Models\ForumsModel;
 
 /*
 * Post Controller
 */
-class Post 
+class Post extends Controller
 {
+    public $current_user;
+
+    // Get Current User
+    public function __construct()
+    {
+        $this->current_user = $this->currentuser(1);
+        if (!CONFIG['FORUMS']) {
+            showMessage(Url(), LANG["FORUM_AVAILABLE"]);
+        }
+        if (!CONFIG['FORUMS_GUESTREAD'] && !$this->current_user->id) {
+            showMessage(Url(), LANG["NO_PERMISSION"]);
+        }
+        if ($this->current_user->forumbanned == "yes" || $this->current_user->view_forum == "no") {
+            showMessage(Url(), LANG["FORUM_BANNED"]);
+        }
+    }
+
     // View Forum Topic Default Page
     public function index($topicid)
     {
-        $USER = new User(0, 1);
-        $USER->permission('forum');
-        $post = PostsModel::getTopicPages($topicid);
+        $post = (new PostsModel)->getTopicPages($topicid, $this->current_user);
 
-        // Init Data
+        // Data For View
         $data = [
-            'V_title' => $post['subject'],
+            'page_title' => $post['subject'],
             'V_posts' => $post['stmt'],
             'V_topicid' => $topicid,
             'V_info' => $post,
             'V_pager' => $post["pager"],
-            'USER' => $USER
+            'current_user' => $this->current_user
         ];
 
         // Load View
-        template('post', $data, 'user');
+        $this->view('post', $data, 'user');
     }
 
     public function submit($topicid) // todo
     {
-        $USER = new User(0, 1);
-        $USER->permission('forum');
-        PostsModel::addPost($topicid);
+        (new PostsModel)->addPost($topicid, $this->current_user);
     }
 
     // Post Edit Form Submit
     public function edit()
     {
-        $USER = new User(0, 1);
-        $USER->permission('forum');
         if (!empty($_POST)) {
-            PostsModel::edit($USER);
+            (new PostsModel)->edit($this->current_user);
         } else {
-            Redirect(Url(), Txt("NOTHING_SELECTED"));
+            showMessage(Url(), LANG["NOTHING_SELECTED"]);
         }
         
     }
@@ -55,29 +66,26 @@ class Post
     // Post Delete Submit
     public function delete($postid, $sure = 0)
     {
-        $USER = new User(0, 1);
-        $USER->permission('forum');
-        PostsModel::deletePost($USER, $postid, $sure);
+        (new PostsModel)->deletePost($postid, $this->current_user, $sure);
     }
 
     // Users Posts Default Page
     public function user($id)
     {
-        $USER = new User(0, 1);
-        $USER->permission('forum');
-        $posts = ForumsModel::getUsersPost($USER, $id);
+        $data['current_user'] = $this->current_user;
+        $posts = (new ForumsModel)->getUsersPost($id, $data);
 
-        // Init Data To View
+        // Data For View To View
         $data = [
-            'V_title' => Txt("USER_POSTS"),
+            'page_title' => LANG["USER_POSTS"],
             'V_id' => $id,
             'V_posts' => $posts['row'],
             'V_pager' => $posts['pager'],
-            'USER' => $USER
+            'current_user' => $this->current_user
         ];
 
         // Load View
-        template('post_user', $data, 'user');
+        $this->view('post_user', $data, 'user');
     }
     
 }

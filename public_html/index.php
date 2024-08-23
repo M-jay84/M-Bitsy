@@ -1,11 +1,11 @@
 <?php
 
 // Get Config/Paths
-require('../App/bootstrap.php');
+require('../Core/init.php');
 
 // Autoload Classes
 spl_autoload_register(function ($className) {
-    $filename = NAME_SPACE . DIRECTORY_SEPARATOR . str_replace('\\', '/', $className) . '.php';
+    $filename = CONFIG['NAME_SPACE'] . DIRECTORY_SEPARATOR . str_replace('\\', '/', $className) . '.php';
     if (file_exists($filename)) {
         require_once($filename);
     }

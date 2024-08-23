@@ -14,22 +14,15 @@ use App\Models\GroupsModel;
 */
 class ForumsModel
 {
-    // Fetch All Forums
-    public static function fetchAll($columns = '*', $where = '', $values = '', $other = '')
-    {
-        $stmt = DB::newSelect('forum_forums', $columns, $where, $values, $other);
-		return $stmt;
-	}
-		
     // Fetch Forums Row
-    public static function fetchRow($columns = '*', $where = '', $values = '', $other = '')
+    public function fetchRow($columns = '*', $where = '', $values = '', $other = '')
     {
         $stmt = DB::fetchRow('forum_forums', $columns, $where, $values, $other);
 		return $stmt;
 	}
 	
     // Returns the minimum read/write class levels of a forum
-    public static function getForumAccessLevels($forumid)
+    public function getForumAccessLevels($forumid)
     {
         $arr = DB::fetchRow('forum_forums', 'minclassread, minclasswrite', ['id='], [$forumid]);
         if (!$arr) {
@@ -39,10 +32,10 @@ class ForumsModel
     }
 
     // Get Cats
-    public static function getCatForums()
+    public function getCatForums()
     {
         $list = [];
-        $forum_cats = ForumCatsModel::fetchAll('*', '', 'ORDER BY sort');
+        $forum_cats = (new ForumCatsModel)->fetchAll('*', '', 'ORDER BY sort');
 
         foreach ($forum_cats as $cat) {
 
@@ -60,9 +53,9 @@ class ForumsModel
             foreach ($cat_forums as $forum) {
 
                 $f_id = $forum['id'];
-                $count_topic = TopicsModel::fetchColumn('count(id)', ['forumid='], [$f_id]);
-                $topic_id = TopicsModel::fetchColumn('count(id)', ['forumid='], [$f_id]);
-                $count_post = PostsModel::fetchColumn('count(id)', ['topicid='], [$topic_id]);
+                $count_topic = (new TopicsModel)->fetchColumn('count(id)', ['forumid='], [$f_id]);
+                $topic_id = (new TopicsModel)->fetchColumn('count(id)', ['forumid='], [$f_id]);
+                $count_post = (new PostsModel)->fetchColumn('count(id)', ['topicid='], [$topic_id]);
                 $country_info['c_forums'][$f_id] = [
                     'f_id' => $f_id,
                     'f_name' => $forum['name'],
@@ -83,7 +76,7 @@ class ForumsModel
     }
 
     // Search Forum
-    public static function search()
+    public function search()
     {
         // Check User Input
         $keywords = (isset($_GET['keywords'])) ? trim(filter_input(INPUT_GET, 'keywords')) : '';
@@ -92,7 +85,7 @@ class ForumsModel
         $data = [
             'forums' => array(),
             'keywords' => $keywords,
-            'title' => Txt("FORUM"),
+            'title' => LANG["FORUM"],
             'pager' => ''
         ];
 
@@ -124,7 +117,7 @@ class ForumsModel
                              WHERE ($whered)
                              ORDER BY count_words,added DESC");
             $count = $res2->rowCount();
-            list($pager, $limit) = pagination(30, $count, URLROOT . "/forum/search?keywords=$keywords&type=deep&");
+            list($pager, $limit) = pagination(30, $count, CONFIG['URLROOT'] . "/forum/search?keywords=$keywords&type=deep&");
             $res = DB::run("SELECT *, ( $wherea + $whereb ) as count_words
                             FROM forum_posts
                             JOIN forum_topics
@@ -142,7 +135,7 @@ class ForumsModel
                              ON forum_forums.id=forum_topics.forumid
                              WHERE ($wherec)");
             $count = $res2->rowCount();
-            list($pager, $limit) = pagination(30, $count, URLROOT . "/forum/search?keywords=$keywords&");
+            list($pager, $limit) = pagination(30, $count, CONFIG['URLROOT'] . "/forum/search?keywords=$keywords&");
 
             $res = DB::run("SELECT distinct topicid, subject, forumid, forum_posts.added, forum_posts.userid, forum_forums.name, forum_forums.minclassread, forum_forums.guest_read, ( $wherea ) as count_words
                             FROM forum_topics
@@ -160,7 +153,7 @@ class ForumsModel
             $data['forums'] = $forums['res'];
             $data['pager'] = $forums['pager'];
         } else {
-            Redirect(Url('forum/search'), Txt("NOTHING_FOUND"));
+            showMessage(Url('forum/search'), LANG["NOTHING_FOUND"]);
         }
     }
 
@@ -168,7 +161,7 @@ class ForumsModel
     }
 
     // Unread Topics
-    public static function unread()
+    public function unread($data = [])
     {
         $stmt = DB::run("SELECT forum_readposts.lastpostread, forum_readposts.topicid,
                                 forum_topics.id, forum_topics.forumid, forum_topics.subject, forum_topics.lastpost,
@@ -180,62 +173,62 @@ class ForumsModel
                         ON forum_forums.id=forum_topics.id
                         WHERE forum_readposts.userid=? 
                         ORDER BY forum_topics.lastpost DESC
-                        LIMIT 5", [$_SESSION['id']])->fetchAll();
+                        LIMIT 5", [$data['current_user']->id])->fetchAll();
         return $stmt;
     }
 
     // Admin Delete Cat
-    public static function deleteCats($id, $action = 0)
+    public function deleteCats($id, $action = 0)
     {
         if ($action != 'sure') {
-            Redirect(Url('adminforumcat'), "Are You Sure <a href='".URLROOT."/adminforumcat/delete/$id/sure'>Remove Cat $id</a>");
+            showMessage(Url('adminforumcat'), "Are You Sure <a href='".CONFIG['URLROOT']."/adminforumcat/delete/$id/sure'>Remove Cat $id</a>");
         }
 
 
         $v = ForumCatsModel::fetchRow('*', ['id='], [$id]);
         if (!$v) {
-            Redirect(Url('adminforumcat'), Txt("FORUM_INVALID_CAT"));
+            showMessage(Url('adminforumcat'), LANG["FORUM_INVALID_CAT"]);
         }
 
-        ForumCatsModel::delete(['id' => $id]);
+        (new ForumCatsModel)->delete(['id' => $id]);
         $res = DB::fetchAll('forum_forums', 'id', ['category='], [$id]);
         foreach ($res as $row) {
-            $res2 = TopicsModel::fetchAll('id', ['forumid='], [$row['id']]);
+            $res2 = (new TopicsModel)->fetchAll('id', ['forumid='], [$row['id']]);
             foreach ($res2 as $arr) {
-                PostsModel::delete(['topicid' => $arr['id']]);
-                ReadModel::delete(['topicid' => $arr['id']]);
+                (new PostsModel)->delete(['topicid' => $arr['id']]);
+                (new ReadModel)->delete(['topicid' => $arr['id']]);
             }
-            TopicsModel::delete(['forumid' => $row['id']]);
+            (new TopicsModel)->delete(['forumid' => $row['id']]);
             DB::delete('forum_forums', ['id' => $row['id']]);
         }
         
-        Redirect(Url('adminforumcat'), Txt("DEL_COMPLETE"));
+        showMessage(Url('adminforumcat'), LANG["DEL_COMPLETE"]);
     }
 
     // Admin Get Cats
-    public static function getCats()
+    public function getCats()
     {
-        $forumcat = ForumCatsModel::fetchAll('id, name, sort', '', 'ORDER BY sort, name');
+        $forumcat = (new ForumCatsModel)->fetchAll('id, name, sort', '', 'ORDER BY sort, name');
         return $forumcat;
     }
 
     // Admin Reorder Cats
-    public static function reorder($id, $move)
+    public function reorder($id, $move)
     {
         if ($move == 'up') {
-            ForumCatsModel::update(['sort'], ['sort =', 'category =', 'id !='], [$_GET["sort"], $_GET["sort"] - 1, $id]);
-            ForumCatsModel::update(['sort'], ['id ='], [($_GET["sort"] - 1), $id]);
+            (new ForumCatsModel)->update(['sort'], ['sort =', 'category =', 'id !='], [$_GET["sort"], $_GET["sort"] - 1, $id]);
+            (new ForumCatsModel)->update(['sort'], ['id ='], [($_GET["sort"] - 1), $id]);
         }
 
         if ($move == 'down') {
-            ForumCatsModel::update(['sort'], ['id ='], [$_GET["sort"] + 1, $id]);
-            ForumCatsModel::update(['sort'], ['sort =', 'category =', 'id !='], [$_GET["sort"], $_GET["sort"] + 1, $id]);
+            (new ForumCatsModel)->update(['sort'], ['id ='], [$_GET["sort"] + 1, $id]);
+            (new ForumCatsModel)->update(['sort'], ['sort =', 'category =', 'id !='], [$_GET["sort"], $_GET["sort"] + 1, $id]);
         }
-        Redirect(Url('adminforumcat'), Txt("MOVED"));
+        showMessage(Url('adminforumcat'), LANG["MOVED"]);
     }
 
     // Admin Reorder Forums
-    public static function reorderForum($id, $forumid, $move)
+    public function reorderForum($id, $forumid, $move)
     {
         if ($move == 'up') {
             DB::update('forum_forums', ['sort'], ['sort =', 'category =', 'id !='], [$_GET["sort"], $_GET["sort"] - 1, $id, $forumid]);
@@ -246,50 +239,50 @@ class ForumsModel
             DB::update('forum_forums', ['sort'], ['id ='], [$_GET["sort"] + 1, $id]);
             DB::update('forum_forums', ['sort'], ['sort =', 'category =', 'id !='], [$_GET["sort"], $_GET["sort"] + 1, $id, $forumid]);
         }
-        Redirect(Url("adminforum/$id"), Txt("MOVED"));
+        showMessage(Url("adminforum/$id"), LANG["MOVED"]);
     }
 
     // Add/Edit Cat
-    public static function insertOrUpdate()
+    public function insertOrUpdate()
     {
         $name = Input('name');
         $sort = Input('sort');
         $id = Input('id');
         
         if ($name == "") {
-            Redirect(Url('adminforumcat'), Txt("MISSING_FORM_DATA"));
+            showMessage(Url('adminforumcat'), LANG["MISSING_FORM_DATA"]);
         }
         
         // Admin Insert Forum Cat
         if (!$id) {
-            $res = ForumCatsModel::insert(['name' => $name, 'sort' => intval($sort)]);
+            $res = (new ForumCatsModel)->insert(['name' => $name, 'sort' => intval($sort)]);
             if (!empty($res)) {
-                Redirect(Url('adminforumcat'), Txt("SUCCESS"));
+                showMessage(Url('adminforumcat'), LANG["SUCCESS"]);
             } else {
-                Redirect(Url('adminforumcat'), Txt("ACTION_FAILED"));
+                showMessage(Url('adminforumcat'), LANG["ACTION_FAILED"]);
             }
         } else {
-            ForumCatsModel::update(['sort','name'], ['id='], [$sort, $name, $id]);
-            Redirect(Url('adminforumcat'), "<center><b>" . Txt("UPDATE_COMPLETE") . "</b></center>");
+            (new ForumCatsModel)->update(['sort','name'], ['id='], [$sort, $name, $id]);
+            showMessage(Url('adminforumcat'), "<center><b>" . LANG["UPDATE_COMPLETE"] . "</b></center>");
         }
     }
 
     public static function getIndex()
     {
-        $array = ForumCatsModel::fetchAll('*', '', 'ORDER BY sort');
+        $array = (new ForumCatsModel)->fetchAll('*', '', 'ORDER BY sort');
 
         return $array;
     }
 
     // Get User Forum Post By Id
-    public static function getUsersPost($USER, $id)
+    public function getUsersPost($id, $data = [])
     {
-        if (!$USER->permission('view_users', $id)) {
-            Redirect(Url(), Txt("NO_USER_VIEW"));
+        if ($data['current_user']->view_users != "yes" && $data['current_user']->id != $id) {
+            showMessage(Url(), LANG["NO_USER_VIEW"]);
         }
 
         // Pagination
-        $count = PostsModel::fetchColumn('count(id) as count', ['userid ='], [$id]);
+        $count = (new PostsModel)->fetchColumn('count(id) as count', ['userid ='], [$id]);
         list($pager, $limit) = pagination(20, $count, Url("post/user/$id&"));
         $row = DB::run("SELECT
                         forum_posts.id, 
@@ -333,10 +326,10 @@ class ForumsModel
     }
 
     // Admin Get Forums
-    public static function getForums($id)
+    public function getForums($id)
     {
-        $name = ForumCatsModel::fetchColumn('name', ['id='], [$id], 'ORDER BY sort, name');
-        $query = ForumCatsModel::fetchAll('*', '', 'ORDER BY sort, name');
+        $name = (new ForumCatsModel)->fetchColumn('name', ['id='], [$id], 'ORDER BY sort, name');
+        $query = (new ForumCatsModel)->fetchAll('*', '', 'ORDER BY sort, name');
         $forumcat = array();
         foreach ($query as $row) {
             $forumcat[] = $row;
@@ -349,7 +342,7 @@ class ForumsModel
         }
 
         $query = DB::fetchAll('forum_forums', '*', ['category='], [$id], 'ORDER BY category, sub, sort');
-        $groups = GroupsModel::fetchAll('*', '');
+        $groups = (new GroupsModel)->fetchAll('*', '');
         $array = [
             'forumcat' => $forumcat,
             'forumforum' => $forumforum,
@@ -361,7 +354,7 @@ class ForumsModel
     }
 
     // Admin Add/Edit Forum
-    public static function insertOrUpdateForum()
+    public function insertOrUpdateForum()
     {
         $name = Input('name');
         $description = Input('description');
@@ -377,32 +370,32 @@ class ForumsModel
             $res = DB::insert('forum_forums', ['name' => $name, 'description' => $description, 'sort' => $sort, 'category' => $new_forum_cat, 'minclassread' => $minclassread, 'minclasswrite' => $minclasswrite, 'guest_read' => $guest_read, 'sub' => $sub]);
             $id = DB::lastInsertId();
             if ($res) {
-                Redirect(Url("adminforum/$new_forum_cat"), Txt("SUCCESS"));
+                showMessage(Url("adminforum/$new_forum_cat"), LANG["SUCCESS"]);
             } else {
-                Redirect(Url("adminforum/$new_forum_cat"), Txt("ACTION_FAILED"));
+                showMessage(Url("adminforum/$new_forum_cat"), LANG["ACTION_FAILED"]);
             }
         } else {
             DB::update('forum_forums', ['sort','name','description','category','minclassread','minclasswrite','guest_read','sub'], ['id='], [$sort, $name, $description, $new_forum_cat, $minclassread, $minclasswrite, $guest_read, $sub, $id]);
-            Redirect(Url("adminforum/$new_forum_cat"), "<center><b>" . Txt("UPDATE_COMPLETE") . "</b></center>");
+            showMessage(Url("adminforum/$new_forum_cat"), "<center><b>" . LANG["UPDATE_COMPLETE"] . "</b></center>");
         }
     }
 
     // Admin Delete Forum
-    public static function delete($id, $sure = 0)
+    public function delete($id, $sure = 0)
     {
         if ($sure != 'sure') {
-            Redirect(Url('adminforum'), "Are You Sure <a href='".URLROOT."/adminforum/delete/$id/sure'>Remove Forum $id</a>");
+            showMessage(Url('adminforum'), "Are You Sure <a href='".CONFIG['URLROOT']."/adminforum/delete/$id/sure'>Remove Forum $id</a>");
         }
 
         $v = DB::fetchRow('forum_forums', '*', ['id='], [$id]);
         if (!$v) {
-            Redirect(Url('adminforum'), Txt("FORUM_INVALID"));
+            showMessage(Url('adminforum'), LANG["FORUM_INVALID"]);
         }
 
         DB::delete('forum_forums', ['id' => $id]);
-        TopicsModel::delete(['forumid' => $id]);
-        PostsModel::delete(['topicid' => $id]);
-        ReadModel::delete(['topicid' => $id]);
-        Redirect(Url('adminforumcat'), Txt("DEL_COMPLETE"));
+        (new TopicsModel)->delete(['forumid' => $id]);
+        (new PostsModel)->delete(['topicid' => $id]);
+        (new ReadModel)->delete(['topicid' => $id]);
+        showMessage(Url('adminforumcat'), LANG["DEL_COMPLETE"]);
     }
 }

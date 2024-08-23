@@ -2,18 +2,29 @@
 
 namespace App\Controllers\Admin;
 
-use App\Libs\User;
+use App\Libs\Controller;
 
 /*
 * Exception Controller
 */
-class Adminexceptions 
+class Adminexceptions extends Controller
 {
+    public $current_user;
+
+    // Get Current User
+    public function __construct()
+    {
+        $this->current_user = $this->currentuser(2);
+        if ($this->current_user->class < CONFIG['_MODERATOR']) {
+            showMessage(CONFIG['URLROOT'], LANG["NO_PERMISSION"]);
+        }
+    }
+
     // Exception Default Page
     public function index() {
-        $USER = new User(_MODERATOR, 2);
+    
         // Get File
-        $exceptionfilelocation = LOGGER."/exception_log.txt";
+        $exceptionfilelocation = CONFIG['LOGGER']."/exception_log.txt";
         $filecontents = file_get_contents($exceptionfilelocation);
 
         // Create File
@@ -29,15 +40,14 @@ class Adminexceptions
             make_content_file($exceptionfilelocation, $newcontents);
         }
 
-        // Init Data
+        // Data For View
         $data = [
-            'V_title' => Txt('EXCEPTIONS'),
-            'V_filecontents' => $filecontents,
-            'USER' => $USER
+            'page_title' => LANG['EXCEPTIONS'],
+            'V_filecontents' => $filecontents
         ];
 
         // Load View
-        template('exception', $data, 'admin');
+        $this->view('exception', $data, 'admin');
     }
 
 }

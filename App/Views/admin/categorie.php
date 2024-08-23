@@ -1,20 +1,20 @@
-<?php block_begin($V_title) ?>
+<?php block_begin($page_title) ?>
 <p class="text-center">
-    <a type="button" class="model_form ttbtn btn-sm" data-bs-toggle="modal" data-bs-target="#addModal"><?= Txt('ADD') ?></a>
+    <a type="button" class="model_form ttbtn btn-sm" data-bs-toggle="modal" data-bs-target="#addModal"><?= LANG['ADD'] ?></a>
 <p>
 
 <div class="table-responsive p-2">
     <p class="text-center">
-        <i><?= Txt('CAT_IMAGE_HELP') ?></i>
+        <i><?= LANG['CAT_IMAGE_HELP'] ?></i>
     </p>
     <table class='table table-striped'>
         <thead>
             <tr>
-                <th width='10'><?= Txt('SORT') ?></th>
-                <th><?= Txt('PARENT_CAT') ?></th>
-                <th><?= Txt('SUB_CAT') ?></th>
-                <th><?= Txt('ICON') ?></th>
-                <th><?= Txt('ACTION') ?></th>
+                <th width='10'><?= LANG['SORT'] ?></th>
+                <th><?= LANG['PARENT_CAT'] ?></th>
+                <th><?= LANG['SUB_CAT'] ?></th>
+                <th><?= LANG['ICON'] ?></th>
+                <th><?= LANG['ACTION'] ?></th>
             </tr>
         </thead>
         <tbody><?php
@@ -72,15 +72,15 @@
             <div class="modal-content">
                 <div class="modal-body">
                     <input type='hidden' name='id' id='id' />
-                    <input type='text' name='parent_cat' id='parent_cat' class="form-control fullwidth" placeholder="<?= Txt('PARENT_CAT') ?>"/><br>
-                    <input type='text' name='name' id='name' class="form-control fullwidth" placeholder="<?= Txt('SUB_CAT') ?>"/><br>
-                    <input type='text' name='sort_index' id='sort_index' class="form-control fullwidth" placeholder="<?= Txt('SORT') ?>"/><br>
-                    <input type='text' name='image' id='image' class="form-control fullwidth" placeholder="<?= Txt('ICON') ?> eg fa-book"/><br>
+                    <input type='text' name='parent_cat' id='parent_cat' class="form-control fullwidth" placeholder="<?= LANG['PARENT_CAT'] ?>"/><br>
+                    <input type='text' name='name' id='name' class="form-control fullwidth" placeholder="<?= LANG['SUB_CAT'] ?>"/><br>
+                    <input type='text' name='sort_index' id='sort_index' class="form-control fullwidth" placeholder="<?= LANG['SORT'] ?>"/><br>
+                    <input type='text' name='image' id='image' class="form-control fullwidth" placeholder="<?= LANG['ICON'] ?> eg fa-book"/><br>
 
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-sm ttbtn" data-bs-dismiss="modal"><?= Txt('CLOSE') ?></button>
-                    <button type="submit" class="btn btn-sm ttbtn"><?= Txt("SUBMIT"); ?></button>
+                    <button type="button" class="btn btn-sm ttbtn" data-bs-dismiss="modal"><?= LANG['CLOSE'] ?></button>
+                    <button type="submit" class="btn btn-sm ttbtn"><?= LANG["SUBMIT"]; ?></button>
                 </div>
             </div>
         </div>

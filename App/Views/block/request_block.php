@@ -2,8 +2,8 @@
 
 use App\Models\RequestsModel;
 
-if ($USER->has('id')) {
-    block_begin(Txt("REQUESTS"));
+if ($_SESSION['id']) {
+    block_begin(LANG["REQUESTS"]);
     $expires = 600; // Cache time in seconds 10 mins
     if (($rows = $TTCache->Get("block/request_block", $expires)) === false) {
         $requests = RequestsModel::joincat();

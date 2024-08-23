@@ -21,9 +21,9 @@ class DB
                 PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
                 PDO::ATTR_EMULATE_PREPARES => false,
             );
-            $dsn = 'mysql:host=' . DB_HOST . ';dbname=' . DB_NAME . ';charset=' . DB_CHAR;
+            $dsn = 'mysql:host=' . CONFIG['DB_HOST'] . ';dbname=' . CONFIG['DB_NAME'] . ';charset=' . CONFIG['DB_CHAR'];
 		try {
-            self::$instance = new PDO($dsn, DB_USER, DB_PASS, $opt);
+            self::$instance = new PDO($dsn, CONFIG['DB_USER'], CONFIG['DB_PASS'], $opt);
         } catch (\PDOException $e) {
             die('The Database Details Are Incorrect');
         }

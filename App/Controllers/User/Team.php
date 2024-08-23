@@ -2,44 +2,53 @@
 
 namespace App\Controllers\User;
 
-use App\Libs\User;
+use App\Libs\Controller;
 use App\Models\TeamsModel;
 
 /*
 * Teams Controller
 */
-class Team 
+class Team extends Controller
 {
+    public $current_user;
+
+    // Get Current User
+    public function __construct()
+    {
+        $this->current_user = $this->currentuser(2);
+    }
+
     // Teams Default Page
     public function index()
     {
-        $USER = new User(0, 2);
+    
         // Get Teams Data
-        $teams = TeamsModel::getTeams();
+        $teams = (new TeamsModel)->getTeams();
 
-        // Init Data
+        // Data For View
         $data = [
-            'V_title' => Txt("TEAM"),
+            'page_title' => LANG["TEAM"],
             'V_teams' => $teams,
-            'USER' => $USER
+            'current_user' => $this->current_user
         ];
         
         // Load View
-        template('team', $data, 'user');
+        $this->view('team', $data, 'user');
     }
 
     // Delete Team Form Submit
     public function delete($id)
     {
-        $USER = new User(0, 2);
-        TeamsModel::delete($id);
+
+    
+        (new TeamsModel)->delete($id, $this->current_user->name);
     }
 
     // Add/Edit Form Submit
     public function submit()
     {
-        $USER = new User(0, 2);
-        TeamsModel::addOrUpdate();
+    
+        (new TeamsModel)->addOrUpdate($this->current_user->name);
     }
 
 }

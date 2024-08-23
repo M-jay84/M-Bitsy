@@ -1,11 +1,11 @@
 <?php
-use App\Models\TorrentsModel;
+use App\Libs\DB;
 
-if ($USER->has('id')) {
-    block_begin(Txt("SEEDERS_WANTED"));
+if ($_SESSION['id']) {
+    block_begin(LANG["SEEDERS_WANTED"]);
     $expires = 600; // Cache time in seconds
     if (($rows = $TTCache->Get("block/seedwanted_block", $expires)) === false) {
-        $res = TorrentsModel::fetchAll('id, name, seeders, leechers', ['seeders=','leechers=','banned=','external='], [0,0,'no','no'], 'ORDER BY leechers DESC LIMIT 5');
+        $res = DB::fetchAll('torrents', 'id, name, seeders, leechers', ['seeders=','leechers=','banned=','external='], [0,0,'no','no'], 'ORDER BY leechers DESC LIMIT 5');
         $rows = array();
         foreach ($res as $row) {
             $rows[] = $row;
@@ -14,13 +14,13 @@ if ($USER->has('id')) {
     }
 
     if (!$rows) { ?>
-		<p class="text-center"><?= Txt("NOTHING_FOUND"); ?></p>
+		<p class="text-center"><?= LANG["NOTHING_FOUND"]; ?></p>
 	    <?php
     } else {
         foreach ($rows as $row) {
             $smallname = htmlspecialchars(CutName($row["name"], 20));?>
 			<div class="pull-left"><a href="<?= Url("torrent/$row[id]") ?>" title="<?= htmlspecialchars($row["name"]); ?>"><?= $smallname; ?></a></div>
-			<div class="pull-right"><span class="label label-waring"><?= Txt("LEECHERS") ?>: <?= number_format($row["leechers"]); ?></span></div>
+			<div class="pull-right"><span class="label label-waring"><?= LANG["LEECHERS"] ?>: <?= number_format($row["leechers"]); ?></span></div>
 		    <?php
         }
     }

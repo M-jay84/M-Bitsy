@@ -140,8 +140,8 @@ function strtobytes($str)
 // Upload Image - torrent/edit
 function uploadimage($x, $imgname, $tid)
 {
-    $imagesdir = UPLOADDIR . "/images";
-    $allowed_types = ALLOWEDIMAGETYPES;
+    $imagesdir = CONFIG['UPLOADDIR'] . "/images";
+    $allowed_types = CONFIG['ALLOWEDIMAGETYPES'];
     if (!($_FILES["image$x"]["name"] == "")) {
         if ($imgname != "") {
             $img = "$imagesdir/$imgname";
@@ -150,13 +150,13 @@ function uploadimage($x, $imgname, $tid)
         $y = $x + 1;
         $im = getimagesize($_FILES["image$x"]["tmp_name"]);
         if (!$im[2]) {
-            Redirect(URLROOT . $_SERVER["HTTP_REFERER"], "Invalid Image $y.");
+            showMessage(Url(CONFIG['URLROOT'] . $_SERVER["HTTP_REFERER"]), "Invalid Image $y.");
         }
         if (!array_key_exists($im['mime'], $allowed_types)) {
-            Redirect(URLROOT . $_SERVER["HTTP_REFERER"], Txt("INVALID_FILETYPE_IMAGE"));
+            showMessage(Url(CONFIG['URLROOT'] . $_SERVER["HTTP_REFERER"]), LANG["INVALID_FILETYPE_IMAGE"]);
         }
-        if ($_FILES["image$x"]["size"] > IMAGEMAXFILESIZE) {
-            Redirect(URLROOT . $_SERVER["HTTP_REFERER"], sprintf(Txt("INVAILD_FILE_SIZE_IMAGE"), $y));
+        if ($_FILES["image$x"]["size"] > CONFIG['IMAGEMAXFILESIZE']) {
+            showMessage(Url(CONFIG['URLROOT'] . $_SERVER["HTTP_REFERER"]), sprintf(LANG["INVAILD_FILE_SIZE_IMAGE"], $y));
         }
         $uploaddir = "$imagesdir/";
         $ifilename = $tid . $x . $allowed_types[$im['mime']];
@@ -166,9 +166,9 @@ function uploadimage($x, $imgname, $tid)
 }
 
 // Save Image
-function copyImage($source, $destination, $redirect = URLROOT)
+function copyImage($source, $destination, $redirect = CONFIG['URLROOT'])
 {
-    if (extension_loaded('gd') && USE_WEBP) {
+    if (extension_loaded('gd') && CONFIG['USE_WEBP']) {
         // compress size max 100
         $compression_quality = 25;
         // set type
@@ -191,14 +191,14 @@ function copyImage($source, $destination, $redirect = URLROOT)
             $image = imagecreatefromjpeg($source);
             $new_destination = substr($destination, 0, -4) . 'webp';
         } else {
-            Redirect($redirect, sprintf(Txt("Strange Image Type - Only Gif, Png, Jpeg & Jpg allowed")));
+            showMessage(Url(), sprintf(LANG["Strange Image Type - Only Gif, Png, Jpeg & Jpg allowed"]));
         }
 
         // convert image
         $result = imagewebp($image, $new_destination, $compression_quality);
         // check result
         if (false === $result) {
-            Redirect($redirect, sprintf(Txt("No Image Result")));
+            showMessage(Url(), sprintf(LANG["No Image Result"]));
         }
         // destroy temp
         imagedestroy($image);
@@ -206,7 +206,7 @@ function copyImage($source, $destination, $redirect = URLROOT)
     } else {
         $copy = copy($source, $destination);
         if (!$copy) {
-            Redirect($redirect, Txt("IMAGE_UPLOAD_FAILED"));
+            showMessage(Url(), LANG["IMAGE_UPLOAD_FAILED"]);
         }
         return $destination;
     }

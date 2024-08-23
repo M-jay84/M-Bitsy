@@ -2,67 +2,74 @@
 
 namespace App\Controllers\User;
 
-use App\Libs\User;
+use App\Libs\Controller;
 use App\Models\ProfileModel;
 
 /*
 * Profile Controller
 */
-class Profile
+class Profile extends Controller
 {
+    public $current_user;
+
+    // Get Current User
+    public function __construct()
+    {
+        $this->current_user = $this->currentuser(2);
+    }
+
     // Profile Default Page
     public function index($id)
     {
-        $USER = new User(0, 2);
-        if (!$USER->permission('view_users', $id)) {
-            Redirect(Url(), Txt("NO_USER_VIEW"));
+    
+        if ($this->current_user->view_users != "yes" && $this->current_user->id != $id) {
+            showMessage(Url(), LANG["NO_USER_VIEW"]);
         }
 
-        $user = ProfileModel::getProfile($USER, $id);
+        $user = (new ProfileModel)->getProfile($id, $this->current_user);
 
-        if ($user['user']["privacy"] != "strong" || ($USER->has('control_panel') == "yes") || ($USER->has('id') == $id)) {
+        if ($user['user']["privacy"] != "strong" || ($this->current_user->control_panel == "yes") || ($this->current_user->id == $id)) {
 
-            // Init Data
+            // Data For View
             $data = [
-                'V_title' => Txt("USER_DETAILS_FOR") . coloredname($id),
+                'page_title' => LANG["USER_DETAILS_FOR"] . coloredname($id),
                 'V_id' => $id,
                 'V_count' => $user['count'],
                 'V_dropdown' => $user['dropdown'],
                 'V_user' => $user['user'],
                 'V_friend' => $user['friend'],
                 'V_html' => $user['html'],
-                'USER' => $USER
+            'current_user' => $this->current_user
             ];
 
             // Load View
-            template('profile', $data, 'user');
+            $this->view('profile', $data, 'user');
         } else {
-            Redirect(Url(), Txt("USER_PRIVATE"));
+            showMessage(Url(), LANG["USER_PRIVATE"]);
         }
     }
 
     // Edit Profile Form Submit
     public function submit($id)
     {
-        $USER = new User(0, 2);
+    
         // Check User
-        if ($USER->isStaff($id)) {
-            Redirect(Url(), Txt("NO_PERMISSION"));
+        if ($this->current_user->class < CONFIG['_MODERATOR'] or $this->current_user->id != $id) {
+            showMessage(Url(), LANG["NO_PERMISSION"]);
         }
-        ProfileModel::submit($USER, $id);
+        (new ProfileModel)->submit($id, $this->current_user);
     }
 
     // Admin Edit Profile Form Submit
     public function submited($id)
     {
-        $USER = new User(0, 2);
-        ProfileModel::adminSubmited($USER, $id);
+    
+        (new ProfileModel)->adminSubmited($id, $this->current_user);
     }
 
     // Delete Profile Default Page otdo (tidy up)
     public function delete()
     {
-        $USER = new User(0, 2);
-        ProfileModel::deleteprofile($USER);
+        (new ProfileModel)->deleteprofile($this->current_user);
     }
 }

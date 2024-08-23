@@ -10,28 +10,28 @@ use App\Libs\DB;
 class ForumCatsModel
 {
     // Delete Cat
-    public static function delete($id)
+    public function delete($id)
     {
         $stmt = DB::delete('forumcats', ['id'=>$id]);
         return $stmt;
     }
 
     // Insert Forum Cat
-    public static function insert($updateset)
+    public function insert($updateset)
     {
         $stmt = DB::insert('forumcats', $updateset);
         return $stmt;
 	}
 	
     // Update Forum Cat
-    public static function update($cols, $where, $vals, $other = '')
+    public function update($cols, $where, $vals, $other = '')
     {
         $stmt = DB::update('forumcats', $cols, $where, $vals, $other);
         return $stmt; 
 	}
 	
     // Fetch Forum Cat Column
-    public static function fetchColumn($columns = '*', $where = '', $values = '', $other = '')
+    public function fetchColumn($columns = '*', $where = '', $values = '', $other = '')
     {
         $stmt = DB::newSelect('forumcats', $columns, $where, $values, $other)->fetchColumn();
 		return $stmt;
@@ -45,7 +45,7 @@ class ForumCatsModel
 	}
 
     // Fetch Forum Cat Row
-    public static function fetchAll($columns = '*', $where = '', $values = '', $other = '')
+    public function fetchAll($columns = '*', $where = '', $values = '', $other = '')
     {
         $stmt = DB::newSelect('forumcats', $columns, $where, $values, $other);
 		return $stmt;

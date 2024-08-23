@@ -3,10 +3,10 @@
 <?php
 foreach ($data['res'] as $row) {
     // Quick Function To Tidy Results
-    $user = userpostdetails($USER, $row); ?>
+    $user = userpostdetails($row); ?>
     <div class="row tt_block rounded p-1">
         <div class="col-2 d-none d-sm-block"> <?php
-            if (!$USER->permission('edit_users') && $user['privacylevel'] == 'strong') {
+            if (!$current_user->edit_users == 'yes' && $user['privacylevel'] == 'strong') {
                 print('<center>' . coloredname($row['userid']) . '<br /><i>' . $user['title'] . '</i><img width="80" height="80" src="' . $user['avatar'] . '" alt="" /><br />Uploaded: ---<br />Downloaded: ---<br />Ratio: ' . get_ratio_color('---') . '</small><br /><br /><a href="' . Url("profile/$user[id]") . '"><i class="fa fa-user tticon" title="Profile"></i></a> <a href="' . Url("message/create/$user[id]") . '"><i class="fa fa-comment" title="Send PM"></i></a></center>');
             } else {
                 print('<center>' . coloredname($row['userid']) . '<br><i>' . $user['title'] . '</i><img width="80" height="80" src="' . $user['avatar'] . '" alt="" /><br />Uploaded: ' . $user['useruploaded'] . '<br />Downloaded: ' . $user['userdownloaded'] . '<br />Ratio: ' . get_ratio_color($user['userratio']) . '</small><br /><a href="' . Url("profile/$user[id]") . '"><i class="fa fa-user" title="Profile"></i></a> <a href="'.Url("message/create/$user[id]") . '"><i class="fa fa-comment" title="Send PM"></i></a></center>');

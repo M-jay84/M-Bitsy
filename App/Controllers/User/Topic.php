@@ -2,122 +2,80 @@
 
 namespace App\Controllers\User;
 
-use App\Libs\User;
+use App\Libs\Controller;
 use App\Models\TopicsModel;
 
 /*
 * Topic Controller
 */
-class Topic 
+class Topic extends Controller
 {
+    public $current_user;
+
+    // Get Current User
+    public function __construct()
+    {
+        $this->current_user = $this->currentuser(1);
+        if (!CONFIG['FORUMS']) {
+            showMessage(Url(), LANG["FORUM_AVAILABLE"]);
+        }
+        if (!CONFIG['FORUMS_GUESTREAD'] && !$this->current_user->id) {
+            showMessage(Url(), LANG["NO_PERMISSION"]);
+        }
+        if ($this->current_user->view_forum != "yes" && $this->current_user->class <= CONFIG['_MODERATOR']) {
+            showMessage(Url(), LANG["FORUM_BANNED"]);
+        }
+    }
+
     // View Forum Topic Page
     public function index($forumid)
     {
-        $USER = new User(0, 1);
-        if (!CONFIG['FORUMS']) {
-            Redirect(Url(), Txt("FORUM_AVAILABLE"));
-        }
-        if (!CONFIG['FORUMS_GUESTREAD'] && !$USER->has('id')) {
-            Redirect(Url(), Txt("NO_PERMISSION"));
-        }
-        if (!$USER->permission('view_forum')) {
-            Redirect(Url(), Txt("FORUM_BANNED"));
-        }
         // Get Topics Data
-        $topics = TopicsModel::getForumTopics($forumid);
+        $topics = (new TopicsModel)->getForumTopics($forumid, $this->current_user);
 
-        // Init Data
+        // Data For View
         $data = [
-            'V_title' => Txt("FORUM"),
+            'page_title' => LANG["FORUM"],
             'V_topics' => $topics,
             'V_forumid' => $forumid,
             'V_topic_name' => $topics['topic_name'],
             'V_forum_name' => $topics['forum_name'],
-            'USER' => $USER
+            'current_user' => $this->current_user
         ];
 
         // Load View
-        template('topic', $data, 'user');
+        $this->view('topic', $data, 'user');
     }
 
     // Post Topic
     public function submit($forumid)
     {
-        $USER = new User(0, 1);
-        if (!CONFIG['FORUMS']) {
-            Redirect(Url(), Txt("FORUM_AVAILABLE"));
-        }
-        if (!CONFIG['FORUMS_GUESTREAD'] && !$USER->has('id')) {
-            Redirect(Url(), Txt("NO_PERMISSION"));
-        }
-        if (!$USER->permission('view_forum')) {
-            Redirect(Url(), Txt("FORUM_BANNED"));
-        }
-        TopicsModel::insertTopic($USER, $forumid);
+        $data['current_user'] = $this->current_user;
+        (new TopicsModel)->insertTopic($forumid, $data);
     }
 
     // Delete a Topic Submit
     public function delete($topicid, $sure = 0)
     {
-        $USER = new User(0, 1);
-        if (!CONFIG['FORUMS']) {
-            Redirect(Url(), Txt("FORUM_AVAILABLE"));
-        }
-        if (!CONFIG['FORUMS_GUESTREAD'] && !$USER->has('id')) {
-            Redirect(Url(), Txt("NO_PERMISSION"));
-        }
-        if (!$USER->permission('view_forum')) {
-            Redirect(Url(), Txt("FORUM_BANNED"));
-        }
-        TopicsModel::delTopic($topicid, $sure);
+        (new TopicsModel)->delTopic($topicid, $sure);
     }
 
     // Rename a Topic Submit
     public function rename($topicid)
     {
-        $USER = new User(0, 1);
-        if (!CONFIG['FORUMS']) {
-            Redirect(Url(), Txt("FORUM_AVAILABLE"));
-        }
-        if (!CONFIG['FORUMS_GUESTREAD'] && !$USER->has('id')) {
-            Redirect(Url(), Txt("NO_PERMISSION"));
-        }
-        if (!$USER->permission('view_forum')) {
-            Redirect(Url(), Txt("FORUM_BANNED"));
-        }
-        TopicsModel::rename($topicid, $USER);
+        (new TopicsModel)->rename($topicid, $this->current_user);
     }
 
     // Move a Topic Submit
     public function move($topicid)
     {
-        $USER = new User(0, 1);
-        if (!CONFIG['FORUMS']) {
-            Redirect(Url(), Txt("FORUM_AVAILABLE"));
-        }
-        if (!CONFIG['FORUMS_GUESTREAD'] && !$USER->has('id')) {
-            Redirect(Url(), Txt("NO_PERMISSION"));
-        }
-        if (!$USER->permission('view_forum')) {
-            Redirect(Url(), Txt("FORUM_BANNED"));
-        }
-        TopicsModel::move($topicid, $USER);
+        (new TopicsModel)->move($topicid, $this->current_user);
     }
 
     // Lock a Topic Submit
     public function action($forumid, $topicid, $type)
     {
-        $USER = new User(0, 1);
-        if (!CONFIG['FORUMS']) {
-            Redirect(Url(), Txt("FORUM_AVAILABLE"));
-        }
-        if (!CONFIG['FORUMS_GUESTREAD'] && !$USER->has('id')) {
-            Redirect(Url(), Txt("NO_PERMISSION"));
-        }
-        if (!$USER->permission('view_forum')) {
-            Redirect(Url(), Txt("FORUM_BANNED"));
-        }
-        TopicsModel::action($forumid, $topicid, $type, $USER);
+        (new TopicsModel)->action($forumid, $topicid, $type, $this->current_user);
     }
 
 }

@@ -2,66 +2,72 @@
 
 namespace App\Controllers\User;
 
-use App\Libs\User;
+use App\Libs\Controller;
 use App\Models\SnatchedModel;
 
 /*
 * Snatch Controller
 */
-class Snatch 
+class Snatch extends Controller
 {
+    public $current_user;
+
+    // Get Current User
+    public function __construct()
+    {
+        $this->current_user = $this->currentuser(2);
+    }
+
     // Snatched Torrent Default Page // todo more test
     public function index($id, $type)
     {
-        $USER = new User(0, 2);
-        if ($!USER->permission('view_torrents') && $id != $USER->has('id')) {
-            Redirect(Url(), Txt("NO_TORRENT_VIEW"));
+    
+        if ($this->current_user->view_torrents && $id != $this->current_user->id) {
+            showMessage(Url(), LANG["NO_TORRENT_VIEW"]);
         }
         
         if ($type == 'complete') {
-            $snatched = SnatchedModel::join('snatched.tid = ? AND snatched.completed != 0', $id);
+            $snatched = (new SnatchedModel)->join('snatched.tid = ? AND snatched.completed != 0', $id);
             $cols = 'torrent';
         } elseif ($type == 'torrent') {
-            $snatched = SnatchedModel::join('snatched.tid = ?', $id);
+            $snatched = (new SnatchedModel)->join('snatched.tid = ?', $id);
             $cols = 'torrent';
         } elseif ($type == 'user') {
-            $snatched = SnatchedModel::join('snatched.uid = ?', $id);
+            $snatched = (new SnatchedModel)->join('snatched.uid = ?', $id);
             $cols = 'user';
         }
 
-        // Init Data
+        // Data For View
         $data = [
-            'V_title' => Txt("SNATCH_RESULT"),
+            'page_title' => LANG["SNATCH_RESULT"],
             'V_cols' => $cols,
             'V_snatched' => $snatched['stmt'],
             'V_count' => $snatched['count'],
-            'V_pager' => $snatched['pager'],
-            'USER' => $USER
+            'V_pager' => $snatched['pager']
         ];
 
         // Load View
-        template('snatch', $data, 'user');
+        $this->view('snatch', $data, 'user');
     }
 
     // Trade Snatched Default Page
     public function trade()
     {
-        $USER = new User(0, 2);
+    
         if (!empty($_POST)) {
-                SnatchedModel::submitTrade();
+            (new SnatchedModel)->submitTrade($this->current_user);
         } else {
             // Get Snatched Data
-            $snatched = SnatchedModel::trade($USER->has('id'));
+            $snatched = (new SnatchedModel)->trade($this->current_user->id);
 
-            // Init Data
+            // Data For View
             $data = [
-                'V_title' => Txt('TRADE'),
-                'V_snatched' => $snatched,
-                'USER' => $USER
+                'page_title' => LANG['TRADE'],
+                'V_snatched' => $snatched
             ];
 
             // Load View
-            template('snatch_trade', $data, 'user');
+            $this->view('snatch_trade', $data, 'user');
         }
     }
 

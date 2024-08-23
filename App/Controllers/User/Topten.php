@@ -2,15 +2,23 @@
 
 namespace App\Controllers\User;
 
-use App\Libs\User;
+use App\Libs\Controller;
 use App\Libs\DB;
 use App\Models\UsersModel;
 
 /*
 * Top Ten Controller
 */
-class Topten 
+class Topten extends Controller
 {
+    public $current_user;
+
+    // Get Current User
+    public function __construct()
+    {
+        $this->current_user = $this->currentuser(2);
+    }
+
     private function sql($limit = 10)
     {
         $info['active'] = DB::run("SELECT t.*, (t.size * t.times_completed + SUM(p.downloaded)) AS data FROM torrents AS t LEFT JOIN peers AS p ON t.id = p.torrent WHERE p.seeder = 'no' GROUP BY t.id ORDER BY seeders + leechers DESC, seeders DESC, added ASC LIMIT $limit")->fetchAll(); 
@@ -41,30 +49,29 @@ class Topten
     // Top Torrents Default Page // todo
     public function index($limit = 10)
     {
-        $USER = new User(0, 2);
+    
         $info = $this->sql($limit);
 
         $data = [
-            'V_title' => Txt("TOP_10"),
-            'V_info' => $info,
-            'USER' => $USER
+            'page_title' => LANG["TOP_10"],
+            'V_info' => $info
         ];
         
         // Load View
-        template('topten', $data, 'user');
+        $this->view('topten', $data, 'user');
     }
 
     // Top 100
     public function more($limit = 100)
     {
-        $USER = new User(0, 2);
+    
         $info = $this->sql($limit);
         
-        require_once "assets/themes/" . ($USER->has('stylesheet') ?: CONFIG['DEFAULTTHEME']) . "/header.php";
+        require_once "assets/themes/" . ($this->current_user->stylesheet ?: CONFIG['DEFAULTTHEME']) . "/header.php";
         block_begin("Top Ten");
 
         block_end();
-        require_once "assets/themes/" . ($USER->has('stylesheet') ?: CONFIG['DEFAULTTHEME']) . "/footer.php";
+        require_once "assets/themes/" . ($this->current_user->stylesheet ?: CONFIG['DEFAULTTHEME']) . "/footer.php";
     }
 
 }

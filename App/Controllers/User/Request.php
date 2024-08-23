@@ -2,113 +2,121 @@
 
 namespace App\Controllers\User;
 
-use App\Libs\User;
+use App\Libs\Controller;
 use App\Models\CatagoriesModel;
 use App\Models\RequestsModel;
 
 /*
 * Request Controller
 */
-class Request 
+class Request extends Controller
 {
+    public $current_user;
+
+    // Get Current User
+    public function __construct()
+    {
+        $this->current_user = $this->currentuser(2);
+    }
+
     // Request Page
     public function index($id = 0)
     {
-        $USER = new User(0, 2);
-        if (!$USER->permission('view_torrents')) {
-            Redirect(Url(), Txt("NO_PERMISSION"));
+    
+        if ($this->current_user->view_torrents != "yes" && CONFIG['MEMBERSONLY']) {
+            showMessage(Url(), LANG["NO_PERMISSION"]);
         }
         if (!CONFIG['REQUESTSON']) {
-            Redirect(Url(), Txt("REQ_OFF"));
+            showMessage(Url(), LANG["REQ_OFF"]);
         }
-        $requests = RequestsModel::pages($id);
+        $requests = (new RequestsModel)->pages($id);
    
         $data = [
-            'V_title' => Txt('REQUEST'),
+            'page_title' => LANG['REQUEST'],
             'V_pager' => $requests['pager'],
             'V_cats' => CatagoriesModel::genreList(),
             'V_requests' => $requests['res'],
-            'USER' => $USER
+            'current_user' => $this->current_user
         ];
-        template('request', $data, 'user');
+        $this->view('request', $data, 'user');
     }
 
     // Confirm Request
     public function confirmreq()
     {
-        $USER = new User(0, 2);
-        if (!$USER->permission('view_torrents')) {
-            Redirect(Url(), Txt("NO_PERMISSION"));
+    
+        if ($this->current_user->view_torrents != "yes" && CONFIG['MEMBERSONLY']) {
+            showMessage(Url(), LANG["NO_PERMISSION"]);
         }
         if (!CONFIG['REQUESTSON']) {
-            Redirect(Url(), Txt("REQ_OFF"));
+            showMessage(Url(), LANG["REQ_OFF"]);
         }
-        RequestsModel::create($USER);
+        (new RequestsModel)->create($this->current_user);
     }
 
     // Edit Request
     public function edit()
     {
-        $USER = new User(0, 2);
-        if (!$USER->permission('view_torrents')) {
-            Redirect(Url(), Txt("NO_PERMISSION"));
+    
+        if ($this->current_user->view_torrents != "yes" && CONFIG['MEMBERSONLY']) {
+            showMessage(Url(), LANG["NO_PERMISSION"]);
         }
         if (!CONFIG['REQUESTSON']) {
-            Redirect(Url(), Txt("REQ_OFF"));
+            showMessage(Url(), LANG["REQ_OFF"]);
         }
-        RequestsModel::edit();
+        (new RequestsModel)->edit();
     }
 
     // Delete Request
     public function delete()
     {
-        $USER = new User(0, 2);
-        if (!$USER->permission('view_torrents')) {
-            Redirect(Url(), Txt("NO_PERMISSION"));
+    
+        if ($this->current_user->view_torrents != "yes" && CONFIG['MEMBERSONLY']) {
+            showMessage(Url(), LANG["NO_PERMISSION"]);
         }
         if (!CONFIG['REQUESTSON']) {
-            Redirect(Url(), Txt("REQ_OFF"));
+            showMessage(Url(), LANG["REQ_OFF"]);
         }
-        RequestsModel::delete();
+        (new RequestsModel)->delete($this->current_user);
     }
 
     // Request Filled
     public function reqfilled($requestid)
     {
-        $USER = new User(0, 2);
-        if (!$USER->permission('view_torrents')) {
-            Redirect(Url(), Txt("NO_PERMISSION"));
+    
+        if ($this->current_user->view_torrents != "yes" && CONFIG['MEMBERSONLY']) {
+            showMessage(Url(), LANG["NO_PERMISSION"]);
         }
         if (!CONFIG['REQUESTSON']) {
-            Redirect(Url(), Txt("REQ_OFF"));
+            showMessage(Url(), LANG["REQ_OFF"]);
         }
-        RequestsModel::fill($requestid);
+        (new RequestsModel)->fill($requestid, $this->current_user);
     }
 
     // Request Votes
     public function addvote($requestid)
     {
-        $USER = new User(0, 2);
-        if (!$USER->permission('view_torrents')) {
-            Redirect(Url(), Txt("NO_PERMISSION"));
+    
+        if ($this->current_user->view_torrents != "yes" && CONFIG['MEMBERSONLY']) {
+            showMessage(Url(), LANG["NO_PERMISSION"]);
         }
         if (!CONFIG['REQUESTSON']) {
-            Redirect(Url(), Txt("REQ_OFF"));
+            showMessage(Url(), LANG["REQ_OFF"]);
         }
-        RequestsModel::vote($requestid, $USER->has('id'));
+        (new RequestsModel)->vote($requestid, $this->current_user->id);
     }
 
     // Reset Request
     public function reqreset($requestid)
     {
-        $USER = new User(0, 2);
-        if (!$USER->permission('view_torrents')) {
-            Redirect(Url(), Txt("NO_PERMISSION"));
+    
+        if ($this->current_user->view_torrents != "yes" && CONFIG['MEMBERSONLY']) {
+            showMessage(Url(), LANG["NO_PERMISSION"]);
         }
         if (!CONFIG['REQUESTSON']) {
-            Redirect(Url(), Txt("REQ_OFF"));
+            showMessage(Url(), LANG["REQ_OFF"]);
         }
-        RequestsModel::reset($requestid);
+        (new RequestsModel)->reset($requestid, $this->current_user);
     }
 
 }

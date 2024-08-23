@@ -10,7 +10,7 @@ use App\Libs\DB;
 class ReportsModel
 {
     // Admin Get Reports
-    public static function pagination()
+    public function pagination()
     {
         $pager = array();
         $where = array();
@@ -76,31 +76,31 @@ class ReportsModel
     }
 
     // Admin Update Report
-    public static function update()
+    public function update($userid)
     {
         $ids = multiIds('ids');
-        DB::run("UPDATE reports SET complete = '1', dealtwith = '1', dealtby = ".$_SESSION['id']." WHERE id IN ($ids)");
-        Redirect(Url('adminreport'), Txt("ACTION_COMPLETE"));
+        DB::run("UPDATE reports SET complete = '1', dealtwith = '1', dealtby = ".$userid." WHERE id IN ($ids)");
+        showMessage(Url('adminreport'), LANG["ACTION_COMPLETE"]);
      }
 
     // Admin Delete Report
-    public static function deleteByIds()
+    public function deleteByIds()
     {
         
         $ids = multiIds('ids');
         $stmt = DB::deleteByIds('reports', ['complete ='], $ids , 'id', [1]);
-        Redirect(Url('adminreport'), Txt("SUCCESS"));
+        showMessage(Url('adminreport'), LANG["SUCCESS"]);
     }
 	
     // Delete Report
-    public static function delete($where)
+    public function delete($where)
     {
         $stmt = DB::delete('reports', $where);
         return $stmt;
     }
 	
     // Add Report
-    public static function reportItem($USER)
+    public function reportItem($current_user)
     {
         // Check User Input
         $id = Input('id', 'int');
@@ -109,31 +109,31 @@ class ReportsModel
         $postid = Input('postid', 'int');
 
         // Check User
-        if (!$USER->permission('view_users', $USER->has('id')) && $type == 'user') {
-            Redirect(Url(), Txt("NO_USER_VIEW"));
-        } elseif (!$USER->permission('view_torrents') && $type == 'torrent') {
-            Redirect(Url(), Txt("NO_TORRENT_VIEW"));
-        } elseif (!$USER->permission('view_forum') && $type == 'forum') {
-            Redirect(Url(), Txt("FORUM_BANNED"));
+        if ($current_user->view_users != "yes" && $current_user->id != $id && $type == 'user') {
+            showMessage(Url(), LANG["NO_USER_VIEW"]);
+        } elseif ($current_user->view_torrents != "yes" && CONFIG['MEMBERSONLY'] && $type == 'torrent') {
+            showMessage(Url(), LANG["NO_TORRENT_VIEW"]);
+        } elseif ($current_user->view_forum != "yes" && $current_user->class <= CONFIG['_MODERATOR'] && $type == 'forum') {
+            showMessage(Url(), LANG["FORUM_BANNED"]);
         }
 
         if (!empty($_POST)) {
             if (empty($reason) || empty($id) &&  empty($postid)) {
-                Redirect($_SERVER['HTTP_REFERER'], Txt("YOU_MUST_ENTER_A_REASON"));
+                showMessage(Url($_SERVER['HTTP_REFERER']), LANG["YOU_MUST_ENTER_A_REASON"]);
             }
 
-            $res = DB::fetchColumn('reports', 'count(id)', ['addedby=', 'votedfor=', 'type='], [$USER->has('id'), $id, $type]);
+            $res = DB::fetchColumn('reports', 'count(id)', ['addedby=', 'votedfor=', 'type='], [$current_user->id, $id, $type]);
             if (!$res) {
                 if ($type == 'forum') {
-                    DB::insert('reports', ['addedby' => $USER->has('id'), 'votedfor' => $id, 'votedfor_xtra' => $postid, 'type' => $type, 'reason' => $reason]);
+                    DB::insert('reports', ['addedby' => $current_user->id, 'votedfor' => $id, 'votedfor_xtra' => $postid, 'type' => $type, 'reason' => $reason]);
                 } elseif ($type == 'other' || $type == 'req' || $type == 'comment') {
-                    DB::insert('reports', ['addedby' => $USER->has('id'), 'votedfor' => $postid, 'votedfor_xtra' => 0, 'type' => $type, 'reason' => $reason]);
+                    DB::insert('reports', ['addedby' => $current_user->id, 'votedfor' => $postid, 'votedfor_xtra' => 0, 'type' => $type, 'reason' => $reason]);
                 } else {
-                    DB::insert('reports', ['addedby' => $USER->has('id'), 'votedfor' => $id, 'votedfor_xtra' => 0, 'type' => $type, 'reason' => $reason]);
+                    DB::insert('reports', ['addedby' => $current_user->id, 'votedfor' => $id, 'votedfor_xtra' => 0, 'type' => $type, 'reason' => $reason]);
                 }
-                    Redirect($_SERVER['HTTP_REFERER'], "$type: $id, $postid Reason: " . htmlspecialchars($reason) . "<p>Successfully Reported</p>");
+                    showMessage(Url($_SERVER['HTTP_REFERER']), "$type: $id, $postid Reason: " . htmlspecialchars($reason) . "<p>Successfully Reported</p>");
             } else {
-                Redirect($_SERVER['HTTP_REFERER'], Txt("YOU_HAVE_ALREADY_REPORTED"));
+                showMessage(Url($_SERVER['HTTP_REFERER']), LANG["YOU_HAVE_ALREADY_REPORTED"]);
             }
         }
     }

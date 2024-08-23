@@ -2,58 +2,67 @@
 
 namespace App\Controllers\Admin;
 
-use App\Libs\User;
+use App\Libs\Controller;
 use PDO;
 
 /*
 * Backup DB Controller
 */
-class Adminbackup
+class Adminbackup extends Controller
 {
-    // Backup Page
+    public $current_user;
+
+    // Get Current User
+    public function __construct()
+    {
+        $this->current_user = $this->currentuser(2);
+        if (!$this->current_user->isStaff) {
+            showMessage(CONFIG['URLROOT'], LANG["NO_PERMISSION"]);
+        }
+    }
+
+    // Backup Database
     public function index()
     {
-        $USER = new User(_ADMINISTRATOR, 2);
-        // Search Dir Backups
-        $dir = opendir(BACUP . "/");
+        $files = [];
+        // Search Backups Dir Files
+        $dir = opendir(CONFIG['BACUP'] . "/");
         while ($dir && ($file = readdir($dir)) !== false) {
             $ext = explode('.', $file);
             if ($ext[1] == "sql" || $ext[1] == "gz") {
-                $size = round(filesize(BACUP . "/" . $file) / 1024, 2);
+                $size = round(filesize(CONFIG['BACUP'] . "/" . $file) / 1024, 2);
                 $files[] = ['name' => $ext[0], 'ext' => $ext[1], 'size' => $size];
             }
         }
 
-        // Init Data
+        // Data For View
         $data = [
-            'V_title' => Txt("BACKUPS"),
-            'V_files' => $files,
-            'USER' => $USER
+            'page_title' => LANG["BACKUPS"],
+            'backup_files' => $files,
+            'current_user' => $this->current_user
         ];
 
         // Load View
-        template('backup', $data, 'admin');
+        $this->view('backup', $data, 'admin');
     }
 
-    // Backup Form Submit
+    // Backup Submit
     public function submit()
     {
-        $USER = new User(_ADMINISTRATOR, 2);
         $this->backup_tables();
     }
 
-    // Delete Backup Form Submit
+    // Delete Backup Submit
     public function delete($filename)
     {
-        $USER = new User(_ADMINISTRATOR, 2);
         $delete_error = true;
-        if (!unlink(BACUP . '/' . $filename)) {
+        if (!unlink(CONFIG['BACUP'] . '/' . $filename)) {
             $delete_error = false;
         }
         if ($delete_error) {
-            Redirect(Url('adminbackup'), Txt("DEL_COMPLETE"));
+            showMessage(Url('adminbackup'), LANG["DEL_COMPLETE"]);
         } else {
-            Redirect(Url('adminbackup'), Txt("DEL_ERROR"));
+            showMessage(Url('adminbackup'), LANG["DEL_ERROR"]);
         }
     }
 
@@ -61,11 +70,11 @@ class Adminbackup
     public function download($filename)
     {
         // Get The File
-        $fn = BACUP . "/$filename";
+        $fn = CONFIG['BACUP'] . "/$filename";
 
-        // Download
+        // Download File
         if (!file_exists($fn)) {
-            Redirect(Url('adminbackup'), sprintf(Txt("NO_FILE"), $filename));
+            showMessage(Url('adminbackup'), sprintf(LANG["NO_FILE"], $filename));
         } else {
             header('Content-Description: File Transfer');
             header('Content-Type: application/octet-stream');
@@ -84,11 +93,11 @@ class Adminbackup
     // Backup DB Tables
     function backup_tables()
     {
-        $DBH = new PDO("mysql:host=" . DB_HOST . ";dbname=" . DB_NAME . "; charset=utf8", DB_USER, DB_PASS);
+        $DBH = new PDO("mysql:host=" . CONFIG['DB_HOST'] . ";dbname=" . CONFIG['DB_NAME'] . "; charset=utf8", CONFIG['DB_USER'], CONFIG['DB_PASS']);
         //put table names you want backed up in this array or leave empty to do all
         $tables = array();
         $DBH->setAttribute(PDO::ATTR_ORACLE_NULLS, PDO::NULL_NATURAL);
-        $BACKUP_PATH = BACUP . "/";
+        $BACKUP_PATH = CONFIG['BACUP'] . "/";
         $nowtimename = time();
         $handle = fopen($BACKUP_PATH . $nowtimename . '.sql', 'a+');
 
@@ -175,6 +184,6 @@ class Adminbackup
 
         //var_dump($result->errorInfo());
         fclose($handle);
-        Redirect(Url('adminbackup'), Txt("BACKUP_COMPLETE"));
+        showMessage(Url('adminbackup'), LANG["BACKUP_COMPLETE"]);
     }
 }

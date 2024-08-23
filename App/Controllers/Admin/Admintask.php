@@ -4,33 +4,44 @@ namespace App\Controllers\Admin;
 
 use App\Libs\Cache;
 use App\Libs\Cleanup;
-use App\Libs\User;
+use App\Libs\Controller;
 use App\Models\TasksModel;
 
 /*
 * Task Controller
 */
-class Admintask 
+class Admintask extends Controller
 {
+    public $current_user;
+
+    // Get Current User
+    public function __construct()
+    {
+        $this->current_user = $this->currentuser(2);
+        if ($this->current_user->class < CONFIG['_MODERATOR']) {
+            showMessage(CONFIG['URLROOT'], LANG["NO_PERMISSION"]);
+        }
+    }
+
     // No Default Page
     public function index()
     {
-        Redirect(Url('admincp'));
+        Url(Url('admincp'), true);
     }
 
     // Cleanup
     public function cleanup()
     {
-        $USER = new User(_MODERATOR, 2);
-        TasksModel::update(['last_time'], ['task='], [gmtime(),'cleanup']);
+    
+        (new TasksModel)->update(['last_time'], ['task='], [gmtime(),'cleanup']);
         Cleanup::run();
-        Redirect(Url('admincp'), Txt("FORCE_CLEAN_COMPLETED"));
+        showMessage(Url('admincp'), LANG["FORCE_CLEAN_COMPLETED"]);
     }
 
     // Prune Cache
     public function cache()
     {
-        $USER = new User(_MODERATOR, 2);
+    
         $TTCache = new Cache();
         $TTCache->Delete("block/blocks_left");
         $TTCache->Delete("block/blocks_middle");
@@ -41,7 +52,7 @@ class Admintask
         $TTCache->Delete("block/seedwanted_block");
         $TTCache->Delete("block/usersonline_block");
         $TTCache->Delete("block/request_block");
-        Redirect(Url('admincp'), Txt('PURGE_COMPLETED'));
+        showMessage(Url('admincp'), LANG['PURGE_COMPLETED']);
     }
 
 }

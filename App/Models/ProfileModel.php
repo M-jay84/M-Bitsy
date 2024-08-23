@@ -20,43 +20,43 @@ use App\Models\LogsModel;
 class ProfileModel
 {
     // Get User Profile
-    public static function getProfile($USER, $id)
+    public function getProfile($id, $current_user)
     {
         $user = DB::fetchRow('users', '*', ['id='], [$id]);
 
         if (!$user) {
-            Redirect(Url(), Txt("NO_USER") . " $id.");
+            showMessage(Url(), LANG["NO_USER"] . " $id.");
         }
 
-        if (($user["enabled"] == "no" || ($user["status"] == "pending")) && !$USER->permission('edit_users')) {
-            Redirect(Url(), Txt("NO_ACCESS_ACCOUNT_DISABLED"));
+        if (($user["enabled"] == "no" || ($user["status"] == "pending")) && !$current_user->edit_users == 'yes') {
+            showMessage(Url(), LANG["NO_ACCESS_ACCOUNT_DISABLED"]);
         }
 
         // Start Blocked Users
-        $show = FriendsModel::fetchRow('id', ['userid=','friend=','friendid='], [$user['id'],'enemy',$USER->has('id')]);
+        $show = (new FriendsModel)->fetchRow('id', ['userid=','friend=','friendid='], [$user['id'],'enemy',$current_user->id]);
 
-        if ($show && $USER->has('control_panel') != "yes") {
-            Redirect(Url(), ("USER_PRIVATE"));
+        if ($show && $current_user->control_panel != "yes") {
+            showMessage(Url(), LANG["USER_PRIVATE"]);
         }
 
-        $dropdown['stylesheets'] = StylesheetsModel::getStyleDropDown($user['stylesheet']);
-        $dropdown['countries'] = CountriesModel::dropdown($user['country']);
+        $dropdown['stylesheets'] = (new StylesheetsModel)->getStyleDropDown($user['stylesheet']);
+        $dropdown['countries'] = (new CountriesModel)->dropdown($user['country']);
         $dropdown['tz'] = timeZoneDropDown($user['tzoffset']);
-        $dropdown['teams'] = TeamsModel::dropDownTeams($user['team']);
-        $dropdown['gender'] = "<option value='Male'" . ($user['gender'] == "Male" ? " selected='selected'" : "") . ">" . Txt("MALE") . "</option>\n"
-            . "<option value='Female'" . ($user['gender'] == "Female" ? " selected='selected'" : "") . ">" . Txt("FEMALE") . "</option>\n";
+        $dropdown['teams'] = (new TeamsModel)->dropDownTeams($user['team']);
+        $dropdown['gender'] = "<option value='Male'" . ($user['gender'] == "Male" ? " selected='selected'" : "") . ">" . LANG["MALE"] . "</option>\n"
+            . "<option value='Female'" . ($user['gender'] == "Female" ? " selected='selected'" : "") . ">" . LANG["FEMALE"] . "</option>\n";
 
-        $count['numtorrents'] = TorrentsModel::fetchColumn('count(id)', ['owner='], [$id]);
-        $count['numcomments'] = CommentsModel::fetchColumn('count(id)', ['user='], [$id]);
-        $count['numforumposts'] = PostsModel::fetchColumn('count(id)', ['userid='], [$id]);
-        $count['numhnr'] = SnatchedModel::fetchColumn('COUNT(`hnr`)', ['uid='], [$id]);
+        $count['numtorrents'] = (new TorrentsModel)->fetchColumn('count(id)', ['owner='], [$id]);
+        $count['numcomments'] = (new CommentsModel)->fetchColumn('count(id)', ['user='], [$id]);
+        $count['numforumposts'] = (new PostsModel)->fetchColumn('count(id)', ['userid='], [$id]);
+        $count['numhnr'] = (new SnatchedModel)->fetchColumn('COUNT(`hnr`)', ['uid='], [$id]);
 
         $html['userratio'] = $user["downloaded"] > 0 ? number_format($user["uploaded"] / $user["downloaded"], 1) : "---";
-        $html['avatar'] = htmlspecialchars($user["avatar"]) ? htmlspecialchars($user["avatar"]) : URLROOT . "/assets/images/misc/default_avatar.webp";
+        $html['avatar'] = htmlspecialchars($user["avatar"]) ? htmlspecialchars($user["avatar"]) : CONFIG['URLROOT'] . "/assets/images/misc/default_avatar.webp";
         $html['usersignature'] = stripslashes($user["signature"]);
-        $html['team'] = TeamsModel::getTeam($user['team']);
+        $html['team'] = (new TeamsModel)->getTeam($user['team']);
         $html['country'] = CountriesModel::fetchRow($user['country']);
-        $friend = FriendsModel::countFriendAndEnemy($USER->has('id'), $id);
+        $friend = (new FriendsModel)->countFriendAndEnemy($current_user->id, $id);
 
         // Init Data
         $data = [
@@ -70,7 +70,7 @@ class ProfileModel
     }
 
     // Edit Profile Form Submit
-    public static function submit($USER, $id)
+    public function submit($id, $data)
     {
 
         if (!empty($_POST)) {
@@ -93,24 +93,24 @@ class ProfileModel
 
             if ($_POST['resetpasskey']) {
                 $rand = array_sum(explode(" ", microtime()));
-                $passkey = md5($USER->has('username') . $rand . $USER->has('secret') . ($rand * mt_rand()));
+                $passkey = md5($data['current_user']->username . $rand . $data['current_user']->secret . ($rand * mt_rand()));
                 $data['passkey'] = $passkey;
             }
 
             // Update
             UsersModel::updateset($data, $id);
-            Redirect(Url("profile/$id"), Txt("UPDATE_COMPLETE"));
+            showMessage(Url("profile/$id"), LANG["UPDATE_COMPLETE"]);
         }
     }
 
     // Admin Edit Profile Form Submit
-    public static function adminSubmited($USER, $id)
+    public function adminSubmited($id, $data)
     {
         $email = Input('email', 'email');
 
         // Check User
-        if ($USER->has('class') < 5 && $id != $USER->has('id')) {
-            Redirect(Url("profile/$id"), Txt("NO_PERMISSION"));
+        if ($data['current_user']->class < 5 && $id != $data['current_user']->id) {
+            showMessage(Url("profile/$id"), LANG["NO_PERMISSION"]);
         }
 
         // Init Data
@@ -132,20 +132,20 @@ class ProfileModel
         ];
 
         // Change User Class
-        if ($data['class'] != 0 && $data['class'] != $USER->has('class')) {
+        if ($data['class'] != 0 && $data['class'] != $data['current_user']->class) {
             // change user class
             $arr = UsersModel::fetchRow('class', ['id ='], [$id]);
             $uc = $arr['class'];
             // skip if class is same as current
-            if ($uc != $data['class'] && $uc > $USER->has('class')) {
-                Redirect(Url(), Txt("YOU_CANT_DEMOTE_YOURSELF"));
-            } elseif ($uc == $USER->has('class')) {
-                Redirect(Url(), Txt("YOU_CANT_DEMOTE_SOMEONE_SAME_LVL"));
+            if ($uc != $data['class'] && $uc > $data['current_user']->class) {
+                showMessage(Url(), LANG["YOU_CANT_DEMOTE_YOURSELF"]);
+            } elseif ($uc == $data['current_user']->class) {
+                showMessage(Url(), LANG["YOU_CANT_DEMOTE_SOMEONE_SAME_LVL"]);
             } else {
                 UsersModel::update(['class'], ['id='], [$data['class'], $id]);
                 // Notify user
                 $prodemoted = ($data['class'] > $uc ? "promoted" : "demoted");
-                $msg = "You have been $prodemoted to " . GroupsModel::GetUserClassName($data['class']) . " by " . $USER->has('username') . "";
+                $msg = "You have been $prodemoted to " . (new GroupsModel)->GetUserClassName($data['class'], $data['current_user']) . " by " . $data['current_user']->username . "";
                 MessagesModel::insert(['sender' => 0, 'receiver' => $id, 'added' => get_date_time(), 'subject' => 'Group Change', 'msg' => $msg]);
             }
         }
@@ -153,7 +153,7 @@ class ProfileModel
         // Reset Passkey Check
         if ($_POST['resetpasskey'] == 'yes') {
             $rand = array_sum(explode(" ", microtime()));
-            $passkey = md5($USER->has('username') . $rand . $USER->has('secret') . ($rand * mt_rand()));
+            $passkey = md5($data['current_user']->username . $rand . $data['current_user']->secret . ($rand * mt_rand()));
             $data = ['passkey' => $passkey];
         }
 
@@ -164,18 +164,18 @@ class ProfileModel
             if ($data['password'] != $passres['password']) {
                 $password = password_hash($data['password'], PASSWORD_BCRYPT);
                 $data = ['password' => $password];
-                LogsModel::write($USER->has('username') . " has changed password for user: $id");
+                (new LogsModel)->write($data['current_user']->username . " has changed password for user: $id");
             }
         }
 
         // Update
         UsersModel::updateset($data, $id);
-        LogsModel::write($USER->has('username') . " has edited user: $id details");
-        Redirect(Url("profile/$id"), Txt("UPDATE_COMPLETE"));
+        (new LogsModel)->write($data['current_user']->username . " has edited user: $id details");
+        showMessage(Url("profile/$id"), LANG["UPDATE_COMPLETE"]);
     }
 
     // Delete Profile Default Page otdo (tidy up)
-    public static function deleteprofile($USER)
+    public function deleteprofile($data)
     {
         // Check User Input
         $userid = Input('userid', 'int');
@@ -183,30 +183,30 @@ class ProfileModel
         $sure = Input('sure', 'int');
 
         // Check User
-        if (!$USER->has('delete_users')) {
-            Redirect(Url("profile/$userid"), Txt("NO_PERMISSION"));
+        if (!$data['current_user']->delete_users) {
+            showMessage(Url("profile/$userid"), LANG["NO_PERMISSION"]);
         }
 
         if (!Id($userid)) {
-            Redirect(Url("profile/$userid"), Txt("MISSING_ID"));
+            showMessage(Url("profile/$userid"), LANG["MISSING_ID"]);
         }
 
-        if ($USER->has('id') == $userid) {
-            Redirect(Url("profile/$userid"), Txt("YOU_CANT_DELETE_ADMIN"));
+        if ($data['current_user']->id == $userid) {
+            showMessage(Url("profile/$userid"), LANG["YOU_CANT_DELETE_ADMIN"]);
         }
 
         if (!$delreason) {
-            Redirect(Url("profile/$userid"), Txt("MISSING_FORM_DATA"));
+            showMessage(Url("profile/$userid"), LANG["MISSING_FORM_DATA"]);
         }
 
         if ($sure == "0") {
-            Redirect(Url('profile/delete'), "Sanity check: You are about to delete user. Click <a href='" . URLROOT . "/profile/delete?sure=1'>here</a> if you are sure.");
+            showMessage(Url('profile/delete'), "Sanity check: You are about to delete user. Click <a href='" . CONFIG['URLROOT'] . "/profile/delete?sure=1'>here</a> if you are sure.");
         }
 
         // Delete Profile
         UsersModel::deleteUser($userid);
-        LogsModel::write($USER->has('username') . " has deleted account: " . coloredname($userid) . "");
-        Redirect(Url("profile/$userid"), Txt("DEL_COMPLETE"));
+        (new LogsModel)->write($data['current_user']->username . " has deleted account: " . coloredname($userid) . "");
+        showMessage(Url("profile/$userid"), LANG["DEL_COMPLETE"]);
     }
 
 }

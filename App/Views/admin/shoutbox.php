@@ -1,4 +1,4 @@
-<?php block_begin($V_title) ?>
+<?php block_begin($page_title) ?>
 <p id="shoutboxstaff"></p>
 <form id='contactForm1' name='contactForm1' action='<?= Url('adminshoutbox/add') ?>' method='post'>
     <div class="row  rounded p-2">

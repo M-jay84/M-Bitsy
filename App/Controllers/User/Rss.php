@@ -2,7 +2,7 @@
 
 namespace App\Controllers\User;
 
-use App\Libs\User;
+use App\Libs\Controller;
 use App\Models\CatagoriesModel;
 use App\Models\TorrentsModel;
 use App\Models\UsersModel;
@@ -10,12 +10,19 @@ use App\Models\UsersModel;
 /*
 * Rss Controller
 */
-class Rss 
+class Rss extends Controller
 {
+    public $current_user;
+
+    // Get Current User
+    public function __construct()
+    {
+        $this->current_user = $this->currentuser(0);
+    }
+
     // RSS Default Page todo (simplify)
     public function index()
     {
-        $USER = new User(0, 0);
         // Check User Input
         $passkey = $_GET["passkey"];
         $incldead = $_GET["incldead"];
@@ -24,7 +31,7 @@ class Rss
 
         // Check User
         if ($passkey == ''){
-            $passkey = $USER->has('passkey');
+            $passkey = $this->current_user->passkey;
         }
         $member = UsersModel::fetchColumn('count(id)', ['passkey ='], [$passkey]);
         if ($member == 1) {
@@ -34,7 +41,7 @@ class Rss
         }
         
         if ($link == "" && CONFIG['MEMBERSONLY']) {
-            Redirect(Url(), Txt("NO_PERMISSION"));
+            showMessage(Url(), LANG["NO_PERMISSION"]);
         }
 
         // Sort Input
@@ -56,11 +63,11 @@ class Rss
         $limit = "LIMIT 50";
 
         // Get Data
-        $res = TorrentsModel::rssInfo($where, $limit);
+        $res = (new TorrentsModel)->rssInfo($where, $limit);
 
         // start the RSS feed output
-        header( "Content-type: text/xml; charset=".CHARSET."");
-        echo "<?xml version='1.0' encoding='".CHARSET."'?>
+        header( "Content-type: text/xml; charset=".CONFIG['CHARSET']."");
+        echo "<?xml version='1.0' encoding='".CONFIG['CHARSET']."'?>
         <rss version='2.0'>
         <channel>
         <title>" . htmlspecialchars(CONFIG['SITENAME']) . " | RSS</title>
@@ -72,8 +79,8 @@ class Rss
             $pubdate = date("r", sql_timestamp_to_unix_timestamp($row['added']));
             echo "<item>
                   <title>" . htmlspecialchars($row['name']) . "</title>
-                  <guid>" . URLROOT . "/torrent/$row[id]/hit</guid>
-                  <link>" . URLROOT . "/download/$row[id]/$link</link>
+                  <guid>" . CONFIG['URLROOT'] . "/torrent/$row[id]/hit</guid>
+                  <link>" . CONFIG['URLROOT'] . "/download/$row[id]/$link</link>
                   <pubDate>" . $pubdate . "</pubDate>
                   <category> " . $row["cat_parent"] . ": " . $row["cat_name"] . "</category>
                   <description>Size: " . mksize($row['size']) . " Seeders: " . $row['seeders'] . " Leechers: " . $row['leechers'] . "</description>
@@ -85,38 +92,35 @@ class Rss
     // RSS Custom Default Page
     public function custom()
     {
-        $USER = new User(0, 0);
         // Check User
-        if (!$USER->permission('view_torrents')) {
-            Redirect(Url(), Txt("NO_TORRENT_VIEW"));
+        if ($this->current_user->view_torrents != "yes" && CONFIG['MEMBERSONLY']) {
+            showMessage(Url(), LANG["NO_TORRENT_VIEW"]);
         }
 
-        // Init Data
+        // Data For View
         $data = [
-            'V_title' => Txt("MAKE_RSS_FEED"),
-            'V_cats' => CatagoriesModel::genreList(),
-            'USER' => $USER
+            'page_title' => LANG["MAKE_RSS_FEED"],
+            'V_cats' => CatagoriesModel::genreList()
         ];
 
         // Load View
-        template('Rss', $data, 'user');
+        $this->view('Rss', $data, 'user');
     }
 
     // RSS Form Submit
     public function submit()
     {
-        $USER = new User(0, 0);
         // Check User
-        if (!$USER->permission('view_torrents')) {
-            Redirect(Url(), Txt("NO_TORRENT_VIEW"));
+        if ($this->current_user->view_torrents != "yes" && CONFIG['MEMBERSONLY']) {
+            showMessage(Url(), LANG["NO_TORRENT_VIEW"]);
         }
 
         if (!empty($_POST)) {
             // Sort Data
             $params = array();
 
-            if ($USER->has('id')) {
-                $params[] = "passkey=".$USER->has('passkey')."";
+            if ($this->current_user->id) {
+                $params[] = "passkey=".$this->current_user->passkey."";
             }
             if ($cats = $_POST["cats"]) {
                 $catlist = array();
@@ -141,10 +145,10 @@ class Rss
                 $param = "";
             }
             
-            Redirect(Url(), "Your RSS link is: <a href='".URLROOT."/rss$param'>".URLROOT."/rss$param</a>");
+            showMessage(Url(), "Your RSS link is: <a href='".CONFIG['URLROOT']."/rss$param'>".CONFIG['URLROOT']."/rss$param</a>");
 
         } else {
-            Redirect(Url(), Txt('NOTHING_SELECTED'));
+            showMessage(Url(), LANG['NOTHING_SELECTED']);
         }
     }
 

@@ -1,4 +1,4 @@
-<?php block_begin($V_title) ?>
+<?php block_begin($page_title) ?>
 <div class='rounded p-3'> <?php
     foreach ($V_comments as $row) {
         $title = ($row['title']) ? $row['title'] : $row['name'];

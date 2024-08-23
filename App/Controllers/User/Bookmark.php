@@ -2,46 +2,54 @@
 
 namespace App\Controllers\User;
 
-use App\Libs\User;
+use App\Libs\Controller;
 use App\Models\BookmarksModel;
 
 /*
 * Bookmark Controller (Home Page)
 */
-class Bookmark 
+class Bookmark extends Controller
 {
+    public $current_user;
+
+    // Get Current User
+    public function __construct()
+    {
+        $this->current_user = $this->currentuser(2);
+    }
+
     // Book Mark Default Page
     public function index($id)
     {
-        $USER = new User(0, 2);
+    
 
-        if (!$USER->isStaff($id)) {
-            Redirect(Url(), Txt("NO_PERMISSION"));
+        if ($this->current_user->class < CONFIG['_MODERATOR'] or $this->current_user->id != $id) {
+            showMessage(Url(), LANG["NO_PERMISSION"]);
         } else {
-            $bookmarks = BookmarksModel::getAll($id);
+            $bookmarks = (new BookmarksModel)->getAll($id);
 
-            // Init Data
+            // Data For View
             $data = [
-                'V_title' => Txt('BOOKMARKS'),
+                'page_title' => LANG['BOOKMARKS'],
                 'V_count' => $bookmarks['count'],
                 'V_pager' => $bookmarks['pager'],
                 'V_bookmarks' => $bookmarks['query'],
-                'USER' => $USER
+            'current_user' => $this->current_user
             ];
     
             // Load View
-            template('bookmark', $data, 'user');
+            $this->view('bookmark', $data, 'user');
         } 
     }
 
     // Add/Delete Bookmark Submit
     public function action($id = 0, $del = 0)
     {
-        $USER = new User(0, 2, true);
-        if (!$USER->isStaff($USER->has('id'))) {
-            Redirect(Url(), Txt("NO_PERMISSION"));
+        if ($this->current_user->class < CONFIG['_MODERATOR'] or $id != $this->current_user->id) {
+            showMessage(Url(), LANG["NO_PERMISSION"]);
         } else {
-            BookmarksModel::action($id, $del);
+            $data = ['current_user' => $this->current_user];
+            (new BookmarksModel)->action($id, $del, $data);
         } 
     }
 

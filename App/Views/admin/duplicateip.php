@@ -1,14 +1,14 @@
-<?php block_begin($V_title) ?>
+<?php block_begin($page_title) ?>
 <div class='table-responsive p-2'>
     <table class='table table-striped'>
         <thead>
             <tr>
-                <th><?= Txt("USERNAME") ?></th>
-                <th><?= Txt("USERCLASS") ?></th>
-                <th><?= Txt("EMAIL") ?></th>
-                <th><?= Txt("IP") ?></th>
-                <th><?= Txt("ADDED") ?></th>
-                <th><?= Txt("COUNT") ?></th>
+                <th><?= LANG['USERNAME'] ?></th>
+                <th><?= LANG["USERCLASS"] ?></th>
+                <th><?= LANG["EMAIL"] ?></th>
+                <th><?= LANG["IP"] ?></th>
+                <th><?= LANG["ADDED"] ?></th>
+                <th><?= LANG["COUNT"] ?></th>
             </tr>
         </thead>
         <tbody><?php

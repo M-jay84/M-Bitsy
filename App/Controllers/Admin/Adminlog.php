@@ -2,37 +2,47 @@
 
 namespace App\Controllers\Admin;
 
-use App\Libs\User;
+use App\Libs\Controller;
 use App\Models\LogsModel;
 
 /*
 * Log Controller
 */
-class Adminlog 
+class Adminlog extends Controller
 {
+    public $current_user;
+
+    // Get Current User
+    public function __construct()
+    {
+        $this->current_user = $this->currentuser(2);
+        if ($this->current_user->class < CONFIG['_MODERATOR']) {
+            showMessage(CONFIG['URLROOT'], LANG["NO_PERMISSION"]);
+        }
+    }
+
     // Log Default Page
     public function index()
     {
-        $USER = new User(_MODERATOR, 2);
-        $logs = LogsModel::getAll();
+    
+        $logs = (new LogsModel)->getAll();
 
-        // Init Data
+        // Data For View
         $data = [
-            'V_title' => Txt("SITE_LOG"),
+            'page_title' => LANG["SITE_LOG"],
             'V_pager' => $logs['pager'],
-            'V_logs' => $logs['logs'],
-            'USER' => $USER
+            'V_logs' => $logs['logs']
         ];
 
         // Load View
-        template('log', $data, 'admin');
+        $this->view('log', $data, 'admin');
     }
 
     // Log Form Submit
     public function delete()
     {
-        $USER = new User(_MODERATOR, 2);
-        LogsModel::delete();
+    
+        (new LogsModel)->delete();
     }
 
 }

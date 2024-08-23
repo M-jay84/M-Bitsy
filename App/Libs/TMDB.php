@@ -31,9 +31,9 @@ class TMDB
     // Call A TMDB Url
     private function _call($action, $appendToResponse)
     {
-        $url = self::_API_URL_ . $action . '?api_key=' . _TMDBAPIKEY . '&language=' . _TMDBLANG . '&' . $appendToResponse; // todo lang var
+        $url = self::_API_URL_ . $action . '?api_key=' . CONFIG['_TMDBAPIKEY'] . '&language=' . CONFIG['_TMDBLANG'] . '&' . $appendToResponse; // todo lang var
 
-        if (_TMDBDEBUG) {
+        if (CONFIG['_TMDBDEBUG']) {
             echo '<pre><a href="' . $url . '">check request</a></pre>';
         }
 
@@ -183,7 +183,7 @@ class TMDB
     public function searchMovie($movieTitle)
     {
         $movies = array();
-        $result = $this->_call('search/movie', 'query=' . urlencode($movieTitle), _TMDBLANG);
+        $result = $this->_call('search/movie', 'query=' . urlencode($movieTitle), CONFIG['_TMDBLANG']);
         foreach ($result['results'] as $data) {
             $movies[] = new Movie($data);
         }
@@ -194,7 +194,7 @@ class TMDB
     public function searchTVShow($tvShowTitle)
     {
         $tvShows = array();
-        $result = $this->_call('search/tv', 'query=' . urlencode($tvShowTitle), _TMDBLANG);
+        $result = $this->_call('search/tv', 'query=' . urlencode($tvShowTitle), CONFIG['_TMDBLANG']);
         foreach ($result['results'] as $data) {
             $tvShows[] = new TVShow($data);
         }
@@ -205,7 +205,7 @@ class TMDB
     public function searchPerson($personName)
     {
         $persons = array();
-        $result = $this->_call('search/person', 'query=' . urlencode($personName), _TMDBLANG);
+        $result = $this->_call('search/person', 'query=' . urlencode($personName), CONFIG['_TMDBLANG']);
         foreach ($result['results'] as $data) {
             $persons[] = new Person($data);
         }
@@ -216,7 +216,7 @@ class TMDB
     public function searchCollection($collectionName)
     {
         $collections = array();
-        $result = $this->_call('search/collection', 'query=' . urlencode($collectionName), _TMDBLANG);
+        $result = $this->_call('search/collection', 'query=' . urlencode($collectionName), CONFIG['_TMDBLANG']);
         foreach ($result['results'] as $data) {
             $collections[] = new Collection($data);
         }

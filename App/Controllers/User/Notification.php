@@ -2,61 +2,67 @@
 
 namespace App\Controllers\User;
 
-use App\Libs\User;
+use App\Libs\Controller;
 use App\Models\NotificationsModel;
 
 /*
 * Notifications Controller
 */
-class Notification 
+class Notification extends Controller
 {
+    public $current_user;
+
+    // Get Current User
+    public function __construct()
+    {
+        $this->current_user = $this->currentuser(2);
+    }
+
     // Notification Page
     public function index()
     {
-        $USER = new User(0, 2);
-        $notifs = NotificationsModel::getAll();
+    
+        $notifs = (new NotificationsModel)->getAll($this->current_user->id);
         if ($notifs['count']) {
-            // Init Data
+            // Data For View
             $data = [
-                'V_title' => Txt('Notifications'),
-                'V_notifications' => $notifs['result'],
-                'USER' => $USER
+                'page_title' => LANG['Notifications'],
+                'V_notifications' => $notifs['result']
             ];
             // Load View
-            template('notification', $data, 'user');
+            $this->view('notification', $data, 'user');
         } else {
-            Redirect(Url(), Txt('NOTHING_FOUND'));
+            showMessage(Url(), LANG['NOTHING_FOUND']);
         }
     }
 
     // Notification Read // TODO
     public function read($id)
     {
-        $USER = new User(0, 2);
-        NotificationsModel::updateRead($id);
-        $notif = NotificationsModel::getById($id);
+    
+        (new NotificationsModel)->updateRead($id, $this->current_user->id);
+        $notif = (new NotificationsModel)->getById($id, $this->current_user->id);
         
-        // Init Data
+        // Data For View
         $data = [
-            'V_title' => Txt('Notifications'),
-            'V_notifications' => $notif,
-            'USER' => $USER
+            'page_title' => LANG['Notifications'],
+            'V_notifications' => $notif
         ];
 
         // Load View
-        template('notification_read', $data, 'user');
+        $this->view('notification_read', $data, 'user');
     }
 
     // Submit Read
     public function submit($id)
     {
-        $USER = new User(0, 2);
+    
         if (!empty($_GET)) {
-            $read = NotificationsModel::updateRead($id);
+            $read = (new NotificationsModel)->updateRead($id, $this->current_user->id);
             if ($read) {
-                Redirect(Url('notification'), 'Marked Read');
+                showMessage(Url('notification'), 'Marked Read');
             } else {
-                Redirect(Url('notification'), 'Error Marking Read');
+                showMessage(Url('notification'), 'Error Marking Read');
             }
         }
     }
@@ -64,8 +70,7 @@ class Notification
     // Notification Delete
     public function delete($id)
     {
-        $USER = new User(0, 2);
-        NotificationsModel::deleteById($id);
+        (new NotificationsModel)->deleteById($id, $this->current_user->id);
     }
 
 }

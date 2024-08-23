@@ -10,33 +10,22 @@ use App\Models\CommentsModel;
 */
 class NewsModel
 {
-    // Get News
-    public static function get() {
-        $res = DB::run("SELECT news.id, news.title, news.added, news.body, users.username 
-        FROM news 
-        LEFT JOIN users 
-        ON news.userid = users.id 
-        ORDER BY added 
-        DESC LIMIT 10");
-        return $res;
-    }
-	
     // Fetch All News
-    public static function fetchAll($columns = '*', $where = '', $values = '', $other = '')
+    public function fetchAll($columns = '*', $where = '', $values = '', $other = '')
     {
         $stmt = DB::newSelect('news', $columns, $where, $values, $other);
 		return $stmt;
 	}
 	
     // Fetch News Row
-    public static function fetchRow($columns = '*', $where = '', $values = '', $other = '')
+    public function fetchRow($columns = '*', $where = '', $values = '', $other = '')
     {
         $stmt = DB::fetchRow('news', $columns, $where, $values, $other);
 		return $stmt;
 	}
 
     // Admin Add/Edit News
-    public static function insertOrUpdate()
+    public function insertOrUpdate($data = [])
     {
         // Check User Input
         $body = Input('body');
@@ -46,7 +35,7 @@ class NewsModel
        
         // Check Correct Input
         if (!$body || !$title) {
-            Redirect(Url('adminnews'), Txt("MISSING_FORM_DATA"));
+            showMessage(Url('adminnews'), LANG["MISSING_FORM_DATA"]);
         }
         
         if (!$added) {
@@ -54,19 +43,19 @@ class NewsModel
         }
 
         if (!$id) {
-            DB::insert('news', ['userid'=>$_SESSION['id'], 'added'=>get_date_time(), 'body'=>$body, 'title'=>$title]);
+            DB::insert('news', ['userid'=>$data['current_user']->id, 'added'=>get_date_time(), 'body'=>$body, 'title'=>$title]);
         } else {
             DB::update('news', ['body', 'title'], ['id='], [$body, $title, $id]);
         }
-        Redirect(Url('adminnews'), Txt("ACTION_COMPLETE"));
+        showMessage(Url('adminnews'), LANG["ACTION_COMPLETE"]);
     }
 
     // Admin Delete News
-    public static function delete($id)
+    public function delete($id, $userid)
     {
         DB::delete('news', ['id'=>$id]);
-        CommentsModel::delete($id, 'news');
-        Redirect(Url('adminnews'), Txt("DEL_COMPLETE"));
+        (new CommentsModel)->delete($id, $userid, 'news');
+        showMessage(Url('adminnews'), LANG["DEL_COMPLETE"]);
     }
 
 }

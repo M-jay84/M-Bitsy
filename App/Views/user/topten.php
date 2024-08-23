@@ -1,4 +1,4 @@
-<?php block_begin($V_title); ?>
+<?php block_begin($page_title); ?>
 <div class="row">
     <div class="col-sm-4 m-1 post-message" style='width: 32.33333333%;'>
         <div class='text-center'>

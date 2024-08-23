@@ -1,11 +1,11 @@
-<?php block_begin($V_title) ?>
+<?php block_begin($page_title) ?>
 <div class='table-responsive  p-3'>
     <table class='table table-striped'>
         <thead>
             <tr>
-                <th><?= Txt('NAME') ?></th>
-                <th><?= Txt('PAGE') ?></th>
-                <th><?= Txt('DATE') ?></th>
+                <th><?= LANG['NAME'] ?></th>
+                <th><?= LANG['PAGE'] ?></th>
+                <th><?= LANG['DATE'] ?></th>
             </tr>
         </thead>
         <tbody> <?php

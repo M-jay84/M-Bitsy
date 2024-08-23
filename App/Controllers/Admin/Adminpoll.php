@@ -2,36 +2,46 @@
 
 namespace App\Controllers\Admin;
 
-use App\Libs\User;
+use App\Libs\Controller;
 use App\Models\PollsModel;
 
 /*
 * Polls Controller
 */
-class Adminpoll 
+class Adminpoll extends Controller
 {
+    public $current_user;
+
+    // Get Current User
+    public function __construct()
+    {
+        $this->current_user = $this->currentuser(2);
+        if ($this->current_user->class < CONFIG['_MODERATOR']) {
+            showMessage(CONFIG['URLROOT'], LANG["NO_PERMISSION"]);
+        }
+    }
+
     // Polls Default Page
     public function index()
     {
-        $USER = new User(_MODERATOR, 2);
+    
         // Get Poll Data
         $polls = PollsModel::getAll();
 
-        // Init Data
+        // Data For View
         $data = [
-            'V_title' => Txt("POLLS"),
-            'V_polls' => $polls,
-            'USER' => $USER
+            'page_title' => LANG["POLLS"],
+            'V_polls' => $polls
         ];
 
         // Load View
-        template('poll', $data, 'admin');
+        $this->view('poll', $data, 'admin');
     }
 
     // Add/Edit Poll Form Submit
     public function submit()
     {
-        $USER = new User(_MODERATOR, 2);
+    
         // Add Insert / Edit Update
         PollsModel::insertOrUpdate();
     }
@@ -39,7 +49,7 @@ class Adminpoll
     // Delete Poll Form Submit
     public function delete($id)
     {
-        $USER = new User(_MODERATOR, 2);
+    
         PollsModel::delete($id);
     }
 

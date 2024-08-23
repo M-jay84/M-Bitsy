@@ -1,7 +1,7 @@
-<?php block_begin($V_title) ?>
+<?php block_begin($page_title) ?>
 <p class="text-center">
-   <?= Txt('POLLS') ?>
-   <a href="javascript:;" class="pollAttr" data-bs-toggle="modal" data-bs-target="#pollModal"><?= Txt("ADD") ?></a>
+   <?= LANG['POLLS'] ?>
+   <a href="javascript:;" class="pollAttr" data-bs-toggle="modal" data-bs-target="#pollModal"><?= LANG["ADD"] ?></a>
 </p>
 
 <?php foreach ($V_polls as $row) : ?>
@@ -19,8 +19,8 @@
          <table class='table table-striped'>
          <thead>
             <tr>
-                <th><?= Txt('NAME') ?></th>
-                <th><?= Txt('VOTED') ?></th>
+                <th><?= LANG['NAME'] ?></th>
+                <th><?= LANG['VOTED'] ?></th>
             </tr>
          </thead>
          <tbody>
@@ -82,26 +82,26 @@
                <div class="input-group mb-3">
                   <span></span>
                </div>
-               <?= Txt("QUESTION"); ?> *&nbsp;<input name='question' id='question' /><br><br>
-               <?= Txt("OPTION") ?> 1 *&nbsp;<input name='option0' id='option0' /><br><br>
-               <?= Txt("OPTION") ?> 2 *&nbsp;<input name="option1" id="option1" /><br><br>
-               <?= Txt("OPTION") ?> 3&nbsp;&nbsp;&nbsp;<input name="option2" id="option2" id="option2" /><br><br>
-               <?= Txt("OPTION") ?> 4&nbsp;&nbsp;&nbsp;<input name="option3" id="option3" /><br><br>
-               <?= Txt("OPTION") ?> 5&nbsp;&nbsp;&nbsp;<input name="option4" id="option4" /><br><br>
-               <?= Txt("OPTION") ?> 6&nbsp;&nbsp;&nbsp;<input name="option5" id="option5" /><br><br>
-               <?= Txt("OPTION") ?> 7&nbsp;&nbsp;&nbsp;<input name="option6" id="option6" /><br><br>
-               <?= Txt("OPTION") ?> 8&nbsp;&nbsp;&nbsp;<input name="option7" id="option7" /><br><br>
-               <?= Txt("OPTION") ?> 9&nbsp;&nbsp;&nbsp;<input name="option8" id="option8" /><br><br>
-               <?= Txt("OPTION") ?> 10&nbsp;<input name="option9" id="option9" /><br><br>
-               <?= Txt("OPTION") ?> 11&nbsp;<input name="option10" id="option10" /><br><br>
-               <?= Txt("OPTION") ?> 12&nbsp;<input name="option11" id="option11" /><br><br>
-               <?= Txt("SORT") ?>&nbsp;
-               <input type="radio" name="sort" value="yes" id="sort" /><?= Txt("YES") ?>
-               <input type="radio" name="sort" value="no" id="sort" /><?= Txt("NO") ?>
+               <?= LANG["QUESTION"]; ?> *&nbsp;<input name='question' id='question' /><br><br>
+               <?= LANG["OPTION"] ?> 1 *&nbsp;<input name='option0' id='option0' /><br><br>
+               <?= LANG["OPTION"] ?> 2 *&nbsp;<input name="option1" id="option1" /><br><br>
+               <?= LANG["OPTION"] ?> 3&nbsp;&nbsp;&nbsp;<input name="option2" id="option2" id="option2" /><br><br>
+               <?= LANG["OPTION"] ?> 4&nbsp;&nbsp;&nbsp;<input name="option3" id="option3" /><br><br>
+               <?= LANG["OPTION"] ?> 5&nbsp;&nbsp;&nbsp;<input name="option4" id="option4" /><br><br>
+               <?= LANG["OPTION"] ?> 6&nbsp;&nbsp;&nbsp;<input name="option5" id="option5" /><br><br>
+               <?= LANG["OPTION"] ?> 7&nbsp;&nbsp;&nbsp;<input name="option6" id="option6" /><br><br>
+               <?= LANG["OPTION"] ?> 8&nbsp;&nbsp;&nbsp;<input name="option7" id="option7" /><br><br>
+               <?= LANG["OPTION"] ?> 9&nbsp;&nbsp;&nbsp;<input name="option8" id="option8" /><br><br>
+               <?= LANG["OPTION"] ?> 10&nbsp;<input name="option9" id="option9" /><br><br>
+               <?= LANG["OPTION"] ?> 11&nbsp;<input name="option10" id="option10" /><br><br>
+               <?= LANG["OPTION"] ?> 12&nbsp;<input name="option11" id="option11" /><br><br>
+               <?= LANG["SORT"] ?>&nbsp;
+               <input type="radio" name="sort" value="yes" id="sort" /><?= LANG["YES"] ?>
+               <input type="radio" name="sort" value="no" id="sort" /><?= LANG["NO"] ?>
             </div>
             <div class="modal-footer">
-               <button type="button" class="btn btn-sm ttbtn" data-bs-dismiss="modal"><?= Txt("CLOSE") ?></button>
-               <button type="submit" class="btn btn-sm ttbtn"><?= Txt("SUBMIT") ?></button>
+               <button type="button" class="btn btn-sm ttbtn" data-bs-dismiss="modal"><?= LANG['CLOSE'] ?></button>
+               <button type="submit" class="btn btn-sm ttbtn"><?= LANG['SUBMIT'] ?></button>
             </div>
          </div>
       </div>

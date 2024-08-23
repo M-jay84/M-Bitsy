@@ -2,30 +2,40 @@
 
 namespace App\Controllers\Admin;
 
-use App\Libs\User;
+use App\Libs\Controller;
 use App\Models\UsersModel;
 
 /*
 * Whos Where Controller
 */
-class Adminwhoswhere 
+class Adminwhoswhere extends Controller
 {
+    public $current_user;
+
+    // Get Current User
+    public function __construct()
+    {
+        $this->current_user = $this->currentuser(2);
+        if ($this->current_user->class < CONFIG['_MODERATOR']) {
+            showMessage(CONFIG['URLROOT'], LANG["NO_PERMISSION"]);
+        }
+    }
+
     // Whos Where Default Page
     public function index()
     {
-        $USER = new User(_MODERATOR, 2);
+    
         // Get Data
         $users1 = UsersModel::select('id, username, page, last_access', ['enabled=', 'status='], ['yes','confirmed'], 'ORDER BY `last_access` DESC LIMIT 100');
         
-        // Init Data
+        // Data For View
         $data = [
-            'V_title' => ("WHOS_WHERE"),
-            'V_users' => $users1,
-            'USER' => $USER
+            'page_title' => ("WHOS_WHERE"),
+            'V_users' => $users1
         ];
 
         // Load View
-        template('whoswhere', $data, 'admin');
+        $this->view('whoswhere', $data, 'admin');
     }
 
 }

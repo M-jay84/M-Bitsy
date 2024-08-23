@@ -2,21 +2,21 @@
     <?php if ($row['public'] == "yes") { ?>
         <?php block_begin($row['title']) ?>
         <?= format_comment($row['text']); ?><br>
-        <?php if ($USER->has('class') > _UPLOADER) : ?>
+        <?php if ($current_user->class > CONFIG['_UPLOADER']) : ?>
             <p class="text-end">
-                <i class="fa fa-user-secret m-1 tt_prime" title="<?= Txt('STAFF') ?>"></i>
+                <i class="fa fa-user-secret m-1 tt_prime" title="<?= LANG['STAFF'] ?>"></i>
                 <a href='<?= Url("rule/delete/$row[id]") ?>'><i class="fa fa-trash"></i></a>
                 <a href="javascript:;" class="rulesAttr" data-bs-toggle="modal" data-bs-target="#rulesModal" data-id="<?= $row['id'] ?>" data-title="<?= $row['title'] ?>" data-text="<?= $row['text'] ?>" data-public="<?= $row['public'] ?>" data-classs="<?= $row['class'] ?>">
                 <i class="fa fa-pencil"></i></a>
             </p>
         <?php endif; ?>
         <?php block_end(); ?>
-    <?php } else if ($row['public'] == "no" && $row['class'] <= $USER->has('class')) { ?>
+    <?php } else if ($row['public'] == "no" && $row['class'] <= $current_user->class) { ?>
         <?php block_begin($row['title']) ?>
         <?= format_comment($row['text']); ?><br>
-        <?php if ($USER->has('class') > _UPLOADER) : ?>
+        <?php if ($current_user->class > CONFIG['_UPLOADER']) : ?>
             <p class="text-end">
-                <i class="fa fa-user-secret m-1 tt_prime" title="<?= Txt('STAFF'); ?>"></i>
+                <i class="fa fa-user-secret m-1 tt_prime" title="<?= LANG['STAFF']; ?>"></i>
                 <a href='<?= Url("rule/delete/$row[id]") ?>'><i class="fa fa-trash"></i></a>
                 <a href="javascript:;" class="rulesAttr" data-bs-toggle="modal" data-bs-target="#rulesModal" data-id="<?= $row['id'] ?>" data-title="<?= $row['title'] ?>" data-text="<?= $row['text'] ?>" data-public="<?= $row['public'] ?>" data-classs="<?= $row['class'] ?>">
                 <i class="fa fa-pencil"></i></a>
@@ -26,14 +26,14 @@
     <?php } ?>
 <?php endforeach; ?>
 
-<?php if ($USER->has('class') > _UPLOADER) : ?>
+<?php if ($current_user->class > CONFIG['_UPLOADER']) : ?>
     <p class="text-end">
-        <button class="ttbtn"><i class="fa fa-user-secret m-1 tt_prime" data-bs-toggle="modal" data-bs-target="#rulesModal" title="<?= Txt('STAFF') ?>"><?= Txt(' Add new') ?></i></button>
+        <button class="ttbtn"><i class="fa fa-user-secret m-1 tt_prime" data-bs-toggle="modal" data-bs-target="#rulesModal" title="<?= LANG['STAFF'] ?>"><?= LANG[' Add new'] ?></i></button>
     <p>
 <?php endif; ?>
 
 <!-- Add/Edit Modal -->
-<?php if ($USER->has('class') > _UPLOADER) : ?>
+<?php if ($current_user->class > CONFIG['_UPLOADER']) : ?>
     <script>
         $('.rulesAttr').click(function() {
             var id = $(this).data('id');
@@ -56,21 +56,21 @@
                 <div class="modal-content">
                     <div class="modal-body">
                         <input type='hidden' name='id' id='id' />
-                        <?= Txt('TITLE') ?> :<br>
+                        <?= LANG['TITLE'] ?> :<br>
                         <input class="form-control fullwidth" type="text" name="title" id="title" />
-                        <?= Txt('RULE') ?> :<br>
+                        <?= LANG['RULE'] ?> :<br>
                         <textarea style="height:150px;" class="form-control" name="text" id="text"></textarea>
-                        <?= Txt('PUBLIC') ?> :<br>
+                        <?= LANG['PUBLIC'] ?> :<br>
                         <select name='public' id='public' style='width: 95%' class='form-control'>
-                            <option value='yes'><?= Txt('YES') ?></option>
-                            <option value='no'><?= Txt('NO') ?></option>
+                            <option value='yes'><?= LANG['YES'] ?></option>
+                            <option value='no'><?= LANG['NO'] ?></option>
                         </select>
-                        <?= Txt('MIN_CLASS') ?> :<br>
+                        <?= LANG['MIN_CLASS'] ?> :<br>
                         <input type="text" name='classs' id='classs' class="form-control" />
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-sm ttbtn" data-bs-dismiss="modal"><?= Txt('CLOSE') ?></button>
-                        <button type="submit" class="btn btn-sm ttbtn"><?= Txt("SUBMIT") ?></button>
+                        <button type="button" class="btn btn-sm ttbtn" data-bs-dismiss="modal"><?= LANG['CLOSE'] ?></button>
+                        <button type="submit" class="btn btn-sm ttbtn"><?= LANG['SUBMIT'] ?></button>
                     </div>
                 </div>
             </div>

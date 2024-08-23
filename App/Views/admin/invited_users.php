@@ -1,6 +1,6 @@
-<?php block_begin($V_title) ?>
+<?php block_begin($page_title) ?>
 <p class='text-center'>
-    <?php echo sprintf(Txt('INVITED_USER'), number_format($V_count)); ?>
+    <?php echo sprintf(LANG['INVITED_USER'], number_format($V_count)); ?>
 </p>
 <div class=''>
     <form id="invited" method="post" action="<?= Url('admininvite/sumbit') ?>">
@@ -8,12 +8,12 @@
             <table class='table table-striped'>
                 <thead>
                     <tr>
-                        <th><?= Txt("NAME") ?></th>
-                        <th><?= Txt("EMAIL") ?></th>
-                        <th><?= Txt("CLASS") ?></th>
-                        <th><?= Txt("INVITED") ?></th>
-                        <th><?= Txt("LAST_ACCESS") ?></th>
-                        <th><?= Txt("INVITED_BY") ?></th>
+                        <th><?= LANG["NAME"] ?></th>
+                        <th><?= LANG["EMAIL"] ?></th>
+                        <th><?= LANG["CLASS"] ?></th>
+                        <th><?= LANG["INVITED"] ?></th>
+                        <th><?= LANG["LAST_ACCESS"] ?></th>
+                        <th><?= LANG["INVITED_BY"] ?></th>
                         <th><input type="checkbox" name="checkall" onclick="checkAll(this.form.id);" /></th>
                     </tr>
                 </thead>
@@ -34,7 +34,7 @@
             </table>
         </div>
         <div class='text-center'>
-            <button type='submit' class='btn btn-sm ttbtn'><?= Txt("DEL") ?></button>
+            <button type='submit' class='btn btn-sm ttbtn'><?= LANG["DEL"] ?></button>
         </div>
     </form>
 </div>

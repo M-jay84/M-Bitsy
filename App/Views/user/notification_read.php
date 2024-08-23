@@ -1,4 +1,4 @@
-<?php block_begin($V_title) ?>
+<?php block_begin($page_title) ?>
 <div class='row tt_blockcenter rounded '>
     <div class="col">
         <div class="rounded">

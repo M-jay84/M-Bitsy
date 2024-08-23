@@ -2,26 +2,23 @@
 // Start Session
 session_start();
 
-// Error Reporting
-error_reporting(E_ALL); // error_reporting(E_ALL);
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-//ini_set('error_log', '../data/logs/errors_log.txt');
+// Load Config
+require 'config.php';
 
 // Register custom exception handler
-include "Helpers/exception_helper.php";
+include "Helpers/error_helper.php";
+error_handler(); //todo
 set_exception_handler("handleUncaughtException");
-//set_error_handler('runtime_error_handler');
 
-// Load Config
-require 'Config/config.php';
-require 'Config/settings.php';
-// Load Main Functions
-require "Helpers/globals_helper.php";
 // Load Langauge
 $language = isset($_SESSION['language']) ? $_SESSION['language'] : 'english';
-require LANG."/$language.php";
+require CONFIG['LANG']."/$language.php";
+
+// Load Main Functions
+require "Helpers/my_helper.php";
+
 // Load Helpers
+require "Helpers/session_helper.php";
 require "Helpers/bbcode_helper.php";
 require "Helpers/datetime_helper.php";
 require "Helpers/displaytable_helper.php";

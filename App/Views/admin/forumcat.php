@@ -1,18 +1,18 @@
-<?php block_begin($V_title) ?>
+<?php block_begin($page_title) ?>
  <div class="rounded">
      <div class="text-center">
-        <b><?= Txt("FORUM_CATAGORY") ?></b><br>
-        <a type="button" class="model_form ttbtn btn-sm" data-bs-toggle="modal" data-bs-target="#forumcatModal"><?= Txt("ADD") ?></a>
+        <b><?= LANG["FORUM_CATAGORY"] ?></b><br>
+        <a type="button" class="model_form ttbtn btn-sm" data-bs-toggle="modal" data-bs-target="#forumcatModal"><?= LANG["ADD"] ?></a>
      </div>
      <form id="submit" method="post" action="<?= Url('adminforumcat/submit') ?>">
          <div class="table-responsive rounded rounded-bottom">
              <table class="table table-striped">
                  <thead>
                      <tr>
-                         <th><?= Txt("ID") ?></th>
-                         <th><?= Txt("TITLE") ?></th>
-                         <th><?= Txt("SORT") ?></th>
-                         <th><?= Txt("MOVE") ?></th>
+                         <th><?= LANG["ID"] ?></th>
+                         <th><?= LANG["TITLE"] ?></th>
+                         <th><?= LANG["SORT"] ?></th>
+                         <th><?= LANG["MOVE"] ?></th>
                          <th></th>
                      </tr>
                  </thead>
@@ -33,7 +33,7 @@
                                      <i class="fa fa-edit"></i>
                                  </a>
                                  <a href='<?= Url("adminforumcat/delete/$row[id]") ?>'>
-                                     <i class='fa fa-trash' title='<?= Txt("DEL")  ?>'></i>
+                                     <i class='fa fa-trash' title='<?= LANG["DEL"]  ?>'></i>
                                  </a>
                              </td>
                          </tr>
@@ -62,12 +62,12 @@
              <div class="modal-content">
                  <div class="modal-body">
                      <input type='hidden' name='id' id='id' />
-                    <input class="form-control fullwidth" type='text' name='name' id='name' placeholder="<?= Txt("NAME") ?>"><br>
-                    <input class="form-control fullwidth" type='number' name="sort" id='sort' placeholder="<?= Txt("SORT") ?>"><br>
+                    <input class="form-control fullwidth" type='text' name='name' id='name' placeholder="<?= LANG["NAME"] ?>"><br>
+                    <input class="form-control fullwidth" type='number' name="sort" id='sort' placeholder="<?= LANG["SORT"] ?>"><br>
                  </div>
                  <div class="modal-footer">
-                     <button type="button" class="btn btn-sm ttbtn" data-bs-dismiss="modal"><?= Txt("CLOSE") ?></button>
-                     <button type="submit" class="btn btn-sm ttbtn"><?= Txt("SUBMIT") ?></button>
+                     <button type="button" class="btn btn-sm ttbtn" data-bs-dismiss="modal"><?= LANG['CLOSE'] ?></button>
+                     <button type="submit" class="btn btn-sm ttbtn"><?= LANG['SUBMIT'] ?></button>
                  </div>
              </div>
          </div>

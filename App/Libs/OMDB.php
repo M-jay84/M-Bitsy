@@ -302,7 +302,7 @@ class OMDB
 		}
 
 		// Build final URL
-		$url = $url . $type . urlencode($this->movieId) . $options .'&apikey='._OMDBAPIKEY.'';
+		$url = $url . $type . urlencode($this->movieId) . $options .'&apikey='.CONFIG['_OMDBAPIKEY'].'';
 
 		return $url;
 	}

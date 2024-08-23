@@ -1,4 +1,4 @@
-<?php block_begin($V_title) ?>
+<?php block_begin($page_title) ?>
 <form method='get' action='<?= Url('admintorrent') ?>'>
     <p class="tt_blockcenter rounded text-center">
         Search: <input type='text' name='search' value='<?= $V_search ?>' size='30' />
@@ -7,15 +7,15 @@
 </form>
 
 <p class="text-center">
-    <a href='<?= Url('admintorrent') ?>'><?= Txt("ALL") ?> - </a>&nbsp;&nbsp;
-    <a href='<?= Url('admintorrent/dead') ?>'><?= Txt("DEAD") ?> - <?= Txt("TORRENT") ?></a>&nbsp;&nbsp;
-    <a href='<?= Url('admintorrent/banned') ?>'><?= Txt("BANNED") ?> - <?= Txt("TORRENT") ?></a>&nbsp;&nbsp;
-    <a href='<?= Url('admintorrent/free') ?>'><?= Txt("FREELEECH") ?> - <?= Txt("TORRENT") ?></a><br>
-    <?= $_GET['type'] ?> - <?= Txt("TORRENT") ?> - <?= Txt("TOTAL") ?> <?= $V_count ?>
+    <a href='<?= Url('admintorrent') ?>'><?= LANG["ALL"] ?> - </a>&nbsp;&nbsp;
+    <a href='<?= Url('admintorrent/dead') ?>'><?= LANG["DEAD"] ?> - <?= LANG["TORRENT"] ?></a>&nbsp;&nbsp;
+    <a href='<?= Url('admintorrent/banned') ?>'><?= LANG["BANNED"] ?> - <?= LANG["TORRENT"] ?></a>&nbsp;&nbsp;
+    <a href='<?= Url('admintorrent/free') ?>'><?= LANG["FREELEECH"] ?> - <?= LANG["TORRENT"] ?></a><br>
+    <?= $_GET['type'] ?> - <?= LANG["TORRENT"] ?> - <?= LANG["TOTAL"] ?> <?= $V_count ?>
 </p>
 
 <form id="delete" method='post' action='<?= Url('admintorrent/delete') ?>'>
-    <?php torrenttable($USER, $V_torrents); ?>
+    <?php torrenttable($V_torrents); ?>
     <p class="text-center">
         <input type='submit' class='btn btn-sm ttbtn' value='Delete checked' />
     </p>

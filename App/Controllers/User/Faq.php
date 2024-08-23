@@ -2,61 +2,65 @@
 
 namespace App\Controllers\User;
 
-use App\Libs\User;
+use App\Libs\Controller;
 use App\Models\FaqModel;
 
 /*
 * Faq Controller
 */
-class Faq 
+class Faq extends Controller
 {
+    public $current_user;
+
+    // Get Current User
+    public function __construct()
+    {
+        $this->current_user = $this->currentuser(1);
+    }
+
     // F.&.Q Page
     public function index()
     {
-        $USER = new User(0, 1);
         // Get Data
-        $faqs = FaqModel::select();
+        $faqs = (new FaqModel)->select();
         
-        // Init Data
+        // Data For View
         $data = [
-            'V_title' => Txt("FAQ"),
+            'page_title' => LANG["FAQ"],
             'V_faqs' => $faqs,
-            'USER' => $USER
+            'current_user' => $this->current_user
         ];
         
         // Load View
-        template('faq', $data, 'user');
+        $this->view('faq', $data, 'user');
     }
 
     // Delete FAQ
     public function delete($id, $sure = 0)
     {
-        $USER = new User(0, 1);
-        if ($USER->isStaff()) {
-            Redirect(Url(), Txt("NO_PERMISSION"));
+        if ($this->current_user->class > CONFIG['_MODERATOR']) {
+            showMessage(Url(), LANG["NO_PERMISSION"]);
         } else {
-            FaqModel::delete($id, $sure);
+            (new FaqModel)->delete($id, $sure);
         }
     }
 
     // Add/Edit Section
     public function section()
     {
-        $USER = new User(0, 1);
-        if ($USER->isStaff()) {
-            Redirect(Url(), Txt("NO_PERMISSION"));
+        if ($this->current_user->class > CONFIG['_MODERATOR']) {
+            showMessage(Url(), LANG["NO_PERMISSION"]);
         } else {
-            FaqModel::insertOrUpdateSection();
+            (new FaqModel)->insertOrUpdateSection();
         }
     }
 
     public function item()
     {
-        $USER = new User(0, 1);
-        if ($USER->isStaff()) {
-            Redirect(Url(), Txt("NO_PERMISSION"));
+        if ($this->current_user->class > CONFIG['_MODERATOR']) {
+            showMessage(Url(), LANG["NO_PERMISSION"]);
         } else {
-            FaqModel::insertOrUpdateItem();
+            (new FaqModel)->insertOrUpdateItem();
         }
     }
 

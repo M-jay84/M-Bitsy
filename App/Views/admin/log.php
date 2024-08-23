@@ -1,7 +1,7 @@
-<?php block_begin($V_title) ?>
+<?php block_begin($page_title) ?>
 <form method='post' action='<?= Url('adminlog') ?>'>
     <p class="tt_blockcenter p-2 rounded text-center">
-        <?= Txt("SEARCH") ?>: <input type='text' size='30' name='search' />
+        <?= LANG["SEARCH"] ?>: <input type='text' size='30' name='search' />
         <input type='submit' class='btn btn-sm ttbtn' value='Search' />
     <p>
 </form>
@@ -11,9 +11,9 @@
         <table class='table table-striped'>
             <thead>
                 <tr>
-                    <th><?= Txt("EVENT") ?></th>
-                    <th><?= Txt("DATE") ?></th>
-                    <th><?= Txt("TIME") ?></th>
+                    <th><?= LANG["EVENT"] ?></th>
+                    <th><?= LANG["DATE"] ?></th>
+                    <th><?= LANG["TIME"] ?></th>
                     <th><input type="checkbox" name="checkall" onclick="checkAll(this.form.id)" /></th>
                 </tr>
             </thead>
@@ -34,7 +34,7 @@
     </div><br>
 
     <div class="text-center">
-        <input type='submit' class='btn btn-sm ttbtn' value='<?= Txt("SUBMIT") ?>' />
+        <input type='submit' class='btn btn-sm ttbtn' value='<?= LANG['SUBMIT'] ?>' />
     </div>
 </form>
 <?= $V_pager ?>

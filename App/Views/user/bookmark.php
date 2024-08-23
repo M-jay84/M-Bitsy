@@ -1,12 +1,12 @@
-<?php block_begin($V_title) ?>
-<?php usermenu($USER, $USER->has('id')); ?>
+<?php block_begin($page_title) ?>
+<?php usermenu($current_user->id); ?>
 <div class='text-center'>
-<?php echo sprintf(Txt('BOOKMARK_MESSAGE'), $V_count) ?>
+<?php echo sprintf(LANG['BOOKMARK_MESSAGE'], $V_count) ?>
 </div>
 <form id='bookmark' action='<?= Url('bookmark/action') ?>' method='post'>
-    <?php torrenttable($USER, $V_bookmarks, 'category,name,dl,magnet,uploader,tube,tmdb,comments,nfo,size,completed,seeders,leechers,health,external,added,speed,wait,rating,bookmark') ?>
+    <?php torrenttable($V_bookmarks, 'category,name,dl,magnet,uploader,tube,tmdb,comments,nfo,size,completed,seeders,leechers,health,external,added,speed,wait,rating,bookmark') ?>
     <div class="text-center">
-        <button type="submit" class="btn ttbtn"><?= Txt("SUBMIT") ?></button>
+        <button type="submit" class="btn ttbtn"><?= LANG['SUBMIT'] ?></button>
     </div>
 </form>
 <?= $V_pager ?>

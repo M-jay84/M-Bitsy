@@ -2,25 +2,33 @@
 
 namespace App\Controllers\User;
 
-use App\Libs\User;
+use App\Libs\Controller;
 use App\Libs\Tmdb;
 
 // Get TMDB Classes
-require_once APPROOT . "/Libs/TMDB.php";
+require_once CONFIG['APPROOT'] . "/Libs/TMDB.php";
 
 /*
 * TMDB Viewer Controller
 */
-class Moviedatabase 
+class Moviedatabase extends Controller
 {
+    public $current_user;
+
+    // Get Current User
+    public function __construct()
+    {
+        $this->current_user = $this->currentuser(2);
+    }
+
     // TMDB Search Default Page todo (tidy file)
     public function index()
     {
-        $USER = new User(0, 2);
+    
 
         // Check TMDB Set
-        if (_TMDBswitch === false) {
-            Redirect(Url(), Txt("TMDB_OFF"));
+        if (CONFIG['_TMDBswitch'] === false) {
+            showMessage(Url(), LANG["TMDB_OFF"]);
         }
         $name = Input('search');
         $type = Input('type');
@@ -32,41 +40,40 @@ class Moviedatabase
         if ($type == 'person') {
             $persons = $tmdb->searchPerson($name);
             foreach ($persons as $person) {
-                $link .= $person->getName() . ' <a href="' . URLROOT . '/moviedatabase/details/' . $person->getID() . '/person"><b>Link</b></a><br>';
+                $link .= $person->getName() . ' <a href="' . CONFIG['URLROOT'] . '/moviedatabase/details/' . $person->getID() . '/person"><b>Link</b></a><br>';
             }
         } elseif ($type == 'show') {
             $tvShows = $tmdb->searchTVShow($name);
             foreach ($tvShows as $tvShow) {
-                $link .= $tvShow->getName() . ' <a href="' . URLROOT . '/moviedatabase/details/' . $tvShow->getID() . '/show"><b>Link</b></a><br>';
+                $link .= $tvShow->getName() . ' <a href="' . CONFIG['URLROOT'] . '/moviedatabase/details/' . $tvShow->getID() . '/show"><b>Link</b></a><br>';
             }
         } elseif ($type == 'movie') {
             $movies = $tmdb->searchMovie($name);
             foreach ($movies as $movie) {
-                $link .= $movie->getTitle() . ' <a href="' . URLROOT . '/moviedatabase/details/' . $movie->getID() . '/movie"><b>Link</b></a><br>';
+                $link .= $movie->getTitle() . ' <a href="' . CONFIG['URLROOT'] . '/moviedatabase/details/' . $movie->getID() . '/movie"><b>Link</b></a><br>';
             }
         }
 
-        // Init Data
+        // Data For View
         $data = [
-            'V_title' => Txt("Search"). $type,
+            'page_title' => LANG["Search"]. $type,
             'V_link' => $link,
             'V_type' => $type,
-            'V_search' => $name,
-            'USER' => $USER
+            'V_search' => $name
         ];
 
         // Load View
-        template('moviedatabase', $data, 'user');
+        $this->view('moviedatabase', $data, 'user');
     }
 
     // Details Page
     public function details($id,  $type,  $seasonnumber = 0) // todo
     {
-        $USER = new User(0, 2);
+    
 
         // Check TMDB Set
-        if (_TMDBswitch === false) {
-            Redirect(Url(), Txt("TMDB_OFF"));
+        if (CONFIG['_TMDBswitch'] === false) {
+            showMessage(Url(), LANG["TMDB_OFF"]);
         }
         // Get TMDB Data
         $tmdb = new TMDB();
@@ -83,14 +90,14 @@ class Moviedatabase
             $movieRoles = $_data->getMovieRoles();
             $details = '<b>Movie Roles</b><br>';
             foreach ($movieRoles as $movieRole) {
-                $details .= $movieRole->getCharacter() . ' in <a href="' . URLROOT . '/moviedatabase/details/' . $movieRole->getMovieID() . '/movie">' . $movieRole->getMovieTitle() . '</a><br>';
+                $details .= $movieRole->getCharacter() . ' in <a href="' . CONFIG['URLROOT'] . '/moviedatabase/details/' . $movieRole->getMovieID() . '/movie">' . $movieRole->getMovieTitle() . '</a><br>';
             }
             $data['details'] = $details;
 
             $tvShowRoles = $_data->getTVShowRoles();
             $info = '<b>Show Roles</b><br>';
             foreach ($tvShowRoles as $tvShowRole) {
-                $info .= $tvShowRole->getCharacter() . ' in <a href="' . URLROOT . '/moviedatabase/details/' . $tvShowRole->getTVShowID() . '/show">' . $tvShowRole->getTVShowName() . '</a><br>';
+                $info .= $tvShowRole->getCharacter() . ' in <a href="' . CONFIG['URLROOT'] . '/moviedatabase/details/' . $tvShowRole->getTVShowID() . '/show">' . $tvShowRole->getTVShowName() . '</a><br>';
             }
             $data['info'] = $info;
 
@@ -110,7 +117,7 @@ class Moviedatabase
             $details .= '' . $_data->getNumSeasons() . '  Seasons<br>';
             $seasons = $_data->getSeasons();
             foreach ($seasons as $season) {
-                $details .= "<a href='" . URLROOT . "/moviedatabase/details/" . $season->getID() . "/season/" . $season->getSeasonNumber() . "'>" . $season->getSeasonNumber() . "</a>&nbsp;";
+                $details .= "<a href='" . CONFIG['URLROOT'] . "/moviedatabase/details/" . $season->getID() . "/season/" . $season->getSeasonNumber() . "'>" . $season->getSeasonNumber() . "</a>&nbsp;";
             }
             $data['details'] = $details;
 
@@ -127,7 +134,7 @@ class Moviedatabase
             $info = "<div class='row'>";
             for ($i = 0; $i <= 3; $i++) {
                 $info .= "<div class='col-3'>";
-                $info .= "<a href='" . URLROOT . "/moviedatabase/details/" . $casting_id[$i] . "/person'><img class='avatar3' src='" . $casting_img[$i] . "' /></a><br>" . $casting_nom[$i] . "<br>" . $casting_role[$i] . "&nbsp;";
+                $info .= "<a href='" . CONFIG['URLROOT'] . "/moviedatabase/details/" . $casting_id[$i] . "/person'><img class='avatar3' src='" . $casting_img[$i] . "' /></a><br>" . $casting_nom[$i] . "<br>" . $casting_role[$i] . "&nbsp;";
                 $info .= "</div>";
             }
             $info .= "</div>";
@@ -166,7 +173,7 @@ class Moviedatabase
             $info = "<div class='row'>";
             for ($i = 0; $i <= 3; $i++) {
                 $info .= "<div class='col-3'>";
-                $info .= "<a href='" . URLROOT . "/moviedatabase/details/" . $casting_id[$i] . "/person'><img class='avatar3' src='" . $casting_img[$i] . "' /></a><br>" . $casting_nom[$i] . "<br>" . $casting_role[$i] . "&nbsp;";
+                $info .= "<a href='" . CONFIG['URLROOT'] . "/moviedatabase/details/" . $casting_id[$i] . "/person'><img class='avatar3' src='" . $casting_img[$i] . "' /></a><br>" . $casting_nom[$i] . "<br>" . $casting_role[$i] . "&nbsp;";
                 $info .= "</div>";
             }
             $info .= "</div>";
@@ -178,20 +185,19 @@ class Moviedatabase
 
         }
 
-        // Init Data
+        // Data For View
         $data = [
             'V_id' => $id,
-            'V_title' => $data['title'],
+            'page_title' => $data['title'],
             'V_poster' => $data['poster'],
             'V_details' => $data['details'],
             'V_info' => $data['info'],
             'V_seasonnumber' => $seasonnumber,
-            'V_search' => Input('seach'),
-            'USER' => $USER
+            'V_search' => Input('seach')
         ];
 
         // Load View
-        template('moviedatabase_details', $data, 'user');
+        $this->view('moviedatabase_details', $data, 'user');
 
     }
 }

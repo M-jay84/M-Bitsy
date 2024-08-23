@@ -1,23 +1,23 @@
-<?php block_begin($V_title) ?>
+<?php block_begin($page_title) ?>
 <div class='text-center'>
-    <a href="<?= Url('adminban/email') ?>"><?= Txt("EMAIL") ?></a>&nbsp;
-    <a href="<?= Url('adminban/ip') ?>"><?= Txt("IP") ?></a>
+    <a href="<?= Url('adminban/email') ?>"><?= LANG['EMAIL'] ?></a>&nbsp;
+    <a href="<?= Url('adminban/ip') ?>"><?= LANG["IP"] ?></a>
 </div>
 <p class="text-end">
-    <a type="button" class="model_form ttbtn btn-sm" data-bs-toggle="modal" data-bs-target="#banModal"><?= Txt("ADD") ?></a>
+    <a type="button" class="model_form ttbtn btn-sm" data-bs-toggle="modal" data-bs-target="#banModal"><?= LANG["ADD"] ?></a>
 <p>
 <form id='delete' action='<?= Url('adminban/delete') ?>' method='post'>
-    <p class="text-center"><?= Txt("BANNED_TYPE ") ?>  <?= $V_type ?></p>
+    <p class="text-center"><?= LANG["BANNED_TYPE"] ?>  <?= $V_type ?></p>
     <div class='table-responsive'>
         <table class='table table-striped'>
             <thead>
                 <tr>
-                    <th><?= Txt("DATE_ADDED") ?></th>
-                    <th><?= Txt("FIRST") ?></th>
-                    <th><?= Txt("LAST") ?></th>
-                    <th><?= Txt("ADDED_BY") ?></th>
-                    <th><?= Txt("COMMENT") ?></th>
-                    <th><?= Txt("TYPE") ?></th>
+                    <th><?= LANG["DATE_ADDED"] ?></th>
+                    <th><?= LANG['FIRST'] ?></th>
+                    <th><?= LANG["LAST"] ?></th>
+                    <th><?= LANG["ADDED_BY"] ?></th>
+                    <th><?= LANG["COMMENT"] ?></th>
+                    <th><?= LANG["TYPE"] ?></th>
                     <th><input type='checkbox' name='checkall' onclick='checkAll(this.form.id);' /></th>
                 </tr>
             </thead>
@@ -36,7 +36,7 @@
             </tbody>
         </table>
     </div>
-    <p class="text-center"><button type="submit" class="btn btn-sm ttbtn"><?= Txt("Delete") ?></button></p>
+    <p class="text-center"><button type="submit" class="btn btn-sm ttbtn"><?= LANG['DEL'] ?></button></p>
 </form>
 
 <form id="submit" method="post" action="<?= Url('adminban'); ?>">
@@ -45,24 +45,25 @@
             <div class="modal-content">
                 <div class="modal-body p-2">
                     <div class="text-center">
-                        <b><?= Txt("ADD_BAN") ?></b><br>
-                        <input id="first" type="text" class="form-control fullwidth" name="first" placeholder="<?= Txt("BAN_EMAIL_IP") ?>"><br>
-                        <input id="last" type="text" class="form-control fullwidth" name="last" placeholder="<?= Txt("Other Ip") ?>"><br>
+                        <b><?= LANG["ADD_BAN"] ?></b><br>
+                        <input id="first" type="text" class="form-control fullwidth" name="first" placeholder="<?= LANG["BAN_EMAIL_IP"] ?>"><br>
+                        <input id="last" type="text" class="form-control fullwidth" name="last" placeholder="<?= LANG["Other Ip"] ?>"><br>
                         <select name="type" class='form-select'>
-                            <option value="email"><?= Txt("EMAIL") ?></option>
-                            <option value="ip"><?= Txt("IP") ?></option>
-                            <option value="domain"><?= Txt("DOMAIN") ?></option>
+                            <option value="email"><?= LANG["EMAIL"] ?></option>
+                            <option value="ip"><?= LANG["IP"] ?></option>
+                            <option value="domain"><?= LANG["DOMAIN"] ?></option>
                         </select><br>
-                        <input id="comment" type="text" class="form-control fullwidth" name="comment" placeholder="<?= Txt("ADDCOMMENT") ?>"><br>
+                        <input id="comment" type="text" class="form-control fullwidth" name="comment" placeholder="<?= LANG["ADDCOMMENT"] ?>"><br>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-sm ttbtn" data-bs-dismiss="modal"><?= Txt("CLOSE") ?></button>
-                        <button type="submit" class="btn btn-sm ttbtn"><?= Txt("BAN") ?></button>
+                        <button type="button" class="btn btn-sm ttbtn" data-bs-dismiss="modal"><?= LANG["CLOSE"] ?></button>
+                        <button type="submit" class="btn btn-sm ttbtn"><?= LANG['BAN'] ?></button>
                     </div>
                 </div>
             </div>
         </div>
+    </div>
 </form>
 
 <?= $V_pager ?>
-<?php block_end() ?>
+<?php block_begin($page_title) ?>

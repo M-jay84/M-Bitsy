@@ -2,30 +2,40 @@
 
 namespace App\Controllers\Admin;
 
-use App\Libs\User;
+use App\Libs\Controller;
 use App\Models\UsersModel;
 
 /*
 * Duplicate IP Controller
 */
-class Adminduplicateip 
+class Adminduplicateip extends Controller
 {
+    public $current_user;
+
+    // Get Current User
+    public function __construct()
+    {
+        $this->current_user = $this->currentuser(2);
+        if ($this->current_user->class < CONFIG['_MODERATOR']) {
+            showMessage(CONFIG['URLROOT'], LANG["NO_PERMISSION"]);
+        }
+    }
+
     // Duplicate Ips Default Page
     public function index()
     {
-        $USER = new User(_MODERATOR, 2);
+    
         // Get Ip Data
         $users = UsersModel::duplicateIps();
         
-        // Init Data
+        // Data For View
         $data = [
-            'V_title' => Txt("DUPLICATEIP"),
-            'V_users' => $users['stmt'],
-            'USER' => $USER
+            'page_title' => LANG["DUPLICATEIP"],
+            'V_users' => $users['stmt']
         ];
 
         // Load View
-        template('duplicateip', $data, 'admin');
+        $this->view('duplicateip', $data, 'admin');
     }
 
 }

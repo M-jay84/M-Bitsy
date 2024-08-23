@@ -10,33 +10,33 @@ use App\Libs\DB;
 class PermissionsModel
 {
     // Fetch Permission Row
-    public static function fetchRow($columns = '*', $where = '', $values = '', $other = '')
+    public function fetchRow($columns = '*', $where = '', $values = '', $other = '')
     {
         $stmt = DB::fetchRow('permissions', $columns, $where, $values, $other);
 		return $stmt;
 	}
 	
     // Fetch aLL PermissionS
-    public static function fetchALL($columns = '*', $where = '', $values = '', $other = '')
+    public function fetchALL($columns = '*', $where = '', $values = '', $other = '')
     {
         $stmt = DB::newSelect('permissions', $columns, $where, $values, $other);
 		return $stmt;
 	}
 	
     // Admin Delete Permissions
-    public static function delete($id)
+    public function delete($id)
     {
         // Protect Permissions
         if ($id == 1) {
-            Redirect(Url('permission'), Txt("YOU_CANT_DEL_THIS_GRP"));
+            showMessage(Url('permission'), LANG["YOU_CANT_DEL_THIS_GRP"]);
         }
 
         DB::delete('`permissions`', ['permission_id'=>$id]);
-        Redirect(Url('adminpermission'), Txt("DEL_COMPLETE"));
+        showMessage(Url('adminpermission'), LANG["DEL_COMPLETE"]);
     }
 
     // Admin Add/Update Permissions
-    public static function insertOrUpdate()
+    public function insertOrUpdate()
     {
         $group_id = Input('permission_id', 'int');
         
@@ -58,7 +58,7 @@ class PermissionsModel
                 $_POST["view_forum"], $_POST["edit_forum"], $_POST["delete_forum"], $_POST["can_upload"], $_POST["can_download"], $group_id]);
         }
 
-        Redirect(Url('adminpermission'), Txt("ACTION_COMPLETE"));
+        showMessage(Url('adminpermission'), LANG["ACTION_COMPLETE"]);
     }
 
 }

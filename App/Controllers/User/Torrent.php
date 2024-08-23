@@ -2,7 +2,7 @@
 
 namespace App\Controllers\User;
 
-use App\Libs\User;
+use App\Libs\Controller;
 use App\Models\TorrentsModel;
 use App\Models\LogsModel;
 use App\Models\MessagesModel;
@@ -11,16 +11,24 @@ use App\Models\TorrentTagModel;
 /*
 * Torrent Controller
 */
-class Torrent
+class Torrent extends Controller
 {
-    // Torrent Default Page
+    public $current_user;
+
+    // Get Current User
+    public function __construct()
+    {
+        $this->current_user = $this->currentuser(2);
+    }
+
+    // Torrent Default Page // TODO
     public function index($id, $action = '')
     {
-        $USER = new User(_MODERATOR, 2);
-        $torrent = TorrentsModel::fetchIdDetails('torrents.id=?', [$id]);
+    
+        $torrent = (new TorrentsModel)->fetchIdDetails('torrents.id=?', [$id], $this->current_user);
 
-        if (!$USER->permission('view_torrents') && $torrent['owner'] != $id) {
-            Redirect(Url(), Txt("NO_TORRENT_VIEW"));
+        if ($this->current_user->view_torrents != "yes" && CONFIG['MEMBERSONLY'] && $torrent['owner'] != $id) {
+            showMessage(Url(), LANG["NO_TORRENT_VIEW"]);
         }
 
         // Add Hit
@@ -28,19 +36,19 @@ class Torrent
             $pvkey_var = "t_" . $id;
             $views = $_SESSION[$pvkey_var] == 1 ? $torrent["views"] + 0 : $torrent["views"] + 1;
             $_SESSION[$pvkey_var] = 1;
-            TorrentsModel::update(['views'], ['id='], [$views, $id]);
-            Redirect(Url("torrent/$id"));
+            (new TorrentsModel)->update(['views'], ['id='], [$views, $id]);
+            Url(Url("torrent/$id"));
         }
 
         // Add Bump
         if ($action == 'bump') {
-            TorrentsModel::update(['added'], ['id='], [get_date_time(), $id]);
-            Redirect(Url("torrent/$id"), Txt("ACTION_COMPLETE"));
+            (new TorrentsModel)->update(['added'], ['id='], [get_date_time(), $id]);
+            showMessage(Url("torrent/$id"), LANG["ACTION_COMPLETE"]);
         }
 
-        // Init Data
+        // Data For View
         $data = [
-            'V_title' => Txt("TORRENT_DETAILS_FOR") . " " . $torrent['name'] . "",
+            'page_title' => LANG["TORRENT_DETAILS_FOR"] . " " . $torrent['name'] . "",
             'V_torrent' => $torrent['torrent'],
             'V_tmdb1' => $torrent['tmdb1'],
             'V_image' => $torrent['image'],
@@ -50,22 +58,22 @@ class Torrent
             'V_tags' => $torrent['tags'],
             'V_html' => $torrent['html'],
             'V_scraper' => $torrent['scraper'],
-            'USER' => $USER
+            'current_user' => $this->current_user
         ];
 
         // Load View
-        template('torrent', $data, 'user');
+        $this->view('torrent', $data, 'user');
     }
 
     // Edit Torrent Form Submit // todo 
     public function submit($id)
     {
-        $USER = new User(_MODERATOR, 2);
+    
         // Get Torrent Data
-        $row = TorrentsModel::fetchRow('owner,image2,image1', ['id ='], [$id]);
+        $row = (new TorrentsModel)->fetchRow('owner,image2,image1', ['id ='], [$id]);
 
-        if ($USER->has('control_panel') == "no" && $USER->has('id') != $id) {
-            Redirect(Url(), Txt("NO_PERMISSION"));
+        if ($this->current_user->control_panel == "no" && $this->current_user->id != $id) {
+            showMessage(Url(), LANG["NO_PERMISSION"]);
         }
 
         $updateset = array();
@@ -80,15 +88,15 @@ class Torrent
                     die("No data " . var_dump($_FILES));
                 }
                 if ($nfofile['size'] > 65535) {
-                    Redirect(Url("torrent/$id"), "NFO is too big! Max 65,535 bytes.");
+                    showMessage(Url("torrent/$id"), "NFO is too big! Max 65,535 bytes.");
                 }
                 $nfofilename = $nfofile['tmp_name'];
                 if (@is_uploaded_file($nfofilename) && @filesize($nfofilename) > 0) {
-                    @move_uploaded_file($nfofilename, UPLOADDIR . "/nfos/$id.nfo");
+                    @move_uploaded_file($nfofilename, CONFIG['UPLOADDIR'] . "/nfos/$id.nfo");
                     $updateset['nfo'] = 'yes';
                 } //success
             } elseif ($nfoaction == "delete") {
-                unlink(UPLOADDIR . "/nfos/$id");
+                unlink(CONFIG['UPLOADDIR'] . "/nfos/$id");
                 $updateset['nfo'] = 'no';
             }
 
@@ -105,15 +113,15 @@ class Torrent
             $updateset['anon'] = $_POST["anon"] ? "yes" : "no";
             $updateset['torrentlang'] = (int) $_POST["language"] ?? 0;
 
-            if ($USER->isStaff()) {
+            if ($this->current_user->class > CONFIG['_MODERATOR']) {
                 $updateset['sticky'] = $_POST["sticky"] == 'yes' ? 'yes' : 'no';
             }
 
-            if ($USER->permission('edit_torrents')) {
+            if ($this->current_user->edit_torrents == 'yes') {
                 $updateset['freeleech'] = $_POST["freeleech"] ? 1 : 0;
             }
 
-            if ($USER->permission('edit_torrents')) {
+            if ($this->current_user->edit_torrents == 'yes') {
                 if ($_POST["banned"]) {
                     $updateset['banned'] = 'yes';
                     $_POST['visible'] = 'no';
@@ -126,7 +134,7 @@ class Torrent
 
             $tags = $_POST['tags'];
             if ($tags) {
-                TorrentTagModel::insert(['torrentid' => $id, 'type1' => $tags[0], 'type2' => $tags[1], 'type3' => $tags[2]]);
+                (new TorrentTagModel)->insert(['torrentid' => $id, 'type1' => $tags[0], 'type2' => $tags[1], 'type3' => $tags[2]]);
             }
 
             // Images
@@ -137,7 +145,7 @@ class Torrent
 
             if ($img1action == "delete") {
                 if ($row['image1']) {
-                    unlink(UPLOADDIR . "/images/$row[image1]");
+                    unlink(CONFIG['UPLOADDIR'] . "/images/$row[image1]");
                     $updateset['image1'] = '';
                 }
             }
@@ -149,51 +157,51 @@ class Torrent
 
             if ($img2action == "delete") {
                 if ($row['image2']) {
-                    unlink(UPLOADDIR . "/images/$row[image2]");
+                    unlink(CONFIG['UPLOADDIR'] . "/images/$row[image2]");
                     $updateset['image2'] = '';
                 }
             }
 
             // Update
-            TorrentsModel::updateset($updateset, $id);
-            LogsModel::write("Torrent $id (" . htmlspecialchars($_POST["name"]) . ") was edited by " . $USER->has('username') . "");
-            Redirect(Url("torrent/$id"), Txt('SUCCESS'));
+            (new TorrentsModel)->updateset($updateset, $id);
+            (new LogsModel)->write("Torrent $id (" . htmlspecialchars($_POST["name"]) . ") was edited by " . $this->current_user->username . "");
+            showMessage(Url("torrent/$id"), LANG['SUCCESS']);
         } else {
-            Redirect(Url("torrent/$id"), Txt('ACTION_FAILED'));
+            showMessage(Url("torrent/$id"), LANG['ACTION_FAILED']);
         }
     }
 
     // Delete Torrent Default Page
     public function deleteok()
     {
-        $USER = new User(_MODERATOR, 2);
+    
         // Check User Input
         $torrentid = Input('id', 'id');
         $delreason = Input('delreason');
         $torrentname = Input('torrentname');
 
         // Check Corrert Input
-        if (!$USER->permission('delete_torrents')) {
-            Redirect(Url("torrent/$torrentid"), Txt("NO__PERMISSION"));
+        if (!$this->current_user->delete_torrents == 'yes') {
+            showMessage(Url("torrent/$torrentid"), LANG["NO__PERMISSION"]);
         }
         if (!Id($torrentid)) {
-            Redirect(Url("torrent/delete?id=$torrentid"), Txt("MISSING_ID"));
+            showMessage(Url("torrent/delete?id=$torrentid"), LANG["MISSING_ID"]);
         }
         if (!$delreason) {
-            Redirect(Url("torrent/delete?id=$torrentid"), Txt("MISSING_FORM_DATA"));
+            showMessage(Url("torrent/delete?id=$torrentid"), LANG["MISSING_FORM_DATA"]);
         }
 
         // Delete Torrent
-        $owner = TorrentsModel::fetchRow('name, owner', ['id ='], $torrentid);
-        TorrentsModel::deleteTorrent($torrentid);
-        LogsModel::write($USER->has('username') . " has deleted torrent: ID:$torrentid - " . htmlspecialchars($torrentname) . " - Reason: " . htmlspecialchars($delreason));
-        unlink(UPLOADDIR . "/torrents/$torrentid.torrent");
+        $owner = (new TorrentsModel)->fetchRow('name, owner', ['id ='], $torrentid);
+        (new TorrentsModel)->deleteTorrent($torrentid, $this->current_user->id);
+        (new LogsModel)->write($this->current_user->username . " has deleted torrent: ID:$torrentid - " . htmlspecialchars($torrentname) . " - Reason: " . htmlspecialchars($delreason));
+        unlink(CONFIG['UPLOADDIR'] . "/torrents/$torrentid.torrent");
 
-        if ($USER->has('id')=== $owner['owner']) {
-            $msg_shout = "Your torrent " . $torrentname . " has been deleted by " . $USER->has('username') . "/nReason: " . $_POST["delreason"] . "";
+        if ($this->current_user->id=== $owner['owner']) {
+            $msg_shout = "Your torrent " . $torrentname . " has been deleted by " . $this->current_user->username . "/nReason: " . $_POST["delreason"] . "";
             MessagesModel::insert(['sender' => 0, 'receiver' => $owner['owner'], 'added' => get_date_time(), 'subject' => 'Torrent Deleted', 'msg' => $msg_shout, 'unread' => 'yes', 'location' => 'in']);
         }
 
-        Redirect(Url("peer/seeding/$owner[owner]"), htmlspecialchars($torrentname) . " " . Txt("DEL_ERROR"));
+        showMessage(Url("peer/seeding/$owner[owner]"), htmlspecialchars($torrentname) . " " . LANG["DEL_ERROR"]);
     }
 }

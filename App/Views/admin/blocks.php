@@ -1,20 +1,20 @@
-<?php block_begin($V_title) ?>
+<?php block_begin($page_title) ?>
 <p class="text-center">
     Place new blocks in App/Views/blocks
-    <a type="button" class="ttbtn btn-sm" data-bs-toggle="modal" data-bs-target="#addblockModal"><?= Txt("ADD") ?></a>
+    <a type="button" class="ttbtn btn-sm" data-bs-toggle="modal" data-bs-target="#addblockModal"><?= LANG["ADD"] ?></a>
 </p>
 <form name="blocks" method="post" action="<?= Url('adminportal/true') ?>">
     <div class='table-responsive  p-3'>
         <table class='table table-striped'>
             <thead>
                 <tr>
-                    <th><?= Txt("NAME") ?><br />(<?= Txt("_FL_NM_IF_NO_SET_") ?>)</th>
-                    <th><?= Txt("_FILE_NAME_") ?><br></th>
-                    <th><?= Txt("DESCRIPTION") ?><br />(<?= Txt("_MAX_") ?> 255 <?= Txt("_CHARS_") ?>)</th>
-                    <th><?= Txt("POSITION") ?></th>
-                    <th><?= Txt("SORT") ?></th>
-                    <th><?= Txt("ORDER") ?></th>
-                    <th><?= Txt("ENABLED") ?><br><?= Txt("YES") ?>/<?= Txt("NO") ?></th>
+                    <th><?= LANG["NAME"] ?><br />(<?= LANG["_FL_NM_IF_NO_SET_"] ?>)</th>
+                    <th><?= LANG["_FILE_NAME_"] ?><br></th>
+                    <th><?= LANG["DESCRIPTION"] ?><br />(<?= LANG["_MAX_"] ?> 255 <?= LANG["_CHARS_"] ?>)</th>
+                    <th><?= LANG["POSITION"] ?></th>
+                    <th><?= LANG["SORT"] ?></th>
+                    <th><?= LANG["ORDER"] ?></th>
+                    <th><?= LANG["ENABLED"] ?><br><?= LANG["YES"] ?>/<?= LANG["NO"] ?></th>
                 </tr>
             </thead>
             <?php foreach ($V_blocks as $row) : ?>
@@ -22,13 +22,13 @@
                 
                 switch ($row["position"]) {
                     case "left":
-                        $pos = Txt("LEFT");
+                        $pos = LANG["LEFT"];
                         break;
                     case "middle":
-                        $pos = Txt("MIDDLE");
+                        $pos = LANG["MIDDLE"];
                         break;
                     case "right":
-                        $pos = Txt("RIGHT");
+                        $pos = LANG["RIGHT"];
                         break;
                 }
                 ?>
@@ -49,11 +49,11 @@
                         <?php echo $row["sort"] ?>
                     </td>
                     <td> <!-- Edit Sort (Order) -->
-                        <?php echo ((($row["position"] != "left") && ($row["enabled"] == 1)) ? "<a href=\"" . Url("adminportal/true&position=left&left=$row[id]") . "\"><img border=\"0\" src=\"" . URLROOT . "/assets/images/blocks/leftenable.webp\" width=\"18\" height=\"15\"  /></a>" : "<img border=\"0\" src=\"" . URLROOT . "/assets/images/blocks/leftdisable.webp\" width=\"18\" height=\"15\" " . ($row["enabled"] ? "alt=\"" . Txt("_AT_LEFT_") . "\"" : "") . " " . ($row["enabled"] ? "onclick=\"javascript: alert('" . Txt("_AT_LEFT_") . "');\"" : "onclick=\"javascript: alert('" . Txt("_MUST_ENB_FIRST") . "');\"") . "  />") ?>
-                        <?php echo ((($row["position"] != "middle") && ($row["enabled"] == 1)) ? "<a href=\"" . Url("adminportal/true&position=middle&middle=$row[id]") . "\"><img border=\"0\" src=\"" . URLROOT . "/assets/images/blocks/middleenable.webp\" width=\"18\" height=\"15\" /></a>" : "<img border=\"0\" src=\"" . URLROOT . "/assets/images/blocks/middledisable.webp\" width=\"18\" height=\"15\" " . ($row["enabled"] ? "alt=\"" . Txt("_AT_CENTER_") . "\"" : "") . " " . ($row["enabled"] ? "onclick=\"javascript: alert('" . Txt("_AT_CENTER_") . "');\"" : "onclick=\"javascript: alert('" . Txt("_MUST_ENB_FIRST") . "');\"") . "  />") ?>
-                        <?php echo ((($row["position"] != "right") && ($row["enabled"] == 1)) ? "<a href=\"" . Url("adminportal/true&position=right&right=$row[id]") . "\"><img border=\"0\" src=\"" . URLROOT . "/assets/images/blocks/rightenable.webp\" width=\"18\" height=\"15\" /></a>" : "<img border=\"0\" src=\"" . URLROOT . "/assets/images/blocks/rightdisable.webp\" width=\"18\" height=\"15\" " . ($row["enabled"] ? "alt=\"" . Txt("_AT_RIGHT_") . "\"" : "") . " " . ($row["enabled"] ? "onclick=\"javascript: alert('" . Txt("_AT_RIGHT_") . "');\"" : "onclick=\"javascript: alert('" . Txt("_MUST_ENB_FIRST") . "');\"") . "  />") ?>
-                        <?php echo ((($row["sort"] != 1) && ($row["enabled"] != 0)) ? "<a href=\"" . Url("adminportal/true&position=$row[position]&sort=$row[sort]&up=$row[id]") . "\"><img border=\"0\" src=\"" . URLROOT . "/assets/images/blocks/updisable.webp\" width=\"18\" height=\"15\" /></a>" : "<img border='0' src=\"" . URLROOT . "/assets/images/blocks/updisable.webp\" width=\"18\" height=\"15\" alt=\"" . ($row["enabled"] ? "" . Txt("_AT_TOP_") . "" : "") . "\" " . ($row["enabled"] ? "onclick=\"javascript: alert('" . Txt("_AT_TOP_") . "');\"" : "onclick=\"javascript: alert('" . Txt("_MUST_ENB_FIRST") . "');\"") . " />") ?>
-                        <?php echo (((($row["sort"] != ($nextleft - 1)) && ($row["position"] == "left") || ($row["sort"] != ($nextright - 1)) && ($row["position"] == "right") || ($row["sort"] != ($nextmiddle - 1)) && ($row["position"] == "middle")) && ($row["enabled"] != 0)) ? "<a href=\"" . Url("adminportal/true&position=$row[position]&sort=$row[sort]&down=$row[id]") . "\"><img border=\"0\" src=\"" . URLROOT . "/assets/images/blocks/downenable.webp\" width=\"18\" height=\"15\" /></a>" : "<img border=\"0\" src=\"" . URLROOT . "/assets/images/blocks/downdisable.webp\" width=\"18\" height=\"15\" alt=\"" . ($row["enabled"] ? "" . Txt("_AT_BOTTOM_") . "" : "") . "\" " . ($row["enabled"] ? "onclick=\"javascript: alert('" . Txt("_AT_BOTTOM_") . "');\"" : "onclick=\"javascript: alert('" . Txt("_MUST_ENB_FIRST") . "');\"") . " />") ?>
+                        <?php echo ((($row["position"] != "left") && ($row["enabled"] == 1)) ? "<a href=\"" . Url("adminportal/true&position=left&left=$row[id]") . "\"><img border=\"0\" src=\"" . CONFIG['URLROOT'] . "/assets/images/blocks/leftenable.webp\" width=\"18\" height=\"15\"  /></a>" : "<img border=\"0\" src=\"" . CONFIG['URLROOT'] . "/assets/images/blocks/leftdisable.webp\" width=\"18\" height=\"15\" " . ($row["enabled"] ? "alt=\"" . LANG["_AT_LEFT_"] . "\"" : "") . " " . ($row["enabled"] ? "onclick=\"javascript: alert('" . LANG["_AT_LEFT_"] . "');\"" : "onclick=\"javascript: alert('" . LANG["_MUST_ENB_FIRST"] . "');\"") . "  />") ?>
+                        <?php echo ((($row["position"] != "middle") && ($row["enabled"] == 1)) ? "<a href=\"" . Url("adminportal/true&position=middle&middle=$row[id]") . "\"><img border=\"0\" src=\"" . CONFIG['URLROOT'] . "/assets/images/blocks/middleenable.webp\" width=\"18\" height=\"15\" /></a>" : "<img border=\"0\" src=\"" . CONFIG['URLROOT'] . "/assets/images/blocks/middledisable.webp\" width=\"18\" height=\"15\" " . ($row["enabled"] ? "alt=\"" . LANG["_AT_CENTER_"] . "\"" : "") . " " . ($row["enabled"] ? "onclick=\"javascript: alert('" . LANG["_AT_CENTER_"] . "');\"" : "onclick=\"javascript: alert('" . LANG["_MUST_ENB_FIRST"] . "');\"") . "  />") ?>
+                        <?php echo ((($row["position"] != "right") && ($row["enabled"] == 1)) ? "<a href=\"" . Url("adminportal/true&position=right&right=$row[id]") . "\"><img border=\"0\" src=\"" . CONFIG['URLROOT'] . "/assets/images/blocks/rightenable.webp\" width=\"18\" height=\"15\" /></a>" : "<img border=\"0\" src=\"" . CONFIG['URLROOT'] . "/assets/images/blocks/rightdisable.webp\" width=\"18\" height=\"15\" " . ($row["enabled"] ? "alt=\"" . LANG["_AT_RIGHT_"] . "\"" : "") . " " . ($row["enabled"] ? "onclick=\"javascript: alert('" . LANG["_AT_RIGHT_"] . "');\"" : "onclick=\"javascript: alert('" . LANG["_MUST_ENB_FIRST"] . "');\"") . "  />") ?>
+                        <?php echo ((($row["sort"] != 1) && ($row["enabled"] != 0)) ? "<a href=\"" . Url("adminportal/true&position=$row[position]&sort=$row[sort]&up=$row[id]") . "\"><img border=\"0\" src=\"" . CONFIG['URLROOT'] . "/assets/images/blocks/updisable.webp\" width=\"18\" height=\"15\" /></a>" : "<img border='0' src=\"" . CONFIG['URLROOT'] . "/assets/images/blocks/updisable.webp\" width=\"18\" height=\"15\" alt=\"" . ($row["enabled"] ? "" . LANG["_AT_TOP_"] . "" : "") . "\" " . ($row["enabled"] ? "onclick=\"javascript: alert('" . LANG["_AT_TOP_"] . "');\"" : "onclick=\"javascript: alert('" . LANG["_MUST_ENB_FIRST"] . "');\"") . " />") ?>
+                        <?php echo (((($row["sort"] != ($nextleft - 1)) && ($row["position"] == "left") || ($row["sort"] != ($nextright - 1)) && ($row["position"] == "right") || ($row["sort"] != ($nextmiddle - 1)) && ($row["position"] == "middle")) && ($row["enabled"] != 0)) ? "<a href=\"" . Url("adminportal/true&position=$row[position]&sort=$row[sort]&down=$row[id]") . "\"><img border=\"0\" src=\"" . CONFIG['URLROOT'] . "/assets/images/blocks/downenable.webp\" width=\"18\" height=\"15\" /></a>" : "<img border=\"0\" src=\"" . CONFIG['URLROOT'] . "/assets/images/blocks/downdisable.webp\" width=\"18\" height=\"15\" alt=\"" . ($row["enabled"] ? "" . LANG["_AT_BOTTOM_"] . "" : "") . "\" " . ($row["enabled"] ? "onclick=\"javascript: alert('" . LANG["_AT_BOTTOM_"] . "');\"" : "onclick=\"javascript: alert('" . LANG["_MUST_ENB_FIRST"] . "');\"") . " />") ?>
                     </td>
                     <td> <!-- Enable -->
                         <?php echo "
@@ -65,7 +65,7 @@
         </table>
     </div>
     <p class="text-center">
-        <button type="submit" class="btn btn-sm ttbtn"><?= Txt('SUBMIT') ?></button>
+        <button type="submit" class="btn btn-sm ttbtn"><?= LANG['SUBMIT'] ?></button>
     </p>
 </form>
 
@@ -78,11 +78,11 @@
                     <table class='table table-striped'>
                         <thead>
                             <tr>
-                                <th><?= Txt("_NAMED_") ?> (<?= Txt("_FL_NM_IF_NO_SET_") ?>)</th>
-                                <th><?= Txt("FILE") ?></th>
-                                <th><?= Txt("DESCRIPTION") ?> (<?= Txt("_MAX_") ?> 255 <?= Txt("CHARS") ?>)</th>
-                                <th><?= Txt("ADD") ?></th>
-                                <th><?= Txt("DEL") ?></th>
+                                <th><?= LANG["_NAMED_"] ?> (<?= LANG["_FL_NM_IF_NO_SET_"] ?>)</th>
+                                <th><?= LANG["FILE"] ?></th>
+                                <th><?= LANG["DESCRIPTION"] ?> (<?= LANG["_MAX_"] ?> 255 <?= LANG["CHARS"] ?>)</th>
+                                <th><?= LANG["ADD"] ?></th>
+                                <th><?= LANG["DEL"] ?></th>
                             </tr>
                         </thead>
                         <tbody>
@@ -112,8 +112,8 @@
                     </table>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-sm ttbtn" data-bs-dismiss="modal"><?= Txt("CLOSE") ?></button>
-                    <button type="submit" class="btn btn-sm ttbtn"><?= Txt("SUBMIT") ?></button>
+                    <button type="button" class="btn btn-sm ttbtn" data-bs-dismiss="modal"><?= LANG["CLOSE"] ?></button>
+                    <button type="submit" class="btn btn-sm ttbtn"><?= LANG["SUBMIT"] ?></button>
                 </div>
             </div>
         </div>

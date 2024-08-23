@@ -10,7 +10,7 @@ use App\Libs\DB;
 class FaqModel
 {
     // Get All Faqs
-    public static function select()
+    public function select()
     {
         $res = DB::fetchAll('faq', 'id, question, answer, flag, type', ['type='], ['categ'], 'ORDER BY `order` ASC');
         foreach ($res as $arr) {
@@ -33,19 +33,19 @@ class FaqModel
     }
 
     // Delete Faq
-    public static function delete($id, $sure = 0)
+    public function delete($id, $sure = 0)
     {
         if ($sure) {
             DB::delete('faq', ['id' => $id], 1);
             DB::deleteByIds('faq', 'categ', $id);
-            Redirect(Url('faq'), Txt("ACTION_COMPLETE"));
+            showMessage(Url('faq'), LANG["ACTION_COMPLETE"]);
         } else {
-            Redirect(Url('faq'),  "Please click <a href=\"" . URLROOT . "/faq/delete/$id/1\">here</a> to confirm.");
+            showMessage(Url('faq'),  "Please click <a href=\"" . CONFIG['URLROOT'] . "/faq/delete/$id/1\">here</a> to confirm.");
         }
     }
 
     // Add/Edit Section
-    public static function insertOrUpdateSection()
+    public function insertOrUpdateSection()
     {
         $id = Input('id');
         $title = Input('title');
@@ -60,11 +60,11 @@ class FaqModel
         } else {
             DB::update('faq', ['question','answer','flag','categ'], ['id='], [$title, '', $flag, 0, $id]);
         }
-        Redirect(Url('faq'), Txt("ACTION_COMPLETE"));
+        showMessage(Url('faq'), LANG["ACTION_COMPLETE"]);
     }
 
     // Add/Edit Item
-    public static function insertOrUpdateItem()
+    public function insertOrUpdateItem()
     {
         // Check User Input
         $id = Input('id');
@@ -78,10 +78,10 @@ class FaqModel
             $res = DB::fetchColumn('faq', 'COUNT(`order`)', ['type=','categ='], ['item', $id]);
             $order = $res + 1;
             DB::insert('faq', ['type'=>'item', 'question'=>$question, 'answer'=>$answer, 'flag'=>$flag, 'categ'=>$id]); // todo , 'order'=>$order
-            Redirect(Url('faq'), Txt("SUCCESS"));
+            showMessage(Url('faq'), LANG["SUCCESS"]);
         } else {
             DB::update('faq', ['question', 'answer', 'flag'], ['id='], [$question, $answer, $flag, $id]);
-            Redirect(Url('faq'), Txt("UPDATE_COMPLETE"));
+            showMessage(Url('faq'), LANG["UPDATE_COMPLETE"]);
         }
     }
 }

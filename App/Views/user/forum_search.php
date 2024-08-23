@@ -6,29 +6,29 @@
             <input id="keywords" type="text" class="form-control w-50" name="keywords" minlength="3" maxlength="25">
         </div>
         <div class="text-center">
-            <button type='submit' class='btn btn-sm ttbtn' value='Search'><?= Txt('SEARCH_TOPIC') ?></button>&nbsp;&nbsp;
-            <button type='Submit' class='btn btn-sm ttbtn' name='type' value='deep'><?= Txt('SEARCH_POST') ?></button>
+            <button type='submit' class='btn btn-sm ttbtn' value='Search'><?= LANG['SEARCH_TOPIC'] ?></button>&nbsp;&nbsp;
+            <button type='Submit' class='btn btn-sm ttbtn' name='type' value='deep'><?= LANG['SEARCH_POST'] ?></button>
         </div>
     </form>
 </div>
 
 <div class="table-responsive p-3">
     <p class="text-center">
-        <?= Txt('SEARCH') ?>: <b><?= htmlspecialchars($keywords) ?></b>
+        <?= LANG['SEARCH'] ?>: <b><?= htmlspecialchars($keywords) ?></b>
     </p>
     <table class="table table-striped">
         <thead>
             <tr>
-                <th><?= Txt('SUBJECT') ?></th>
-                <th><?= Txt('FORUM') ?></th>
-                <th><?= Txt('ADDED') ?></th>
-                <th><?= Txt('ADDED_BY') ?></th>
+                <th><?= LANG['SUBJECT'] ?></th>
+                <th><?= LANG['FORUM'] ?></th>
+                <th><?= LANG['ADDED'] ?></th>
+                <th><?= LANG['ADDED_BY'] ?></th>
             </tr>
         </thead>
         <tbody>
             <?php
             foreach ($forums as $row) {
-                if ($row["name"] == "" || ($row["minclassread"] > $USER->has('class') && $row["guest_read"] == "no")) {
+                if ($row["name"] == "" || ($row["minclassread"] > $current_user->class && $row["guest_read"] == "no")) {
                     continue;
                 } ?>
                 <tr>

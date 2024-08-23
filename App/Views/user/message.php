@@ -1,5 +1,5 @@
-<?php block_begin($V_title) ?>
-<?php usermenu($USER, $USER->has('id'), 'messages'); ?><br>
+<?php block_begin($page_title) ?>
+<?php usermenu($current_user->id, 'messages'); ?><br>
 <div class="row  rounded">
     <p class="text-center">
         <?= messagemenu(); ?>
@@ -14,7 +14,7 @@
         <div class='row'>
             <div class='col-12'>
                 <?= coloredname($V_messages['sender']) ?>
-                <small><?= Txt("POSTED_AT") ?> <?= $V_messages['added'] ?> </small>
+                <small><?= LANG["POSTED_AT"] ?> <?= $V_messages['added'] ?> </small>
             </div>
             <div class='col-md-12'>
                 <?= format_comment($V_messages['msg']); ?>
@@ -22,13 +22,13 @@
         </div>
     </div>
     <?php if ($V_messages['previous']) : ?>
-    <p class="text-center"><?= Txt("HISTORY") ?></p>
+    <p class="text-center"><?= LANG["HISTORY"] ?></p>
         <?php foreach ($V_messages['previous'] as $msg) : ?>
        <div class='tt_block rounded p-3'>
         <div class='row'>
             <div class='col-12'>
                 <?= coloredname($msg['sender']) ?>
-                <small><?= Txt("POSTED_AT") ?> <?= $msg['added'] ?> </small>
+                <small><?= LANG["POSTED_AT"] ?> <?= $msg['added'] ?> </small>
             </div>
             <div class='col-md-12 p-2'>
                 <?= format_comment($msg['msg']); ?>
@@ -50,26 +50,26 @@
                 <input type="hidden" name="subject" value="<?= $V_messages['subject'] ?>" />
                 <input type="hidden" name="history" value="<?= $V_messages['history'] ?>" />
                 <div class="text-center">
-                    <?= Txt("TO") ?> <?= coloredname($V_messages['replyto']) ?><br>
-                    <?= Txt("SUBJECT") ?> <?= $V_messages['subject'] ?><br>
+                    <?= LANG["TO"] ?> <?= coloredname($V_messages['replyto']) ?><br>
+                    <?= LANG["SUBJECT"] ?> <?= $V_messages['subject'] ?><br>
                 </div>
                 <div class="form-floating mb-4">
                     <select name="template" class='form-select'>
                         <option name='0'>---</option>
                         <?php echo $V_messages['messages'] ?>
                     </select>
-                    <label for="template"><?= Txt("TEMPLATE") ?>:</label>
+                    <label for="template"><?= LANG["TEMPLATE"] ?>:</label>
                 </div>
                 <?php print textbbcode("form", "body"); ?>
                 <p class="text-center">
-                    <button type="submit" class="btn-sm ttbtn" name="Update" value="create"><?= Txt("CREATE") ?></button>&nbsp;
-                    <label><?= Txt("SAVE_COPY") ?></label>
+                    <button type="submit" class="btn-sm ttbtn" name="Update" value="create"><?= LANG["CREATE"] ?></button>&nbsp;
+                    <label><?= LANG["SAVE_COPY"] ?></label>
                     <input type="checkbox" name="save" checked='Checked'>&nbsp;
                 </p>
             </div>
             <div class="modal-footer">
-                <button type="button" class='btn ttbtn' data-bs-dismiss="modal"><?= Txt("CLOSE") ?></button>
-                <button type="submit" class='btn ttbtn'><?= Txt("SUBMIT") ?></button>
+                <button type="button" class='btn ttbtn' data-bs-dismiss="modal"><?= LANG['CLOSE'] ?></button>
+                <button type="submit" class='btn ttbtn'><?= LANG['SUBMIT'] ?></button>
             </div>
         </div>
     </div>
@@ -85,8 +85,8 @@
                     <?php print textbbcode("form1", "msg", $V_messages['msg']); ?>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class='btn ttbtn m-2' data-bs-dismiss="modal"><?= Txt("CLOSE") ?></button>
-                    <button type="submit" class='btn ttbtn m-2'><?= Txt("SUBMIT") ?></button>
+                    <button type="button" class='btn ttbtn m-2' data-bs-dismiss="modal"><?= LANG['CLOSE'] ?></button>
+                    <button type="submit" class='btn ttbtn m-2'><?= LANG['SUBMIT'] ?></button>
                 </div>
             </form>
         </div>

@@ -2,41 +2,51 @@
 
 namespace App\Controllers\Admin;
 
-use App\Libs\User;
+use App\Libs\Controller;
 use App\Models\NewsModel;
 
 /*
 * News Controller
 */
-class Adminnews 
+class Adminnews extends Controller
 {
+    public $current_user;
+
+    // Get Current User
+    public function __construct()
+    {
+        $this->current_user = $this->currentuser(2);
+        if ($this->current_user->class < CONFIG['_MODERATOR']) {
+            showMessage(CONFIG['URLROOT'], LANG["NO_PERMISSION"]);
+        }
+    }
+
     // News Default Page
     public function index()
     {
-        $USER = new User(_MODERATOR, 2);
+    
         if (!empty($_POST)) {
-            NewsModel::insertOrUpdate();
+            (new NewsModel)->insertOrUpdate();
         } else {
             // Get News Data
-            $news = NewsModel::fetchAll('*', '', 'ORDER BY added DESC');
+            $news = (new NewsModel)->fetchAll('*', '', 'ORDER BY added DESC');
 
-            // Init Data
+            // Data For View
             $data = [
-                'V_title' => Txt("NEWS"),
-                'V_news' => $news,
-                'USER' => $USER
+                'page_title' => LANG["NEWS"],
+                'V_news' => $news
             ];
        
             // Load View
-            template('news', $data, 'admin');
+            $this->view('news', $data, 'admin');
         }
     }
 
     // Delete News Form Submit
     public function delete($id)
     {
-        $USER = new User(_MODERATOR, 2);
-        NewsModel::delete($id);
+    
+        (new NewsModel)->delete($id, $this->current_user->id);
     }
 
 }

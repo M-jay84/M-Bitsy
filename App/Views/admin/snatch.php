@@ -1,6 +1,6 @@
-<?php block_begin($V_title) ?>
+<?php block_begin($page_title) ?>
 <div class='text-center'>
-    <?php echo  sprintf(Txt('WE_HAVE_X_SNATCH'), $V_count); ?>
+    <?php echo  sprintf(LANG['WE_HAVE_X_SNATCH'], $V_count); ?>
 </div>
 
 <form id="snatched" method="post" action="<?= Url('adminsnatch/submit') ?>">
@@ -8,13 +8,13 @@
         <table class="table table-striped">
             <thead>
                 <tr>
-                    <th><b><?= Txt('NAME') ?></b></th>
-                    <th><b><?= Txt('USER') ?></b></th>
-                    <th><b><?= Txt('UPLOADED') ?></b></th>
-                    <th><b><?= Txt('DOWNLOADED') ?></b></th>
-                    <th><b><?= Txt('SEED_TIME') ?></b></th>
-                    <th><b><?= Txt('STARTED') ?></b></th>
-                    <th><b><?= Txt('LAST_ACTION') ?></b></th>
+                    <th><b><?= LANG['NAME'] ?></b></th>
+                    <th><b><?= LANG['USER'] ?></b></th>
+                    <th><b><?= LANG['UPLOADED'] ?></b></th>
+                    <th><b><?= LANG['DOWNLOADED'] ?></b></th>
+                    <th><b><?= LANG['SEED_TIME'] ?></b></th>
+                    <th><b><?= LANG['STARTED'] ?></b></th>
+                    <th><b><?= LANG['LAST_ACTION'] ?></b></th>
                     <th><input type="checkbox" name="checkall" onclick="checkAll(this.form.id)" /></th>
                 </tr>
             </thead>

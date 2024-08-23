@@ -2,33 +2,39 @@
 
 namespace App\Controllers\User;
 
-use App\Libs\User;
+use App\Libs\Controller;
 use App\Models\TagsModel;
 
 /*
 * Tags Controller
 */
-class Tag 
+class Tag extends Controller
 {
+    public $current_user;
+
+    // Get Current User
+    public function __construct()
+    {
+        $this->current_user = $this->currentuser(1);
+    }
+
     // Search By Tag Default Page
     public function index($name)
     {
-        $USER = new User(0, 1);
-        if (!$USER->permission('view_torrents')) {
-            Redirect(Url(), Txt("NO_TORRENT_VIEW"));
+        if ($this->current_user->view_torrents != "yes" && CONFIG['MEMBERSONLY']) {
+            showMessage(Url(), LANG["NO_TORRENT_VIEW"]);
         }
         // Get Tag Data
-        $tags = TagsModel::search($name);
+        $tags = (new TagsModel)->search($name);
 
-        // Init Data
+        // Data For View
         $data = [
-            'V_title' => Txt("SEARCH"),
-            'V_tags' => $tags['stmt'],
-            'USER' => $USER
+            'page_title' => LANG["SEARCH"],
+            'V_tags' => $tags['stmt']
         ];
 
         // Load View
-        template('tag', $data, 'user');
+        $this->view('tag', $data, 'user');
     }
 
 }

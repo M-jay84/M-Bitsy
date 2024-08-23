@@ -1,12 +1,12 @@
 <?php
 
-use App\Models\UsersModel;
+use App\Libs\DB;
 
-if ($USER->has('id')) {
-	block_begin(Txt("NEWEST_MEMBERS"));
+if ($_SESSION['id']) {
+	block_begin(LANG["NEWEST_MEMBERS"]);
     $expire = 600; // time in seconds
     if (($rows = $TTCache->Get("block/newestmember_block", $expire)) === false) {
-        $res = UsersModel::fetchAll('id, username', ['enabled=','status=','privacy !='], ['yes','confirmed','strong'], "ORDER BY id DESC LIMIT 5");
+        $res = DB::fetchAll('users', 'id, username', ['enabled=','status=','privacy !='], ['yes','confirmed','strong'], "ORDER BY id DESC LIMIT 5");
         $rows = array();
         foreach ($res as $row) {
             $rows[] = $row;
@@ -15,7 +15,7 @@ if ($USER->has('id')) {
     }
 
     if (!$rows) { ?>
-	   <p class="text-center"><?= Txt("NOTHING_FOUND") ?></p>
+	   <p class="text-center"><?= LANG["NOTHING_FOUND"] ?></p>
        <?php
     } else { ?>
 		<div>

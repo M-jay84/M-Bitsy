@@ -1,6 +1,6 @@
 <?php
 if (CONFIG['SITENOTICEON']) {
-    block_begin(Txt('NOTICE'));
+    block_begin(LANG['NOTICE']);
     ?>
     <div class="text-center">
         <?= CONFIG['SITENOTICE'] ?>

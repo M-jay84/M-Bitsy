@@ -1,13 +1,12 @@
 <?php
 
-use App\Models\StylesheetsModel;
-use App\Models\TorrentLangModel;
+use App\Libs\DB;
 
-if ($USER->has('id')) {
-	block_begin(Txt("THEME") . " / " . Txt("LANGUAGE"));
+if ($_SESSION['id']) {
+	block_begin(LANG["THEME"] . " / " . LANG["LANGUAGE"]);
     $stylesheets = '';
     $languages = '';
-    $ss_r = StylesheetsModel::fetchAll('*', '');
+    $ss_r = DB::fetchAll('stylesheets', '*', '');
     $ss_sa = array();
     foreach ($ss_r as $ss_a) {
         $ss_id = $ss_a["uri"];
@@ -18,7 +17,7 @@ if ($USER->has('id')) {
     reset($ss_sa);
     //while (list($ss_name, $ss_id) = thisEach($ss_sa)) {
     foreach($ss_sa as $ss_name => $ss_id) {
-        if ($ss_id == $USER->has('stylesheet')) {
+        if ($ss_id == $_SESSION['stylesheet']) {
             $ss = " selected='selected'";
         } else {
             $ss = "";
@@ -26,7 +25,7 @@ if ($USER->has('id')) {
         $stylesheets .= "<option value='$ss_id'$ss>$ss_name</option>\n";
     }
 
-    $lang_r = TorrentLangModel::fetchAllLang('*', '');
+    $lang_r = DB::newSelect('languages', '*', '');
     $lang_sa = array();
     foreach ($lang_r as $lang_a) {
         $lang_id = $lang_a["name"];
@@ -37,7 +36,7 @@ if ($USER->has('id')) {
     reset($lang_sa);
     //while (list($lang_name, $lang_id) = thisEach($lang_sa)) {
     foreach($lang_sa as $lang_name => $lang_id) {
-        if ($lang_id == $USER->has('language')) {
+        if ($lang_id == $_SESSION['language']) {
             $lang = " selected='selected'";
         } else {
             $lang = "";
@@ -48,14 +47,14 @@ if ($USER->has('id')) {
 
     <form method="post" action="<?= Url('stylesheet') ?>" class="form-horizontal">
  	    <div class="form-group">
-		    <center><label><?= Txt("THEME") ?></label></center>
+		    <center><label><?= LANG["THEME"] ?></label></center>
 		    <select name="stylesheet" style="width: 95%"  class='form-select'><?= $stylesheets; ?></select>
   	    </div>
 	    <div class="form-group">
-            <center><label><?= Txt("LANGUAGE") ?></label></center>
+            <center><label><?= LANG["LANGUAGE"] ?></label></center>
 	    	<select name="language" style="width: 95%"  class='form-select'><?= $languages; ?></select>
   	    </div>
-        <center><button type="submit" class="btn ttbtn center-block" value="" /><?= Txt("APPLY") ?></button></center>
+        <center><button type="submit" class="btn ttbtn center-block" value="" /><?= LANG["APPLY"] ?></button></center>
     </form>
     <?php
     block_end();

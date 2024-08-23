@@ -1,25 +1,25 @@
-<?php block_begin($V_title) ?>
+<?php block_begin($page_title) ?>
 <div class="tt_blockcenter rounded p-2 text-center">
     <form action='<?= Url('admininactive') ?>' method='post'>
-        <?= Txt("DAYS") ?>
+        <?= LANG["DAYS"] ?>
         <input type='text' name='cday' size='10' value='<?= ($V_cday > 30 ? $V_cday : 30) ?>' maxlength='3' />
         <input type='hidden' name='action' value='cday' />
-        <input type='submit' class='btn btn-sm ttbtn' value='<?= Txt("SUBMIT") ?>' />
+        <input type='submit' class='btn btn-sm ttbtn' value='<?= LANG['SUBMIT'] ?>' />
     </form>
 </div>
 
-<h5 class='text-center'><?= $V_count ?> <?= Txt("INACTIVE_FOR") ?> <?= $V_cday ?> <?= Txt("DAYS") ?></h5>
+<h5 class='text-center'><?= $V_count ?> <?= LANG["INACTIVE_FOR"] ?> <?= $V_cday ?> <?= LANG["DAYS"] ?></h5>
 <form id="inactive" action='<?= Url('admininactive/submit') ?>' method='post'>
     <div class='table-responsive  p-3'>
         <table class='table table-striped'>
             <thead>
                 <tr>
-                    <th><?= Txt("USERNAME") ?></th>
-                    <th><?= Txt("CLASS") ?></th>
-                    <th><?= Txt("IP") ?></th>
-                    <th><?= Txt("RATIO") ?></th>
-                    <th><?= Txt("JOINED") ?></th>
-                    <th><?= Txt("LAST_VISIT") ?></th>
+                    <th><?= LANG['USERNAME'] ?></th>
+                    <th><?= LANG["CLASS"] ?></th>
+                    <th><?= LANG["IP"] ?></th>
+                    <th><?= LANG["RATIO"] ?></th>
+                    <th><?= LANG["JOINED"] ?></th>
+                    <th><?= LANG["LAST_VISIT"] ?></th>
                     <th></th>
                     <th><input type="checkbox" name="checkall" onclick="checkAll(this.form.id);" /></th>
                 </tr>
@@ -42,9 +42,9 @@
                         <td><?= $last_seen ?></td>
                         <td>
                             <select name='action' class='form-select'>
-                                <option value=mail><?= Txt("PM") ?></option>
-                                <option value='deluser'><?= Txt("DELETEUSERS") ?></option>
-                                <option value='disable'><?= Txt("DISABLED_ACCOUNTS") ?></option>
+                                <option value=mail><?= LANG["PM"] ?></option>
+                                <option value='deluser'><?= LANG["DELETEUSERS"] ?></option>
+                                <option value='disable'><?= LANG["DISABLED_ACCOUNTS"] ?></option>
                             </select>
                         </td>
                         <td><input type="checkbox" name="users[]" value="<?= $row["id"]; ?>" /></td>
@@ -53,7 +53,7 @@
             </tbody>
         </table>
         <div class="text-center">
-            <input type='submit' class='btn btn-sm ttbtn' name='submit' value='<?= Txt("SUBMIT") ?>' />
+            <input type='submit' class='btn btn-sm ttbtn' name='submit' value='<?= LANG['SUBMIT'] ?>' />
         </div>
     </div>
 </form>

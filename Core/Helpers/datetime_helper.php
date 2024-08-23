@@ -63,16 +63,6 @@ function get_elapsed_time($ts)
     return "< 1 min";
 }
 
-// Get Timestamp - Option Pass Format To Data
-function get_date_time($timestamp = 0)
-{
-    if ($timestamp) {
-        return date("Y-m-d H:i:s", $timestamp);
-    } else {
-        return gmdate("Y-m-d H:i:s");
-    }
-}
-
 // Get Timestamp From User Time Zone
 function utc_to_tz($timestamp = 0)
 {

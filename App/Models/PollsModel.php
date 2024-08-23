@@ -56,7 +56,7 @@ class PollsModel
 
         // Check Correct Input
         if (!$data['question'] || !$data['option0'] || !$data['option1']) {
-            Redirect(Url('adminpoll'), Txt("MISSING_FORM_DATA") . "!");
+            showMessage(Url('adminpoll'), LANG["MISSING_FORM_DATA"] . "!");
         }
 
         if ($id) {
@@ -65,7 +65,7 @@ class PollsModel
             DB::insert("polls", $data);
         }
         
-        Redirect(Url('adminpoll'), Txt("ACTION_COMPLETE"));
+        showMessage(Url('adminpoll'), LANG["ACTION_COMPLETE"]);
     }
 
     // Admin Delete Poll
@@ -73,7 +73,7 @@ class PollsModel
     {
         DB::delete('polls', ['id'=>$id]);
         PollsanswerModel::delete($id);
-        Redirect(Url('adminpoll'), Txt("ACTION_COMPLETE"));
+        showMessage(Url('adminpoll'), LANG["ACTION_COMPLETE"]);
     }
 
 }

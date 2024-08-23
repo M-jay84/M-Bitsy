@@ -2,46 +2,56 @@
 
 namespace App\Controllers\Admin;
 
-use App\Libs\User;
+use App\Libs\Controller;
 use App\Models\ReportsModel;
 
 /*
 * Report Controller
 */
-class Adminreport 
+class Adminreport extends Controller
 {
+    public $current_user;
+
+    // Get Current User
+    public function __construct()
+    {
+        $this->current_user = $this->currentuser(2);
+        if ($this->current_user->class < CONFIG['_MODERATOR']) {
+            showMessage(CONFIG['URLROOT'], LANG["NO_PERMISSION"]);
+        }
+    }
+
     // Reports Default Page
     public function index()
     {
-        $USER = new User(_MODERATOR, 2);
+    
         // Check User Input
-        $reports = ReportsModel::pagination();
+        $reports = (new ReportsModel)->pagination();
 
-        // Init Data
+        // Data For View
         $data = [
-            'V_title' => Txt("REPORT"),
+            'page_title' => LANG["REPORT"],
             'V_reports' => $reports['stmt'],
-            'V_pager' => $reports['pager'],
-            'USER' => $USER
+            'V_pager' => $reports['pager']
         ];
 
         // Load View
-        template('report', $data, 'admin');
+        $this->view('report', $data, 'admin');
     }
 
     // Reports Form Submit
     public function submit()
     {
-        $USER = new User(_MODERATOR, 2);
+    
         if ($_POST["mark"]) {
-            ReportsModel::update();
+            (new ReportsModel)->update($this->current_user->id);
         }
         
         if ($_POST["delete"]) {
-            ReportsModel::deleteByIds();
+            (new ReportsModel)->deleteByIds();
         }
 
-        Redirect(Url('adminreport'), Txt("ACTION_FAILED"));
+        showMessage(Url('adminreport'), LANG["ACTION_FAILED"]);
     }
 
 }

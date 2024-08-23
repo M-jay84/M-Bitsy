@@ -2,48 +2,58 @@
 
 namespace App\Controllers\Admin;
 
-use App\Libs\User;
+use App\Libs\Controller;
 use App\Models\ForumsModel;
 
 /*
 * forum Cats Controller
 */
-class AdminforumCat 
+class AdminforumCat extends Controller
 {
+    public $current_user;
+
+    // Get Current User
+    public function __construct()
+    {
+        $this->current_user = $this->currentuser(2);
+        if ($this->current_user->class < CONFIG['_MODERATOR']) {
+            showMessage(CONFIG['URLROOT'], LANG["NO_PERMISSION"]);
+        }
+    }
+
     // Forum Cat Default Page
     public function index($id = 0, $move = false)
     {
-        $USER = new User(_MODERATOR, 2);
+    
         if ($move) {
-            ForumsModel::reorder($id, $move);
+            (new ForumsModel)->reorder($id, $move);
         }
 
         // Get Forum Cat Data
-        $forumcat = ForumsModel::getCats();
+        $forumcat = (new ForumsModel)->getCats();
 
-        // Init Data
+        // Data For View
         $data = [
-            'V_title' => Txt("FORUMS"),
-            'V_category' => $forumcat,
-            'USER' => $USER
+            'page_title' => LANG["FORUMS"],
+            'V_category' => $forumcat
         ];
 
         // Load View
-        template('forumcat', $data, 'admin');
+        $this->view('forumcat', $data, 'admin');
     }
 
     // Add Forum Cat Submit
     public function submit()
     {
-        $USER = new User(_MODERATOR, 2);
-        ForumsModel::insertOrUpdate();
+    
+        (new ForumsModel)->insertOrUpdate();
     }
 
     // Delete Forum Cat Submit
     public function delete($id, $action = '')
     {
-        $USER = new User(_MODERATOR, 2);
-        ForumsModel::deleteCats($id, $action);
+    
+        (new ForumsModel)->deleteCats($id, $action);
     }
 
 }

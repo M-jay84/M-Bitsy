@@ -2,73 +2,75 @@
 
 namespace App\Controllers\User;
 
-use App\Libs\User;
+use App\Libs\Controller;
 use App\Models\ShoutboxModel;
 
 /*
 * Shoutbox Controller
 */
-class Shoutbox 
+class Shoutbox extends Controller
 {
+    public $current_user;
+
+    // Get Current User
+    public function __construct()
+    {
+        $this->current_user = $this->currentuser(0);
+    }
+
     // No Default Page
     public function index()
     {
-        Redirect(URLROOT);
+        Url(CONFIG['URLROOT'], true);
     }
 
     // Ajax Shoutbox Load
     public function chat()
     {
-        $USER = new User(0, 0);
-        $shouts = ShoutboxModel::shouts(20);
+        $shouts = (new ShoutboxModel)->shouts(20);
 
-        // Init Data
+        // Data For View
         $data = [
-            'V_title' => Txt('SHOUTBOX'),
+            'page_title' => LANG['SHOUTBOX'],
             'V_shouts' => $shouts,
-            'USER' => $USER
+            'current_user' => $this->current_user
         ];
         
         // Load View
-        template('shoutboxload', $data, 'home');
+        $this->view('shoutboxload', $data);
     }
 
     // Add Shout Submit
     public function add()
     {
-        $USER = new User(0, 0);
-        ShoutboxModel::add($USER);
+        (new ShoutboxModel)->add($this->current_user);
     }
 
     // Delete Shout Submit
     public function delete($id, $sure = 0)
     {
-        $USER = new User(0, 0);
-        ShoutboxModel::delete($USER, $id, $sure);
+        (new ShoutboxModel)->delete($id, $sure);
     }
 
     // Edit Shout Default Page
     public function edit()
     {
-        $USER = new User(0, 0);
-        ShoutboxModel::edit();
+        (new ShoutboxModel)->edit($this->current_user);
     }
 
     // Shoutbox History Default Page
     public function history()
     {
-        $USER = new User(0, 0);
-        $shouts = ShoutboxModel::shouts(80);
+        $shouts = (new ShoutboxModel)->shouts(80);
         
-        // Init Data
+        // Data For View
         $data = [
-            'V_title' => Txt('HISTORY'),
-            'V_shouts' => $shouts,
-            'USER' => $USER
+            'page_title' => LANG['HISTORY'],
+            'V_shouts' => $shouts
         ];
 
         // Load View
-        template('shoutbox', $data, 'user');
+        $this->view('shoutbox', $data, 'user');
     }
 
 }

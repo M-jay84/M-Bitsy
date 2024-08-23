@@ -1,7 +1,7 @@
 <?php
-if ($USER->has('id')) {
-    block_begin(Txt("DONATE")); ?>
-    <p class="text-center"><?= Txt("THIS_WOULD_BE_DONATION_INFO") ?></p>
+if ($_SESSION['id']) {
+    block_begin(LANG["DONATE"]); ?>
+    <p class="text-center"><?= LANG["THIS_WOULD_BE_DONATION_INFO"] ?></p>
     <?php
     block_end();
 }

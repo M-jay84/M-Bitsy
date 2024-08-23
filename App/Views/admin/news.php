@@ -1,6 +1,6 @@
-<?php block_begin($V_title) ?>
+<?php block_begin($page_title) ?>
 <p class="text-center">
-   <a href="javascript:;" class="newsAttr" data-bs-toggle="modal" data-bs-target="#newsModal"><?= Txt('ADD') ?></a>
+   <a href="javascript:;" class="newsAttr" data-bs-toggle="modal" data-bs-target="#newsModal"><?= LANG['ADD'] ?></a>
 </p> <?php
 if ($V_news->rowCount() > 0) {
    foreach ($V_news as $row) {
@@ -40,13 +40,13 @@ if ($V_news->rowCount() > 0) {
          <div class="modal-content">
             <div class="modal-body">
                <input type='hidden' name='id' id='id'/>
-               <?= Txt("TITLE") ?>
+               <?= LANG["TITLE"] ?>
                <input type='text' name='title' id='title' class="form-control fullwidth"/><br />
                <?php echo textbbcode("submit", "body"); ?>
             </div>
             <div class="modal-footer">
-               <button type="button" class="btn btn-sm ttbtn" data-bs-dismiss="modal"><?= Txt("CLOSE") ?></button>
-               <button type="submit" class="btn btn-sm ttbtn"><?= Txt("SUBMIT") ?></button>
+               <button type="button" class="btn btn-sm ttbtn" data-bs-dismiss="modal"><?= LANG['CLOSE'] ?></button>
+               <button type="submit" class="btn btn-sm ttbtn"><?= LANG['SUBMIT'] ?></button>
             </div>
          </div>
       </div>

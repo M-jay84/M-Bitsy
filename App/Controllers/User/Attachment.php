@@ -2,25 +2,32 @@
 
 namespace App\Controllers\User;
 
-use App\Libs\User;
+use App\Libs\Controller;
 use App\Models\AttachmentsModel;
 
 /*
 * Attachment Controller
 */
-class Attachment 
+class Attachment extends Controller
 {
+    public $current_user;
+
+    // Get Current User
+    public function __construct()
+    {
+        $this->current_user = $this->currentuser(1);
+    }
+
     // Download Attachment Page
     public function index($id, $hash)
     {
-        $USER = new User(0, 1);
-        $file = UPLOADDIR . "/attachment/$hash.data";
-        $attachment = AttachmentsModel::fetchRow('*', ['id ='], [$id]);
+        $file = CONFIG['UPLOADDIR'] . "/attachment/$hash.data";
+        $attachment = (new AttachmentsModel)->fetchRow('*', ['id ='], [$id]);
         $extension = substr($attachment['filename'], -3);
         
         // Download
         if (!file_exists($file)) {
-            Redirect($_SERVER['HTTP_REFERER'], "The file $hash does not exists");
+            showMessage(Url($_SERVER['HTTP_REFERER']), "The file $hash does not exists");
         } else {
             header('Content-Disposition: attachment; filename="' . $attachment['filename'] . '"');
             header('Content-Length: ' . filesize($file));

@@ -2,40 +2,50 @@
 
 namespace App\Controllers\Admin;
 
-use App\Libs\User;
+use App\Libs\Controller;
 use App\Models\TorrentLangModel;
 
 /*
 * Language Controller
 */
-class Admintorrentlang 
+class Admintorrentlang extends Controller
 {
+    public $current_user;
+
+    // Get Current User
+    public function __construct()
+    {
+        $this->current_user = $this->currentuser(2);
+        if ($this->current_user->class < CONFIG['_MODERATOR']) {
+            showMessage(CONFIG['URLROOT'], LANG["NO_PERMISSION"]);
+        }
+    }
+
     // Torrent Language Default Page
     public function index()
     {
-        $USER = new User(_MODERATOR, 2);
+    
         if (!empty($_POST)) {
-            TorrentLangModel::insertOrUpdate();
+            (new TorrentLangModel)->insertOrUpdate();
           } else {
             // Get Torrent Lang Data
-            $torrentlang = TorrentLangModel::fetchAll();
+            $torrentlang = (new TorrentLangModel)->fetchAll();
     
-            // Init Data
+            // Data For View
             $data = [
-                'V_title' => Txt("LANGUAGE"),
+                'page_title' => LANG["LANGUAGE"],
                 'V_torrentlang' => $torrentlang
             ];
 
             // Load View
-            template('torrentlang', $data, 'admin');
+            $this->view('torrentlang', $data, 'admin');
           }
     }
 
     // Delete Torrent Language Default Page
     public function delete($id, $sure = '')
     {
-        $USER = new User(_MODERATOR, 2);
-        TorrentLangModel::update($id, $sure);
+        (new TorrentLangModel)->update($id, $sure);
     }
 
 }

@@ -16,42 +16,42 @@ use App\Models\ShoutboxModel;
 class TopicsModel
 {	
     // Fetch Topic Column
-    public static function fetchColumn($columns = '*', $where = '', $values = '', $other = '')
+    public function fetchColumn($columns = '*', $where = '', $values = '', $other = '')
     {
         $stmt = DB::newSelect('forum_topics', $columns, $where, $values, $other)->fetchColumn();
 		return $stmt;
 	}
 	
     // Fetch All Topics
-    public static function fetchAll($columns = '*', $where = '', $values = '', $other = '')
+    public function fetchAll($columns = '*', $where = '', $values = '', $other = '')
     {
         $stmt = DB::newSelect('forum_topics', $columns, $where, $values, $other);
 		return $stmt;
 	}
 		
     // Fetch Topic Row
-    public static function fetchRow($columns = '*', $where = '', $values = '', $other = '')
+    public function fetchRow($columns = '*', $where = '', $values = '', $other = '')
     {
         $stmt = DB::fetchRow('forum_topics', $columns, $where, $values, $other);
 		return $stmt;
 	}
 	
     // Get Topics
-    public static function getForumTopics($forumid)
+    public function getForumTopics($forumid, $current_user)
     {
         // Pagination
         $count = DB::fetchColumn('forum_topics', 'count(id)', ['forumid='], [$forumid]);
-        list($pager, $limit) = pagination(25, $count, URLROOT . "/topic/$forumid&");
+        list($pager, $limit) = pagination(25, $count, CONFIG['URLROOT'] . "/topic/$forumid&");
         $topics = DB::fetchAll('forum_topics', '*', ['forumid='], [$forumid], "ORDER BY lastpost DESC $limit");
 
         foreach ($topics as $arr) {
-            $arr1 = ForumsModel::fetchRow('*', ['id='], [$forumid]);
+            $arr1 = (new ForumsModel)->fetchRow('*', ['id='], [$forumid]);
 
-            if (!$arr1['name'] || $_SESSION['class'] < $arr1["minclassread"] && $arr1["guest_read"] == "no") {
-                Redirect(Url('forum'), Txt("FORUMS_NOT_PERMIT"));
+            if (!$arr1['name'] || $current_user->class < $arr1["minclassread"] && $arr1["guest_read"] == "no") {
+                showMessage(Url('forum'), LANG["FORUMS_NOT_PERMIT"]);
             }
 
-            $arr2 = PostsModel::fetchColumn('count(id)', ['topicid='], [$arr['id']]);
+            $arr2 = (new PostsModel)->fetchColumn('count(id)', ['topicid='], [$arr['id']]);
             $object[$arr['id']]['id'] = $arr['id'];
             $object[$arr['id']]['userid'] = $arr['userid'];
             $object[$arr['id']]['subject'] = $arr['subject'];
@@ -65,7 +65,7 @@ class TopicsModel
             $object[$arr['id']]['replys'] = $arr2;
 
             if ($_SESSION) {
-                $r = ReadModel::fetchRow('lastpostread', ['userid=', 'topicid='], [$_SESSION['id'], $arr['id']]);
+                $r = (new ReadModel)->fetchRow('lastpostread', ['userid=', 'topicid='], [$current_user->id, $arr['id']]);
                 $a = $r;
             }
             if ($new = !$a || $arr['lastpost'] > $a[0]) {
@@ -75,7 +75,7 @@ class TopicsModel
     
             $object[$arr['id']]['read'] = $topicpic;
             
-            $arr3 = PostsModel::fetchRow('*', ['topicid='], [$arr['id']], 'ORDER BY id DESC LIMIT 1');
+            $arr3 = (new PostsModel)->fetchRow('*', ['topicid='], [$arr['id']], 'ORDER BY id DESC LIMIT 1');
             $object[$arr['id']]['lastuserpost'] = "by&nbsp;".coloredname($arr3['userid'])."<br />".utc_to_tz($arr3['added'])."</span>";
             
             $object[$arr['id']]['added'] = $arr1['added'];
@@ -86,11 +86,11 @@ class TopicsModel
         }
         /*
         if (count($object) == 0) {
-            Redirect(Url(), Txt("FORUM_AVAILABLE"));
+            showMessage(Url(), LANG["FORUM_AVAILABLE"));
         }
         */
         $fname = ForumCatsModel::fetchRow('name', ['id='], [$forumid]);
-        $tname = ForumsModel::fetchRow('name', ['id='], [$forumid]);
+        $tname = (new ForumsModel)->fetchRow('name', ['id='], [$forumid]);
 
         $array = [
             'topics' => $object,
@@ -104,126 +104,131 @@ class TopicsModel
     }
 
     // Add New Topic
-    public static function insertTopic($USER, $forumid)
+    public function insertTopic($forumid, $data)
     {
 
         $subject = Input('subject');
         $body = htmlspecialchars_decode($_POST["body"]);
-        
+
         if (!$body || !$subject) {
-            Redirect(Url('forum'), Txt("MISSING_FORM_DATA"));
+            showMessage(Url('forum'), LANG["MISSING_FORM_DATA"]);
         }
 
         // Make sure sure user has write access in forum
-        $arr = ForumsModel::getForumAccessLevels($forumid) or Redirect(Url('forum'), "Bad forum ID");
-        if ($USER->has('class') < $arr["write"]) {
-            Redirect(Url('forum'), Txt("FORUMS_NOT_PERMIT"));
+        $arr = (new ForumsModel)->getForumAccessLevels($forumid) or showMessage(Url('forum'), "Bad forum ID");
+        if ($data['current_user']->class < $arr["write"]) {
+            showMessage(Url('forum'), LANG["FORUMS_NOT_PERMIT"]);
         }
 
         // Create Topic / Reply
-        DB::insert('forum_topics', ['userid'=>$USER->has('id'), 'forumid'=>$forumid, 'subject'=>$subject]);
-        $topicid = DB::lastInsertId() or Redirect(Url('forum'), "Topics id n/a");
+        DB::insert('forum_topics', ['userid'=>$data['current_user']->id, 'forumid'=>$forumid, 'subject'=>$subject]);
+        $topicid = DB::lastInsertId() or showMessage(Url('forum'), "Topics id n/a");
 
         // Insert the new post
-        PostsModel::insert(['topicid'=>$topicid, 'userid'=>$USER->has('id'), 'added'=>get_date_time(), 'body'=>$body]);
+        (new PostsModel)->insert(['topicid'=>$topicid, 'userid'=>$data['current_user']->id, 'added'=>get_date_time(), 'body'=>$body]);
         $postid = DB::lastInsertId();
 
         // Update topic last post
-        TopicsModel::update(['lastpost'], ['id='], [$postid, $topicid]);
+        DB::update('forum_topics', ['lastpost'], ['id='], [$postid, $topicid]);
 
         // attachments
-        AttachmentsModel::set_attachment($topicid, $postid);
-
+        
+        $data['current_user'] = $data['current_user'];
+        $data['topicid'] = $topicid;
+        $data['postid'] = $postid;
+        (new AttachmentsModel)->set_attachment($data);
         // Insert Shout
-        $msg_shout = "New Forum Topic: [url=" . URLROOT . "/post/" . $topicid . "]" . $subject . "[/url] posted by [color=".$USER->has('Color')."]".$USER->has('username')."[/color].";
-        ShoutboxModel::insert(['userid'=>0, 'date'=>get_date_time(), 'user'=>'System', 'message'=>$msg_shout]);
-        Redirect(Url("post/$topicid/last"));
+        $msg_shout = "New Forum Topic: [url=" . CONFIG['URLROOT'] . "/post/" . $topicid . "]" . $subject . "[/url] posted by [color=".$data['current_user']->Color."]".$data['current_user']->username."[/color].";
+        (new ShoutboxModel)->insert(['userid'=>0, 'date'=>get_date_time(), 'user'=>'System', 'message'=>$msg_shout]);
+        
+        
+        Url(CONFIG['URLROOT']."/post/$topicid", true); // die; todo
     }
 
     // Delete Topic
-    public static function delTopic($topicid, $sure = 0)
+    public function delTopic($topicid, $sure = 0)
     {
        /*- 
-        if (!Id($topicid) || !$USER->permission('delete_forum')) {
-            Redirect(Url('forum'), Txt("NO_PERMISSION"));
+        if (!Id($topicid) || !$data['current_user']->delete_news'] == 'yes') {
+            showMessage(Url('forum'), LANG["NO_PERMISSION"));
         }
        */
         if ($sure == "0") {
-            Redirect(Url('forum'), "Sanity check: You are about to delete a topic. Click <a href='" . URLROOT . "/topic/delete/$topicid/1'>here</a> if you are sure.");
+            showMessage(Url('forum'), "Sanity check: You are about to delete a topic. Click <a href='" . CONFIG['URLROOT'] . "/topic/delete/$topicid/1'>here</a> if you are sure.");
         }
 
         DB::delete('forum_topics', ['id'=>$topicid]);
-        PostsModel::delete(['topicid'=>$topicid]);
-        ReadModel::delete(['topicid'=>$topicid]);
-        AttachmentsModel::deleteAll($topicid);
-        Redirect(Url('forum'), Txt("DEL_COMPLETE"));
+        (new PostsModel)->delete(['topicid'=>$topicid]);
+        (new ReadModel)->delete(['topicid'=>$topicid]);
+        (new AttachmentsModel)->deleteAll($topicid);
+        showMessage(Url('forum'), LANG["DEL_COMPLETE"]);
     }
 
     // Delete Post
-    public static function delete($id)
+    public function delete($id)
     {
         DB::delete('forum_topics', ['id'=>$id]);
     }
 
     // Update Topic
-    public static function update($cols, $where, $values)
+    public function update($cols, $where, $values)
     {
         DB::update('forum_topics', $cols, $where, $values);
     }
 
     // Rename a Topic Submit
-    public static function rename($topicid, $USER)
+    public function rename($topicid, $current_user)
     {
-        if (!$USER->permission('delete_forum') || !$USER->permission('edit_forum')) {
-            Redirect(Url('forum'), Txt("NO_PERMISSION"));
+        if (!$current_user->delete_news == 'yes' || !$current_user->edit_forum == 'yes') {
+            showMessage(Url('forum'), LANG["NO_PERMISSION"]);
         }
 
         // Check User Input
         $subject = Input('subject');
 
         if ($subject == '') {
-            Redirect(Url('forum'), Txt("MISSING_FORM_DATA"));
+            showMessage(Url('forum'), LANG["MISSING_FORM_DATA"]);
         }
 
         // Update
-        TopicsModel::update(['subject'], ['id='], [$subject,$topicid]);
-        Redirect(Url("post/$topicid"), Txt("NAME_UPDATED"));
+        (new TopicsModel)->update(['subject'], ['id='], [$subject,$topicid]);
+        showMessage(Url("post/$topicid"), LANG["NAME_UPDATED"]);
     }
 
     // Move a Topic Submit
-    public static function move($topicid, $USER)
+    public function move($topicid, $current_user)
     {
         // Check User Input
         $forumid = Input('forumid', 'id');
 
         // Check User
-        if (!Id($forumid) || !$USER->permission('delete_forum') || !$USER->permission('edit_forum')) {
-            Redirect(Url('forum'), Txt("NO_PERMISSION"));
+        if (!Id($forumid) || !$current_user->delete_news == 'yes' || !$current_user->edit_forum == 'yes') {
+            showMessage(Url('forum'), LANG["NO_PERMISSION"]);
         }
 
         // Check Permisson To View
-        $arr = ForumsModel::fetchRow('minclasswrite', ['id ='], [$forumid]);
+        $arr = (new ForumsModel)->fetchRow('minclasswrite', ['id ='], [$forumid]);
         if ($arr->rowCount() != 1) {
-            Redirect(Url('forum'), Txt("NOTHING_FOUND"));
+            showMessage(Url('forum'), LANG["NOTHING_FOUND"]);
         }
-        if ($USER->has('class') < $arr['minclasswrite']) {
-            Redirect(Url('forum'), Txt("NO_PERMISSION"));
+        if ($current_user->class < $arr['minclasswrite']) {
+            showMessage(Url('forum'), LANG["NO_PERMISSION"]);
         }
 
         // Move Topic
-        $arr = TopicsModel::fetchRow('subject,forumid', ['id ='], $topicid);
+        $arr = (new TopicsModel)->fetchRow('subject,forumid', ['id ='], $topicid);
         if ($arr->rowCount() != 1) {
-            Redirect(Url('forum'), Txt("NOTHING_FOUND"));
+            showMessage(Url('forum'), LANG["NOTHING_FOUND"]);
         }
         if ($arr["forumid"] != $forumid) {
-            TopicsModel::update(['forumid', 'moved'], ['id='], [$forumid,'yes',$topicid]);
+            (new TopicsModel)->update(['forumid', 'moved'], ['id='], [$forumid,'yes',$topicid]);
         }
 
-        Redirect(Url("topic/$forumid"));
+        Url(Url("topic/$forumid", true));
     }
 
     // Lock/Sticky Topic Submit
-    public static function action($forumid, $topicid, $type, $USER)
+    public function action($forumid, $topicid, $type, $current_user)
     {
         if ($type == 'sticky') {
             $action = ['sticky'];
@@ -240,13 +245,13 @@ class TopicsModel
         }
 
         // Check User
-        if (!Id($topicid) || !$USER->permission('delete_forum') || !$USER->permission('edit_forum')) {
-            Redirect(Url('forum'), Txt("NO_PERMISSION"));
+        if (!Id($topicid) || !$current_user->delete_news == 'yes' || !$current_user->edit_forum == 'yes') {
+            showMessage(Url('forum'), LANG["NO_PERMISSION"]);
         }
 
         // Update
-        TopicsModel::update($action, ['id='], $values);
-        Redirect(Url("topic/$forumid"));
+        (new TopicsModel)->update($action, ['id='], $values);
+        Url(Url("topic/$forumid"), true);
     }
 
 }

@@ -14,7 +14,7 @@
             },
             complete: function() {
                 $("#message").focus().val('');
-                $('#shoutboxstaff').load('<?php echo URLROOT; ?>/adminshoutbox/loadchat');
+                $('#shoutboxstaff').load('<?php echo CONFIG['URLROOT']; ?>/adminshoutbox/loadchat');
             },
             error: function(data) {
                 console.log('An error occurred.');
@@ -26,7 +26,7 @@
 <script>
 function updatestaffShouts(){
             // Assuming we have #shoutbox
-            $('#shoutboxstaff').load('<?php echo URLROOT; ?>/adminshoutbox/loadchat');
+            $('#shoutboxstaff').load('<?php echo CONFIG['URLROOT']; ?>/adminshoutbox/loadchat');
         }
         setInterval( "updatestaffShouts()", 300000 );
 		updatestaffShouts();

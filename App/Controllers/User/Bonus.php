@@ -2,64 +2,73 @@
 
 namespace App\Controllers\User;
 
-use App\Libs\User;
+use App\Libs\Controller;
 use App\Models\BonusModel;
 
 /*
 * Bonus Controller
 */
-class Bonus 
+class Bonus extends Controller
 {
+    public $current_user;
+
+    // Get Current User
+    public function __construct()
+    {
+        $this->current_user = $this->currentuser(2);
+        if (!$this->current_user->loggedin) {
+            $this->showMessage(Url('login'), true);
+        }
+    }
+
     // Bonus Page
     public function index()
     {
-        $USER = new User(0, 2);
-        // Get Data
-        $bonus = BonusModel::getAll();
-
-        // Init Data
         $data = [
-            'V_title' => Txt('BONUS'),
-            'V_bonus' => $bonus,
-            'V_interval' => floor(CONFIG['ADDBONUS'] / 60),
-            'USER' => $USER
+            'page_title' => LANG['BONUS'],
+            'bonus_result' => (new BonusModel)->getAll(),
+            'set_bonus_interval' => floor(CONFIG['ADDBONUS'] / 60),
+            'current_user' => $this->current_user
         ];
 
-        // Load View
-        template('bonus', $data, 'user');
+        $this->view('bonus', $data, 'user');
     }
 
     // Bonus Form Submit
     public function submit()
     {
-        $USER = new User(0, 2);
         if (!empty($_POST)) {
-            BonusModel::getById($USER);
+            (new BonusModel)->getById($this->current_user);
         } else {
-            Redirect(Url('bonus'), Txt("NOTHING_FOUND"));
+            $this->showMessage(Url('bonus'), LANG["NOTHING_FOUND"]);
         }
+        $this->showMessage(Url('bonus'), LANG["SUCCESS"]);
     }
     
-    // Bonus Edit/Add Default Page
+    // Bonus Edit/Add Form Submit
     public function update()
     {
-        $USER = new User(0, 2);
-        if (!$USER->isStaff()) {
-            Redirect(Url(), Txt("NO_PERMISSION"));
+        if (!$this->current_user->isStaff) {
+            $this->showMessage(Url(), LANG["NO_PERMISSION"]);
         } else {
-            BonusModel::insertOrUpdate();
+            if (!empty($_POST)) {
+                (new BonusModel)->insertOrUpdate();
+            } else {
+                $this->showMessage(Url('bonus'), LANG["NOTHING_FOUND"]);
+            }
         } 
+        $this->showMessage(Url('bonus'), LANG["SUCCESS"]);
     }
 
-    // Delete Bonus
-    public function delete($id, $sure = '')
+    // Delete Bonus By Link
+    public function delete($id)
     {
-        $USER = new User(0, 2);
-        if (!$USER->isStaff()) {
-            Redirect(Url(), Txt("NO_PERMISSION"));
+        if (!$this->current_user->isStaff) {
+            $this->showMessage(Url(), LANG["NO_PERMISSION"]);
         } else {
-            BonusModel::delete($id, $sure);
+            (new BonusModel)->delete($id);
         }
+        $this->showMessage(Url('bonus'), LANG["DEL_COMPLETE"]);
     }
 
 }

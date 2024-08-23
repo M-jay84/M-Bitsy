@@ -2,36 +2,41 @@
 
 namespace App\Controllers\User;
 
-use App\Libs\User;
+use App\Libs\Controller;
 use App\Models\StaffMessagesModel;
 
 /*
 * Confirm Controller
 */
-class Contact 
+class Contact extends Controller
 {
+    public $current_user;
+
+    // Get Current User
+    public function __construct()
+    {
+        $this->current_user = $this->currentuser(1);
+    }
+
     // Contact Us Page
     public function index()
     {
-        $USER = new User(0, 1);
-        // Init Data
+        // Data For View
         $data = [
-            'V_title' => 'Contact Staff',
-            'USER' => $USER
+            'page_title' => 'Contact Staff'
         ];
 
         // Load View
-        template('contact', $data, 'user');
+        $this->view('contact', $data, 'user');
     }
 
     // Contact Form Submit
     public function submit()
     {
-        $USER = new User(0, 1);
         if (!empty($_POST)) {
-            StaffMessagesModel::insert();
+            (new StaffMessagesModel)->insert();
         } else {
-            Redirect(Url('bonus'), Txt("NOTHING_FOUND"));
+            showMessage(Url('contact'), LANG["NOTHING_FOUND"]);
         }
     }
 }

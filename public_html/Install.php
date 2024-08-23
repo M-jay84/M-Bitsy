@@ -71,7 +71,7 @@ $html .= "<div class='col-5'>$openssl</div>";
 $html .= "<div class='col-7'>bcmath support (Required for IPv6)</div>";
 $html .= "<div class='col-5'>$bcmath</div>";
 $html .= "<div class='col-7'>app/config/config.php</div>";
-if (@file_exists('../config/config.php') && @is_writable(APPROOT.'/config/config.php')) {
+if (@file_exists('../config/config.php') && @is_writable(CONFIG['APPROOT'].'/config/config.php')) {
     $html .= "<div class='col-5'><b><font color='red'>Writeable</font></b><br />Warning: leaving app/config/config.php writeable is a security risk</div>";
 } else {
     $html .= "<div class='col-5'><b><font color='green'>Unwriteable</font></b></div>";
@@ -154,88 +154,88 @@ return $html;
 // Write config.php File
 function write_config() {
 $text = "<?php
+define('CONFIG', array (
 
 // DB Details
-define('DB_HOST', '".$_POST['DB_HOST']."');
-define('DB_USER', '".$_POST['DB_USER']."');
-define('DB_PASS', '".$_POST['DB_PASS']."');
-define('DB_NAME', '".$_POST['DB_NAME']."');
-define('DB_CHAR', 'utf8mb4');
+'DB_HOST' => $_POST[DB_HOST],
+'DB_USER' => $_POST[DB_USER],
+'DB_PASS' => $_POST[DB_PASS],
+'DB_NAME' => $_POST[DB_NAME],
+'DB_CHAR' => 'utf8mb4',
 
 // URL Root
-define('URLROOT', '".$_POST['URLROOT']."');
+'URLROOT' => $_POST[URLROOT],
 
 // App Root
-define('APPROOT', dirname(dirname(__FILE__)));
-define('NAME_SPACE', '../');
+'APPROOT' => dirname(dirname(__FILE__)),
+'NAME_SPACE' => '../',
 
 // Paths
-define('BACUP', '../data/backups');
-define('CACHE', '../data/cache');
-define('LANG', '../data/languages');
-define('LOGGER', '../data/logs');
-define('UPLOADDIR', '../data/uploads');
-define('EMAILDIR', '../data/email');
+'BACUP' => '../data/backups',
+'CACHE' => '../data/cache',
+'LANG' => '../data/languages';
+'LOGGER' => '../data/logs',
+'UPLOADDIR' => '../data/uploads',
+'EMAILDIR' => '../data/email',
 
 // Quick Time
-define('TT_TIME', time());
-define('TT_DATE', date('Y-m-d H:i:s'));
+'TT_TIME' => time(),
+'TT_DATE' => date('Y-m-d H:i:s'),
 
 // Version
-define('VERSION', 'PDO');
+'VERSION' => 'PDO',
 
 // File Charset
-define('CHARSET', 'utf-8');
+'CHARSET' => 'utf-8',
 
 // Announcelist //seperate via comma
-define('ANNOUNCELIST', URLROOT . '/announce.php');
+'ANNOUNCELIST' => '/announce.php',
 
 // Default Block Layout
-define('DEFAULT_LAYOUT', false);
+'DEFAULT_LAYOUT' => false,
  
 // Passkey Url
-define('PASSKEYURL', URLROOT . '/announce.php?passkey=%s');
+'PASSKEYURL' => '/announce.php?passkey=%s',
 
 // Can edit Settings
-define('_OWNERS', array('".$_POST['_OWNERS']."')); // Example & with more define('_OWNERS', array('mjay', 'mjay', 'mjay'));
+'_OWNERS' => array($_POST[_OWNERS]), // Example & with more '_OWNERS' => array('mjay', 'mjay', 'mjay')
 
 // Image upload settings
-define('USE_WEBP', ".$_POST['USE_WEBP']."); // Use Webp 
-define('IMAGEMAXFILESIZE', 524288); // Max uploaded image size in bytes (Default: 512 kB)
-define('ALLOWEDIMAGETYPES', array(
+'USE_WEBP' => $_POST[USE_WEBP], // Use Webp 
+'IMAGEMAXFILESIZE' => 524288, // Max uploaded image size in bytes (Default: 512 kB)
+'ALLOWEDIMAGETYPES' => array(
     'image/gif' => '.gif',
     'image/jpeg' => '.jpg',
     'image/jpg' => '.jpg',
     'image/png' => '.png',
-));
+),
 
 // Hide Blocks On Pages
-define('ISURL', array('login', 'logout', 'signup', 'contact', 'recover', 'recover/confirm'));
+'ISURL' => array('login', 'logout', 'signup', 'contact', 'recover', 'recover/confirm'),
 
 // category,name,dl,magnet,uploader,tube,tmdb,comments,nfo,size,completed,seeders,leechers,health,external,added,speed,wait,rating
-define('TORRENTTABLE_COLUMNS', 'category,name,dl,magnet,uploader,tube,tmdb,comments,nfo,size,completed,seeders,leechers,health,external,added,speed,wait,rating,admin');
+'TORRENTTABLE_COLUMNS' => 'category,name,dl,magnet,uploader,tube,tmdb,comments,nfo,size,completed,seeders,leechers,health,external,added,speed,wait,rating,admin',
 
 // Set User Group
-define('_USER', 1);
-define('_POWERUSER', 2);
-define('_VIP', 3);
-define('_UPLOADER', 4);
-define('_MODERATOR', 5);
-define('_SUPERMODERATOR', 6);
-define('_ADMINISTRATOR', 7);
+'_UPLOADER' => 4,
+'_MODERATOR' => 5,
+'_SUPERMODERATOR' => 6,
+'_ADMINISTRATOR' => 7,
 
 // Cat arrays
-define('PopularCats', array(1)); // popular cat id for popular block
-define('MovieCats', array('Film')); // movie cats eg array('Movies','MoviesHD')
-define('SerieCats', array('TV')); // serie cat eg array('Anime','tv')
+'PopularCats' => array(1), // popular cat id for popular block
+'MovieCats' => array('Film'), // movie cats eg array('Movies','MoviesHD')
+'SerieCats' => array('TV'), // serie cat eg array('Anime','tv')
 
 // TMDB
-define('_TMDBAPIKEY', '".$_POST['_TMDBAPIKEY']."'); // Place Key Here ////////
-define('_TMDBLANG', 'en'); // TMDB Language
-define('_TMDBDEBUG', false); // TMDB Debug
-define('_TMDBswitch', ".$_POST['_TMDBswitch']."); // TMDB On - Off
-define('_OMDBAPIKEY', '".$_POST['_OMDBAPIKEY']."'); // Place Key Here ////////
-define('_OMDBswitch', ".$_POST['_OMDBswitch']."); // TMDB On - Off ";
+'_TMDBAPIKEY' => $_POST[_TMDBAPIKEY], // Place Key Here ////////
+'_TMDBLANG' => 'en', // TMDB Language
+'_TMDBDEBUG' => false, // TMDB Debug
+'_TMDBswitch' => $_POST[_TMDBswitch], // TMDB On - Off
+'_OMDBAPIKEY' => $_POST[_OMDBAPIKEY], // Place Key Here ////////
+'_OMDBswitch' => $_POST[_OMDBswitch], // TMDB On - Off
+
+));";
 file_put_contents('../app/config/config.php', $text);
 //file_put_contents('backend/newconfig.php', $text); // for v3
 }
@@ -332,17 +332,17 @@ if ($step == 0 || !$step) {
     $form .= "<div class='row'>";
     $form .= "<div class='col'>";
     $form .= "<dl class='row mb-0'>";
-    $form .= "<dt class='col-sm-5'>Host</dt><dd class='col-sm-7'><input type='text' class='form-control' name='DB_HOST' value='$_POST[host]'></dd>";
-    $form .= "<dt class='col-sm-5'>DB Username</dt><dd class='col-sm-7'><input type='text' class='form-control' name='DB_USER' value='$_POST[dbuser]'></dd>";
-    $form .= "<dt class='col-sm-5'>DB Password</dt><dd class='col-sm-7'><input type='text' class='form-control' name='DB_PASS' value='$_POST[dbpass]'></dd>";
-    $form .= "<dt class='col-sm-5'>DB Name</dt><dd class='col-sm-7'><input type='text' class='form-control' name='DB_NAME' value='$_POST[dbname]'></dd>";
-    $form .= "<dt class='col-sm-5'>Site Url</dt><dd class='col-sm-7'><input type='text' class='form-control' name='URLROOT' placeholder='eg http://localhost/M-BiTsy'></dd>";
-    $form .= "<dt class='col-sm-5'>Owner Username (Use this name on signup to access admin settings)</dt><dd class='col-sm-7'><input type='text' class='form-control' name='_OWNERS' placeholder='eg M-jay or multi M-jay,M-jay'></dd>";
-    $form .= "<dt class='col-sm-5'>Use Webp Images (use false if gd extension not present)</dt><dd class='col-sm-7'><input type='text' class='form-control' name='USE_WEBP' placeholder='eg true or false'></dd>";
-    $form .= "<dt class='col-sm-5'>TMDB API Key</dt><dd class='col-sm-7'><input type='text' class='form-control' name='_TMDBAPIKEY' placeholder='eg g8rg5r5eg4e5geg4e5g54'></dd>";
-    $form .= "<dt class='col-sm-5'>TMDB API Key On (use false if no key/account)</dt><dd class='col-sm-7'><input type='text' class='form-control' name='_TMDBswitch' placeholder='eg true or false'></dd>";
-    $form .= "<dt class='col-sm-5'>OMDB API Key</dt><dd class='col-sm-7'><input type='text' class='form-control' name='_OMDBAPIKEY' placeholder='eg g8rg5r5eg4e5geg4e5g54'></dd>";
-    $form .= "<dt class='col-sm-5'>OMDB API Key On (use false if no key/account)</dt><dd class='col-sm-7'><input type='text' class='form-control' name='_OMDBswitch' placeholder='eg true or false'></dd>";
+    $form .= "<dt class='col-sm-5'>Host</dt><dd class='col-sm-7'><input type='text' class='form-control' name='CONFIG['DB_HOST']' value='$_POST[host]'></dd>";
+    $form .= "<dt class='col-sm-5'>DB Username</dt><dd class='col-sm-7'><input type='text' class='form-control' name='CONFIG['DB_USER']' value='$_POST[dbuser]'></dd>";
+    $form .= "<dt class='col-sm-5'>DB Password</dt><dd class='col-sm-7'><input type='text' class='form-control' name='CONFIG['DB_PASS']' value='$_POST[dbpass]'></dd>";
+    $form .= "<dt class='col-sm-5'>DB Name</dt><dd class='col-sm-7'><input type='text' class='form-control' name='CONFIG['DB_NAME']' value='$_POST[dbname]'></dd>";
+    $form .= "<dt class='col-sm-5'>Site Url</dt><dd class='col-sm-7'><input type='text' class='form-control' name='CONFIG['URLROOT']' placeholder='eg http://localhost/M-BiTsy'></dd>";
+    $form .= "<dt class='col-sm-5'>Owner Username (Use this name on signup to access admin settings)</dt><dd class='col-sm-7'><input type='text' class='form-control' name='CONFIG['_OWNERS']' placeholder='eg M-jay or multi M-jay,M-jay'></dd>";
+    $form .= "<dt class='col-sm-5'>Use Webp Images (use false if gd extension not present)</dt><dd class='col-sm-7'><input type='text' class='form-control' name='CONFIG['USE_WEBP']' placeholder='eg true or false'></dd>";
+    $form .= "<dt class='col-sm-5'>TMDB API Key</dt><dd class='col-sm-7'><input type='text' class='form-control' name='CONFIG['_TMDBAPIKEY']' placeholder='eg g8rg5r5eg4e5geg4e5g54'></dd>";
+    $form .= "<dt class='col-sm-5'>TMDB API Key On (use false if no key/account)</dt><dd class='col-sm-7'><input type='text' class='form-control' name='CONFIG['_TMDBswitch']' placeholder='eg true or false'></dd>";
+    $form .= "<dt class='col-sm-5'>OMDB API Key</dt><dd class='col-sm-7'><input type='text' class='form-control' name='CONFIG['_OMDBAPIKEY']' placeholder='eg g8rg5r5eg4e5geg4e5g54'></dd>";
+    $form .= "<dt class='col-sm-5'>OMDB API Key On (use false if no key/account)</dt><dd class='col-sm-7'><input type='text' class='form-control' name='CONFIG['_OMDBswitch']' placeholder='eg true or false'></dd>";
     $form .= "<div class='text-center'><input type=submit value='Next Final Step'></div></dd>";
     $form .= "</div>";
     $form .= "</div>";

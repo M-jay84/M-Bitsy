@@ -2,45 +2,55 @@
 
 namespace App\Controllers\Admin;
 
-use App\Libs\User;
+use App\Libs\Controller;
 use App\Models\ClientsModel;
 
 /*
 * Client Controller
 */
-class Adminclient 
+class Adminclient extends Controller
 {
+    public $current_user;
+
+    // Get Current User
+    public function __construct()
+    {
+        $this->current_user = $this->currentuser(2);
+        if ($this->current_user->class < CONFIG['_MODERATOR']) {
+            showMessage(CONFIG['URLROOT'], LANG["NO_PERMISSION"]);
+        }
+    }
+
     // Client Default Page
     public function index($type = 'peers')
     {
-        $USER = new User(_MODERATOR, 2);
+    
         // Get Peer Client Data
-        $client = ClientsModel::select($type);
+        $client = (new ClientsModel)->select($type);
 
-        // Init Data
+        // Data For View
         $data = [
-            'V_title' => Txt("CLIENTS"),
+            'page_title' => LANG["CLIENTS"],
             'V_client' => $client,
-            'V_type' => $type,
-            'USER' => $USER
+            'V_type' => $type
         ];
         
         // Load View
-        template('client', $data, 'admin');
+        $this->view('client', $data, 'admin');
     }
 
     // Add Client Record
     public function submit()
     {
-        $USER = new User(_MODERATOR, 2);
-        ClientsModel::insert();
+    
+        (new ClientsModel)->insert();
     }
 
     // Delete Client Record
     public function delete($id)
     {
-        $USER = new User(_MODERATOR, 2);
-        ClientsModel::delete($id);
+    
+        (new ClientsModel)->delete($id);
     }
 
 }

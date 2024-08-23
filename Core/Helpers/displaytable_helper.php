@@ -1,11 +1,10 @@
 <?php
 
 use App\Libs\MDBS;
-use App\Models\LikesModel;
-use App\Models\PeersModel;
+use App\Libs\DB;
 
 // Function For Comment Table
-function commenttable($USER, $res, $type = null)
+function commenttable($res, $type = null)
 {
     while ($row = $res->fetch(PDO::FETCH_LAZY)) {
         $postername = coloredname($row["user"]);
@@ -27,53 +26,53 @@ function commenttable($USER, $res, $type = null)
         $userratio = $row["downloaded"] > 0 ? number_format($row["uploaded"] / $row["downloaded"]) : "---";
 
         if (!$avatar) {
-            $avatar = URLROOT . "/assets/images/misc/default_avatar.webp";
+            $avatar = CONFIG['URLROOT'] . "/assets/images/misc/default_avatar.webp";
         }
 
         $commenttext = format_comment($row["text"]);
 
         $edit = null;
-        if ($type == "torrent" && $USER->permission('edit_torrents') || $type == "news"  || $type == "req" && $USER->permission('edit_news') || $USER->has('id') == $row['user'] && $USER->has('id')) {
-            $edit = '<a href="#" data-bs-toggle="modal" data-bs-target="#editModal'.$row['id'].'"><i class="fa fa-pencil" title="'. Txt("EDIT") .'"></i></a>';
+        if ($type == "torrent" && $_SESSION['edit_torrents'] == 'yes' || $type == "news"  || $type == "req" && $_SESSION['edit_news'] == 'yes' || $_SESSION['id'] == $row['user'] && $_SESSION['id']) {
+            $edit = '<a href="#" data-bs-toggle="modal" data-bs-target="#editModal'.$row['id'].'"><i class="fa fa-pencil" title="'. LANG["EDIT"] .'"></i></a>';
         }
 
         $delete = null;
-        if ($type == "torrent" && $USER->permission('delete_torrents') || $type == "req" || $type == "id" || $type == "news" && $USER->permission('delete_news')) {
-            $delete = '<a href=' . URLROOT . '/comment/delete/' . $row['id'] . '><i class="fa fa-trash" title="'. Txt("DEL") .'"></i></a>';
+        if ($type == "torrent" && $_SESSION['delete_torrents'] == 'yes' || $type == "req" || $type == "id" || $type == "news" && $_SESSION['delete_news'] == 'yes') {
+            $delete = '<a href=' . CONFIG['URLROOT'] . '/comment/delete/' . $row['id'] . '><i class="fa fa-trash" title="'. LANG["DEL"] .'"></i></a>';
         }
 
         ?>
         <div class='row p-4'>
             <div class="col-2">
-                <?php if (!$USER->permission('edit_users') && $privacylevel == 'strong') : ?>
-                    <a href="<?= URLROOT ?>/profile/<?= $row['id'] ?>"><b><?= $postername ?></b></a>
+                <?php if (!$_SESSION['edit_users'] == 'yes' && $privacylevel == 'strong') : ?>
+                    <a href="<?= CONFIG['URLROOT'] ?>/profile/<?= $row['id'] ?>"><b><?= $postername ?></b></a>
                     <?= $title ?><br>
                     <img width="80" height="80" src="<?= $avatar ?>" alt="" /><br>
                     <i class="fa fa-upload" title="upload"></i> <?= $useruploaded ?><br />
                     <i class="fa fa-download" title="download"></i> <?= $userdownloaded ?><br />
-                    <?= Txt("RATIO") ?>: <?= get_ratio_color($userratio) ?><br />
+                    <?= LANG["RATIO"] ?>: <?= get_ratio_color($userratio) ?><br />
                 <?php else : ?>
-                    <a href="<?= URLROOT ?>/profile/<?= $row['id'] ?>"><b><?= Txt('PRIVATE') ?></b></a>
+                    <a href="<?= CONFIG['URLROOT'] ?>/profile/<?= $row['id'] ?>"><b><?= LANG['PRIVATE'] ?></b></a>
                     <?= $title ?><br>
-                    <img width="80" height="80" src="<?= URLROOT ?>/assets/images/misc/default_avatar.webp" alt="" /><br>
+                    <img width="80" height="80" src="<?= CONFIG['URLROOT'] ?>/assets/images/misc/default_avatar.webp" alt="" /><br>
                     <i class="fa fa-upload" title="upload"></i> <?= $useruploaded ?><br />
                     <i class="fa fa-download" title="download"></i> <?= $userdownloaded ?><br />
-                    <?= Txt("RATIO") ?>: <?= get_ratio_color($userratio) ?><br />
+                    <?= LANG["RATIO"] ?>: <?= get_ratio_color($userratio) ?><br />
                 <?php endif; ?>
             </div>
             <div class="col-10">
-                <?= Txt("POSTED") ?>: <?php echo date("d-m-Y \\a\\t H:i:s", utc_to_tz_time($row["added"])) ?> <a id="comment<?= $row["id"] ?>"></a><br>
+                <?= LANG["POSTED"] ?>: <?php echo date("d-m-Y \\a\\t H:i:s", utc_to_tz_time($row["added"])) ?> <a id="comment<?= $row["id"] ?>"></a><br>
                 <div class="p-2"><?= $commenttext ?></div>
                 <hr>
                 <?= $usersignature ?>
             </div>
             <div class="col-12">
-                <?= $edit ?> <?= $delete ?> <a href="#" data-bs-toggle="modal" data-bs-target="#reportModal"><i class="fa fa-flag" title="<?= Txt("REPORT") ?>"></i></a>
+                <?= $edit ?> <?= $delete ?> <a href="#" data-bs-toggle="modal" data-bs-target="#reportModal"><i class="fa fa-flag" title="<?= LANG["REPORT"] ?>"></i></a>
             </div>
         </div>
 
         <!-- Edit Modal -->
-        <form id="submit" method="post" action="<?= URLROOT ?>/comment/submit/<?= $row['id'] ?>/<?= $type ?>">
+        <form id="submit" method="post" action="<?= CONFIG['URLROOT'] ?>/comment/submit/<?= $row['id'] ?>/<?= $type ?>">
             <div class="modal fade" id="editModal<?= $row['id'] ?>" tabindex="-1" aria-hidden="true">
                 <div class="modal-dialog modal-dialog-centered modal-md" style="max-width:700px;">
                     <div class="modal-content">
@@ -82,8 +81,8 @@ function commenttable($USER, $res, $type = null)
                             <?php echo textbbcode("submit", "text", $row["text"]); ?>
                         </div>
                         <div class="modal-footer">
-                            <button type="button" class="btn btn-sm ttbtn" data-bs-dismiss="modal"><?= Txt("CLOSE") ?></button>
-                            <button type="submit" class="btn btn-sm ttbtn"><?= Txt("SAVE") ?></button>
+                            <button type="button" class="btn btn-sm ttbtn" data-bs-dismiss="modal"><?= LANG["CLOSE"] ?></button>
+                            <button type="submit" class="btn btn-sm ttbtn"><?= LANG["SAVE"] ?></button>
                         </div>
                     </div>
                 </div>
@@ -96,16 +95,16 @@ function commenttable($USER, $res, $type = null)
                 <div class="modal-dialog modal-dialog-centered modal-md" style="max-width:700px;">
                     <div class="modal-content">
                         <div class="modal-body">
-                            <p class="text-center"><?= Txt("ARE_YOU_SURE_REPORT") ?> comment.</p>
+                            <p class="text-center"><?= LANG["ARE_YOU_SURE_REPORT"] ?> comment.</p>
                             <input type='hidden' name='id' value='<?= $row["id"] ?>' />
                             <input type='hidden' name='postid' value='<?= $row["text"] ?>' />
                             <input type='hidden' name='type' value='<?= $type ?>' />
-                            <p class="text-center"><?= Txt("REASON") ?>.</p>
+                            <p class="text-center"><?= LANG["REASON"] ?>.</p>
                             <input class="form-control fullwidth" type='text' name='reason' /><br>
                         </div>
                         <div class="modal-footer">
-                            <button type="button" class="btn btn-sm ttbtn" data-bs-dismiss="modal"><?= Txt("CLOSE") ?></button>
-                            <button type="submit" class="btn btn-sm ttbtn"><?= Txt("SAVE") ?></button>
+                            <button type="button" class="btn btn-sm ttbtn" data-bs-dismiss="modal"><?= LANG["CLOSE"] ?></button>
+                            <button type="submit" class="btn btn-sm ttbtn"><?= LANG["SAVE"] ?></button>
                         </div>
                     </div>
                 </div>
@@ -123,18 +122,18 @@ function peerstable($res)
     $html .= "<table class='table table-striped'>";
     $html .= "<thead>";
     $html .= "<tr>";
-    $html .= "<th>" . Txt("NAME") . "</th>";
-    $html .= "<th>" . Txt("SIZE") . "</th>";
-    $html .= "<th>" . Txt("UPLOADED") . "</th>";
-    $html .= "<th>" . Txt("DOWNLOADED") . "</th>";
-    $html .= "<th>" . Txt("RATIO") . "</th>";
+    $html .= "<th>" . LANG["NAME"] . "</th>";
+    $html .= "<th>" . LANG["SIZE"] . "</th>";
+    $html .= "<th>" . LANG["UPLOADED"] . "</th>";
+    $html .= "<th>" . LANG["DOWNLOADED"] . "</th>";
+    $html .= "<th>" . LANG["RATIO"] . "</th>";
     $html .= "</tr>";
     $html .= "</thead>";
     $html .= "<tbody>";
     foreach ($res as $arr) {
         $userratio = $arr["downloaded"] > 0 ? number_format($arr["uploaded"] / $arr["downloaded"], 1) : "---";
         $html .= "<tr>";
-        $html .= "<td><a href=" . URLROOT . "/torrent/$arr[torrent]/hit'><b>" . htmlspecialchars($arr["name"]) . "</b></a></td>";
+        $html .= "<td><a href=" . CONFIG['URLROOT'] . "/torrent/$arr[torrent]/hit'><b>" . htmlspecialchars($arr["name"]) . "</b></a></td>";
         $html .= "<td>" . mksize($arr["size"]) . "</td>";
         $html .= "<td>" . mksize($arr["uploaded"]) . "</td>";
         $html .= "<td>" . mksize($arr["downloaded"]) . "</td>";
@@ -154,24 +153,24 @@ function snatchtable($res, $col)
     $html .= "<table class='table table-striped'>";
     $html .= "<thead>";
     $html .= "<tr>";
-    $html .= "<th>" . Txt("NAME") . "</th>";
-    $html .= "<th>" . Txt("UPLOADED") . "</th>";
-    $html .= "<th>" . Txt("DOWNLOADED") . "</th>";
-    $html .= "<th>" . Txt("RATIO") . "</th>";
-    $html .= "<th>" . Txt("ADDED") . "</th>";
-    $html .= "<th>" . Txt("LAST_ACTION") . "</th>";
-    $html .= "<th>" . Txt("SEED_TIMED") . "</th>";
-    $html .= "<th>" . Txt("COMPLETED") . "</th>";
-    $html .= "<th>" . Txt("SEEDING") . "</th>";
-    $html .= "<th>" . Txt("HNR") . "</th>";
+    $html .= "<th>" . LANG["NAME"] . "</th>";
+    $html .= "<th>" . LANG["UPLOADED"] . "</th>";
+    $html .= "<th>" . LANG["DOWNLOADED"] . "</th>";
+    $html .= "<th>" . LANG["RATIO"] . "</th>";
+    $html .= "<th>" . LANG["ADDED"] . "</th>";
+    $html .= "<th>" . LANG["LAST_ACTION"] . "</th>";
+    $html .= "<th>" . LANG["SEED_TIMED"] . "</th>";
+    $html .= "<th>" . LANG["COMPLETED"] . "</th>";
+    $html .= "<th>" . LANG["SEEDING"] . "</th>";
+    $html .= "<th>" . LANG["HNR"] . "</th>";
     $html .= "</tr>";
     $html .= "</thead>";
     $html .= "<tbody>";
     foreach ($res as $row) {
         $userratio = $row['download'] > 0 ? number_format($row['upload'] / $row['download'], 1) : "---";
-        $complete = $row['completed'] != 'yes' ? "<font color=#27B500><b>" . Txt("YES") . "</b></font>" : "<font color=#FF1200><b>" . Txt("NO") . "</b></font>";
-        $seeding = $row['seeding'] != 'yes' ? "<font color=#27B500><b>" . Txt("YES") . "</b></font>" : "<font color=#FF1200><b>" . Txt("NO") . "</b></font>";
-        $hnr = $row['hnr'] != 'yes' ? "<font color=#27B500><b>" . Txt("YES") . "</b></font>" : "<font color=#FF1200><b>" . Txt("NO") . "</b></font>";
+        $complete = $row['completed'] != 'yes' ? "<font color=#27B500><b>" . LANG["YES"] . "</b></font>" : "<font color=#FF1200><b>" . LANG["NO"] . "</b></font>";
+        $seeding = $row['seeding'] != 'yes' ? "<font color=#27B500><b>" . LANG["YES"] . "</b></font>" : "<font color=#FF1200><b>" . LANG["NO"] . "</b></font>";
+        $hnr = $row['hnr'] != 'yes' ? "<font color=#27B500><b>" . LANG["YES"] . "</b></font>" : "<font color=#FF1200><b>" . LANG["NO"] . "</b></font>";
         $seedtime = $row['last_time'] ? mkprettytime($row['last_time']) : '---';
         $name = $col == 'torrent' ?  coloredname($row['id']) : htmlspecialchars(CutName($row['name'], 35));
         $html .= "<tr>";
@@ -194,12 +193,12 @@ function snatchtable($res, $col)
 }
 
 // Function To Display Tables Of Torrents
-function torrenttable($USER, $res, $columns = TORRENTTABLE_COLUMNS)
+function torrenttable($res, $columns = CONFIG['TORRENTTABLE_COLUMNS'])
 {
     // Set Waiting Time
-    if (CONFIG['MEMBERSONLY_WAIT'] && CONFIG['MEMBERSONLY'] && in_array($USER->has('class'), explode(",", CONFIG['CLASS_WAIT']))) {
-        $gigs = $USER->has('uploaded') / (1024 * 1024 * 1024);
-        $userratio = $USER->has('downloaded') > 0 ? number_format($USER->has('uploaded') / $USER->has('downloaded'), 1) : "---";
+    if (CONFIG['MEMBERSONLY_WAIT'] && CONFIG['MEMBERSONLY'] && in_array($_SESSION['class'], explode(",", CONFIG['CLASS_WAIT']))) {
+        $gigs = $_SESSION['uploaded'] / (1024 * 1024 * 1024);
+        $userratio = $_SESSION['downloaded'] > 0 ? number_format($_SESSION['uploaded'] / $_SESSION['downloaded'], 1) : "---";
         if ($userratio < 0 || $gigs < 0) {
             $wait = CONFIG['A_WAIT'];
         } elseif ($userratio < CONFIG['RATIOA'] || $gigs < CONFIG['GIGSA']) {
@@ -226,79 +225,79 @@ function torrenttable($USER, $res, $columns = TORRENTTABLE_COLUMNS)
     foreach ($cols as $col) {
         switch ($col) {
             case 'category':
-                echo "<th>" . Txt("TYPE") . "</th>";
+                echo "<th>" . LANG["TYPE"] . "</th>";
                 break;
             case 'name':
-                echo "<th>" . Txt("NAME") . "</th>";
+                echo "<th>" . LANG["NAME"] . "</th>";
                 break;
             case 'dl':
-                echo "<th>" . Txt("DL") . "</th>";
+                echo "<th>" . LANG["DL"] . "</th>";
                 break;
             case 'magnet':
-                echo "<th>" . Txt("MAGNET") . "</th>";
+                echo "<th>" . LANG["MAGNET"] . "</th>";
                 break;
             case 'uploader':
-                echo "<th>" . Txt("UPLOADER") . "</th>";
+                echo "<th>" . LANG["UPLOADER"] . "</th>";
                 break;
             case 'tube':
-                echo "<th>" . Txt("YOUTUBE") . "</th>";
+                echo "<th>" . LANG["YOUTUBE"] . "</th>";
                 break;
             case 'tmdb':
-                echo "<th>" . Txt("MDB") . "</th>";
+                echo "<th>" . LANG["MDB"] . "</th>";
                 break;
             case 'comments':
-                echo "<th>" . Txt("COMM") . "</th>";
+                echo "<th>" . LANG["COMM"] . "</th>";
                 break;
             case 'nfo':
-                echo "<th>" . Txt("NFO") . "</th>";
+                echo "<th>" . LANG["NFO"] . "</th>";
                 break;
             case 'size':
-                echo "<th>" . Txt("SIZE") . "</th>";
+                echo "<th>" . LANG["SIZE"] . "</th>";
                 break;
             case 'completed':
-                echo "<th>" . Txt("C") . "</th>";
+                echo "<th>" . LANG["C"] . "</th>";
                 break;
             case 'seeders':
-                echo "<th>" . Txt("S") . "</th>";
+                echo "<th>" . LANG["S"] . "</th>";
                 break;
             case 'leechers':
-                echo "<th>" . Txt("L") . "</th>";
+                echo "<th>" . LANG["L"] . "</th>";
                 break;
             case 'health':
-                echo "<th>" . Txt("HEALTH") . "</th>";
+                echo "<th>" . LANG["HEALTH"] . "</th>";
                 break;
             case 'external':
                 if (CONFIG['ALLOWEXTERNAL']) {
-                    echo "<th>" . Txt("L/E") . "</th>";
+                    echo "<th>" . LANG["L/E"] . "</th>";
                 }
                 break;
             case 'added':
-                echo "<th>" . Txt("ADDED") . "</th>";
+                echo "<th>" . LANG["ADDED"] . "</th>";
                 break;
             case 'speed':
-                echo "<th>" . Txt("SPEED") . "</th>";
+                echo "<th>" . LANG["SPEED"] . "</th>";
                 break;
             case 'wait':
                 if ($wait) {
-                    echo "<th>" . Txt("WAIT") . "</th>";
+                    echo "<th>" . LANG["WAIT"] . "</th>";
                 }
                 break;
             case 'rating':
-                echo "<th>" . Txt("RATINGS") . "</th>";
+                echo "<th>" . LANG["RATINGS"] . "</th>";
                 break;
             case 'bookmark':
-                echo "<th>" . Txt("DEL") . "&nbsp;<input type='checkbox' name='checkall' onclick='checkAll(this.form.id);' /></th>";
+                echo "<th>" . LANG["DEL"] . "&nbsp;<input type='checkbox' name='checkall' onclick='checkAll(this.form.id);' /></th>";
                 break;
             case 'admin':
-                if ($USER->has('class') == 7) {
-                    echo "<th>" . Txt("STAFF") . "</th>";
+                if ($_SESSION['class'] == 7) {
+                    echo "<th>" . LANG["STAFF"] . "</th>";
                 }
                 break;
         }
     }
     // Do They Have To Wiait
     if ($wait && !in_array("wait", $cols)) {
-        echo "<th>" . Txt("WAIT") . "</th>";
+        echo "<th>" . LANG["WAIT"] . "</th>";
     }
 
     echo "</tr></thead>";
@@ -312,7 +311,7 @@ function torrenttable($USER, $res, $columns = TORRENTTABLE_COLUMNS)
                 case 'category':
                     print("<td>");
                     if (!empty($row["cat_name"])) {
-                        print("<center><a href=\"" . URLROOT . "/browse?cat=" . $row["category"] . "\">");
+                        print("<center><a href=\"" . CONFIG['URLROOT'] . "/browse?cat=" . $row["category"] . "\">");
                         if (!empty($row["cat_pic"]) && $row["cat_pic"] != "") {
                             print("<i class='fa ".$row['cat_pic']."' style='font-size:22px;' title='".$row["cat_name"]."'>  </i>");
                         } else {
@@ -331,55 +330,55 @@ function torrenttable($USER, $res, $columns = TORRENTTABLE_COLUMNS)
                     $added = date("M d, Y", utc_to_tz_time($row['added']));
                     $type ='';
                     if (strtotime($added) >= strtotime("yesterday")){ // Only show for torrents 1 day old
-                        $type .= "<b><font color='#ff0000'> (" . Txt("NEW") . "!) </font></b>";
+                        $type .= "<b><font color='#ff0000'> (" . LANG["NEW"] . "!) </font></b>";
                     }
                     if ($row["freeleech"] == 1) {
-                        $type .= " <i class='fa fa-sun-o' title='" . Txt("FREELEECH") . "'></i>";
+                        $type .= " <i class='fa fa-sun-o' title='" . LANG["FREELEECH"] . "'></i>";
                     }
                     if ($row["vip"] == "yes") {
-                        $type .= " <i class='fa fa-user-secret' title='" . Txt("VIP") . "'></i>";
+                        $type .= " <i class='fa fa-user-secret' title='" . LANG["VIP"] . "'></i>";
                     }
                     if ($row["sticky"] == "yes") {
-                        $type .= " <i class='fa fa-thumb-tack' title='" . Txt("STICKY") . "'></i>";
+                        $type .= " <i class='fa fa-thumb-tack' title='" . LANG["STICKY"] . "'></i>";
                     }
-                    //print("<td class='ttable_col$x' nowrap='nowrap'><a href=\"" . URLROOT . "/torrent/$id/hit\">$dispname</a></td>");
+                    //print("<td class='ttable_col$x' nowrap='nowrap'><a href=\"" . CONFIG['URLROOT'] . "/torrent/$id/hit\">$dispname</a></td>");
                     // BALLOON TOOLTIP MOD
-                    print("<td nowrap='nowrap'><a href=\"" . URLROOT . "/torrent/$id/hit\" onMouseover=\"return overlib('<table class=ballooncolor border=1 width=300px align=center><tr><td class=balloonheadercolor colspan=2 align=center>$smallname</td></tr><tr valign=top><td class=ballooncolor align=center><img border=0 height=200 width=120 src=".MDBS::getImage($row)."></td><td width=80%  class=ballooncolor><div align=left><b>" . Txt("UPLOADED") . ": </b>" . date("m-d-Y", utc_to_tz_time($row["added"])) . "<br /><b>" . Txt("SIZE") . ": </b>". mksize($row["size"]) . "<br /><b>" . Txt("COMPLETED") . ": </b>" . $row["times_completed"] . "<br /></div><div align=left><b>Views: </b>" . $row["views"] . "<br /><b>" . Txt("HITS") . ": </b>" . $row["hits"] . "<br /><b>" . Txt("SEEDERS") . ": </b><font color=green>" . $row["seeders"] . "</font><br /><b>" . Txt("LEECHERS") . ": </b><font color=red>" . $row["leechers"] . "</font><br /><b>" . Txt("BY") . ": </b>" . $row['username'] . "</div></td></tr><tr><td class=balloonheadercolor colspan=2 align=center>".Txt("DESCRIPTION")."</td></tr><tr><td  class=ballooncolor colspan=2>" . $row['descr'] . "</td></tr></table>', CENTER, HEIGHT, 200, WIDTH, 300)\"; onMouseout=\"return nd()\">".$dispname."</a>".$type."");
+                    print("<td nowrap='nowrap'><a href=\"" . CONFIG['URLROOT'] . "/torrent/$id/hit\" onMouseover=\"return overlib('<table class=ballooncolor border=1 width=300px align=center><tr><td class=balloonheadercolor colspan=2 align=center>$smallname</td></tr><tr valign=top><td class=ballooncolor align=center><img border=0 height=200 width=120 src=".MDBS::getImage($row)."></td><td width=80%  class=ballooncolor><div align=left><b>" . LANG["UPLOADED"] . ": </b>" . date("m-d-Y", utc_to_tz_time($row["added"])) . "<br /><b>" . LANG["SIZE"] . ": </b>". mksize($row["size"]) . "<br /><b>" . LANG["COMPLETED"] . ": </b>" . $row["times_completed"] . "<br /></div><div align=left><b>Views: </b>" . $row["views"] . "<br /><b>" . LANG["HITS"] . ": </b>" . $row["hits"] . "<br /><b>" . LANG["SEEDERS"] . ": </b><font color=green>" . $row["seeders"] . "</font><br /><b>" . LANG["LEECHERS"] . ": </b><font color=red>" . $row["leechers"] . "</font><br /><b>" . LANG["BY"] . ": </b>" . $row['username'] . "</div></td></tr><tr><td class=balloonheadercolor colspan=2 align=center>".LANG["DESCRIPTION"]."</td></tr><tr><td  class=ballooncolor colspan=2>" . $row['descr'] . "</td></tr></table>', CENTER, HEIGHT, 200, WIDTH, 300)\"; onMouseout=\"return nd()\">".$dispname."</a>".$type."");
 
                     $tags = get_tags($id);
                     print($tags."</td>");
                     
                     break;
                 case 'dl':
-                    print("<td><a href=\"" . URLROOT . "/download/$id\"><i class='fa fa-download' style='font-size:22px;color:green' title='" . Txt("DOWNLOADED") . "'></i></a></td>");
+                    print("<td><a href=\"" . CONFIG['URLROOT'] . "/download/$id\"><i class='fa fa-download' style='font-size:22px;color:green' title='" . LANG["DOWNLOADED"] . "'></i></a></td>");
                     break;
                 case 'magnet':
                     // Like Mod
                     if (!CONFIG['FORCETHANKS'] && $row['external'] == 'yes') {
-                        print("<td><a href=\"magnet:?xt=urn:btih:" . $row["info_hash"] . "&dn=" . rawurlencode($row['name']) . "&tr=udp://tracker.openbittorrent.com&tr=udp://tracker.publicbt.com\"><i class='fa fa-magnet fa-2x' style='font-size:23px;color:green' title='" . Txt("DOWNLOADED") . "'></i></a></td>");
+                        print("<td><a href=\"magnet:?xt=urn:btih:" . $row["info_hash"] . "&dn=" . rawurlencode($row['name']) . "&tr=udp://tracker.openbittorrent.com&tr=udp://tracker.publicbt.com\"><i class='fa fa-magnet fa-2x' style='font-size:23px;color:green' title='" . LANG["DOWNLOADED"] . "'></i></a></td>");
                     } elseif (CONFIG['FORCETHANKS']) {
-                        $like = LikesModel::fetchRow('user', ['liked =', 'type =', 'user ='], [$id, 'torrent', $USER->has('id')]);
+                        $like = DB::fetchRow('likes', 'user', ['liked =', 'type =', 'user ='], [$id, 'torrent', $_SESSION['id']]);
                         if ($like) {
-                            if ($USER->permission('can_download') && $row['external'] == 'yes') {
-                                print("<td><a href=\"magnet:?xt=urn:btih:" . $row["info_hash"] . "&dn=" . rawurlencode($row['name']) . "&tr=udp://tracker.openbittorrent.com&tr=udp://tracker.publicbt.com\"><i class='fa fa-magnet fa-2x' style='font-size:23px;color:green' title='" . Txt("DOWNLOADED") . "'></i></a></td>");
+                            if ($_SESSION['can_download'] == 'yes' && $row['external'] == 'yes') {
+                                print("<td><a href=\"magnet:?xt=urn:btih:" . $row["info_hash"] . "&dn=" . rawurlencode($row['name']) . "&tr=udp://tracker.openbittorrent.com&tr=udp://tracker.publicbt.com\"><i class='fa fa-magnet fa-2x' style='font-size:23px;color:green' title='" . LANG["DOWNLOADED"] . "'></i></a></td>");
                             } else {
                                 print("<td><h8><span class='badge border border-1 border-danger'>No Dload</span></h8></td>");
                             }
-                        } elseif ($USER->has('id') == $row["owner"] && $row['external'] == 'yes') {
-                            print("<td><a href=\"magnet:?xt=urn:btih:" . $row["info_hash"] . "&dn=" . rawurlencode($row['name']) . "&tr=udp://tracker.openbittorrent.com&tr=udp://tracker.publicbt.com\"><i class='fa fa-magnet fa-2x' style='font-size:23px;color:green' title='" . Txt("DOWNLOADED") . "'></i></a></td>");
+                        } elseif ($_SESSION['id'] == $row["owner"] && $row['external'] == 'yes') {
+                            print("<td><a href=\"magnet:?xt=urn:btih:" . $row["info_hash"] . "&dn=" . rawurlencode($row['name']) . "&tr=udp://tracker.openbittorrent.com&tr=udp://tracker.publicbt.com\"><i class='fa fa-magnet fa-2x' style='font-size:23px;color:green' title='" . LANG["DOWNLOADED"] . "'></i></a></td>");
                         } else {
-                            print("<td><a href='" . URLROOT . "/like/thanks?id=$id&type=torrent><h8><span class='badge border border-1 border-danger'>" . Txt("THANKS") . "</span></h8></td>");
+                            print("<td><a href='" . CONFIG['URLROOT'] . "/like/thanks?id=$id&type=torrent><h8><span class='badge border border-1 border-danger'>" . LANG["THANKS"] . "</span></h8></td>");
                         }
                     } else {
-                        print("<td><i class='fa fa-home' style='font-size:23px;color:green' title='" . Txt("LOCAL") . "'></i></td>");
+                        print("<td><i class='fa fa-home' style='font-size:23px;color:green' title='" . LANG["LOCAL"] . "'></i></td>");
                     }
                     break;
                 case 'uploader':
                     echo "<td>";
-                    if (($row["anon"] == "yes" || $row["privacy"] == "strong") && $USER->has('id') != $row["owner"] && !$USER->permission('edit_torrents')) {
+                    if (($row["anon"] == "yes" || $row["privacy"] == "strong") && $_SESSION['id'] != $row["owner"] && !$_SESSION['edit_torrents'] == 'yes') {
                         echo "Anonymous";
                     } elseif ($row["username"]) {
-                        echo "<a href='" . URLROOT . "/profile/$row[owner]'>" . coloredname($row['owner']) . "</a>";
+                        echo "<a href='" . CONFIG['URLROOT'] . "/profile/$row[owner]'>" . coloredname($row['owner']) . "</a>";
                     } else {
                         echo "Unknown";
                     }
@@ -388,26 +387,26 @@ function torrenttable($USER, $res, $columns = TORRENTTABLE_COLUMNS)
                     break;
                 case 'tube':
                     if ($row["tube"]) {
-                        print("<td><a rel=\"prettyPhoto\"  href=" . $row['tube'] . " ><" . htmlspecialchars($row['tube']) . "><i class='fa fa-youtube-play' style='font-size:32px;color:#ff2c2c' title='" . Txt("YOUTUBE") . "'></i></a></td>");
+                        print("<td><a rel=\"prettyPhoto\"  href=" . $row['tube'] . " ><" . htmlspecialchars($row['tube']) . "><i class='fa fa-youtube-play' style='font-size:32px;color:#ff2c2c' title='" . LANG["YOUTUBE"] . "'></i></a></td>");
                     } else {
                         print("<td>-</td>");
                     }
                     break;
                 case 'tmdb':
                     if ($row["imdb"]) {
-                        print("<td><a href=" . $row['imdb'] . "><img src='" . URLROOT . "/assets/images/misc/imdb.webp'  border='0' width='28' height='25' alt=\"\" /></a></td>");
+                        print("<td><a href=" . $row['imdb'] . "><img src='" . CONFIG['URLROOT'] . "/assets/images/misc/imdb.webp'  border='0' width='28' height='25' alt=\"\" /></a></td>");
                     } elseif ($row["tmdb"]) {
-                        print("<td><a href=" . $row['tmdb'] . "><img src='" . URLROOT . "/assets/images/misc/tmdb1.webp'  border='0' width='28' height='25' alt=\"\" /></a></td>");
+                        print("<td><a href=" . $row['tmdb'] . "><img src='" . CONFIG['URLROOT'] . "/assets/images/misc/tmdb1.webp'  border='0' width='28' height='25' alt=\"\" /></a></td>");
                     } else {
                         print("<td>-</td>");
                     }
                     break;
                 case 'comments':
-                    print("<td><a href='" . URLROOT . "/comment/$id/torrent'><b>$row[comments]</b></a></td>\n");
+                    print("<td><a href='" . CONFIG['URLROOT'] . "/comment/$id/torrent'><b>$row[comments]</b></a></td>\n");
                     break;
                 case 'nfo':
                     if ($row["nfo"] == "yes") {
-                        print("<td><i class='fa fa-file-text-o' title='" . Txt("NFO") . "'></i></a></td>");
+                        print("<td><i class='fa fa-file-text-o' title='" . LANG["NFO"] . "'></i></a></td>");
                     } else {
                         print("<td>-</td>");
                     }
@@ -425,14 +424,14 @@ function torrenttable($USER, $res, $columns = TORRENTTABLE_COLUMNS)
                     print("<td><font color='#ff0000'><b>" . number_format($row["leechers"]) . "</b></font></td>\n");
                     break;
                 case 'health':
-                    print("<td><img src='" . URLROOT . "/assets/images/health/health_" . health($row["leechers"], $row["seeders"]) . ".webp' alt='' /></td>\n");
+                    print("<td><img src='" . CONFIG['URLROOT'] . "/assets/images/health/health_" . health($row["leechers"], $row["seeders"]) . ".webp' alt='' /></td>\n");
                     break;
                 case 'external':
                     if (CONFIG['ALLOWEXTERNAL']) {
                         if ($row["external"] == 'yes') {
-                            print("<td>" . Txt("E") . "</td>\n");
+                            print("<td>" . LANG["E"] . "</td>\n");
                         } else {
-                            print("<td>" . Txt("L") . "</td>\n");
+                            print("<td>" . LANG["L"] . "</td>\n");
                         }
                     }
                     break;
@@ -441,7 +440,7 @@ function torrenttable($USER, $res, $columns = TORRENTTABLE_COLUMNS)
                     break;
                 case 'speed':
                     if ($row["external"] != "yes" && $row["leechers"] >= 1) {
-                        $speedQ = PeersModel::fetchColumn("(SUM(downloaded)) / (UNIX_TIMESTAMP('" . get_date_time() . "') - UNIX_TIMESTAMP(started)) AS totalspeed",
+                        $speedQ = DB::fetchColumn('peers', "(SUM(downloaded)) / (UNIX_TIMESTAMP('" . get_date_time() . "') - UNIX_TIMESTAMP(started)) AS totalspeed",
                         ['seeder =', 'torrent ='], ['no',$id], "ORDER BY started ASC");
                         $totalspeed = mksize($speedQ) . "/s";
                     } else {
@@ -466,7 +465,7 @@ function torrenttable($USER, $res, $columns = TORRENTTABLE_COLUMNS)
                         $rating = "--";
                     } else {
                         $average = ceil($row["rating"]);
-                        $rating = "<img src=\"" . URLROOT . "/assets/images/rating/$average.webp\" border=\"0\" alt=\"rating: $average/5\" title=\"rating: $average/5\" /></a>";
+                        $rating = "<img src=\"" . CONFIG['URLROOT'] . "/assets/images/rating/$average.webp\" border=\"0\" alt=\"rating: $average/5\" title=\"rating: $average/5\" /></a>";
                     }
                     //$rating = $row["rating"] . "/5)";
                     print("<td>$rating</td>");
@@ -475,7 +474,7 @@ function torrenttable($USER, $res, $columns = TORRENTTABLE_COLUMNS)
                     print("<td><input type='checkbox' name='ids[]' value='". $row['bookmarkid'] ."' /></td>");
                     break;
                 case 'admin':
-                    if ($USER->has('class') == 7) {
+                    if ($_SESSION['class'] == 7) {
                         print("<td><input type='checkbox' name='ids[]' value='".$row["id"]."' /></td>");
                     }
                     break;
@@ -541,8 +540,8 @@ $html .= "<th>Rank</th>";
 $html .= "<th>Name</th>";
 $html .= "<th><i class='fa fa-check tticon' title='Completed'></i></th>";
 $html .= "<th>Traffic</th>";
-$html .= "<th><i class='fa fa-upload tticon' title='". Txt("SEEDING") ."'></th>";
-$html .= "<th><i class='fa fa-downloadload tticon' title='". Txt("LEECHERS") ."'></i></th>";
+$html .= "<th><i class='fa fa-upload tticon' title='". LANG["SEEDING"] ."'></th>";
+$html .= "<th><i class='fa fa-downloadload tticon' title='". LANG["LEECHERS"] ."'></i></th>";
 $html .= "<th>Total</th>";
 $html .= "<th>Ratio</th>";
 $html .= "</tr></thead>";

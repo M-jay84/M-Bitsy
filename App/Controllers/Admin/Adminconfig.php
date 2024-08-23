@@ -2,38 +2,48 @@
 
 namespace App\Controllers\Admin;
 
-use App\Libs\User;
+use App\Libs\Controller;
 
 /*
 * Config Controller
 */
-class Adminconfig 
+class Adminconfig extends Controller
 {
+    public $current_user;
+
+    // Get Current User
+    public function __construct()
+    {
+        $this->current_user = $this->currentuser(2);
+        if ($this->current_user->class < CONFIG['_MODERATOR']) {
+            showMessage(CONFIG['URLROOT'], LANG["NO_PERMISSION"]);
+        }
+    }
+
     // Check Admin !!!
     public function check()
     {
-        $USER = new User(_ADMINISTRATOR, 2);
-        if (!in_array($USER->has('username'), _OWNERS)) {
-            Redirect(Url('logout'));
+    
+        if (!in_array($this->current_user->username, CONFIG['_OWNERS'])) {
+            Url(Url('logout'), true);
         }
     }
 
     // Config Default Page
     public function index()
     {
-        $USER = new User(_ADMINISTRATOR, 2);
-        if (!in_array($USER->has('username'), _OWNERS)) {
-            Redirect(Url('logout'));
+    
+        if (!in_array($this->current_user->username, CONFIG['_OWNERS'])) {
+            Url(Url('logout'), true);
         }
 
-        // Init Data
+        // Data For View
         $data = [
-            'V_title' => Txt('CONFIG'),
-            'USER' => $USER
+            'page_title' => LANG['CONFIG']
         ];
 
         // Load View
-        template('config', $data, 'admin');
+        $this->view('config', $data, 'admin');
     }
 
     // Check Input For True/False
@@ -51,10 +61,10 @@ class Adminconfig
         
         // Check Input
         if (!$_POST) {
-            Redirect(Url('logout'));
+            Url(Url('logout'), true);
         }
 
-        // Init Data
+        // Data For View
         $data = array (
             'SITENAME' => $_POST['SITENAME'],
             '_SITEDESC' => $_POST['_SITEDESC'],
@@ -158,8 +168,8 @@ class Adminconfig
             'HNR_BAN' => (int) $_POST['HNR_BAN'],
             );
 
-        file_put_contents(APPROOT.'/Config/settings.php', "<?php\ndefine('CONFIG', " . var_export($data, true) . ");");
-        Redirect(Url('adminconfig'), Txt("ACTION_COMPLETE"));
+        file_put_contents(CONFIG['APPROOT'].'/Config/settings.php', "<?php\ndefine('CONFIG', " . var_export($data, true) . ");");
+        showMessage(Url('adminconfig'), LANG["ACTION_COMPLETE"]);
     }
 
     // Backup Form Submit
@@ -169,14 +179,14 @@ class Adminconfig
         $this->check();
 
         // Get Files
-        $file = APPROOT.'/Config/settings.php';
-        $newfile = APPROOT.'/Config/settings.php.bak';
+        $file = CONFIG['APPROOT'].'/Config/settings.php';
+        $newfile = CONFIG['APPROOT'].'/Config/settings.php.bak';
         
         // Create Backup
         if (!copy($file, $newfile)) {
-            Redirect(Url('adminconfig'), Txt("ADDED_FAILED"));
+            showMessage(Url('adminconfig'), LANG["ADDED_FAILED"]);
         }
-        Redirect(Url('adminconfig'), Txt("SUCCESS"));
+        showMessage(Url('adminconfig'), LANG["SUCCESS"]);
     }
 
 }

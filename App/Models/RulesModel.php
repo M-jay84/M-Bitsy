@@ -11,22 +11,22 @@ use App\Models\LogsModel;
 class RulesModel
 {
     // Get Rules
-    public static function gettAll()
+    public function gettAll()
     {
         $stmt = DB::fetchAll('rules', '*', '', 'ORDER BY `id`');
         return $stmt;
     }
 
     // Admin Delete Rule
-    public static function delete($id)
+    public function delete($id, $current_user_username)
     {
         DB::delete('rules', ['id' => $id]);
-        LogsModel::write("Rules have been deleted by ".$_SESSION['username']."");
-        Redirect(Url('rule'), Txt("SUCCESS"));
+        (new LogsModel)->write("Rules have been deleted by ".$current_user_username."");
+        showMessage(Url('rule'), LANG["SUCCESS"]);
     }
 
     // Admin Add/Update Rules
-    public static function insertOrUpdate()
+    public function insertOrUpdate($current_user_username)
     {
         if (!empty($_POST)) {
             $id = Input('id', 'int');
@@ -39,10 +39,10 @@ class RulesModel
             } else {
                 DB::update('rules', ['title','text','public', 'class'], ['id='], [$title, $text, $public, $class, $id]);
             }
-            LogsModel::write("Rules have been changed by ".$_SESSION['username']."");
-            Redirect(Url('rule'), Txt("SUCCESS"));
+            (new LogsModel)->write("Rules have been changed by ".$current_user_username."");
+            showMessage(Url('rule'), LANG["SUCCESS"]);
         } else {
-            Redirect(Url(), Txt("MISSING_FORM_DATA"));
+            showMessage(Url(), LANG["MISSING_FORM_DATA"]);
         }
     }
 }

@@ -1,22 +1,22 @@
-<?php block_begin($V_title) ?>
+<?php block_begin($page_title) ?>
 <div class='text-center'>
-    <a href="<?= Url('adminclient/peers') ?>"><?= Txt("Current_Clients") ?></a>
-    <a href="<?= Url('adminclient/client') ?>"><?= Txt("Banned Clients") ?></a>&nbsp;
+    <a href="<?= Url('adminclient/peers') ?>"><?= LANG["Current_Clients"] ?></a>
+    <a href="<?= Url('adminclient/client') ?>"><?= LANG["Banned Clients"] ?></a>&nbsp;
 </div>
 <?php if ($V_type == 'clients') : ?>
    <div class="text-center">
-      <a type="button" class="model_form ttbtn btn-sm" data-bs-toggle="modal" data-bs-target="#clientModal"><?= Txt('ADD') ?></a><br />
+      <a type="button" class="model_form ttbtn btn-sm" data-bs-toggle="modal" data-bs-target="#clientModal"><?= LANG['ADD'] ?></a><br />
    </div>
 <?php endif; ?>
 <div class='table-responsive p-3'>
    <table class='table table-striped'>
       <thead>
          <tr>
-            <th><?= Txt("CLIENT") ?></th>
-            <th><?= Txt("PEER_ID") ?></th>
-            <th><?= Txt("TO_BAN") ?></th>
-            <th><?= Txt("BANNED") ?></th>
-            <th><?= Txt("ACTION") ?></th>
+            <th><?= LANG["CLIENT"] ?></th>
+            <th><?= LANG["PEER_ID"] ?></th>
+            <th><?= LANG["TO_BAN"] ?></th>
+            <th><?= LANG["BANNED"] ?></th>
+            <th><?= LANG["ACTION"] ?></th>
          </tr>
       </thead>
       <tbody>
@@ -65,11 +65,11 @@
          <div class="modal-content">
             <div class="modal-body">
                <input type='hidden' name='type' id="type" />
-               <input type="text" name="peer_id" id="peer_id" class="form-control fullwidth"placeholder="<?= Txt("ENTER_CODE") ?>">
+               <input type="text" name="peer_id" id="peer_id" class="form-control fullwidth"placeholder="<?= LANG["ENTER_CODE"] ?>">
             </div>
             <div class="modal-footer">
-               <button type="button" class="btn btn-sm ttbtn" data-bs-dismiss="modal"><?= Txt("CLOSE") ?></button>
-               <button type="submit" class="btn btn-sm ttbtn"><?= Txt("SUBMIT") ?></button>
+               <button type="button" class="btn btn-sm ttbtn" data-bs-dismiss="modal"><?= LANG["CLOSE"] ?></button>
+               <button type="submit" class="btn btn-sm ttbtn"><?= LANG['SUBMIT'] ?></button>
             </div>
          </div>
       </div>

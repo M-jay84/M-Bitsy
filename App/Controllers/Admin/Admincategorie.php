@@ -2,41 +2,51 @@
 
 namespace App\Controllers\Admin;
 
-use App\Libs\User;
+use App\Libs\Controller;
 use App\Models\CatagoriesModel;
 
 /*
 * Catagorys Controller
 */
-class Admincategorie 
+class Admincategorie extends Controller
 {
+    public $current_user;
+
+    // Get Current User
+    public function __construct()
+    {
+        $this->current_user = $this->currentuser(2);
+        if ($this->current_user->class < CONFIG['_MODERATOR']) {
+            showMessage(CONFIG['URLROOT'], LANG["NO_PERMISSION"]);
+        }
+    }
+
     // Categorie Default Page
     public function index()
     {
-        $USER = new User(_MODERATOR, 2);
+    
         if (!empty($_POST)) {
-            CatagoriesModel::insertOrUpdate();
+            (new CatagoriesModel)->insertOrUpdate();
         } else {
             // Get Categorie
-            $cats = CatagoriesModel::fetchAll('*', '', 'ORDER BY parent_cat ASC, sort_index ASC');
+            $cats = (new CatagoriesModel)->fetchAll('*', '', 'ORDER BY parent_cat ASC, sort_index ASC');
         
-            // Init Data
+            // Data For View
             $data = [
-                'V_title' => Txt("TORRENT_CATEGORIES"),
-                'V_cats' => $cats,
-                'USER' => $USER
+                'page_title' => LANG["TORRENT_CATEGORIES"],
+                'V_cats' => $cats
             ];
         
             // Load View
-            template('categorie', $data, 'admin');
+            $this->view('categorie', $data, 'admin');
         }
     }
 
     // Categorie Delete
     public function delete($id, $sure = false)
     {
-        $USER = new User(_MODERATOR, 2);
-        CatagoriesModel::deleteAndUpdateTorrent($id, $sure);
+    
+        (new CatagoriesModel)->deleteAndUpdateTorrent($id, $sure);
     }
 
 }

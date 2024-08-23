@@ -28,50 +28,6 @@ body {
     }
 }
 
-/* Admin Layout Style */
-.default_sidebar {
-    position: fixed;
-    top: 68px;
-    left: 0;
-    bottom: 0;
-    width: 250px;
-    height: 100vh;
-    overflow-y: auto;
-    transition: 0.5s;
-    z-index: 999;
-}
-.content {
-    margin-left: 250px;
-    transition: 0.5s;
-}
-@media (min-width: 992px) {
-    .default_sidebar {
-        margin-left: 0;
-    }
-    .default_sidebar.open {
-        margin-left: -250px;
-    }
-    .content {
-        width: calc(100% - 250px);
-    }
-    .content.open {
-        width: 100%;
-        margin-left: 0;
-    }
-}
-@media (max-width: 991.98px) {
-    .default_sidebar {
-        margin-left: -250px;
-    }
-    .default_sidebar.open {
-        margin-left: 0;
-    }
-    .content {
-        width: 100%;
-        margin-left: 0;
-    }
-}
-
 /* Button Style */
 .ttbtn {
     color: #ababad !IMPORTANT;

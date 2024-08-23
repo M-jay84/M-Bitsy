@@ -1,10 +1,10 @@
 <?php
 use App\Libs\MDBS;
 use App\Models\TorrentsModel;
-if (!CONFIG['MEMBERSONLY'] || $USER->has('id')) {
+if (!CONFIG['MEMBERSONLY'] || $_SESSION['id']) {
     $res = TorrentsModel::getAll("WHERE visible = ? AND banned = ?", ['yes', 'no']);
     if ($res['count'] > 0) {
-        block_begin(Txt("LATEST_POSTERS"));
+        block_begin(LANG["LATEST_POSTERS"]);
         print '<table>';
         print '<tr>';
         foreach ( $res['stmt'] as $r )

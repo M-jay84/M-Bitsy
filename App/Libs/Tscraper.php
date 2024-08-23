@@ -4,7 +4,7 @@ namespace App\Libs;
 
 use App\Libs\Parse;
 use App\Libs\Scraper;
-use App\Models\TorrentsModel;
+use App\Libs\DB;
 
 /*
 * Scrape Torrent
@@ -17,7 +17,7 @@ class Tscraper
     {
         if (!is_array($annlist)) {
             $torInfo = new Parse();
-            $tor = $torInfo->torr(UPLOADDIR."/torrents/$id.torrent");
+            $tor = $torInfo->torr(CONFIG['UPLOADDIR']."/torrents/$id.torrent");
             $infohash = $tor['hash'];
             $infohash2 = $tor['hash2'];
             $annlist = $tor['announce-list'];
@@ -42,12 +42,12 @@ class Tscraper
 
         if ($seeders !== 0) {
             // Update the Torrent
-            TorrentsModel::update(['leechers','seeders','times_completed','last_action','visible','announcelist'], ['id='],
+            DB::update('torrents', ['leechers','seeders','times_completed','last_action','visible','announcelist'], ['id='],
                                       [$leechers, $seeders, $completed, get_date_time(), 'yes', $var2, $id]
             );
         } else {
             // Its Dead :(
-            TorrentsModel::update(['last_action'], ['id='], [get_date_time(), $id]);
+            DB::update('torrents', ['last_action'], ['id='], [get_date_time(), $id]);
         }
     }
 
@@ -58,7 +58,7 @@ class Tscraper
         //set_time_limit(15);
 
         // Rescrape 10 Torrents Every X Days. (Default: 2 days)
-        $stmt = TorrentsModel::fetchAll(['id','info_hash','last_action','announcelist'],
+        $stmt = DB::fetchAll('torrents', ['id','info_hash','last_action','announcelist'],
                                 ['external=', 'last_action <='],
                                 ['yes', 86400], 'DATE_SUB(UTC_TIMESTAMP(), INTERVAL 2 DAY)', "LIMIT 10");
 

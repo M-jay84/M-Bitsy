@@ -2,24 +2,36 @@
 
 namespace App\Controllers\User;
 
-use App\Libs\User;
+use App\Libs\Controller;
+use App\Models\ShoutboxModel;
 
 /*
 * Default Controller (Home Page)
 */
-class Home 
+class Home extends Controller
 {
+    public $current_user;
+
+    // Get Current User
+    public function __construct()
+    {
+        $this->current_user = $this->currentuser(1, true);
+    }
+
     // Admincp Default Page
     public function index()
     {
-        $USER = new User(0, 1, true);
-        // Init Data
+        
+        $shouts = (new ShoutboxModel)->shouts(20);
+        
+        // Data For View
         $data = [
-            'V_title' => Txt("Home"),
-            'USER' => $USER
+            'page_title' => LANG["HOME"],
+            'current_user' => $this->current_user,
+            'V_shouts' => $shouts
         ];
 
         // Load View
-        template('home', $data, 'home');
+        $this->view('home', $data, 'user');
     }
 }

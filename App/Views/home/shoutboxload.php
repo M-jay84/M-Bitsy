@@ -1,6 +1,6 @@
 <?php
 
-use App\Models\UsersModel;
+use App\Libs\DB;
 
 ?>
 <div class="table-responsive" style='height:250px;'>
@@ -8,14 +8,14 @@ use App\Models\UsersModel;
         <tr>
             <?php foreach ($data['V_shouts'] as $row) : ?>
                 <?php
-                $ol3 = UsersModel::fetchColumn('avatar', ['id='], [$row["userid"]]);
+                $ol3 = DB::fetchColumn('users', 'avatar', ['id='], [$row["userid"]]);
                 if (!empty($ol3)) {
                     $av = "<img src='" . $ol3 . "' alt='my_avatar' width='20' height='20'>";
                 } else {
-                    $av = "<img src='" . URLROOT . "/assets/images/misc/default_avatar.webp' alt='my_avatar' width='20' height='20'>";
+                    $av = "<img src='" . CONFIG['URLROOT'] . "/assets/images/misc/default_avatar.webp' alt='my_avatar' width='20' height='20'>";
                 }
                 if ($row['userid'] == 0) {
-                    $av = "<img src='" . URLROOT . "/assets/images/misc/default_avatar.webp' alt='default_avatar' width='20' height='20'>";
+                    $av = "<img src='" . CONFIG['URLROOT'] . "/assets/images/misc/default_avatar.webp' alt='default_avatar' width='20' height='20'>";
                 }
                 ?>
         <tr>
@@ -27,15 +27,15 @@ use App\Models\UsersModel;
             <td>
                 <?php
                 echo nl2br(format_comment($row['message']));
-                if ($data['USER']->permission('edit_users')) {
-                    echo "&nbsp<a href='" . URLROOT . "/shoutbox/delete/" . $row['msgid'] . "'><i class='fa fa-remove' ></i></a>&nbsp";
+                if ($current_user->edit_users == 'yes') {
+                    echo "&nbsp<a href='" . CONFIG['URLROOT'] . "/shoutbox/delete/" . $row['msgid'] . "'><i class='fa fa-remove' ></i></a>&nbsp";
                     ?>
                     <a href="javascript:;" class="editAttr" data-bs-toggle="modal" data-bs-target="#editModal" data-id="<?= $row['msgid'] ?>" data-text="<?= $row['message'] ?>" data-user="<?= $row['userid'] ?>"><i class="fa fa-pencil"></i></a>
                     <?php
                 }
-                if (!$data['USER']->permission('edit_users') && $data['USER']->has('username') == $row['user']) {
+                if (!$current_user->edit_users == 'yes' && $current_user->username == $row['user']) {
                     $ts = modify('date', $row['date'], "+1 day");
-                    if ($ts > TT_DATE) {
+                    if ($ts > CONFIG['TT_DATE']) {
                         ?>
                         <a href="javascript:;" class="editAttr" data-bs-toggle="modal" data-bs-target="#editModal" data-id="<?= $row['msgid'] ?>" data-text="<?= $row['message'] ?>" data-user="<?= $row['userid'] ?>"><i class="fa fa-pencil"></i></a>
                         <?php
@@ -48,7 +48,7 @@ use App\Models\UsersModel;
     </table>
 </div>
 
-<?php if ($data['USER']->has('class') > _UPLOADER) : ?>
+<?php if ($current_user->class > CONFIG['_UPLOADER']) : ?>
      <script>
           $('.editAttr').click(function() {
                var id = $(this).data('id');
@@ -69,8 +69,8 @@ use App\Models\UsersModel;
                               <input type="text" class="form-control fullwidth" name="text" id='text'><br>
                          </div>
                          <div class="modal-footer">
-                              <button type="button" class="btn btn-sm ttbtn" data-bs-dismiss="modal"><?= Txt("CLOSE") ?></button>
-                              <button type="submit" class="btn btn-sm ttbtn"><?= Txt("SUBMIT") ?></button>
+                              <button type="button" class="btn btn-sm ttbtn" data-bs-dismiss="modal"><?= LANG['CLOSE'] ?></button>
+                              <button type="submit" class="btn btn-sm ttbtn"><?= LANG['SUBMIT'] ?></button>
                          </div>
                     </div>
                </div>

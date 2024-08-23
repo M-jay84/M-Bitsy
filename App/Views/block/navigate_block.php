@@ -1,77 +1,77 @@
 <?php
 
-if ($USER->has('id') || !CONFIG['MEMBERSONLY']) {
-    block_begin(Txt("NAVIGATION"));
+if ($_SESSION['id'] || !CONFIG['MEMBERSONLY']) {
+    block_begin(LANG["NAVIGATION"]);
 
-    if ($USER->has('id')) { ?>
+    if ($_SESSION['id']) { ?>
         <div class='p-2'>
-            <a href="<?= Url() ?>"><b><?= Txt("HOME") ?></b></a><br>
+            <a href="<?= Url() ?>"><b><?= LANG["HOME"] ?></b></a><br>
 
             <div class="dropdown">
-                <a href="#" class="dropdown-toggle" data-bs-toggle="dropdown"><b><?= Txt("PROFILE") ?></b></a>
+                <a href="#" class="dropdown-toggle" data-bs-toggle="dropdown"><b><?= LANG["PROFILE"] ?></b></a>
                 <div class="dropdown-menu dropdown-menu-end">
-                    <a href="<?= Url("profile/". $USER->has('id') ."") ?>" class="dropdown-item"><?= Txt("PROFILE") ?></a>
-                    <a href="<?= Url("peer/seeding/User(id]") ?>" class="dropdown-item"><?= Txt("SEEDING") ?></a>
-                    <a href='<?= Url("peer/leeching/User(id]") ?>' class="dropdown-item"><?= Txt("DOWNLOADING") ?></a>
-                    <a href="<?= Url("friend/". $USER->has('id') ."") ?>" class="dropdown-item"><?= Txt("FRIENDS") ?></a>
-                    <a href="<?= Url('bonus') ?>" class="dropdown-item"><?= Txt("BONUS") ?></a>
-                    <a href="<?= Url('invite') ?>" class="dropdown-item"><?= Txt("INVITES");?></a>
+                    <a href="<?= Url("profile/". $_SESSION['id'] ."") ?>" class="dropdown-item"><?= LANG["PROFILE"] ?></a>
+                    <a href="<?= Url("peer/seeding/User(id]") ?>" class="dropdown-item"><?= LANG["SEEDING"] ?></a>
+                    <a href='<?= Url("peer/leeching/User(id]") ?>' class="dropdown-item"><?= LANG["DOWNLOADING"] ?></a>
+                    <a href="<?= Url("friend/". $_SESSION['id'] ."") ?>" class="dropdown-item"><?= LANG["FRIENDS"] ?></a>
+                    <a href="<?= Url('bonus') ?>" class="dropdown-item"><?= LANG["BONUS"] ?></a>
+                    <a href="<?= Url('invite') ?>" class="dropdown-item"><?= LANG["INVITES"];?></a>
                 </div>
             </div>
             <?php
-            if ($USER->permission('view_torrents')) { ?>
+            if ($_SESSION['view_torrents'] == "yes" || $_SESSION['view_torrents'] == "no" && CONFIG['MEMBERSONLY']) { ?>
                 <div class="dropdown">
-                <a href="#" class="dropdown-toggle" data-bs-toggle="dropdown"><b><?= Txt("TORRENT") ?></b></a>
+                <a href="#" class="dropdown-toggle" data-bs-toggle="dropdown"><b><?= LANG["TORRENT"] ?></b></a>
                 <div class="dropdown-menu dropdown-menu-end">
                         <!-- Check the link! -->
-                        <a href="<?= Url('browse') ?>" class="dropdown-item"><?= Txt("BROWSE_TORRENTS") ?></a> <?php
-                        if ($USER->has('class') < _VIP && CONFIG['UPLOADERSONLY']) { ?>
+                        <a href="<?= Url('browse') ?>" class="dropdown-item"><?= LANG["BROWSE_TORRENTS"] ?></a> <?php
+                        if ($_SESSION['class'] < CONFIG['_VIP'] && CONFIG['UPLOADERSONLY']) { ?>
                             <?php
                         } else { ?>
-                            <a href="<?= Url('upload') ?>" class="dropdown-item"><?= Txt("UPLOAD_TORRENT") ?></a> <?php
+                            <a href="<?= Url('upload') ?>" class="dropdown-item"><?= LANG["UPLOAD_TORRENT"] ?></a> <?php
                         } ?>
-                        <a href="<?= Url('search') ?>" class="dropdown-item"><?= Txt("SEARCH_TORRENTS") ?></a>
-                        <a href="<?= Url('catalog') ?>" class="dropdown-item"><?= Txt("CATALOG") ?></a> <?php
-                        if (_TMDBswitch) { ?>
-                            <a href="<?= Url('moviedatabase') ?>" class="dropdown-item"><?= Txt("TMDB") ?></a> <?php
+                        <a href="<?= Url('search') ?>" class="dropdown-item"><?= LANG["SEARCH_TORRENTS"] ?></a>
+                        <a href="<?= Url('catalog') ?>" class="dropdown-item"><?= LANG["CATALOG"] ?></a> <?php
+                        if (CONFIG['_TMDBswitch']) { ?>
+                            <a href="<?= Url('moviedatabase') ?>" class="dropdown-item"><?= LANG["TMDB"] ?></a> <?php
                         }
                         if (CONFIG["REQUESTSON"]) { ?>
-                            <a href="<?= Url('request') ?>" class="dropdown-item"><?= Txt("REQUEST") ?></a><?php
+                            <a href="<?= Url('request') ?>" class="dropdown-item"><?= LANG["REQUEST"] ?></a><?php
                         } ?>
-                        <a href="<?= Url('today') ?>" class="dropdown-item"><?= Txt("TODAYS_TORRENTS") ?></a>
-                        <a href="<?= Url('needseed') ?>" class="dropdown-item"><?= Txt("NEED_SEED") ?></a>
+                        <a href="<?= Url('today') ?>" class="dropdown-item"><?= LANG["TODAYS_TORRENTS"] ?></a>
+                        <a href="<?= Url('needseed') ?>" class="dropdown-item"><?= LANG["NEED_SEED"] ?></a>
                     </div>
                 </div>
             <?php
             } ?>
                 <div class="dropdown">
-                <a href="#" class="dropdown-toggle" data-bs-toggle="dropdown"><b><?= Txt("FORUMS") ?></b></a>
+                <a href="#" class="dropdown-toggle" data-bs-toggle="dropdown"><b><?= LANG["FORUMS"] ?></b></a>
                 <div class="dropdown-menu dropdown-menu-end">
-                <a href="<?= Url('forum') ?>" class="dropdown-item"><?= Txt("FORUMS") ?></a>
-                    <a href="<?= Url('forum/viewunread') ?>" class="dropdown-item"><?= Txt("NEW_POSTS") ?></a>
-                    <a href="<?= Url('forum/search') ?>" class="dropdown-item"><?= Txt("SEARCH") ?></a>
+                <a href="<?= Url('forum') ?>" class="dropdown-item"><?= LANG["FORUMS"] ?></a>
+                    <a href="<?= Url('forum/viewunread') ?>" class="dropdown-item"><?= LANG["NEW_POSTS"] ?></a>
+                    <a href="<?= Url('forum/search') ?>" class="dropdown-item"><?= LANG["SEARCH"] ?></a>
                 </div>
             </div>
             <div class="dropdown">
-                <a href="#" class="dropdown-toggle" data-bs-toggle="dropdown"><b><?= Txt("MEMBERS") ?></b></a>
+                <a href="#" class="dropdown-toggle" data-bs-toggle="dropdown"><b><?= LANG["MEMBERS"] ?></b></a>
                 <div class="dropdown-menu dropdown-menu-end">
-                    <a href="<?= Url('members') ?>" class="dropdown-item"><?= Txt("MEMBERS") ?></a>
-                    <a href="<?= Url('team') ?>" class="dropdown-item"><?= Txt("Team") ?></a>
-					<a href="<?= Url('topten') ?>" class="dropdown-item"><?= Txt("TOP_10") ?></a>
+                    <a href="<?= Url('members') ?>" class="dropdown-item"><?= LANG["MEMBERS"] ?></a>
+                    <a href="<?= Url('team') ?>" class="dropdown-item"><?= LANG["Team"] ?></a>
+					<a href="<?= Url('topten') ?>" class="dropdown-item"><?= LANG["TOP_10"] ?></a>
                 </div>
             </div>
             <div class="dropdown">
-                <a href="#" class="dropdown-toggle" data-bs-toggle="dropdown"><b><?= Txt("STAFF") ?></b></a>
+                <a href="#" class="dropdown-toggle" data-bs-toggle="dropdown"><b><?= LANG["STAFF"] ?></b></a>
                 <div class="dropdown-menu dropdown-menu-end">
-                    <a href="<?= Url('staff') ?>" class="dropdown-item"><?= Txt("STAFF") ?></a>
-                    <a href="<?= Url('contact') ?>" class="dropdown-item"><?= Txt("CONTACT_US") ?></a>
+                    <a href="<?= Url('staff') ?>" class="dropdown-item"><?= LANG["STAFF"] ?></a>
+                    <a href="<?= Url('contact') ?>" class="dropdown-item"><?= LANG["CONTACT_US"] ?></a>
                 </div>
             </div>
             <div class="dropdown">
-                <a href="#" class="dropdown-toggle" data-bs-toggle="dropdown"><b><?= Txt("INFO") ?></b></a>
+                <a href="#" class="dropdown-toggle" data-bs-toggle="dropdown"><b><?= LANG["INFO"] ?></b></a>
                 <div class="dropdown-menu dropdown-menu-end">
-                    <a href="<?= Url('rule') ?>" class="dropdown-item"><?= Txt("RULES") ?></a>
-                    <a href="<?= Url('faq') ?>" class="dropdown-item"><?= Txt("FAQ") ?></a>
+                    <a href="<?= Url('rule') ?>" class="dropdown-item"><?= LANG["RULES"] ?></a>
+                    <a href="<?= Url('faq') ?>" class="dropdown-item"><?= LANG["FAQ"] ?></a>
 				</div>
             </div>
         </div>

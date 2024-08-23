@@ -1,16 +1,16 @@
-<?php block_begin($V_title) ?>
+<?php block_begin($page_title) ?>
 <p class='text-center'>
-    <?php echo sprintf(Txt('PENDING_REGS'), number_format($V_count)); ?>
+    <?php echo sprintf(LANG['PENDING_REGS'], number_format($V_count)); ?>
 </p>
 <form id="confirmreg" class='p-1' method="post" action="<?= Url('adminconfirmreg/submit') ?>">
     <div class='table-responsive'>
         <table class='table table-striped'>
             <thead>
                 <tr>
-                    <th><?= Txt('USERNAME') ?></th>
-                    <th><?= Txt('EMAIL') ?></th>
-                    <th><?= Txt('ADDED') ?></th>
-                    <th><?= Txt('IP') ?></th>
+                    <th><?= LANG['USERNAME'] ?></th>
+                    <th><?= LANG['EMAIL'] ?></th>
+                    <th><?= LANG['ADDED'] ?></th>
+                    <th><?= LANG['IP'] ?></th>
                     <th><input type="checkbox" name="checkall" onclick="checkAll(this.form.id);" /></th>
                 </tr>
             </thead>
@@ -28,7 +28,7 @@
         </table>
     </div>
     <div class="text-center">
-        <input type="submit" class='btn btn-sm ttbtn' value="<?= Txt('CONFIRM') ?>" />
+        <input type="submit" class='btn btn-sm ttbtn' value="<?= LANG['CONFIRM'] ?>" />
     </div>
 </form>
 <?= $V_pager ?>

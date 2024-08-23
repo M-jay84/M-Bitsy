@@ -2,42 +2,52 @@
 
 namespace App\Controllers\Admin;
 
-use App\Libs\User;
+use App\Libs\Controller;
 use App\Models\SnatchedModel;
 
 /*
 * Snatched Controller
 */
-class Adminsnatch 
+class Adminsnatch extends Controller
 {
+    public $current_user;
+
+    // Get Current User
+    public function __construct()
+    {
+        $this->current_user = $this->currentuser(2);
+        if ($this->current_user->class < CONFIG['_MODERATOR']) {
+            showMessage(CONFIG['URLROOT'], LANG["NO_PERMISSION"]);
+        }
+    }
+
     // Hit & Runs Default Page
     public function index()
     {
-        $USER = new User(_MODERATOR, 2);
+    
         if (!CONFIG['HNR_ON']) {
-            Redirect(Url(), Txt("HNRS_BEEN_DISABLED"));
+            showMessage(Url(), LANG["HNRS_BEEN_DISABLED"]);
         }
 
         // Pagination
-        $snatched = SnatchedModel::join('snatched.hnr = ?', 'yes');
+        $snatched = (new SnatchedModel)->join('snatched.hnr = ?', 'yes');
 
-        // Init Data
+        // Data For View
         $data = [
-            'V_title' => Txt("HNR"),
+            'page_title' => LANG["HNR"],
             'V_count' => $snatched['count'],
             'V_pager' => $snatched['pager'],
-            'V_snatched' => $snatched['stmt'],
-            'USER' => $USER
+            'V_snatched' => $snatched['stmt']
         ];
 
         // Load View
-        template('snatch', $data, 'admin');
+        $this->view('snatch', $data, 'admin');
     }
 
     // Hit & Runs Default Page
     public function submit()
     {
-        $USER = new User(_MODERATOR, 2);
-        SnatchedModel::deleteByIds();
+    
+        (new SnatchedModel)->deleteByIds();
     }
 }

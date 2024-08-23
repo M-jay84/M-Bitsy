@@ -1,9 +1,9 @@
 <?php
-if ($USER->has('id')) {
+if ($_SESSION['id']) {
     // Enter Rss Feed Url eg http://localhost/M-BiTsy/rss?dllink=1
     $feedUrl = "";
 
-    block_begin(Txt("RSS"));
+    block_begin(LANG["RSS"]);
     if (!$feedUrl) { ?>
         <p class="text-center"><small>This would need editing with an rss feed of your choice.</small></p> <?php
     } else {

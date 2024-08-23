@@ -11,7 +11,7 @@ class Logout
     public function index()
     {
         destroy_cookies();
-        Redirect(Url('login'));
+        Url(Url('login'), true);
     }
 
 }

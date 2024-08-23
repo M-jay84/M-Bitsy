@@ -10,14 +10,14 @@ use App\Libs\DB;
 class LogsModel
 {
     // Add Log
-    public static function write($text)
+    public function write($text)
     {
         $stmt = DB::insert('log', ['added'=>get_date_time(), 'txt'=>$text]);
         return $stmt;
     }
 
     // Admin Get All Logs
-    public static function getAll()
+    public function getAll()
     {
         // Check User Input
         $search = Input('search');
@@ -31,11 +31,11 @@ class LogsModel
     }
 
     // Admin Delete Logs
-    public static function delete()
+    public function delete()
     {
         $ids = multiIds('ids');
         DB::deleteByIds('logs', 'id', $ids);
-        Redirect(Url('adminlog'), Txt("DEL_COMPLETE"));
+        showMessage(Url('adminlog'), LANG["DEL_COMPLETE"]);
     }
 
 }

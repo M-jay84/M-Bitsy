@@ -1,9 +1,9 @@
-<?php block_begin($V_title) ?>
-<?php usermenu($USER, $V_userid); ?>
+<?php block_begin($page_title) ?>
+<?php usermenu($V_userid); ?>
 <div class="text-center">
     <b><?= $V_type ?> list</b><br>
-    <a href="<?= Url("friend/$V_userid/enemy") ?>"><?= Txt("ENEMY") ?></a> | 
-    <a href="<?= Url("friend/$V_userid") ?>"><?= Txt("FRIEND") ?></a>
+    <a href="<?= Url("friend/$V_userid/enemy") ?>"><?= LANG["ENEMY"] ?></a> | 
+    <a href="<?= Url("friend/$V_userid") ?>"><?= LANG["FRIEND"] ?></a>
 </div>
 <?php foreach ($V_friends as $row) : ?>
     <?php

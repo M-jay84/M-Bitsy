@@ -2,37 +2,43 @@
 
 namespace App\Controllers\User;
 
-use App\Libs\User;
+use App\Libs\Controller;
 use App\Models\TorrentsModel;
 
 /*
 * Search Controller
 */
-class Search 
+class Search extends Controller
 {
+    public $current_user;
+
+    // Get Current User
+    public function __construct()
+    {
+        $this->current_user = $this->currentuser(1);
+    }
+
     // Search Default Page
     public function index()
     {
-        $USER = new User(0, 1);
-        if (!$USER->permission('view_torrents')) {
-            Redirect(Url(), Txt("NO_TORRENT_VIEW"));
+        if ($this->current_user->view_torrents != "yes" && CONFIG['MEMBERSONLY']) {
+            showMessage(Url(), LANG["NO_TORRENT_VIEW"]);
         }
-        $torrent = TorrentsModel::countSearch();
+        $torrent = (new TorrentsModel)->countSearch();
 
-        // Init Data
+        // Data For View
         $data = [
-            'V_title' => $torrent['title'],
+            'page_title' => $torrent['title'],
             'V_torrents' => $torrent['torrents'],
             'V_pager' => $torrent['pager'],
             'V_keyword' => $torrent['search']['keyword'],
             'V_url' => $torrent['search']['url'],
             'V_cats' => $torrent['cats'],
-            'V_lang' => $torrent['lang'],
-            'USER' => $USER
+            'V_lang' => $torrent['lang']
         ];
         
         // Load View
-        template('search', $data, 'user');
+        $this->view('search', $data, 'user');
     }
 
 }

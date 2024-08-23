@@ -6,36 +6,46 @@ use App\Models\GroupsModel;
 use App\Models\LogsModel;
 use PDO;
 use App\Libs\TTMail;
-use App\Libs\User;
+use App\Libs\Controller;
 use App\Models\UsersModel;
 
 /*
 * Mass Email Controller
 */
-class Adminemail 
+class Adminemail extends Controller
 {
+    public $current_user;
+
+    // Get Current User
+    public function __construct()
+    {
+        $this->current_user = $this->currentuser(2);
+        if ($this->current_user->class < CONFIG['_MODERATOR']) {
+            showMessage(CONFIG['URLROOT'], LANG["NO_PERMISSION"]);
+        }
+    }
+
     // Mass Email Default Page
     public function index()
     {
-        $USER = new User(_MODERATOR, 2);
+    
         // Get Group Data
-        $groups = GroupsModel::getGroups();
+        $groups = (new GroupsModel)->getGroups();
         
-        // Init Data
+        // Data For View
         $data = [
-            'V_title' => Txt("MASS_EMAIL"),
-            'V_groups' => $groups,
-            'USER' => $USER
+            'page_title' => LANG["MASS_EMAIL"],
+            'V_groups' => $groups
         ];
 
         // Load View
-        template('email', $data, 'admin');
+        $this->view('email', $data, 'admin');
     }
 
     // Mass Email Form Submit
     public function sendemail()
     {
-        $USER = new User(_MODERATOR, 2);
+    
         // Check User Input
         $msg_log = "Sent to classes: ";
         @set_time_limit(0);
@@ -44,17 +54,17 @@ class Adminemail
 
         // Check Correct Input
         if (!$subject || !$body) {
-            Redirect(Url('adminemail'), Txt("MISSING_ID"));
+            showMessage(Url('adminemail'), LANG["MISSING_ID"]);
         }
 
         if (!@count($_POST["groups"])) {
-            Redirect(Url('adminemail'), Txt("NOTHING_SELECTED"));
+            showMessage(Url('adminemail'), LANG["NOTHING_SELECTED"]);
         }
 
         // Get Group Data
         $ids = array_map("intval", $_POST["groups"]);
         $ids = implode(", ", $ids);
-        $res_log = GroupsModel::fetchlevel($ids);
+        $res_log = (new GroupsModel)->fetchlevel($ids);
         foreach ($res_log as $row_log) {
             $msg_log .= $row_log["level"] . ", ";
         }
@@ -67,8 +77,8 @@ class Adminemail
             $TTMail->Send($row["email"], $subject, $body, "Content-type: text/html; charset=utf-8", "-f$siteemail");
         }
 
-        LogsModel::write("<b><font color='Magenta'>A Mass E-Mail</font> was sent by (<font color='Navy'>".$USER->has('username')."</font>) $msg_log<b>");
-        Redirect(Url('adminemail'), "<b><font color='#ff0000'>Mass mail sent....</font></b>");
+        (new LogsModel)->write("<b><font color='Magenta'>A Mass E-Mail</font> was sent by (<font color='Navy'>".$this->current_user->username."</font>) $msg_log<b>");
+        showMessage(Url('adminemail'), "<b><font color='#ff0000'>Mass mail sent....</font></b>");
     }
 
 }

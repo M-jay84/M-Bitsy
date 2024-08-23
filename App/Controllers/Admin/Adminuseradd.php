@@ -2,28 +2,39 @@
 
 namespace App\Controllers\Admin;
 
-use App\Libs\User;
+use App\Libs\Controller;
 use App\Models\UsersModel;
 
 /*
 * Add User Controller
 */
-class Adminuseradd 
+class Adminuseradd extends Controller
 {
+    public $current_user;
+
+    // Get Current User
+    public function __construct()
+    {
+        $this->current_user = $this->currentuser(2);
+        if ($this->current_user->class < CONFIG['_MODERATOR']) {
+            showMessage(CONFIG['URLROOT'], LANG["NO_PERMISSION"]);
+        }
+    }
+
     // No Default Page
     public function index()
     {
-        $USER = new User(_MODERATOR, 2);
+    
         if (!empty($_POST)) {
             UsersModel::adduser();
         } else {
-            // Init Data
+            // Data For View
             $data = [
-                'V_title' => Txt('ADD_USER'),
+                'page_title' => LANG['ADD_USER'],
             ];
         
             // Load View
-            template('user_add', $data, 'admin');
+            $this->view('user_add', $data, 'admin');
         }
     }
     

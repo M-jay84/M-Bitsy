@@ -1,20 +1,19 @@
 <?php
 
-use App\Models\PollsAnswerModel;
-use App\Models\PollsModel;
+use App\Libs\DB;
 
-if ($USER->has('id')) {
-    block_begin(Txt("POLL"));
+if ($_SESSION['id']) {
+    block_begin(LANG["POLL"]);
     // Submit
-    if (!empty($_POST) && $USER->has('id') && $_POST["act"] == "takepoll") {
+    if (!empty($_POST) && $_SESSION['id'] && $_POST["act"] == "takepoll") {
         $choice = Input('choice');
         if ($choice != "" && $choice < 256 && $choice == floor($choice)) {
-            $pollid = PollsModel::fetchColumn('id', '', 'ORDER BY added DESC LIMIT 1') or print("No Poll");
-            $count = PollsAnswerModel::fetchColumn('*', ['pollid=', 'userid='], [$pollid,$USER->has('id')]);
+            $pollid = DB::fetchColumn('polls', 'id', '', 'ORDER BY added DESC LIMIT 1') or print("No Poll");
+            $count = DB::fetchColumn('pollanswers', '*', ['pollid=', 'userid='], [$pollid,$_SESSION['id']]);
             if ($count) {
                 print("You have already voted!");
             } else {
-                $ins = PollsAnswerModel::insert(['pollid' => $pollid, 'userid' => $USER->has('id'), 'selection' => $choice]);
+                $ins = DB::insert('pollanswers', ['pollid' => $pollid, 'userid' => $_SESSION['id'], 'selection' => $choice]);
                 if (!$ins) {
                     print("An error occured. Your vote has not been counted.");
                 }
@@ -25,11 +24,11 @@ if ($USER->has('id')) {
     }
 
     // Get current poll
-    $arr = PollsModel::fetchRow('*', '', 'ORDER BY added DESC LIMIT 1');
+    $arr = DB::fetchRow('polls', '*', '', 'ORDER BY added DESC LIMIT 1');
 
     // Check if user has already voted
     if ($arr) {
-        $arr2 =  PollsAnswerModel::fetchRow('*', ['pollid=','userid='], [$arr["id"],$USER->has('id')]);
+        $arr2 =  DB::fetchRow('pollanswers', '*', ['pollid=','userid='], [$arr["id"],$_SESSION['id']]);
     }
 
     $o = array($arr["option0"], $arr["option1"], $arr["option2"], $arr["option3"], $arr["option4"],
@@ -44,12 +43,12 @@ if ($USER->has('id')) {
         // If member has voted already show results
         if ($arr2) {
             // we reserve 255 for blank vote.
-            $res = PollsAnswerModel::fetchAll('selection', ['pollid=', 'selection <'], [$arr['id'],20]);
+            $res = DB::fetchAll('pollanswers', 'selection', ['pollid=', 'selection <'], [$arr['id'],20]);
             $total_votes = $res->rowCount();
 
             $i = 0;
             while ($a = $o[$i]) {
-                $count = PollsAnswerModel::fetchColumn('count(selection) as count', ['pollid=','selection='], [$arr['id'],$i]);
+                $count = DB::fetchRow('pollanswers', 'count(selection) as count', ['pollid=','selection='], [$arr['id'],$i]);
                 if ($total_votes == 0) {
                     $percent = 0;
                 } else {
@@ -73,7 +72,7 @@ if ($USER->has('id')) {
             }
             ?>
             <div class="text-center">
-                <b><?= Txt("VOTES") . ": " . $total_votes ?></span>
+                <b><?= LANG["VOTES"] . ": " . $total_votes ?></span>
             </b></div>
             <?php
         } else {
@@ -92,11 +91,11 @@ if ($USER->has('id')) {
                 <?php } ?>
                 <div class="radio">
                     <label>
-                        <input type='radio' name='choice' value='255' /><?= Txt("BLANK_VOTE"); ?>
+                        <input type='radio' name='choice' value='255' /><?= LANG["BLANK_VOTE"]; ?>
                     </label>
                 </div>
                 <center>
-                    <button type='submit' class="btn ttbtn center-block" /><?= Txt("VOTE"); ?></button>
+                    <button type='submit' class="btn ttbtn center-block" /><?= LANG["VOTE"]; ?></button>
                 </center>
             </form><?php
         }

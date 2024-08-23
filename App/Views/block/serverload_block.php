@@ -1,5 +1,5 @@
 <?php
-if ($USER->has('id')) {
+if ($_SESSION['id']) {
     block_begin("Server Load");
     if (strtoupper(substr(PHP_OS, 0, 3)) == "WIN") {
         // Get total physical memory (this is in bytes)

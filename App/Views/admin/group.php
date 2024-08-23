@@ -1,18 +1,18 @@
-<?php block_begin($V_title) ?>
+<?php block_begin($page_title) ?>
 <p class="text-center">
-    <a type="button" class="model_form ttbtn btn-sm" data-bs-toggle="modal" data-bs-target="#groupModal"><?= Txt("ADD") ?></a>
+    <a type="button" class="model_form ttbtn btn-sm" data-bs-toggle="modal" data-bs-target="#groupModal"><?= LANG["ADD"] ?></a>
 <p>
 
 <div class='table-responsive  p-3'>
     <table class='table table-striped'>
         <thead>
             <tr>
-                <th><?= Txt("ID") ?></th>
-                <th><?= Txt("NAME") ?></th>
-                <th><?= Txt("PERMISSION_ID") ?></th>
-                <th><?= Txt("PERMISSION_NAME") ?></th>
-                <th><?= Txt("SORT") ?></th>
-                <th><?= Txt("DEL") ?></th>
+                <th><?= LANG["ID"] ?></th>
+                <th><?= LANG["NAME"] ?></th>
+                <th><?= LANG["PERMISSION_ID"] ?></th>
+                <th><?= LANG["PERMISSION_NAME"] ?></th>
+                <th><?= LANG["SORT"] ?></th>
+                <th><?= LANG["DEL"] ?></th>
             </tr>
         </thead>
         <tbody> <?php
@@ -77,38 +77,38 @@
             <div class="modal-content">
                 <div class="modal-body">
                     <input type='hidden' name='group_id' id="group_id" />
-                    <?= Txt("NAME") ?>
+                    <?= LANG["NAME"] ?>
                     <input type="text" name="level" id="level" size="10" class='form-control fullwidth'/><br>
-                    <?= Txt("COLOUR") ?>
+                    <?= LANG["COLOUR"] ?>
                     <input type="text" name="group_color" id="group_color" class='form-control fullwidth'/><br>
-                    <?= Txt("ROLE_ID") ?>
+                    <?= LANG["ROLE_ID"] ?>
                     <input type="text" name="group_role_id" id="group_role_id" size="10" class='form-control fullwidth'/><br>
-                    <?= Txt("SLOTS") ?>
+                    <?= LANG["SLOTS"] ?>
                     <input type="number" name="maxslots" id="maxslots" size="3" class='form-control fullwidth'/><br>
-                    <?= Txt("CAN_VIEW_CP") ?>
+                    <?= LANG["CAN_VIEW_CP"] ?>
                     <select name="control_panel" id="control_panel" class='form-select'>
                         <option name="control_panel" id="control_panel"></option>
-                        <option name="control_panel" id="control_panel" value="yes"><?= Txt("YES") ?></option>
-                        <option name="control_panel" id="control_panel" value="no"><?= Txt("NO") ?></option>
+                        <option name="control_panel" id="control_panel" value="yes"><?= LANG["YES"] ?></option>
+                        <option name="control_panel" id="control_panel" value="no"><?= LANG["NO"] ?></option>
                     </select><br>
-                    <?= Txt("STAFF_PAGE") ?>
+                    <?= LANG["STAFF_PAGE"] ?>
                     <select name="staff_page" id="staff_page" class='form-select'>
                         <option name="staff_page" id="staff_page"></option>
-                        <option name="staff_page" id="staff_page" value="yes"><?= Txt("YES") ?></option>
-                        <option name="staff_page" id="staff_page" value="no"><?= Txt("NO") ?></option>
+                        <option name="staff_page" id="staff_page" value="yes"><?= LANG["YES"] ?></option>
+                        <option name="staff_page" id="staff_page" value="no"><?= LANG["NO"] ?></option>
                     </select><br>
-                    <?= Txt("STAFF_PUBLIC") ?>
+                    <?= LANG["STAFF_PUBLIC"] ?>
                     <select name="staff_public" id="staff_public" class='form-select'>
                         <option name="staff_public" id="staff_public"></option>
-                        <option name="staff_public" id="staff_public" value="yes"><?= Txt("YES") ?></option>
-                        <option name="staff_public" id="staff_public" value="no"><?= Txt("NO") ?></option>
+                        <option name="staff_public" id="staff_public" value="yes"><?= LANG["YES"] ?></option>
+                        <option name="staff_public" id="staff_public" value="no"><?= LANG["NO"] ?></option>
                     </select><br>
-                    <?= Txt("STAFF_SORT") ?>
+                    <?= LANG["STAFF_SORT"] ?>
                     <input type='text' name='staff_sort' size='3' id='staff_sort' class='form-control fullwidth'/>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-sm ttbtn" data-bs-dismiss="modal"><?= Txt("CLOSE") ?></button>
-                    <button type="submit" class="btn btn-sm ttbtn"><?= Txt("SUBMIT") ?></button>
+                    <button type="button" class="btn btn-sm ttbtn" data-bs-dismiss="modal"><?= LANG['CLOSE'] ?></button>
+                    <button type="submit" class="btn btn-sm ttbtn"><?= LANG['SUBMIT'] ?></button>
                 </div>
             </div>
         </div>

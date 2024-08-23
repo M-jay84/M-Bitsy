@@ -1,5 +1,5 @@
 <?php
-if ($USER->has('id')) {
+if ($_SESSION['id']) {
     block_begin("Powered By");
     ?>
     <center>

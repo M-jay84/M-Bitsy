@@ -2,37 +2,42 @@
 
 namespace App\Controllers\User;
 
-use App\Libs\User;
+use App\Libs\Controller;
 use App\Models\CatagoriesModel;
 
 /*
 * Torrents Today Controller
 */
-class Today 
+class Today extends Controller
 {
+    public $current_user;
+
+    // Get Current User
+    public function __construct()
+    {
+        $this->current_user = $this->currentuser(1);
+    }
+
     // Search Today Default Page
     public function index()
     {
-        // Verify User/Guest
-        $USER = new User(0, 1);
-        if (!$USER->permission('view_torrents')) {
-            Redirect(Url(), Txt("NO_TORRENT_VIEW"));
+        if ($this->current_user->view_torrents != "yes" && CONFIG['MEMBERSONLY']) {
+            showMessage(Url(), LANG["NO_TORRENT_VIEW"]);
         }
         $date_time = get_date_time(gmtime() - (3600 * 24)); // the 24 is the hours you want listed
         
         // Get Cat Data
-        $cats = CatagoriesModel::fetchAll('id, name', '', 'ORDER BY sort_index');
+        $cats = (new CatagoriesModel)->fetchAll('id, name', '', 'ORDER BY sort_index');
 
-        // Init Data
+        // Data For View
         $data = [
-            'V_title' => Txt("TODAYS_TORRENTS"),
+            'page_title' => LANG["TODAYS_TORRENTS"],
             'V_date_time' => $date_time,
-            'V_cats' => $cats,
-            'USER' => $USER
+            'V_cats' => $cats
         ];
 
         // Load View
-        template('today', $data, 'user');
+        $this->view('today', $data, 'user');
     }
 
 }

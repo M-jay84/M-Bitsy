@@ -1,6 +1,6 @@
-<?php block_begin($V_title) ?>
+<?php block_begin($page_title) ?>
 <p class='text-center'>
-    <?php echo sprintf(Txt('INVITED_PENDING'), number_format($V_count)); ?>
+    <?php echo sprintf(LANG['INVITED_PENDING'], number_format($V_count)); ?>
 </p>
 
 <div class=''>
@@ -9,10 +9,10 @@
         <table class='table table-stripe'>
             <thead>
                 <tr>
-                    <th><?= Txt("NAME") ?></th>
-                    <th><?= Txt("EMAIL") ?></th>
-                    <th><?= Txt("INVITED") ?></th>
-                    <th><?= Txt("INVITED_BY") ?></th>
+                    <th><?= LANG["NAME"] ?></th>
+                    <th><?= LANG["EMAIL"] ?></th>
+                    <th><?= LANG["INVITED"] ?></th>
+                    <th><?= LANG["INVITED_BY"] ?></th>
                     <th><input type="checkbox" name="checkall" onclick="checkAll(this.form.id);" /></th>
                 </tr>
             </thead>
@@ -30,7 +30,7 @@
             </tbody>
         </table>
         <div class="text-center">
-            <input type="submit" class='btn btn-sm ttbtn' value="<?= Txt("DEL") ?>" />
+            <input type="submit" class='btn btn-sm ttbtn' value="<?= LANG["DEL"] ?>" />
         </div>
     </form>
 </div>

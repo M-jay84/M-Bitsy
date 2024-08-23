@@ -17,7 +17,7 @@ class TasksModel
     }
 
     // Update Task
-    public static function update($cols, $where, $vals, $other = '')
+    public function update($cols, $where, $vals, $other = '')
     {
         $stmt = DB::update('tasks', $cols, $where, $vals, $other);
         return $stmt;

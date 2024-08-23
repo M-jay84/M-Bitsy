@@ -1,4 +1,4 @@
-<?php block_begin($V_title) ?>
+<?php block_begin($page_title) ?>
 <p class='text-center'>
     To solve this problem you must to keep seeding these torrents for <?= CONFIG['HNR_SEEDTIME'] ?> hours or until ratio becomes 1:1<br>
     But if you want a fast way, you can trade to delete these recordings with Bonus or Upload
@@ -8,11 +8,11 @@
     <table class='table table-striped'>
         <thead>
             <tr>
-                <th><?= Txt("TORRENT_NAME") ?></th>
+                <th><?= LANG["TORRENT_NAME"] ?></th>
                 <th><i class='fa fa-upload tticon' title='Uploaded'></i></th>
                 <th><i class='fa fa-download tticon' title='Downloaded'></i></th>
-                <th><?= Txt("SEED_TIME") ?></th>
-                <th><?= Txt("SIZE") ?></th>
+                <th><?= LANG["SEED_TIME"] ?></th>
+                <th><?= LANG["SIZE"] ?></th>
                 <th>Remove Bonus</th>
                 <th>Remove Upload</th>
             </tr>

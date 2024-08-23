@@ -10,7 +10,7 @@ use App\Libs\DB;
 class StylesheetsModel
 {
     // Styles Dropdown
-    public static function getStyleDropDown($stylesheet)
+    public function getStyleDropDown($stylesheet)
     {
         $stylesheets = '';
         $ss_r = DB::fetchAll('stylesheets', '*', '');
@@ -35,38 +35,38 @@ class StylesheetsModel
     }
 	
     // Get All Stylesheets
-    public static function fetchAll($columns = '*', $where = '', $values = '', $other = '')
+    public function fetchAll($columns = '*', $where = '', $values = '', $other = '')
     {
         $stmt = DB::newSelect('stylesheets', $columns, $where, $values, $other);
         return  $stmt;
     }
 
     // Admin Add Style
-    public static function insert()
+    public function insert()
     {
         
         // Check Correct Input
         if (empty($_POST['name']) || empty($_POST['uri'])) {
-            Redirect(Url('adminstylesheet/add'), Txt("MISSING_FORM_DATA"));
+            showMessage(Url('adminstylesheet/add'), LANG["MISSING_FORM_DATA"]);
         }
 
         $qry = DB::insert('stylesheets', ['name' => Input('name'), 'uri' => Input('uri')]);
         if ($qry) {
-            Redirect(Url('adminstylesheet/add'), "Theme '" . htmlspecialchars(Input('name')) . "' added.");
+            showMessage(Url('adminstylesheet/add'), "Theme '" . htmlspecialchars(Input('name')) . "' added.");
         } elseif ($qry->errorCode() == 1062) {
-            Redirect(Url('adminstylesheet/add'), Txt("ALREADY_THERE"));
+            showMessage(Url('adminstylesheet/add'), LANG["ALREADY_THERE"]);
         } else {
-            Redirect(Url('adminstylesheet/add'), Txt("ACTION_FAILED") . " " . $qry->errorInfo());
+            showMessage(Url('adminstylesheet/add'), LANG["ACTION_FAILED"] . " " . $qry->errorInfo());
         }
     }
 
     // Admin Delete Style
-    public static function delete()
+    public function delete()
     {
         $ids = multiIds('ids');
         DB::deleteByIds('stylesheets', 'id', $ids);
         DB::run("UPDATE `users` SET `stylesheet` = " . CONFIG['DEFAULTTHEME'] . " WHERE stylesheet NOT IN (SELECT id FROM stylesheets)");
-        Redirect(Url('adminstylesheet'), Txt("DEL_COMPLETE"));
+        showMessage(Url('adminstylesheet'), LANG["DEL_COMPLETE"]);
     }
 
 }

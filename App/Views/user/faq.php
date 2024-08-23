@@ -1,8 +1,8 @@
-<?php block_begin($V_title) ?>
-<?php if ($USER->has('class') > _UPLOADER) : // todo (tidy up) ?>
+<?php block_begin($page_title) ?>
+<?php if ($current_user->class > CONFIG['_UPLOADER']) : // todo (tidy up) ?>
     <!-- Add Section -->
     <p class="text-end">
-    <i class="fa fa-user-secret" aria-hidden="true" title="Admin"></i><i class="fa fa-plus m-1" data-bs-toggle="modal" data-bs-target="#sectionModal" title="<?= Txt('ADD') ?>"></i>
+    <i class="fa fa-user-secret" aria-hidden="true" title="Admin"></i><i class="fa fa-plus m-1" data-bs-toggle="modal" data-bs-target="#sectionModal" title="<?= LANG['ADD'] ?>"></i>
     <p>
 <?php endif; ?>
 
@@ -12,13 +12,13 @@
         <!-- Section Buutons --> 
         <h5 class='text-center'>
             <?= stripslashes($V_faqs[$id]['title']) ?>
-            <?php if ($USER->has('class') > _UPLOADER) : ?>
+            <?php if ($current_user->class > CONFIG['_UPLOADER']) : ?>
             (<?= $status ?> )
                <i class="fa fa-user-secret" aria-hidden="true" title="Admin"></i>
                <a href="<?= Url("faq/delete/$temp[id]") ?>"><i class="fa fa-trash" title="delete"></i></a>
-               <a href="javascript:;" class="itemAttr" data-bs-toggle="modal" data-bs-target="#itemModal" data-i_id="<?= $temp['id'] ?>" data-i_type="new" title="<?= Txt('ADD') ?>">
+               <a href="javascript:;" class="itemAttr" data-bs-toggle="modal" data-bs-target="#itemModal" data-i_id="<?= $temp['id'] ?>" data-i_type="new" title="<?= LANG['ADD'] ?>">
                 <i class="fa fa-plus"></i></a>
-               <a href="javascript:;" class="sectionAttr" data-bs-toggle="modal" data-bs-target="#sectionModal" title="<?= Txt('EDIT') ?>" data-s_id="<?= $temp['id'] ?>" data-s_title="<?= $temp['title'] ?>" data-s_type="<?= $temp['type'] ?>" data-s_flag="<?= $temp['flag'] ?>">
+               <a href="javascript:;" class="sectionAttr" data-bs-toggle="modal" data-bs-target="#sectionModal" title="<?= LANG['EDIT'] ?>" data-s_id="<?= $temp['id'] ?>" data-s_title="<?= $temp['title'] ?>" data-s_type="<?= $temp['type'] ?>" data-s_flag="<?= $temp['flag'] ?>">
                 <i class="fa fa-edit"></i>
                 </a>
             <?php endif; ?>
@@ -30,10 +30,10 @@
                     <h2 class="accordion-header" id="heading<?= $vars['id'] ?>">
                         <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse<?= $vars['id'] ?>" aria-expanded="true" aria-controls="collapse<?= $vars['id'] ?>">
                             <?= $vars['title'] ?>
-                            <?php if ($USER->has('class') > _UPLOADER) : ?>
+                            <?php if ($current_user->class > CONFIG['_UPLOADER']) : ?>
                                 <i class="fa fa-user-secret" aria-hidden="true" title="Admin"></i>
                                 <a href="<?= Url("faq/delete/$vars[id]") ?>"><i class="fa fa-trash" title="delete"></i></a>
-                                <a href="#" data-bs-toggle="modal" data-bs-target="#itemModal<?= $vars['id'] ?>" title="<?= Txt('EDIT') ?>">
+                                <a href="#" data-bs-toggle="modal" data-bs-target="#itemModal<?= $vars['id'] ?>" title="<?= LANG['EDIT'] ?>">
                                 <i class="fa fa-edit"></i>
                             </a>
                             <?php endif; ?>
@@ -47,7 +47,7 @@
                 </div>
             </div>
 
-            <?php if ($USER->has('class') > _UPLOADER) : ?>
+            <?php if ($current_user->class > CONFIG['_UPLOADER']) : ?>
             <!-- Edit Item Form -->
             <form id="item" method="post" action="<?= Url('faq/item') ?>">
                 <div class="modal fade" id="itemModal<?= $vars['id'] ?>">
@@ -55,19 +55,19 @@
                         <div class="modal-content">
                             <div class="modal-body">
                                 <input type='hidden' name='id' value='<?= $vars['id'] ?>' />
-                                <input class="form-control fullwidth" type="text" name="title" value='<?= $vars['title'] ?>' placeholder="<?= Txt("TITLE") ?>">
+                                <input class="form-control fullwidth" type="text" name="title" value='<?= $vars['title'] ?>' placeholder="<?= LANG["TITLE"] ?>">
                                 <textarea class="form-control fullwidth" type="text" name="answer" style='height: 300px;'><?= $vars['answer'] ?></textarea>
-                                <?= Txt("STATUS") ?><br>
+                                <?= LANG["STATUS"] ?><br>
                                 <select name="flag" id="i_flag" class='form-select' value='<?= $vars['flag'] ?>'>
-                                    <option value="1"><?= Txt("NORMAL") ?></option>
-                                    <option value="0"><?= Txt("HIDDEN") ?></option>
-                                    <option value="2"><?= Txt("UPDATED") ?></option>
-                                    <option value="3"><?= Txt("NEW") ?></option>
+                                    <option value="1"><?= LANG["NORMAL"] ?></option>
+                                    <option value="0"><?= LANG["HIDDEN"] ?></option>
+                                    <option value="2"><?= LANG["UPDATED"] ?></option>
+                                    <option value="3"><?= LANG["NEW"] ?></option>
                                 </select>
                             </div>
                             <div class="modal-footer">
-                                <button type="button" class="btn btn-sm ttbtn" data-bs-dismiss="modal"><?= Txt("CLOSE") ?></button>
-                                <button type="submit" class="btn btn-sm ttbtn"><?= Txt("SUBMIT") ?></button>
+                                <button type="button" class="btn btn-sm ttbtn" data-bs-dismiss="modal"><?= LANG['CLOSE'] ?></button>
+                                <button type="submit" class="btn btn-sm ttbtn"><?= LANG['SUBMIT'] ?></button>
                             </div>
                         </div>
                     </div>
@@ -80,7 +80,7 @@
 <?php  endforeach; ?>
 
 <?php block_end(); ?>
-<?php if ($USER->has('class') > _UPLOADER) : ?>
+<?php if ($current_user->class > CONFIG['_UPLOADER']) : ?>
 <script>
     $('.sectionAttr').click(function() {
         var s_id = $(this).data('s_id');
@@ -108,16 +108,16 @@
                 <div class="modal-body">
                     <input type='hidden' name='id' id="s_id" />
                     <input type='hidden' name='type' id="s_type" />
-                    <input class="form-control fullwidth" type="text" name="title" id="s_title" placeholder="<?= Txt('TITLE') ?>"><br>
-                    <?= Txt("STATUS") ?><br>
+                    <input class="form-control fullwidth" type="text" name="title" id="s_title" placeholder="<?= LANG['TITLE'] ?>"><br>
+                    <?= LANG["STATUS"] ?><br>
                     <select name="flag" id="s_flag" class='form-select'>
-                        <option value="1"><?= Txt("NORMAL") ?></option>
-                        <option value="0"><?= Txt("HIDDEN") ?></option>
+                        <option value="1"><?= LANG["NORMAL"] ?></option>
+                        <option value="0"><?= LANG["HIDDEN"] ?></option>
                     </select>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-sm ttbtn" data-bs-dismiss="modal"><?= Txt("CLOSE") ?></button>
-                    <button type="submit" class="btn btn-sm ttbtn"><?= Txt("SUBMIT") ?></button>
+                    <button type="button" class="btn btn-sm ttbtn" data-bs-dismiss="modal"><?= LANG['CLOSE'] ?></button>
+                    <button type="submit" class="btn btn-sm ttbtn"><?= LANG['SUBMIT'] ?></button>
                 </div>
             </div>
         </div>
@@ -131,19 +131,19 @@
                 <div class="modal-body">
                     <input type='hidden' name='id' id="i_id" />
                     <input type='hidden' name='type' value="new" />
-                    <input class="form-control fullwidth" type="text" name="title" placeholder="<?= Txt("TITLE") ?>">
-                    <textarea class="form-control fullwidth" type="text" name="answer" style='height: 150px;' placeholder="<?= Txt("ANSWER") ?>"></textarea>
-                    <?= Txt("STATUS") ?><br>
+                    <input class="form-control fullwidth" type="text" name="title" placeholder="<?= LANG["TITLE"] ?>">
+                    <textarea class="form-control fullwidth" type="text" name="answer" style='height: 150px;' placeholder="<?= LANG["ANSWER"] ?>"></textarea>
+                    <?= LANG["STATUS"] ?><br>
                     <select name="flag" class='form-select'>
-                        <option value="1"><?= Txt("NORMAL") ?></option>
-                        <option value="0"><?= Txt("HIDDEN") ?></option>
-                        <option value="2"><?= Txt("UPDATED") ?></option>
-                        <option value="3"><?= Txt("NEW") ?></option>
+                        <option value="1"><?= LANG["NORMAL"] ?></option>
+                        <option value="0"><?= LANG["HIDDEN"] ?></option>
+                        <option value="2"><?= LANG["UPDATED"] ?></option>
+                        <option value="3"><?= LANG["NEW"] ?></option>
                     </select>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-sm ttbtn" data-bs-dismiss="modal"><?= Txt("CLOSE") ?></button>
-                    <button type="submit" class="btn btn-sm ttbtn"><?= Txt("SUBMIT") ?></button>
+                    <button type="button" class="btn btn-sm ttbtn" data-bs-dismiss="modal"><?= LANG['CLOSE'] ?></button>
+                    <button type="submit" class="btn btn-sm ttbtn"><?= LANG['SUBMIT'] ?></button>
                 </div>
             </div>
         </div>

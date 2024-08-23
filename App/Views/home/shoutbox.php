@@ -1,7 +1,7 @@
-<?php block_begin(Txt('SHOUTBOX')) ?>
+<?php block_begin(LANG['SHOUTBOX']) ?>
 <?php
-if (CONFIG['SHOUTBOX'] && !($data['USER']->has('hideshoutbox') == 'yes')) {
-    if ($data['USER']->has('id')) { ?>
+if (CONFIG['SHOUTBOX'] && !($current_user->hideshoutbox == 'yes')) {
+    if ($current_user->id) { ?>
         <p id="shoutbox"></p>
         <form id='contactForm1' name='contactForm1' action='<?= Url('shoutbox/add') ?>' method='post'>
             <div class="row">

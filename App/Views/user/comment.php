@@ -1,7 +1,7 @@
-<?php block_begin($V_title) ?>
+<?php block_begin($page_title) ?>
 <?php if ($V_type != 'user') : ?>
 <p class="text-center">
-    <a type="button" class="model_form ttbtn btn-sm" data-bs-toggle="modal" data-bs-target="#addModal"><?= Txt("ADD") ?></a>
+    <a type="button" class="model_form ttbtn btn-sm" data-bs-toggle="modal" data-bs-target="#addModal"><?= LANG["ADD"] ?></a>
 <p>
 <?php endif; ?>
 <?php if ($V_type == "news") : ?>
@@ -13,9 +13,9 @@
     </div><br>
 <?php endif;
 if ($V_count) {
-    commenttable($USER, $V_comments, $V_type);
+    commenttable($V_comments, $V_type);
 } else {
-    print("<br><center><b>" . Txt("NOCOMMENTS") . "</b></center><br>\n");
+    print("<br><center><b>" . LANG["NOCOMMENTS"] . "</b></center><br>\n");
 } ?>
 <?php $V_pager ?>
 
@@ -27,8 +27,8 @@ if ($V_count) {
                     <?php echo textbbcode("submit", "text"); ?>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-sm ttbtn" data-bs-dismiss="modal"><?= Txt("CLOSE") ?></button>
-                    <button type="submit" class="btn btn-sm ttbtn"><?= Txt("SAVE") ?></button>
+                    <button type="button" class="btn btn-sm ttbtn" data-bs-dismiss="modal"><?= LANG['CLOSE'] ?></button>
+                    <button type="submit" class="btn btn-sm ttbtn"><?= LANG["SAVE"] ?></button>
                 </div>
             </div>
         </div>

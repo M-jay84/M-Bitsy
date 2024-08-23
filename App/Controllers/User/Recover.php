@@ -2,57 +2,59 @@
 
 namespace App\Controllers\User;
 
-use App\Libs\User;
+use App\Libs\Controller;
 use App\Models\AccountsModel;
 
 /*
 * Recover Controller
 */
-class Recover 
+class Recover extends Controller
 {
+    public $current_user;
+
+    // Get Current User
+    public function __construct()
+    {
+        $this->current_user = $this->currentuser(0);
+    }
+
     // Recover Page
     public function index()
     {
-        $USER = new User(0, 0);     
-           
         // User Already Logged In
-        if ($USER->has('id')) {
-            Redirect(Url(), Txt("ALREADY_LOGGED"));
+        if ($this->current_user->id) {
+            showMessage(Url(), LANG["ALREADY_LOGGED"]);
         }
         if (!empty($_POST) && csrf_check()) {
-            AccountsModel::recoverPassword();
+            (new AccountsModel)->recoverPassword();
         } else {
             $data = [
-                'V_title' => Txt('RECOVER'),
-                'USER' => $USER
+                'page_title' => LANG['RECOVER']
             ];
-            template('recover', $data, 'user');
+            $this->view('recover', $data, 'user');
         }
     }
 
     // Confirm Recover
     public function confirm($id, $secret)
     {
-        $USER = new User(0, 0);     
-           
         // User Already Logged In
-        if ($USER->has('id')) {
-            Redirect(Url(), Txt("ALREADY_LOGGED"));
+        if ($this->current_user->id) {
+            showMessage(Url(), LANG["ALREADY_LOGGED"]);
         }
         if (!Id($id) && !strlen($secret) == 20) {
-            Redirect(Url(), Txt("NOTHING_FOUND"));
+            showMessage(Url(), LANG["NOTHING_FOUND"]);
         }
 
         if (!empty($_POST) && csrf_check()) {
-            AccountsModel::changePassword($id, $secret);
+            (new AccountsModel)->changePassword($id, $secret);
         } else {
             $data = [
-                'V_title' => Txt('RECOVER'),
+                'page_title' => LANG['RECOVER'],
                 'V_id' => $id,
-                'V_secret' => $secret,
-                'USER' => $USER
+                'V_secret' => $secret
             ];
-            template('recover_confirm', $data, 'user');
+            $this->view('recover_confirm', $data, 'user');
         }
     }
 }

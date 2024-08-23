@@ -10,7 +10,7 @@ use App\Libs\DB;
 class ClientsModel
 {
     // Admin Add Client
-    public static function insert()
+    public function insert()
     {
         $name = Input('type'); // todo type ???
         $peer_id = Input('peer_id');
@@ -19,12 +19,12 @@ class ClientsModel
         $banned = 'yes';
 
         DB::insert('clients', ['agent_name'=>$name, 'hits'=>$banned, 'ins_date'=>get_date_time(), 'code'=>$code, 'peer_id'=>$peer_id]);
-        Redirect(Url('adminclient'), Txt("SUCCESS"));
+        showMessage(Url('adminclient'), LANG["SUCCESS"]);
 
     }
 
     // Admin Get All
-    public static function select($type)
+    public function select($type)
     {
         $array = array(); 
         if ($type == 'clients') {
@@ -46,10 +46,10 @@ class ClientsModel
     }
 
     // Admin Delete Client
-    public static function delete($id)
+    public function delete($id)
     {
         DB::delete('clients', ['agent_id'=>$id]);
-        Redirect(Url('adminclient'), Txt("SUCCESS"));
+        showMessage(Url('adminclient'), LANG["SUCCESS"]);
     }
 
 }

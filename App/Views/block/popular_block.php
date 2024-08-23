@@ -3,13 +3,13 @@
 use App\Libs\MDBS;
 use App\Models\TorrentsModel;
 
-if ($USER->has('id')) {
-$tcat = implode(',', PopularCats);
+if ($_SESSION['id']) {
+$tcat = implode(',', CONFIG['PopularCats']);
 $i = 0;
 
 $q = TorrentsModel::popular($tcat);
 
-block_begin(Txt('POPULAR'));
+block_begin(LANG['POPULAR']);
 print '<table>';
 print '<tr>';
 foreach ( $q as $r )

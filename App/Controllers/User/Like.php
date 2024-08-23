@@ -2,19 +2,28 @@
 
 namespace App\Controllers\User;
 
-use App\Libs\User;
+use App\Libs\Controller;
 use App\Models\LikesModel;
 
 /*
 * Like Controller
 */
-class Like 
+class Like extends Controller
 {
+    public $current_user;
+
+    // Get Current User
+    public function __construct()
+    {
+        $this->current_user = $this->currentuser(2);
+    }
+
     // Like Submit
     public function index($id, $type)
     {
-        $USER = new User(0, 2);
-        LikesModel::switch($id, $type);
+        $data['current_user'] = $this->current_user;
+    
+        (new LikesModel)->switch($id, $type, $data);
     }
 
 }

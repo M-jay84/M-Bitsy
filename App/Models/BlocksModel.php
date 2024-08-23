@@ -10,15 +10,8 @@ use App\Libs\Cache;
 */
 class BlocksModel
 {
-    // Fetch All Blocks
-    public static function fetchAll($columns = '*', $where = '', $values = '', $other = '')
-    {
-        $stmt = DB::newSelect('blocks', $columns, $where, $values, $other);
-		return $stmt;
-	}
-	
     // Admin Insert Block
-    public static function insert($updateset)
+    public function insert($updateset)
     {
         $stmt = DB::insert('blocks', $updateset);
         return $stmt;
@@ -44,7 +37,7 @@ class BlocksModel
     }
 
     // Admin Refresh Page
-    public static function editable()
+    public function editable()
     {
         // Prune Block Cache.
         $TTCache = new Cache();
@@ -139,7 +132,7 @@ class BlocksModel
     }
 
     // Admin Get All
-    public static function getAll()
+    public function getAll()
     {
         $res = DB::newSelect('blocks', '*', '', 'ORDER BY enabled DESC, position, sort')->fetchAll();
         foreach ($res as $fileexist) {

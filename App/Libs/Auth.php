@@ -130,9 +130,9 @@ class Auth
             if ($class < CONFIG['_MODERATOR']) {
                 ob_start();
                 ob_clean();
-                require_once "assets/themes/" . ($_SESSION['stylesheet'] ?: CONFIG['DEFAULTTHEME']) . "/header.php";
+                require_once CONFIG['APPROOT']."/Views/inc/header.php";
                 echo '<div class="alert ttalert"><center>' . stripslashes(CONFIG['OFFLINEMSG']) . '</center></div>';
-                require_once "assets/themes/" . ($_SESSION['stylesheet'] ?: CONFIG['DEFAULTTHEME']) . "/footer.php";
+                require_once CONFIG['APPROOT']."/Views/inc/footer.php";
                 die();
             } else {
                 echo '<center>' . stripslashes(CONFIG['OFFLINEMSG']) . '</center>';

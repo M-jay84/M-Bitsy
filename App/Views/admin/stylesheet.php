@@ -16,7 +16,7 @@
             <tbody>
             <?php foreach ($V_styles as $row) : ?>
                 <?php
-                if (!is_dir("assets/themes/$row[uri]")) {
+                if (!is_dir("assets/$row[uri]_style.css")) {
                     $row['uri'] .= " <b>- " . LANG["THEME_DIR_DONT_EXIST"] . "</b>";
                 }
                 ?>

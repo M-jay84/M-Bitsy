@@ -76,7 +76,7 @@ class Adminimport extends Controller
         if (empty($message)) {
             $r = (new CatagoriesModel)->fetchRow('name, parent_cat', ['id ='], [$catid]);
 
-            require_once "assets/themes/" . ($this->current_user->stylesheet ?: CONFIG['DEFAULTTHEME']) . "/header.php";
+            require_once CONFIG['APPROOT']."/Views/inc/header.php";
             block_begin(LANG["UPLOAD_COMPLETE"]);
             echo "<center>";
             echo "<b>Category:</b> " . htmlspecialchars($r['parent_cat']) . " -> " . htmlspecialchars($r['name']) . "<br />";
@@ -90,7 +90,7 @@ class Adminimport extends Controller
                 //parse torrent file
                 $torrent_dir = CONFIG['UPLOADDIR']."/torrents";
                 $torInfo = new Parse();
-                $tor = $torInfo->torr(CONFIG['UPLOADDIR']."/import/$fname");
+                $tor = $torInfo->torr(CONFIG['UPLOADDIR']."/torrents/import/$fname");
 
                 $message = "<br /><br /><hr /><br /><b>$tor[name]</b><br /><br />Name: " . htmlspecialchars($fname) . "<br />message: ";
                 //check announce url is local or external
@@ -136,7 +136,7 @@ class Adminimport extends Controller
                     continue;
                 }
 
-                copy(CONFIG['UPLOADDIR']."/import/$files[$i]", "$torrent_dir/$id.torrent");
+                copy(CONFIG['UPLOADDIR']."/torrents/import/$files[$i]", "$torrent_dir/$id.torrent");
 
                 //EXTERNAL SCRAPE
                 if ($external == 'yes' && CONFIG['UPLOADSCRAPE']) {
@@ -146,11 +146,11 @@ class Adminimport extends Controller
                 (new LogsModel)->write("Torrent $id ($name) was Uploaded by Visitor(username]");
                 $message .= "<br /><b>" . LANG["UPLOAD_COMPLETE"] . "</b><br /><a href='" . CONFIG['URLROOT'] . "/torrent/" . $id . "'>" . LANG["UPLOAD_VIEW_DL"] . "</a><br /><br />";
                 echo $message;
-                @unlink(CONFIG['UPLOADDIR']."/import/$fname");
+                @unlink(CONFIG['UPLOADDIR']."/torrents/import/$fname");
             }
             echo "</center>";
             block_end();
-            require_once "assets/themes/" . ($this->current_user->stylesheet ?: CONFIG['DEFAULTTHEME']) . "/footer.php";
+            require_once CONFIG['APPROOT']."/Views/inc/footer.php";
             die;
 
         } else {

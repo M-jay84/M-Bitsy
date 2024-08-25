@@ -43,15 +43,15 @@ class Admintask extends Controller
     {
     
         $TTCache = new Cache();
-        $TTCache->Delete("block/blocks_left");
-        $TTCache->Delete("block/blocks_middle");
-        $TTCache->Delete("block/blocks_right");
-        $TTCache->Delete("block/latestuploadsblock");
-        $TTCache->Delete("block/mostactivetorrents_block");
-        $TTCache->Delete("block/newestmember_block");
-        $TTCache->Delete("block/seedwanted_block");
-        $TTCache->Delete("block/usersonline_block");
-        $TTCache->Delete("block/request_block");
+        $TTCache->Delete("sql_cache/blocks_left");
+        $TTCache->Delete("sql_cache/blocks_middle");
+        $TTCache->Delete("sql_cache/blocks_right");
+        $TTCache->Delete("sql_cache/latestuploadsblock");
+        $TTCache->Delete("sql_cache/mostactivetorrents_block");
+        $TTCache->Delete("sql_cache/newestmember_block");
+        $TTCache->Delete("sql_cache/seedwanted_block");
+        $TTCache->Delete("sql_cache/usersonline_block");
+        $TTCache->Delete("sql_cache/request_block");
         showMessage(Url('admincp'), LANG['PURGE_COMPLETED']);
     }
 

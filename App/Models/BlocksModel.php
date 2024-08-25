@@ -41,9 +41,9 @@ class BlocksModel
     {
         // Prune Block Cache.
         $TTCache = new Cache();
-        $TTCache->Delete("block/blocks_left");
-        $TTCache->Delete("block/blocks_middle");
-        $TTCache->Delete("block/blocks_right");
+        $TTCache->Delete("sql_cache/blocks_left");
+        $TTCache->Delete("sql_cache/blocks_middle");
+        $TTCache->Delete("sql_cache/blocks_right");
 
         $nextleft = self::getPosition('left');
         $nextmiddle = self::getPosition('middle');

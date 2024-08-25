@@ -132,7 +132,7 @@ class Upload extends Controller
             if (!$message) {
                 // Torrent / NFO Dir
                 $torrent_dir = CONFIG['UPLOADDIR']."/torrents";
-                $nfo_dir = CONFIG['UPLOADDIR']."/nfos";
+                $nfo_dir = CONFIG['UPLOADDIR']."/torrents/nfos";
 
                 // Move Torrent File
                 if (!move_uploaded_file($_FILES["torrent"]["tmp_name"], "$torrent_dir/$fname")) {

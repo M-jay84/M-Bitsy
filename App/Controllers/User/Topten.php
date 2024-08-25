@@ -67,11 +67,11 @@ class Topten extends Controller
     
         $info = $this->sql($limit);
         
-        require_once "assets/themes/" . ($this->current_user->stylesheet ?: CONFIG['DEFAULTTHEME']) . "/header.php";
+        require_once CONFIG['APPROOT']."/Views/inc/header.php";
         block_begin("Top Ten");
 
         block_end();
-        require_once "assets/themes/" . ($this->current_user->stylesheet ?: CONFIG['DEFAULTTHEME']) . "/footer.php";
+        require_once CONFIG['APPROOT']."/Views/inc/footer.php";
     }
 
 }

@@ -156,7 +156,7 @@ class AccountsModel
         $sitename = CONFIG['URLROOT'];
 
         // Send Email
-        $body = file_get_contents(CONFIG['EMAILDIR'] . "/changeemail.php");
+        $body = file_get_contents(CONFIG['APPROOT'] . "/Views/user/email/changeemail.php");
         $body = str_replace("%usersname%", $data['current_user']->username, $body);
         $body = str_replace("%sitename%", $sitename, $body);
         $body = str_replace("%usersip%", $_SERVER["REMOTE_ADDR"], $body);

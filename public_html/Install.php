@@ -171,12 +171,12 @@ define('CONFIG', array (
 'NAME_SPACE' => '../',
 
 // Paths
-'BACUP' => '../data/backups',
-'CACHE' => '../data/cache',
-'LANG' => '../data/languages';
-'LOGGER' => '../data/logs',
-'UPLOADDIR' => '../data/uploads',
-'EMAILDIR' => '../data/email',
+'BACUP' => '../Core/files/db_backups',
+'CACHE' => '..Core/files/cache',
+'LANG' => '../Core/files/languages';
+'LOGGER' => '../Core/files/logs',
+'UPLOADDIR' => '../Core/files/uploaded',
+'EMAILDIR' => '../Core/files/email',
 
 // Quick Time
 'TT_TIME' => time(),

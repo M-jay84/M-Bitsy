@@ -205,7 +205,7 @@ class TorrentsModel
         if ($row["image2"]) {
             unlink(CONFIG['UPLOADDIR'] . "/images/" . $row["image2"]);
         }
-        @unlink(CONFIG['UPLOADDIR'] . "/nfos/$id.nfo");
+        @unlink(CONFIG['UPLOADDIR'] . "/torrents/nfos/$id.nfo");
         DB::delete('torrents', ['id' => $id]);
         DB::delete('files', ['torrent' => $id]);
         (new ReportsModel)->delete(['votedfor' => $id, 'type' => 'torrent']);

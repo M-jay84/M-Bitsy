@@ -106,7 +106,7 @@ class Admininactive extends Controller
                     $subject = "Warning for inactive account on $sitename";
 
                     // Send Email
-                    $body = file_get_contents(CONFIG['EMAILDIR'] . "/changeemail.php");
+                    $body = file_get_contents(CONFIG['APPROOT'] . "/Views/user/email/changeemail.php");
                     $body = str_replace("%username%", $username, $body);
                     $body = str_replace("%sitename%", $sitename, $body);
                     $body = str_replace("%siteurl%", $siteurl, $body);

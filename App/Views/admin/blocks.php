@@ -1,6 +1,6 @@
 <?php block_begin($page_title) ?>
 <p class="text-center">
-    Place new blocks in App/Views/blocks
+    Place new blocks in App/Views/inc/blocks
     <a type="button" class="ttbtn btn-sm" data-bs-toggle="modal" data-bs-target="#addblockModal"><?= LANG["ADD"] ?></a>
 </p>
 <form name="blocks" method="post" action="<?= Url('adminportal/true') ?>">

@@ -92,11 +92,11 @@ class Torrent extends Controller
                 }
                 $nfofilename = $nfofile['tmp_name'];
                 if (@is_uploaded_file($nfofilename) && @filesize($nfofilename) > 0) {
-                    @move_uploaded_file($nfofilename, CONFIG['UPLOADDIR'] . "/nfos/$id.nfo");
+                    @move_uploaded_file($nfofilename, CONFIG['UPLOADDIR'] . "/torrents/nfos/$id.nfo");
                     $updateset['nfo'] = 'yes';
                 } //success
             } elseif ($nfoaction == "delete") {
-                unlink(CONFIG['UPLOADDIR'] . "/nfos/$id");
+                unlink(CONFIG['UPLOADDIR'] . "/torrents/nfos/$id");
                 $updateset['nfo'] = 'no';
             }
 

@@ -12,12 +12,11 @@ define('CONFIG', array (
     'APPROOT' => '../App',
     'NAME_SPACE' => '../',
     // Paths
-    'BACUP' => '../data/backups',
-    'CACHE' => '../data/cache',
-    'LANG' => '../data/languages',
-    'EMAILDIR' => '../data/email',
-    'LOGGER' => '../data/logs',
-    'UPLOADDIR' => '../data/uploads',
+    'BACUP' => '../Core/files/db_backups',
+    'CACHE' => '../Core/files/cache',
+    'EMAILDIR' => '../Core/files/email',
+    'LOGGER' => '../Core/files/logs',
+    'UPLOADDIR' => '../Core/files/uploaded',
     // Quick Time
     'TT_TIME' => time(),
     'TT_DATE' => date('Y-m-d H:i:s'),

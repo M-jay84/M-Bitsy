@@ -18,7 +18,7 @@ class View
         extract($data);
 
         if ($page == 'user' && file_exists("../App/Views/user/$file.php")) {
-            require_once "assets/themes/" . (isset($data['current_user']->stylesheet) ? $data['current_user']->stylesheet : CONFIG['DEFAULTTHEME']) . "/theme.php";
+            require_once CONFIG['APPROOT']."/Views/inc/theme.php";
         } elseif ($page == 'admin' && file_exists("../App/Views/admin/$file.php")) {
             require_once CONFIG['APPROOT'] . "/Views/admin/admincp.php";
         } elseif (file_exists("../App/Views/user/shoutboxload.php")) {

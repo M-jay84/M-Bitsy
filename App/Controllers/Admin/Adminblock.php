@@ -35,7 +35,7 @@ class Adminblock extends Controller
 
         // Check Dir
         $in_folder = array();
-        if ($folder = opendir(CONFIG['APPROOT'] . '/views/block')) {
+        if ($folder = opendir(CONFIG['APPROOT'] . '/views/inc/block')) {
             while (false !== ($file = readdir($folder))) {
                 if ($file != "." && $file != ".." && !in_array($file, $blocks['files'])) {
                     if (preg_match("/_block.php/i", $file)) {
@@ -65,8 +65,8 @@ class Adminblock extends Controller
         // Delete Block
         if ($_POST["deletepermanent"]) {
             foreach ($_POST["deletepermanent"] as $delpthis) {
-                unlink(CONFIG['APPROOT']."/views/block/" . $delpthis);
-                if (file_exists(CONFIG['APPROOT'] . "/views/block/" . $delpthis)) {
+                unlink(CONFIG['APPROOT']."/views/inc/block/" . $delpthis);
+                if (file_exists(CONFIG['APPROOT'] . "/views/inc/block/" . $delpthis)) {
                     showMessage(Url('adminportal'), LANG["ACTION_FAILED"]);
                 } else {
                     showMessage(Url('adminportal'), LANG["ACTION_COMPLETE"]);

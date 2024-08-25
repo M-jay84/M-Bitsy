@@ -79,7 +79,7 @@ class Invite extends Controller
         $links = CONFIG['URLROOT'];
         $emailmain = CONFIG['SITEEMAIL'];
         
-        $body = file_get_contents(CONFIG['EMAILDIR'] . "/inviteuser.php");
+        $body = file_get_contents(CONFIG['APPROOT'] . "/Views/user/email/inviteuser.php");
         $body = str_replace("sitename%", $names, $body);
         $body = str_replace("%username%", $this->current_user->username, $body);
         $body = str_replace("%email%", $email, $body);

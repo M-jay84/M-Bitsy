@@ -11,8 +11,9 @@ define('MEMBERSONLY', true);
 define('DEBUG_OUTPUT', false);
 define('DEBUG_CODE', true);
 if (DEBUG_CODE) {
-    include "../App/Helpers/exception_helper.php";
-    set_exception_handler("handleUncaughtException");
+    // todo add log instead for exception !!!
+    //include "../App/Helpers/exception_helper.php";
+    //set_exception_handler("handleUncaughtException");
 }
 
 // Debug Function

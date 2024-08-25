@@ -1,5 +1,5 @@
 <?php
-require "assets/themes/default/blocks.php"; ?>
+require CONFIG['APPROOT']."/Views/inc/blocks.php"; ?>
 <?php $GLOBALS['tstart'] = array_sum(explode(" ", microtime())); ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -13,9 +13,9 @@ require "assets/themes/default/blocks.php"; ?>
     <title><?= $data['page_title'] ?></title>
     <!-- Bootstrap & Core CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/css/bootstrap.min.css" rel="stylesheet">
-    <script src="https://kit.fontawesome.com/6f36cea5db.js" crossorigin="anonymous"></script>
+    <script src="https://kit.fontawesome.com/2da665f0cd.js" crossorigin="anonymous"></script>
     <!-- Custom CSS -->
-    <link href="<?= CONFIG['URLROOT'] ?>/assets/themes/<?php echo isset($current_user->stylesheet) ? $current_user->stylesheet : CONFIG['DEFAULTTHEME'] ?>/customstyle.css" rel="stylesheet">
+    <link href="<?= CONFIG['URLROOT'] ?>/assets/default_style.css" rel="stylesheet">
     <!-- Highlight CSS -->
     <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/styles/atom-one-dark.min.css">
     <!-- Ajax -->

@@ -270,7 +270,7 @@ class Cleanup
                     DB::delete('warnings', ['userid' =>$user, 'type' => 'HnR']);
                     DB::insert('log', ['added'=>get_date_time(), 'txt'=>LANG["CLEANUP_THE_MEMBER"] . " <a href='account-details.php?id=" . $user . "'>" . $h[0] . "</a> " . LANG["CLEANUP_HAS_BEEN_BANNED_REASON"] . " " . $count . " H&R."]);
                     $sitename = CONFIG['URLROOT'];
-                    $body = file_get_contents(CONFIG['EMAILDIR'] . "/hitnrunban.php");
+                    $body = file_get_contents(CONFIG['APPROOT'] . "/Views/user/email/hitnrunban.php");
                     $body = str_replace("%count%", $count, $body);
                     $body = str_replace("%sitename%", $sitename, $body);
                     $TTMail = new TTMail();

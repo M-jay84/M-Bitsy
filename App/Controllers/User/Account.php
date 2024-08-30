@@ -2,6 +2,7 @@
 
 namespace App\Controllers\User;
 
+use App\Libs\Auth;
 use App\Libs\Controller;
 use App\Models\AccountsModel;
 
@@ -15,7 +16,7 @@ class Account extends Controller
     // Get Current User
     public function __construct()
     {
-        $this->current_user = $this->currentuser(2);
+        $this->current_user = (new Auth)->user(2);
     }
 
     public function index()
@@ -26,15 +27,15 @@ class Account extends Controller
     // Profile Avatar Upload Submit
     public function avatar($id)
     {
-    
-        if ($this->current_user->class < CONFIG['_MODERATOR'] or $this->current_user->id != $id) {
+        if ($this->current_user->class < CONFIG['_MODERATOR'] or $this->current_user->id != $id )
+        {
             showMessage(Url(), LANG["NO_PERMISSION"]);
         }
 
         if (isset($_FILES["upfile"])) {
             $data['current_user'] = $this->current_user;
             $data['userid'] = $id;
-            (new AccountsModel)->addavatar($id);
+            (new AccountsModel())->addavatar($id);
         } else {
             showMessage(Url("profile/$id"), LANG["ACTION_FAILED"]);
         }
@@ -43,7 +44,6 @@ class Account extends Controller
     // Profile Change Password Submit
     public function changepassword($id)
     {
-    
         if ($this->current_user->class < CONFIG['_MODERATOR'] or $this->current_user->id != $id) {
             showMessage(Url(), LANG["NO_PERMISSION"]);
         }

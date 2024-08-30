@@ -2,7 +2,7 @@
 
 use App\Libs\Cache;
 
- require CONFIG['APPROOT']."/Views/inc/blocks.php"; ?>
+ require CONFIG['APPROOT'] . "/Views/inc/blocks.php"; ?>
 <?php $GLOBALS['tstart'] = array_sum(explode(" ", microtime())); ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -27,14 +27,14 @@ use App\Libs\Cache;
 
 <body class='d-flex flex-column min-vh-100'>
   <!-- Navbar -->
-   <?php require CONFIG['APPROOT']."/Views/inc/navbar.php"; ?>
+   <?php require CONFIG['APPROOT'] . "/Views/inc/navbar.php"; ?>
    <!-- Content Start -->
     <div class="container-fluid" style="margin-top:5px;">
       <div class="row">
         <div class="col  portal_sidebar">
         <?php
         $TTCache = new Cache();
-        include CONFIG['APPROOT']."/Views/inc/block/login_block.php";
+        include CONFIG['APPROOT'] . "/Views/inc/block/login_block.php";
         include CONFIG['APPROOT']."/Views/inc/block/themelang_block.php";
         include CONFIG['APPROOT']."/Views/inc/block/maincats_block.php";
         include CONFIG['APPROOT']."/Views/inc/block/seedwanted_block.php";

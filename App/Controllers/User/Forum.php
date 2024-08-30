@@ -2,6 +2,7 @@
 
 namespace App\Controllers\User;
 
+use App\Libs\Auth;
 use App\Libs\Controller;
 use App\Models\ForumsModel;
 
@@ -15,7 +16,7 @@ class Forum extends Controller
     // Get Current User
     public function __construct()
     {
-        $this->current_user = $this->currentuser(1);
+        $this->current_user = (new Auth)->user(1);
         if (!CONFIG['FORUMS']) {
             showMessage(Url(), LANG["FORUM_AVAILABLE"]);
         }

@@ -2,6 +2,7 @@
 
 namespace App\Controllers\User;
 
+use App\Libs\Auth;
 use App\Libs\Controller;
 use App\Models\ProfileModel;
 
@@ -15,7 +16,7 @@ class Profile extends Controller
     // Get Current User
     public function __construct()
     {
-        $this->current_user = $this->currentuser(2);
+        $this->current_user = (new Auth)->user(2);
     }
 
     // Profile Default Page

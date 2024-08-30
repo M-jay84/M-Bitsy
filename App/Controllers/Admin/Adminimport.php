@@ -2,6 +2,7 @@
 
 namespace App\Controllers\Admin;
 
+use App\Libs\Auth;
 use App\Libs\Parse;
 use App\Models\CatagoriesModel;
 use App\Models\TorrentLangModel;
@@ -20,7 +21,7 @@ class Adminimport extends Controller
     // Get Current User
     public function __construct()
     {
-        $this->current_user = $this->currentuser(2);
+        $this->current_user = (new Auth)->user(2);
         if ($this->current_user->class < CONFIG['_MODERATOR']) {
             showMessage(CONFIG['URLROOT'], LANG["NO_PERMISSION"]);
         }

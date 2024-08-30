@@ -2,6 +2,7 @@
 
 namespace App\Controllers\User;
 
+use App\Libs\Auth;
 use App\Libs\Controller;
 use App\Libs\Parse;
 use App\Libs\Scraper;
@@ -17,7 +18,7 @@ class Scrape extends Controller
     // Get Current User
     public function __construct()
     {
-        $this->current_user = $this->currentuser(2);
+        $this->current_user = (new Auth)->user(2);
     }
 
     

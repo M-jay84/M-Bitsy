@@ -2,6 +2,7 @@
 
 namespace App\Controllers\User;
 
+use App\Libs\Auth;
 /*
 * Logout Controller
 */

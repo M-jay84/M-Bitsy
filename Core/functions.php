@@ -41,6 +41,20 @@ function Url($url = CONFIG['URLROOT'], $go_to = false)
 }
 
 // Check $_POST Input
+function Inputexsist($type)
+{
+    switch ($type) {
+        case "post":
+            $ishere = $_SERVER['REQUEST_METHOD'] === 'POST' ? true :false;
+            break;
+        case "get":
+            $ishere = $_SERVER['REQUEST_METHOD'] === 'GET' ? true :false;
+            break;
+    }
+    return $ishere;
+}
+
+// Check $_POST Input
 function Input($value, $type = null)
 {
     if ($type == 'email') {

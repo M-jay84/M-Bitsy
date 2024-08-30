@@ -2,6 +2,7 @@
 
 namespace App\Controllers\User;
 
+use App\Libs\Auth;
 use App\Libs\Controller;
 use App\Libs\DB;
 use App\Libs\Parse;
@@ -24,7 +25,7 @@ class Upload extends Controller
     // Get Current User
     public function __construct()
     {
-        $this->current_user = $this->currentuser(2);
+        $this->current_user = (new Auth)->user(2);
         if (!$this->current_user->can_upload == 'yes') {
             showMessage(Url(), LANG["NO_PERMISSION"]);
         }

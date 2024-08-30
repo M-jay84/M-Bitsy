@@ -2,6 +2,7 @@
 
 namespace App\Controllers\User;
 
+use App\Libs\Auth;
 use App\Libs\Controller;
 use App\Models\CatagoriesModel;
 use App\Models\TorrentsModel;
@@ -17,7 +18,7 @@ class Rss extends Controller
     // Get Current User
     public function __construct()
     {
-        $this->current_user = $this->currentuser(0);
+        $this->current_user = (new Auth)->user(0);
     }
 
     // RSS Default Page todo (simplify)

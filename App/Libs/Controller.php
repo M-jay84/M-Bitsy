@@ -12,22 +12,6 @@ class Controller
     public $model = null;
     public $data = null;
 
-    // Set Current User
-    public function currentuser($force = 0, $autoclean = false)
-    {
-        $this->data = (new Auth)->user($force, $autoclean);
-        return $this->data;
-    }
-
-    // Get User Value
-    public function get($var){
-        if ($this->currentuser[$var]) {
-            return $this->currentuser[$var];
-        } else {
-            return 0;
-        }
-    }
-
     // Display View Template
     public function view($file, $data = [], $page = false)
     {
@@ -37,7 +21,25 @@ class Controller
     
     public function showMessage($url, $message1)
     {
-        showMessage($url, $message1);
+        showMessage(Url($url), $message1);
         return;
+    }
+
+        
+    public function redirect($url)
+    {
+        $url = CONFIG['URLROOT'] . $url;
+        if (!headers_sent()) {
+            header("Location: " . $url, true, 302);
+            exit();
+        } else {
+            echo '<script type="text/javascript">';
+            echo 'window.location.href="' . $url . '";';
+            echo '</script>';
+            echo '<noscript>';
+            echo '<meta http-equiv="refresh" content="3; url=' . $url . '" />';
+            echo '</noscript>';
+            exit();
+        }
     }
 }

@@ -8,44 +8,35 @@ namespace App\Libs;
 */
 class Router
 {
-    protected $currentController = 'Home'; // Default controller
-    protected $currentMethod = 'index'; // Default method
-    protected $params = []; // Set initial empty params array
+    protected $currentController;
+    protected $currentMethod;
+    protected $params = [];
 
     public function __construct()
     {
         // Get Url
         $url = $this->getUrl();
+
         // Get Controller
-        $this->currentController = @ucwords($url[0]) == '' ? $this->currentController : @ucwords($url[0]);
+        $this->currentController = empty($url[0]) ? 'Home' : ucwords($url[0]);
+        unset($url[0]);
 
-        // Look in Controllers folder for controller
-        if (file_exists('../App/Controllers/User/' . $this->currentController . '.php')) {
-            unset($url[0]);
-            require_once '../App/Controllers/User/' . $this->currentController . '.php';
-            $classname = $this->currentController;
-            $namespace = "App\\Controllers\\User\\$classname";
-        } elseif (file_exists('../App/Controllers/Admin/' . $this->currentController . '.php')) {
-            unset($url[0]);
-            require_once '../App/Controllers/Admin/' . $this->currentController . '.php';
-            $classname = $this->currentController;
-            $namespace = "App\\Controllers\\Admin\\$classname";
+        // Set Namespace
+        if (str_contains($this->currentController, 'Admin')) {
+            $namepace = '\\App\\Controllers\\Admin\\' . $this->currentController;
         } else {
-            showMessage(Url(), LANG['Page not found']);
+            $namepace = '\\App\\Controllers\\User\\' . $this->currentController;
         }
-        
+   
         // Instantiate the current controller
-        $this->currentController = new $namespace();
+        $this->currentController = new $namepace;
 
-        // Check if second part of url is set (method)
-        if (isset($url[1])) {
-            // Check if method/function exists in current controller class
-            if (method_exists($this->currentController, $url[1])) {
-                // Set current method if it exsists
-                $this->currentMethod = $url[1];
-                // Unset 1 index
-                unset($url[1]);
-            }
+        // Get Method
+        if (isset($url[1]) && method_exists($this->currentController, $url[1])) {
+            $this->currentMethod = $url[1];
+            unset($url[1]);
+        } else {
+            $this->currentMethod = 'index';
         }
 
         // Get params - Any values left over in url are params

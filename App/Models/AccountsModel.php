@@ -116,8 +116,8 @@ class AccountsModel
         }
 
         if (in_array($ext, $allowedfiles)) {
-            move_uploaded_file($_FILES['upfile']['tmp_name'], "uploads/avatars/$username.$ext");
-            $avatar = CONFIG['URLROOT'] . "/uploads/avatars/$username.$ext";
+            move_uploaded_file($_FILES['upfile']['tmp_name'], "uploaded/avatars/$username.$ext");
+            $avatar = CONFIG['URLROOT'] . "/uploaded/avatars/$username.$ext";
             UsersModel::update(['avatar'], ['id='], [$avatar, $data['userid']]);
             showMessage(Url("profile/$data[userid]"), LANG["UP_AVATAR"] . " OK");
         }

@@ -2,6 +2,7 @@
 
 namespace App\Controllers\User;
 
+use App\Libs\Auth;
 use App\Libs\Controller;
 use App\Libs\DB;
 use App\Models\UsersModel;
@@ -16,7 +17,7 @@ class Topten extends Controller
     // Get Current User
     public function __construct()
     {
-        $this->current_user = $this->currentuser(2);
+        $this->current_user = (new Auth)->user(2);
     }
 
     private function sql($limit = 10)

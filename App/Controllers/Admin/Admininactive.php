@@ -2,6 +2,7 @@
 
 namespace App\Controllers\Admin;
 
+use App\Libs\Auth;
 use PDO;
 use App\Libs\TTMail;
 use App\Libs\Controller;
@@ -17,7 +18,7 @@ class Admininactive extends Controller
     // Get Current User
     public function __construct()
     {
-        $this->current_user = $this->currentuser(2);
+        $this->current_user = (new Auth)->user(2);
         if ($this->current_user->class < CONFIG['_MODERATOR']) {
             showMessage(CONFIG['URLROOT'], LANG["NO_PERMISSION"]);
         }

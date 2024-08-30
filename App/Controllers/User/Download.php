@@ -2,6 +2,7 @@
 
 namespace App\Controllers\User;
 
+use App\Libs\Auth;
 use App\Libs\Controller;
 use App\Libs\Bencode;
 use App\Models\PermissionsModel;
@@ -20,7 +21,7 @@ class Download extends Controller
     // Get Current User
     public function __construct()
     {
-        $this->current_user = $this->currentuser(0);
+        $this->current_user = (new Auth)->user(0);
     }
 
     // Download Torrent  todo (tidy up)

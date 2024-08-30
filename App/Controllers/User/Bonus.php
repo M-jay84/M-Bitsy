@@ -2,6 +2,7 @@
 
 namespace App\Controllers\User;
 
+use App\Libs\Auth;
 use App\Libs\Controller;
 use App\Models\BonusModel;
 
@@ -10,14 +11,17 @@ use App\Models\BonusModel;
 */
 class Bonus extends Controller
 {
+    public $bonus;
     public $current_user;
 
-    // Get Current User
+    // Get Current User Object
     public function __construct()
     {
-        $this->current_user = $this->currentuser(2);
+        $this->bonus = new BonusModel();
+        $this->current_user = (new Auth)->user(2);
+
         if (!$this->current_user->loggedin) {
-            $this->showMessage(Url('login'), true);
+            $this->redirect('home');
         }
     }
 
@@ -26,8 +30,8 @@ class Bonus extends Controller
     {
         $data = [
             'page_title' => LANG['BONUS'],
-            'bonus_result' => (new BonusModel)->getAll(),
-            'set_bonus_interval' => floor(CONFIG['ADDBONUS'] / 60),
+            'bonus_result' => $this->bonus->getAll(),
+            'set_bonus_interval' => $this->bonus->interval(),
             'current_user' => $this->current_user
         ];
 
@@ -37,38 +41,38 @@ class Bonus extends Controller
     // Bonus Form Submit
     public function submit()
     {
-        if (!empty($_POST)) {
-            (new BonusModel)->getById($this->current_user);
+        if (Inputexsist('post')) {
+            $this->bonus->getById($this->current_user);
         } else {
-            $this->showMessage(Url('bonus'), LANG["NOTHING_FOUND"]);
+            $this->showMessage('bonus', LANG["NOTHING_FOUND"]);
         }
-        $this->showMessage(Url('bonus'), LANG["SUCCESS"]);
+        $this->showMessage('bonus', LANG["SUCCESS"]);
     }
     
     // Bonus Edit/Add Form Submit
     public function update()
     {
-        if (!$this->current_user->isStaff) {
-            $this->showMessage(Url(), LANG["NO_PERMISSION"]);
-        } else {
-            if (!empty($_POST)) {
-                (new BonusModel)->insertOrUpdate();
+        if ($this->current_user->isStaff) {
+            if (Inputexsist('post')) {
+                $this->bonus->insertOrUpdate();
             } else {
-                $this->showMessage(Url('bonus'), LANG["NOTHING_FOUND"]);
+                $this->showMessage('bonus', LANG["NOTHING_FOUND"]);
             }
+        } else {
+            $this->showMessage('home', LANG["NO_PERMISSION"]);
         } 
-        $this->showMessage(Url('bonus'), LANG["SUCCESS"]);
+        $this->showMessage('bonus', LANG["SUCCESS"]);
     }
 
-    // Delete Bonus By Link
+    // Delete Bonus By Link $id
     public function delete($id)
     {
-        if (!$this->current_user->isStaff) {
-            $this->showMessage(Url(), LANG["NO_PERMISSION"]);
+        if ($this->current_user->isStaff) {
+            $this->bonus->delete($id);
         } else {
-            (new BonusModel)->delete($id);
+            $this->showMessage('home', LANG["NO_PERMISSION"]);
         }
-        $this->showMessage(Url('bonus'), LANG["DEL_COMPLETE"]);
+        $this->showMessage('bonus', LANG["SUCCESS"]);
     }
 
 }

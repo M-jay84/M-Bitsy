@@ -11,6 +11,7 @@ use App\Libs\DB;
 class Auth
 {
     public $data = array();
+    public $currentuser = null;
     
     // Check User/Visitor & Set $_SESSION
     public function user($force = 0, $autoclean = false)
@@ -94,9 +95,22 @@ class Auth
                 Cleanup::autoClean();
             }
 
+            $this->currentuser =  $data;
+
             return (object) $data;
         }
     }
+
+
+    // Get User Value
+    public function get($var){
+        if ($this->currentuser[$var]) {
+            return $this->currentuser[$var];
+        } else {
+            return 0;
+        }
+    }
+
 
     // Check Ip Banned
     public static function ipBanned()

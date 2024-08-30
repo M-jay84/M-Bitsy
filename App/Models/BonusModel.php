@@ -12,6 +12,18 @@ use App\Models\UsersModel;
 */
 class BonusModel
 {
+
+    public function __construct()
+    {
+
+    }
+    public function interval()
+    {
+        $interval = floor(CONFIG['ADDBONUS'] / 60);
+        return $interval;
+    }
+    
+
     // Get Bonus All Data
     public function getAll() 
     {

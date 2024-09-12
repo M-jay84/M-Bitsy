@@ -16,17 +16,17 @@ class Adminlog extends Controller
     // Get Current User
     public function __construct()
     {
-        $this->current_user = (new Auth)->user(2);
-        if ($this->current_user->class < CONFIG['_MODERATOR']) {
-            showMessage(CONFIG['URLROOT'], LANG["NO_PERMISSION"]);
+        $this->current_user = new Auth();
+
+        if (!$this->current_user->isStaff) {
+            $this->showMessage(URLROOT, LANG["NO_PERMISSION"]);
         }
     }
 
     // Log Default Page
     public function index()
     {
-    
-        $logs = (new LogsModel)->getAll();
+        $logs = LogsModel::getAll();
 
         // Data For View
         $data = [
@@ -36,14 +36,13 @@ class Adminlog extends Controller
         ];
 
         // Load View
-        $this->view('log', $data, 'admin');
+        $this->view('admin-log', $data, 'admin');
     }
 
     // Log Form Submit
     public function delete()
     {
-    
-        (new LogsModel)->delete();
+        LogsModel::delete();
     }
 
 }

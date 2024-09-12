@@ -16,21 +16,21 @@ class Adminmessage extends Controller
     // Get Current User
     public function __construct()
     {
-        $this->current_user = (new Auth)->user(2);
-        if ($this->current_user->class < CONFIG['_MODERATOR']) {
-            showMessage(CONFIG['URLROOT'], LANG["NO_PERMISSION"]);
+        $this->current_user = new Auth();
+
+        if (!$this->current_user->isStaff) {
+            $this->showMessage(URLROOT, LANG["NO_PERMISSION"]);
         }
     }
 
     // Message Default Page
     public function index()
     {
-    
         if (!empty($_POST)) {
-            (new MessagesModel)->multiPM($this->current_user->id);
+            MessagesModel::multiPM($this->current_user->id);
         } else {
             // Get Messages
-            $messages = (new MessagesModel)->getAll();
+            $messages = MessagesModel::getAll();
        
             // Data For View
             $data = [
@@ -38,19 +38,18 @@ class Adminmessage extends Controller
                 'V_messages' => $messages['res'],
                 'V_pager' => $messages['pager'],
                 'V_groups' => $messages['groups'],
-            'current_user' => $this->current_user
+                'current_user' => $this->current_user
             ];
        
             // Load View
-            $this->view('message', $data, 'admin');
+            $this->view('admin-message', $data, 'admin');
         }
     }
 
     // Message Form Submit
     public function delete()
     {
-    
-        (new MessagesModel)->deleteByIds();
+        MessagesModel::deleteByIds();
     }
 
 }

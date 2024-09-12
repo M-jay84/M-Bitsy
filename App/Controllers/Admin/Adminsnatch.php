@@ -16,22 +16,22 @@ class Adminsnatch extends Controller
     // Get Current User
     public function __construct()
     {
-        $this->current_user = (new Auth)->user(2);
-        if ($this->current_user->class < CONFIG['_MODERATOR']) {
-            showMessage(CONFIG['URLROOT'], LANG["NO_PERMISSION"]);
+        $this->current_user = new Auth();
+
+        if (!$this->current_user->isStaff) {
+            $this->showMessage(URLROOT, LANG["NO_PERMISSION"]);
         }
     }
 
     // Hit & Runs Default Page
     public function index()
     {
-    
         if (!CONFIG['HNR_ON']) {
-            showMessage(Url(), LANG["HNRS_BEEN_DISABLED"]);
+            $this->showMessage(URLROOT, LANG["HNRS_BEEN_DISABLED"]);
         }
 
         // Pagination
-        $snatched = (new SnatchedModel)->join('snatched.hnr = ?', 'yes');
+        $snatched = SnatchedModel::join('snatched.hnr = ?', 'yes');
 
         // Data For View
         $data = [
@@ -42,13 +42,12 @@ class Adminsnatch extends Controller
         ];
 
         // Load View
-        $this->view('snatch', $data, 'admin');
+        $this->view('admin-snatch', $data, 'admin');
     }
 
     // Hit & Runs Default Page
     public function submit()
     {
-    
-        (new SnatchedModel)->deleteByIds();
+        SnatchedModel::deleteByIds();
     }
 }

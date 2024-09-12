@@ -16,9 +16,10 @@ class Admingroup extends Controller
     // Get Current User
     public function __construct()
     {
-        $this->current_user = (new Auth)->user(2);
-        if ($this->current_user->class < CONFIG['_MODERATOR']) {
-            showMessage(CONFIG['URLROOT'], LANG["NO_PERMISSION"]);
+        $this->current_user = new Auth();
+
+        if (!$this->current_user->isStaff) {
+            $this->showMessage(URLROOT, LANG["NO_PERMISSION"]);
         }
     }
 
@@ -26,26 +27,23 @@ class Admingroup extends Controller
     public function index()
     {
         if (!empty($_POST)) {
-            (new GroupsModel)->insertOrUpdate();
+            GroupsModel::insertOrUpdate();
         } else {
-            // Get Groups Data
-            $groups = (new GroupsModel)->getGroups(); 
-        
-            // Data For View
+            
             $data = [
                 'page_title' => LANG["GROUP"],
-                'V_groups' => $groups
+                'V_groups' => GroupsModel::getGroups()
             ];
         
             // Load View
-            $this->view('group', $data, 'admin');
+            $this->view('admin-group', $data, 'admin');
         }
     }
 
     // Delete Groups Submit
     public function delete($group_id)
     {
-        (new GroupsModel)->delete($group_id);
+        GroupsModel::delete($group_id);
     }
 
 }

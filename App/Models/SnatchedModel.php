@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Libs\DB;
+use App\Libs\Validate;
 use App\Models\UsersModel;
 use App\Models\LogsModel;
 
@@ -12,21 +13,21 @@ use App\Models\LogsModel;
 class SnatchedModel
 {
     // Fetch Snatched Column
-    public function fetchColumn($columns = '*', $where = '', $values = '', $other = '')
+    public static function fetchColumn($columns = '*', $where = '', $values = '', $other = '')
     {
         $stmt = DB::newSelect('snatched', $columns, $where, $values, $other)->fetchColumn();
         return  $stmt;
     }
 
     // Update Snatched
-    public function update($columns, $where = '', $values = '', $other = '')
+    public static function update($columns, $where = '', $values = '', $other = '')
     {
         $stmt = DB::update('snatched', $columns, $where, $values, $other);
         return  $stmt;
     }
 
     // Completed Snatched
-    public function completed($id)
+    public static function completed($id)
     {
         $stmt = DB::run(
             "SELECT users.id 
@@ -40,23 +41,23 @@ class SnatchedModel
     }
 
     // Admin Delete By IDs
-    public function deleteByIds()
+    public static function deleteByIds()
     {
         // Delete
-        if (Input('do') == 'delete') {
-            $ids = multiIds('ids');
+        if (Validate::Input('do') == 'delete') {
+            $ids = Validate::multiIds('ids');
             DB::deleteByIds('snatched',
                         ['last_time =', 'hnr =', 'done = '],
                          $ids,
                         `sid`,
                         [86400, 'no', 'yes']
                     );
-                    showMessage(Url('adminsnatch'), LANG["DEL_COMPLETE"]);
+                    showMessage(('adminsnatch'), LANG["DEL_COMPLETE"]);
                 }
     }
 
     // Get Snatched Data
-    public function join($where, $value)
+    public static function join($where, $value)
     {
         $count = DB::run("SELECT COUNT(*) FROM snatched WHERE $where", [$value])->fetchColumn();
         if ($where == 'snatched.uid = ?') {
@@ -107,7 +108,7 @@ class SnatchedModel
     }
 
     // Trade Snatch
-    public function trade($uid)
+    public static function trade($uid)
     {
         $res = DB::run(
             "SELECT  snatched.tid as tid, torrents.name,  torrents.size, 
@@ -126,24 +127,24 @@ class SnatchedModel
     }
 
     // Submit Trade
-    public function submitTrade($current_user)
+    public static function submitTrade($current_user)
     {
-        $torid = Input('torid');
-        $torsize = Input('size');
+        $torid = Validate::Input('torid');
+        $torsize = Validate::Input('size');
         if ($_POST["requestpoints"]) {
-            $modcomment = gmdate("d-M-Y") . " - " . LANG["DELETED_RECORDING"] . ": " . $torid . " with " . $torsize . " " . LANG["POINTS_OF_SEED_BONUS"];
-            UsersModel::updatebonus($torsize, $modcomment, $current_user->id);
-            (new SnatchedModel)->update(['last_time','hnr','done'], ['tid=', 'uid='], [86400, 'no', 'yes', $torid,  $current_user->id]);
-            (new LogsModel)->write("<a href=" . CONFIG['URLROOT'] . "/profile/" . $current_user->id . "><b>" . $current_user->username . "</b></a> " . LANG["DELETED_RECORDING"] . ": <a href=" . CONFIG['URLROOT'] . "/torrent/$torid><b>$torid</b></a>  " . LANG["HIT_AND_RUN_WITH"] . " <b>$torsize</b> " . LANG["POINTS_OF_SEED_BONUS"] . "");
-            showMessage(Url('snatch/trade'), LANG["DEL_COMPLETE"]);
+            $modcomment = date("d-M-Y") . " - " . LANG["DELETED_RECORDING"] . ": " . $torid . " with " . $torsize . " " . LANG["POINTS_OF_SEED_BONUS"];
+            DB::run("UPDATE users SET seedbonus = seedbonus - ?, modcomment = ? WHERE id = ?", [$torsize, $modcomment, $current_user->id]);
+            SnatchedModel::update(['last_time','hnr','done'], ['tid=', 'uid='], [86400, 'no', 'yes', $torid,  $current_user->id]);
+            LogsModel::write("<a href=" . URLROOT . "/profile/" . $current_user->id . "><b>" . $current_user->username . "</b></a> " . LANG["DELETED_RECORDING"] . ": <a href=" . URLROOT . "/torrent/$torid><b>$torid</b></a>  " . LANG["HIT_AND_RUN_WITH"] . " <b>$torsize</b> " . LANG["POINTS_OF_SEED_BONUS"] . "");
+            showMessage(('snatch/trade'), LANG["DEL_COMPLETE"]);
         } elseif ($_POST["requestupload"]) {
-            $modcomment = gmdate("d-M-Y") . " - " . LANG["DELETED_RECORDING"] . ": " . $torid . " with " . mksize($torsize) . " " . LANG["OF_UPLOAD"];
-            UsersModel::updateupload($torsize, $modcomment, $current_user->id);
-            (new SnatchedModel)->update(['last_time','hnr','done'], ['tid=', 'uid='], [86400, 'no', 'yes', $torid,  $current_user->id]);
-            (new LogsModel)->write("<a href=" . CONFIG['URLROOT'] . "/profile/" . $current_user->id . "><b>" . $current_user->username . "</b></a> " . LANG["DELETED_RECORDING"] . ": <a href=" . CONFIG['URLROOT'] . "/torrent/$torid><b>$torid</b></a> " . LANG["HIT_AND_RUN_WITH"] . " <b>$torsize</b> " . LANG["OF_UPLOAD"] . "");
-            showMessage(Url('snatch/trade'), LANG["DEL_COMPLETE"]);
+            $modcomment = date("d-M-Y") . " - " . LANG["DELETED_RECORDING"] . ": " . $torid . " with " . mksize($torsize) . " " . LANG["OF_UPLOAD"];
+            DB::run("UPDATE users SET uploaded = uploaded - '$torsize', modcomment = ? WHERE id = ?", [$modcomment, $current_user->id]);
+            SnatchedModel::update(['last_time','hnr','done'], ['tid=', 'uid='], [86400, 'no', 'yes', $torid,  $current_user->id]);
+            LogsModel::write("<a href=" . URLROOT . "/profile/" . $current_user->id . "><b>" . $current_user->username . "</b></a> " . LANG["DELETED_RECORDING"] . ": <a href=" . URLROOT . "/torrent/$torid><b>$torid</b></a> " . LANG["HIT_AND_RUN_WITH"] . " <b>$torsize</b> " . LANG["OF_UPLOAD"] . "");
+            showMessage(('snatch/trade'), LANG["DEL_COMPLETE"]);
         } else {
-            showMessage(Url('snatch/trade'), LANG["ACTION_FAILED"]);
+            showMessage(('snatch/trade'), LANG["ACTION_FAILED"]);
         }
     }
 

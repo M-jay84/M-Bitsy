@@ -13,7 +13,6 @@ if ($_SESSION['id'] || !CONFIG['MEMBERSONLY']) {
                     <a href="<?= Url("profile/". $_SESSION['id'] ."") ?>" class="dropdown-item"><?= LANG["PROFILE"] ?></a>
                     <a href="<?= Url("peer/seeding/User(id]") ?>" class="dropdown-item"><?= LANG["SEEDING"] ?></a>
                     <a href='<?= Url("peer/leeching/User(id]") ?>' class="dropdown-item"><?= LANG["DOWNLOADING"] ?></a>
-                    <a href="<?= Url("friend/". $_SESSION['id'] ."") ?>" class="dropdown-item"><?= LANG["FRIENDS"] ?></a>
                     <a href="<?= Url('bonus') ?>" class="dropdown-item"><?= LANG["BONUS"] ?></a>
                     <a href="<?= Url('invite') ?>" class="dropdown-item"><?= LANG["INVITES"];?></a>
                 </div>
@@ -31,15 +30,10 @@ if ($_SESSION['id'] || !CONFIG['MEMBERSONLY']) {
                             <a href="<?= Url('upload') ?>" class="dropdown-item"><?= LANG["UPLOAD_TORRENT"] ?></a> <?php
                         } ?>
                         <a href="<?= Url('search') ?>" class="dropdown-item"><?= LANG["SEARCH_TORRENTS"] ?></a>
-                        <a href="<?= Url('catalog') ?>" class="dropdown-item"><?= LANG["CATALOG"] ?></a> <?php
+                         <?php
                         if (CONFIG['_TMDBswitch']) { ?>
                             <a href="<?= Url('moviedatabase') ?>" class="dropdown-item"><?= LANG["TMDB"] ?></a> <?php
-                        }
-                        if (CONFIG["REQUESTSON"]) { ?>
-                            <a href="<?= Url('request') ?>" class="dropdown-item"><?= LANG["REQUEST"] ?></a><?php
                         } ?>
-                        <a href="<?= Url('today') ?>" class="dropdown-item"><?= LANG["TODAYS_TORRENTS"] ?></a>
-                        <a href="<?= Url('needseed') ?>" class="dropdown-item"><?= LANG["NEED_SEED"] ?></a>
                     </div>
                 </div>
             <?php
@@ -56,7 +50,6 @@ if ($_SESSION['id'] || !CONFIG['MEMBERSONLY']) {
                 <a href="#" class="dropdown-toggle" data-bs-toggle="dropdown"><b><?= LANG["MEMBERS"] ?></b></a>
                 <div class="dropdown-menu dropdown-menu-end">
                     <a href="<?= Url('members') ?>" class="dropdown-item"><?= LANG["MEMBERS"] ?></a>
-                    <a href="<?= Url('team') ?>" class="dropdown-item"><?= LANG["Team"] ?></a>
 					<a href="<?= Url('topten') ?>" class="dropdown-item"><?= LANG["TOP_10"] ?></a>
                 </div>
             </div>
@@ -71,7 +64,6 @@ if ($_SESSION['id'] || !CONFIG['MEMBERSONLY']) {
                 <a href="#" class="dropdown-toggle" data-bs-toggle="dropdown"><b><?= LANG["INFO"] ?></b></a>
                 <div class="dropdown-menu dropdown-menu-end">
                     <a href="<?= Url('rule') ?>" class="dropdown-item"><?= LANG["RULES"] ?></a>
-                    <a href="<?= Url('faq') ?>" class="dropdown-item"><?= LANG["FAQ"] ?></a>
 				</div>
             </div>
         </div>

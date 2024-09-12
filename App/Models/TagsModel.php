@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Libs\DB;
+use App\Libs\Validate;
 use PDO;
 
 /*
@@ -11,50 +12,50 @@ use PDO;
 class TagsModel
 {
   // Get Tag Names
-  public function getAll()
+  public static function getAll()
   {
     $stmt = DB::fetchAll('tags', 'id, name, colour', '', 'GROUP BY `name`');
     return $stmt;
   }
 
   // Admin Add/Update Tag
-  public function insertOrUpdate()
+  public static function insertOrUpdate()
   {
-    $name = Input('name');
-    $colour = Input('colour');
-    $id = Input('id', 'int');
+    $name = Validate::Input('name');
+    $colour = Validate::Input('colour');
+    $id = Validate::Input('id', 'int');
 
     if (!$name) {
-      showMessage(Url('admintag'), LANG["MISSING_FORM_DATA"]);
+      showMessage(('admintag'), LANG["MISSING_FORM_DATA"]);
     }
 
     if (!$id) {
       DB::insert('tags', ['name' => $name, 'colour' => $colour]);
-      showMessage(Url('admintag'), LANG['SUCCESS']);
+      showMessage(('admintag'), LANG['SUCCESS']);
     } else {
       $stmt = DB::update('tags', ['name', 'colour'], ['id='], [$name,$colour,$id]);
       return $stmt;
     }
     
-    showMessage(Url('admintag'), LANG["ACTION_COMPLETE"]);
+    showMessage(('admintag'), LANG["ACTION_COMPLETE"]);
   }
 
   // Admin Delete Tag
-  public function delete()
+  public static function delete()
   {
     // Check User Input
-    $ids = multiIds('ids');
+    $ids = Validate::multiIds('ids');
     DB::deleteByIds('tags', 'id', $ids);
-    showMessage(Url('admintag'), LANG["DEL_COMPLETE"]);
+    showMessage(('admintag'), LANG["DEL_COMPLETE"]);
   }
 
   // Search By Tag
-  public function search($name)
+  public static function search($name)
   {
     // Get Tag Data
     $stmt = DB::run("SELECT torrentid FROM tagtorrent WHERE type1 = ? OR type2 = ? OR type3 = ?", [$name, $name, $name])->fetchAll();
     if (count($stmt) == 0) {
-      showMessage(Url(), LANG["NOTHING_FOUND"]);
+      showMessage(URLROOT, LANG["NOTHING_FOUND"]);
     }
 
     // String Of IDS
@@ -70,7 +71,7 @@ class TagsModel
 
     // Get Torrent Data
     $count = DB::run("SELECT COUNT(*) FROM torrents WHERE torrents.id IN ($ids)")->fetchColumn();
-    list($pager, $limit) = pagination(25, $count, CONFIG['URLROOT'] . "/tag/$name&amp;");
+    list($pager, $limit) = pagination(25, $count, URLROOT . "/tag/$name&amp;");
 
     $stmt = DB::run(
       "SELECT torrents.anon, torrents.seeders, torrents.tube, 
@@ -97,7 +98,7 @@ class TagsModel
             WHERE torrents.id IN ($ids) $limit"
     )->fetchAll(PDO::FETCH_ASSOC);
     if (count($stmt) == 0) {
-      showMessage(Url(), LANG["NO_TORRENT_FOUND"]);
+      showMessage(URLROOT, LANG["NO_TORRENT_FOUND"]);
     }
     $array = [
       'stmt' => $stmt,

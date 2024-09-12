@@ -16,18 +16,18 @@ class Adminclient extends Controller
     // Get Current User
     public function __construct()
     {
-        $this->current_user = (new Auth)->user(2);
-        if ($this->current_user->class < CONFIG['_MODERATOR']) {
-            showMessage(CONFIG['URLROOT'], LANG["NO_PERMISSION"]);
+        $this->current_user = new Auth();
+
+        if (!$this->current_user->isStaff) {
+            $this->showMessage(URLROOT, LANG["NO_PERMISSION"]);
         }
     }
 
     // Client Default Page
     public function index($type = 'peers')
     {
-    
         // Get Peer Client Data
-        $client = (new ClientsModel)->select($type);
+        $client = ClientsModel::select($type);
 
         // Data For View
         $data = [
@@ -37,21 +37,19 @@ class Adminclient extends Controller
         ];
         
         // Load View
-        $this->view('client', $data, 'admin');
+        $this->view('admin-client', $data, 'admin');
     }
 
     // Add Client Record
     public function submit()
     {
-    
-        (new ClientsModel)->insert();
+        ClientsModel::insert();
     }
 
     // Delete Client Record
     public function delete($id)
     {
-    
-        (new ClientsModel)->delete($id);
+        ClientsModel::delete($id);
     }
 
 }

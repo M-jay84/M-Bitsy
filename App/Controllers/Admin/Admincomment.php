@@ -16,18 +16,18 @@ class Admincomment extends Controller
     // Get Current User
     public function __construct()
     {
-        $this->current_user = (new Auth)->user(2);
-        if ($this->current_user->class < CONFIG['_MODERATOR']) {
-            showMessage(CONFIG['URLROOT'], LANG["NO_PERMISSION"]);
+        $this->current_user = new Auth();
+
+        if (!$this->current_user->isStaff) {
+            $this->showMessage(URLROOT, LANG["NO_PERMISSION"]);
         }
     }
 
     // Comments Default Page
     public function index()
     {
-    
         // Get Data
-        $comments = (new CommentsModel)->grabAll();
+        $comments = CommentsModel::grabAll();
         
         // Data For View
         $data = [
@@ -37,7 +37,7 @@ class Admincomment extends Controller
         ];
 
         // Load View
-        $this->view('comment', $data, 'admin');
+        $this->view('admin-comment', $data, 'admin');
     }
 
 }

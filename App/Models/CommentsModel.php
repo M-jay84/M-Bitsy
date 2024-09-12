@@ -3,9 +3,9 @@
 namespace App\Models;
 
 use App\Libs\DB;
+use App\Libs\Validate;
 use App\Models\NewsModel;
 use App\Models\TorrentsModel;
-use App\Models\RequestsModel;
 use App\Models\LogsModel;
 
 /*
@@ -14,33 +14,33 @@ use App\Models\LogsModel;
 class CommentsModel
 {
     // Fetch Comment Column
-    public function fetchColumn($columns = '*', $where = '', $values = '', $other = '')
+    public static function fetchColumn($columns = '*', $where = '', $values = '', $other = '')
     {
         $stmt = DB::newSelect('comments', $columns, $where, $values, $other)->fetchColumn();
 		return $stmt;
 	}
 
     // Fetch Torrent Details
-    public function delete($id, $userid, $type = '')
+    public static function delete($id, $userid, $type = '')
     {
         if ($type == "torrent") {
             $row = DB::fetchRow('comments', 'torrent', ['id ='], $id);
             if ($row["torrent"] > 0) {
-                (new TorrentsModel)->updateComments($id, 'sub');
+                TorrentsModel::updateComments($id, 'sub');
             }
         }
         
         DB::delete('comments', ['id' => $id]);
-        (new LogsModel)->write(coloredname($userid) . " has deleted comment: ID: $id");
-        showMessage(Url($_SERVER['HTTP_REFERER']), LANG["DEL_COMPLETE"]);
+        LogsModel::write(coloredname($userid) . " has deleted comment: ID: $id");
+        showMessage(($_SERVER['HTTP_REFERER']), LANG["DEL_COMPLETE"]);
 	}
 
     // Admin Get All
-    public function grabAll()
+    public static function grabAll()
     {
         // Pagination
         $count = DB::fetchColumn('comments', 'count(id)', '');
-        list($pager, $limit) = pagination(10, $count, CONFIG['URLROOT']."/admincomment?");
+        list($pager, $limit) = pagination(10, $count, URLROOT."/admincomment?");
         $stmt = DB::run("SELECT c.id, c.text, c.user, c.torrent, c.news, t.name, n.title, u.username, c.added 
         FROM comments c 
         LEFT JOIN torrents t ON c.torrent = t.id 
@@ -56,28 +56,22 @@ class CommentsModel
     }
 
     // Get Comment
-    public function getInfo($id, $type)
+    public static function getInfo($id, $type)
     {
         if ($type == "news") {
-            $row = (new NewsModel)->fetchRow('*', ['id='], [$id]);
+            $row = NewsModel::fetchRow('*', ['id='], [$id]);
             if (!$row) {
-                showMessage(Url(CONFIG['URLROOT'] . "/comment/$id/news"), LANG["MISSING_ID"]);
+                showMessage((URLROOT . "/comment/$id/news"), LANG["MISSING_ID"]);
             }
             $title = LANG["NEWS"];
         }
 
         if ($type == "torrent") {
-            $row = (new TorrentsModel)->fetchRow('id, name', ['id='], [$id]);
+            $row = TorrentsModel::fetchRow('id, name', ['id='], [$id]);
             if (!$row) {
-                showMessage(Url(), LANG["TORRENT_NOT_FOUND"]);
+                showMessage(URLROOT, LANG["TORRENT_NOT_FOUND"]);
             }
-            $title = LANG["COMMENT_FOR"] . "<a href='" . CONFIG['URLROOT'] . "/torrent/" . $row['id'] . "'>" . htmlspecialchars($row['name']) . "</a>";
-        }
-
-        if ($type == "req") {
-            $row = DB::fetchAll('comments', '*', ['req='], [$id]);
-            $row2 = (new RequestsModel)->fetchRow('request', ['id='], [$id]);
-            $title = LANG["COMMENT_FOR"] . "<a href='" . CONFIG['URLROOT'] . "/request'>" . htmlspecialchars($row2['request']) . "</a>";
+            $title = LANG["COMMENT_FOR"] . "<a href='" . URLROOT . "/torrent/" . $row['id'] . "'>" . htmlspecialchars($row['name']) . "</a>";
         }
 
         if ($type == "id") {
@@ -111,36 +105,33 @@ class CommentsModel
     }
 
     // Add/Edit Comment
-    public function action($targetid, $data = [], $type = '')
+    public static function action($targetid, $id, $type = '')
     {
         // Check User Input
-        $comment_id = Input('comment_id', 'int');
-        $text = Input('text');
+        $comment_id = Validate::Input('comment_id', 'int');
+        $text = Validate::Input('text');
 
         // Check Correct Input
         if (!$text) {
-            showMessage(Url($_SERVER['HTTP_REFERER']), LANG["MISSING_FORM_DATA"]);
+            showMessage(($_SERVER['HTTP_REFERER']), LANG["MISSING_FORM_DATA"]);
         }
 
         if ($type == "torrent") {
-            (new TorrentsModel)->updateComments($targetid, 'add');
-        }
-        if ($type == "req") {
-            (new RequestsModel)->update($targetid);
+            TorrentsModel::updateComments($targetid, 'add');
         }
 
         if (!$comment_id) {
             // Insert Comment
-            $ins = DB::insert('comments', ['user' => $data['current_user']->id, $type => $targetid, 'added' => get_date_time(), 'text' => $text, 'type' => $type]);
+            $ins = DB::insert('comments', ['user' => $id, $type => $targetid, 'added' => CONFIG['TT_DATE'], 'text' => $text, 'type' => $type]);
             if ($ins) {
-                showMessage(Url($_SERVER['HTTP_REFERER']), LANG["SUCCESS"]);
+                showMessage(($_SERVER['HTTP_REFERER']), LANG["SUCCESS"]);
             } else {
-                showMessage(Url($_SERVER['HTTP_REFERER']), LANG["ACTION_FAILED"]);
+                showMessage(($_SERVER['HTTP_REFERER']), LANG["ACTION_FAILED"]);
             }
         } else {
             DB::update('comments', ['text'], ['id='], [$text, $comment_id]);
-            (new LogsModel)->write(coloredname($data['current_user']->id) . " has edited comment: ID:$comment_id");
-            showMessage(Url($_SERVER['HTTP_REFERER']), LANG["UPDATE_COMPLETE"]);
+            LogsModel::write(coloredname($id) . " has edited comment: ID:$comment_id");
+            showMessage(($_SERVER['HTTP_REFERER']), LANG["UPDATE_COMPLETE"]);
         }
     }
 }

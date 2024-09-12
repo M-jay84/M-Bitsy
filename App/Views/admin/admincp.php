@@ -1,5 +1,3 @@
-<?php
-require CONFIG['APPROOT']."/Views/inc/blocks.php"; ?>
 <?php $GLOBALS['tstart'] = array_sum(explode(" ", microtime())); ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -15,7 +13,7 @@ require CONFIG['APPROOT']."/Views/inc/blocks.php"; ?>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://kit.fontawesome.com/2da665f0cd.js" crossorigin="anonymous"></script>
     <!-- Custom CSS -->
-    <link href="<?= CONFIG['URLROOT'] ?>/assets/default_style.css" rel="stylesheet">
+    <link href="<?= URLROOT ?>/assets/css/default_style.css" rel="stylesheet">
     <!-- Highlight CSS -->
     <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/styles/atom-one-dark.min.css">
     <!-- Ajax -->
@@ -70,23 +68,6 @@ require CONFIG['APPROOT']."/Views/inc/blocks.php"; ?>
             <div class="col  portal_sidebar">
                 <!-- Left Column Start -->
                 <a href="<?= Url() ?>"><?= LANG["HOME"] ?></a><br>
-                <a href="<?= Url('adminbackup') ?>"><?= LANG["BACKUPS"] ?></a><br>
-                <a href="<?= Url('adminblock') ?>"><?= LANG["BLOCKS"] ?></a><br>
-                <a href="<?= Url('adminexceptions') ?>"><?= LANG["ERRORS"] ?></a><br>
-                <a href="<?= Url('adminstylesheet') ?>"><?= LANG["THEME"] ?></a><br>
-                <a href="<?= Url('adminconfig') ?>"><?= LANG["CONFIG"] ?></a><br>
-                <a href="<?= Url('adminimport') ?>"><?= LANG["IMPORT"] ?></a><br>
-                <a href="<?= Url('admingroup') ?>"><?= LANG["GROUPS"] ?></a><br>
-                <a href="<?= Url('adminshoutbox/clear') ?>"><?= LANG["CLEAR_SHOUTBOX"] ?></a><br>
-                <a href="<?= Url('adminemail') ?>"><?= LANG["MASS_EMAIL"] ?></a><br>
-                <a href="<?= Url('adminmessage') ?>"><?= LANG["MESSAGES"] ?></a><br>
-                <a href="<?= Url('adminforumcat') ?>"><?= LANG["FORUM"] ?></a><br>
-                <a href="<?= Url('adminnews') ?>"><?= LANG["NEWS"] ?></a><br>
-                <a href="<?= Url('adminpoll') ?>"><?= LANG["POLLS"] ?></a><br>
-                <a href="<?= Url('adminuseradd') ?>"><?= LANG["ADD_USER"] ?></a><br>
-                <a href="<?= Url('adminusersearch') ?>"><?= LANG["USER_SEARCH"] ?></a><br>
-                <a href="<?= Url('admincategorie') ?>"><?= LANG["TORRENT_CATEGORIES"] ?></a><br>
-                <a href="<?= Url('admintorrentlang') ?>"><?= LANG["LANGUAGE"] ?></a><br>
             </div>
             <!-- Main Page Start -->
             <div class="col portalmain">
@@ -96,32 +77,38 @@ require CONFIG['APPROOT']."/Views/inc/blocks.php"; ?>
                     </div>
                     <div class="p-3">
                         <?php block_begin($page_title) ?>
-                        <?php require_once CONFIG['APPROOT'] . "/Views/admin/admin_panel.php"; ?>
-                        <?php require_once CONFIG['APPROOT'] . "/Views/admin/$file.php"; ?>
+                        <?php require_once VIEW_PATH . "/admin/admin-panel.php"; ?>
+                        <?php require_once VIEW_PATH . "/admin/$file.php"; ?>
                         <?php block_end() ?>
                     </div>
                 </div>
             </div>
             <!-- Right Column Start -->
             <div class="col  portal_sidebar">
-                <a href="<?= Url('admintorrent') ?>"><?= LANG["TORRENT"] ?></a><br>
-                <a href="<?= Url('adminsnatch') ?>"><?= LANG["HNR"] ?></a><br>
-                <a href="<?= Url('adminpeer') ?>"><?= LANG["PEERS"] ?></a><br>
-                <a href="<?= Url('admintag') ?>"><?= LANG["TAGS"] ?></a><br>
-                <a href="<?= Url('adminprivacy') ?>"><?= LANG["PRIVACY"] ?></a><br>
                 <a href="<?= Url('adminban') ?>"><?= LANG["BANNED"] ?></a><br>
+                <a href="<?= Url('admincategorie') ?>"><?= LANG["TORRENT_CATEGORIES"] ?></a><br>
                 <a href="<?= Url('adminclient/peers') ?>"><?= LANG["CLIENT_BAN"] ?></a><br>
-                <a href="<?= Url('admincheat') ?>"><?= LANG["CHEATS"] ?></a><br>
-                <a href="<?= Url('adminduplicateip') ?>"><?= LANG["DUPLICATEIP"] ?></a><br>
-                <a href="<?= Url('adminwarning') ?>"><?= LANG["WARNINGS"] ?></a><br>
-                <a href="<?= Url('adminreport') ?>"><?= LANG["REPORT"] ?></a><br>
-                <a href="<?= Url('adminlog') ?>"><?= LANG["SITE_LOG"]; ?></a><br>
-                <a href="<?= Url('adminwhoswhere') ?>"><?= LANG["WHOS_WHERE"] ?></a><br>
-                <a href="<?= Url('admininactive') ?>"><?= LANG["INACTIVE"] ?></a><br>
                 <a href="<?= Url('admincomment') ?>"><?= LANG["COMMENT"] ?></a><br>
-                <a href="<?= Url('admininvite/pending') ?>"><?= LANG["PENDING_INVITE"] ?></a><br>
+                <a href="<?= Url('adminduplicateip') ?>"><?= LANG["DUPLICATEIP"] ?></a><br>
+                <a href="<?= Url('adminemail') ?>"><?= LANG["MASS_EMAIL"] ?></a><br>
+                <a href="<?= Url('adminforumcat') ?>"><?= LANG["FORUM"] ?></a><br>
+                <a href="<?= Url('admingroup') ?>"><?= LANG["GROUPS"] ?></a><br>
+                <a href="<?= Url('admininactive') ?>"><?= LANG["INACTIVE"] ?></a><br>
                 <a href="<?= Url('admininvite') ?>"><?= LANG["INVITED_USER"] ?></a><br>
-                <a href="<?= Url('gallery/avatar') ?>"><?= LANG["AVATAR"] ?></a><br>
+                <a href="<?= Url('admininvite/pending') ?>"><?= LANG["PENDING_INVITE"] ?></a><br>
+                <a href="<?= Url('adminlog') ?>"><?= LANG["SITE_LOG"]; ?></a><br>
+                <a href="<?= Url('adminmessage') ?>"><?= LANG["MESSAGES"] ?></a><br>
+                <a href="<?= Url('adminnews') ?>"><?= LANG["NEWS"] ?></a><br>
+                <a href="<?= Url('adminpeer') ?>"><?= LANG["PEERS"] ?></a><br>
+                <a href="<?= Url('adminprivacy') ?>"><?= LANG["PRIVACY"] ?></a><br>
+                <a href="<?= Url('adminreport') ?>"><?= LANG["REPORT"] ?></a><br>
+                <a href="<?= Url('adminstask/clear') ?>"><?= LANG["CLEAR_SHOUTBOX"] ?></a><br>
+                <a href="<?= Url('adminsnatch') ?>"><?= LANG["HNR"] ?></a><br>
+                <a href="<?= Url('admintag') ?>"><?= LANG["TAGS"] ?></a><br>
+                <a href="<?= Url('admintorrent') ?>"><?= LANG["TORRENT"] ?></a><br>
+                <a href="<?= Url('admintorrentlang') ?>"><?= LANG["LANGUAGE"] ?></a><br>
+                <a href="<?= Url('adminusersearch') ?>"><?= LANG["USER_SEARCH"] ?></a><br>
+                <a href="<?= Url('adminwarning') ?>"><?= LANG["WARNINGS"] ?></a><br>
             </div>
         </div>
     </div>

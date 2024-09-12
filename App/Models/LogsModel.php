@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Libs\DB;
+use App\Libs\Validate;
 
 /*
 * Logs Table Data
@@ -10,17 +11,17 @@ use App\Libs\DB;
 class LogsModel
 {
     // Add Log
-    public function write($text)
+    public static function write($text)
     {
-        $stmt = DB::insert('log', ['added'=>get_date_time(), 'txt'=>$text]);
+        $stmt = DB::insert('log', ['added'=>CONFIG['TT_DATE'], 'txt'=>$text]);
         return $stmt;
     }
 
     // Admin Get All Logs
-    public function getAll()
+    public static function getAll()
     {
         // Check User Input
-        $search = Input('search');
+        $search = Validate::Input('search');
 
         // Pagination
         $where = $search != '' ? "WHERE txt LIKE '$search%'" : '';
@@ -31,11 +32,11 @@ class LogsModel
     }
 
     // Admin Delete Logs
-    public function delete()
+    public static function delete()
     {
-        $ids = multiIds('ids');
+        $ids = Validate::multiIds('ids');
         DB::deleteByIds('logs', 'id', $ids);
-        showMessage(Url('adminlog'), LANG["DEL_COMPLETE"]);
+        showMessage(('adminlog'), LANG["DEL_COMPLETE"]);
     }
 
 }

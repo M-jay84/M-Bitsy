@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Libs\DB;
+use App\Libs\Validate;
 
 /*
 * Report Table Data
@@ -10,7 +11,7 @@ use App\Libs\DB;
 class ReportsModel
 {
     // Admin Get Reports
-    public function pagination()
+    public static function pagination()
     {
         $pager = array();
         $where = array();
@@ -76,50 +77,50 @@ class ReportsModel
     }
 
     // Admin Update Report
-    public function update($userid)
+    public static function update($userid)
     {
-        $ids = multiIds('ids');
+        $ids = Validate::multiIds('ids');
         DB::run("UPDATE reports SET complete = '1', dealtwith = '1', dealtby = ".$userid." WHERE id IN ($ids)");
-        showMessage(Url('adminreport'), LANG["ACTION_COMPLETE"]);
+        showMessage(('adminreport'), LANG["ACTION_COMPLETE"]);
      }
 
     // Admin Delete Report
-    public function deleteByIds()
+    public static function deleteByIds()
     {
         
-        $ids = multiIds('ids');
+        $ids = Validate::multiIds('ids');
         $stmt = DB::deleteByIds('reports', ['complete ='], $ids , 'id', [1]);
-        showMessage(Url('adminreport'), LANG["SUCCESS"]);
+        showMessage(('adminreport'), LANG["SUCCESS"]);
     }
 	
     // Delete Report
-    public function delete($where)
+    public static function delete($where)
     {
         $stmt = DB::delete('reports', $where);
         return $stmt;
     }
 	
     // Add Report
-    public function reportItem($current_user)
+    public static function reportItem($current_user)
     {
         // Check User Input
-        $id = Input('id', 'int');
-        $type = Input('type', 'int');
-        $reason = Input('reason');
-        $postid = Input('postid', 'int');
+        $id = Validate::Input('id', 'int');
+        $type = Validate::Input('type', 'int');
+        $reason = Validate::Input('reason');
+        $postid = Validate::Input('postid', 'int');
 
         // Check User
         if ($current_user->view_users != "yes" && $current_user->id != $id && $type == 'user') {
-            showMessage(Url(), LANG["NO_USER_VIEW"]);
+            showMessage(URLROOT, LANG["NO_USER_VIEW"]);
         } elseif ($current_user->view_torrents != "yes" && CONFIG['MEMBERSONLY'] && $type == 'torrent') {
-            showMessage(Url(), LANG["NO_TORRENT_VIEW"]);
-        } elseif ($current_user->view_forum != "yes" && $current_user->class <= CONFIG['_MODERATOR'] && $type == 'forum') {
-            showMessage(Url(), LANG["FORUM_BANNED"]);
+            showMessage(URLROOT, LANG["NO_TORRENT_VIEW"]);
+        } elseif ($current_user->view_forum != "yes" && $current_user->isStaff && $type == 'forum') {
+            showMessage(URLROOT, LANG["FORUM_BANNED"]);
         }
 
         if (!empty($_POST)) {
             if (empty($reason) || empty($id) &&  empty($postid)) {
-                showMessage(Url($_SERVER['HTTP_REFERER']), LANG["YOU_MUST_ENTER_A_REASON"]);
+                showMessage(($_SERVER['HTTP_REFERER']), LANG["YOU_MUST_ENTER_A_REASON"]);
             }
 
             $res = DB::fetchColumn('reports', 'count(id)', ['addedby=', 'votedfor=', 'type='], [$current_user->id, $id, $type]);
@@ -131,9 +132,9 @@ class ReportsModel
                 } else {
                     DB::insert('reports', ['addedby' => $current_user->id, 'votedfor' => $id, 'votedfor_xtra' => 0, 'type' => $type, 'reason' => $reason]);
                 }
-                    showMessage(Url($_SERVER['HTTP_REFERER']), "$type: $id, $postid Reason: " . htmlspecialchars($reason) . "<p>Successfully Reported</p>");
+                    showMessage(($_SERVER['HTTP_REFERER']), "$type: $id, $postid Reason: " . htmlspecialchars($reason) . "<p>Successfully Reported</p>");
             } else {
-                showMessage(Url($_SERVER['HTTP_REFERER']), LANG["YOU_HAVE_ALREADY_REPORTED"]);
+                showMessage(($_SERVER['HTTP_REFERER']), LANG["YOU_HAVE_ALREADY_REPORTED"]);
             }
         }
     }

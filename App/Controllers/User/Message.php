@@ -17,13 +17,16 @@ class Message extends Controller
     // Get Current User
     public function __construct()
     {
-        $this->current_user = (new Auth)->user(2);
+        $this->current_user = new Auth();
+
+        if (!$this->current_user->loggedin) {
+            $this->showMessage(URLROOT, LANG["NO_PERMISSION"]);
+        }
     }
 
     // Message Default Page
     public function index($id, $type = 'inbox')
     {
-    
         // Set Button
         if ($type == 'templates' || $type == 'draft') {
             $button = "<a href='javascript:;' class='addAttr' data-bs-toggle='modal' data-bs-target='#editModal' '><button class='btn ttbtn m-2'><i class='fa fa-home me-2'></i>Edit</button></a>";
@@ -32,8 +35,8 @@ class Message extends Controller
         }
         
         // Get Message
-        $messages = (new MessagesModel)->getById($id, $this->current_user->id);
-        $templates = (new MessagesModel)->echoTemplates($this->current_user->id);
+        $messages = MessagesModel::getById($id, $this->current_user->id);
+        $templates = MessagesModel::echoTemplates($this->current_user->id);
 
         // Init Dta
         $data = [
@@ -45,19 +48,18 @@ class Message extends Controller
         ];
 
         // Load View
-        $this->view('message', $data, 'user');
+        $this->view('user-message', $data, 'user');
     }
 
     // Mailbox Default Page
     public function mailbox($type = 'inbox')
     {
-    
-        $data['current_user'] = $this->current_user;
         // Count All Messages
-        $count = (new MessagesModel)->countMsg($data);
+        $data['current_user'] = $this->current_user;
+        $count = MessagesModel::countMsg($data);
 
         // Pagination
-        $messages = (new MessagesModel)->msgPagination($type, $this->current_user->id);
+        $messages = MessagesModel::msgPagination($type, $this->current_user->id);
         
         // Init Dta
         $data = [
@@ -70,14 +72,13 @@ class Message extends Controller
         ];
 
         // Load View
-        $this->view('mailbox', $data, 'user');
+        $this->view('user-mailbox', $data, 'user');
     }
 
     // Ajax User search
 	function findUser()
     {
-    
-        if(!empty($_POST["keyword"])) {
+        if(!empty($_POST)) {
             $result = UsersModel::getUserName();
             if(!empty($result)) {
                 ?>
@@ -94,8 +95,7 @@ class Message extends Controller
     // Create Message Default Page
     public function create($id = 0)
     {
-    
-        $templates = (new MessagesModel)->echoTemplates($this->current_user->id);
+        $templates = MessagesModel::echoTemplates($this->current_user->id);
 
         // Init Dta
         $data = [
@@ -106,27 +106,25 @@ class Message extends Controller
         ];
 
         // Load View
-        $this->view('message_create', $data, 'user');
+        $this->view('user-message-create', $data, 'user');
     }
 
     // Create/Reply Message Form Submit
     public function submit()
     {
-    
-        (new MessagesModel)->insertByType($this->current_user->id);
+        MessagesModel::insertByType($this->current_user->id);
     }
 
     // Message Edit Default Page
     public function update($id)
     {
-    
-        (new MessagesModel)->update($id, $this->current_user->id);
+        MessagesModel::update($id, $this->current_user->id);
     }
 
     // Delete/MarkRead Message Submit
     public function delete($type)
     {
-    
-        (new MessagesModel)->delete($type, $this->current_user->id);
+        MessagesModel::delete($type, $this->current_user->id);
     }
+
 }

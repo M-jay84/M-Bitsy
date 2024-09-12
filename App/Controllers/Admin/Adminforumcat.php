@@ -16,22 +16,22 @@ class AdminforumCat extends Controller
     // Get Current User
     public function __construct()
     {
-        $this->current_user = (new Auth)->user(2);
-        if ($this->current_user->class < CONFIG['_MODERATOR']) {
-            showMessage(CONFIG['URLROOT'], LANG["NO_PERMISSION"]);
+        $this->current_user = new Auth();
+
+        if (!$this->current_user->isStaff) {
+            $this->showMessage(URLROOT, LANG["NO_PERMISSION"]);
         }
     }
 
     // Forum Cat Default Page
     public function index($id = 0, $move = false)
     {
-    
         if ($move) {
-            (new ForumsModel)->reorder($id, $move);
+            ForumsModel::reorder($id, $move);
         }
 
         // Get Forum Cat Data
-        $forumcat = (new ForumsModel)->getCats();
+        $forumcat = ForumsModel::getCats();
 
         // Data For View
         $data = [
@@ -40,21 +40,19 @@ class AdminforumCat extends Controller
         ];
 
         // Load View
-        $this->view('forumcat', $data, 'admin');
+        $this->view('admin-forumcat', $data, 'admin');
     }
 
     // Add Forum Cat Submit
     public function submit()
     {
-    
-        (new ForumsModel)->insertOrUpdate();
+        ForumsModel::insertOrUpdate();
     }
 
     // Delete Forum Cat Submit
     public function delete($id, $action = '')
     {
-    
-        (new ForumsModel)->deleteCats($id, $action);
+        ForumsModel::deleteCats($id, $action);
     }
 
 }

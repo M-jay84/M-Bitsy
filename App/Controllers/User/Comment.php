@@ -16,15 +16,18 @@ class Comment extends Controller
     // Get Current User
     public function __construct()
     {
-        $this->current_user = (new Auth)->user(2);
+        $this->current_user = new Auth();
+
+        if (!$this->current_user->loggedin) {
+            $this->showMessage(URLROOT, LANG["NO_PERMISSION"]);
+        }
     }
 
     // Comments Default Page
     public function index($id, $type)
     {
-    
         // Get Data
-        $comments = (new CommentsModel)->getInfo($id, $type);
+        $comments =  CommentsModel::getInfo($id, $type);
 
         // Data For View
         $data = [
@@ -38,26 +41,26 @@ class Comment extends Controller
         ];
 
         // Load View
-        $this->view('comment', $data, 'user');
+        $this->view('user-comment', $data, 'user');
     }
 
     // Add/Edit Comment
     public function submit($targetid, $type)
     {
-    
-        $data['current_user'] = $this->current_user;
-        (new CommentsModel)->action($targetid, $data, $type);
+        if (!empty($_POST)) {
+            CommentsModel::action($targetid, $this->current_user->id, $type);
+        } else {
+            $this->showMessage('bonus', LANG["NOTHING_FOUND"]);
+        }
     }
 
     // Delete Comment Default Page
     public function delete($id, $type = 0)
     {
-    
-        if (!$this->current_user->class > CONFIG['_MODERATOR']) {
-            showMessage(Url(), LANG["NO_PERMISSION"]);
+        if (!$this->current_user->isStaff) {
+            $this->showMessage(URLROOT, LANG["NO_PERMISSION"]);
         } else {
-            $data['current_user'] = $this->current_user;
-            (new CommentsModel)->delete($id, $data, $type);
+            CommentsModel::delete($id, $this->current_user->id, $type);
         }
     }
 

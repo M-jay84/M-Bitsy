@@ -16,16 +16,21 @@ class Search extends Controller
     // Get Current User
     public function __construct()
     {
-        $this->current_user = (new Auth)->user(1);
+        $this->current_user = new Auth();
+
+        if (!$this->current_user->loggedin && CONFIG['MEMBERSONLY']) {
+            $this->showMessage(URLROOT, LANG["NO_PERMISSION"]);
+        }
     }
 
     // Search Default Page
     public function index()
     {
         if ($this->current_user->view_torrents != "yes" && CONFIG['MEMBERSONLY']) {
-            showMessage(Url(), LANG["NO_TORRENT_VIEW"]);
+            $this->showMessage(URLROOT, LANG["NO_TORRENT_VIEW"]);
         }
-        $torrent = (new TorrentsModel)->countSearch();
+
+        $torrent = TorrentsModel::countSearch();
 
         // Data For View
         $data = [
@@ -39,7 +44,7 @@ class Search extends Controller
         ];
         
         // Load View
-        $this->view('search', $data, 'user');
+        $this->view('user-search', $data, 'user');
     }
 
 }

@@ -16,16 +16,19 @@ class Members extends Controller
     // Get Current User
     public function __construct()
     {
-        $this->current_user = (new Auth)->user(2);
+        $this->current_user = new Auth();
+
+        if (!$this->current_user->loggedin) {
+            $this->showMessage(URLROOT, LANG["NO_PERMISSION"]);
+        }
     }
 
     // Members Page
     public function index()
     {
-    
         // Check User
-        if ($this->current_user->view_users != "yes" && $this->current_user->class <= CONFIG['_MODERATOR']) {
-            showMessage(Url(), LANG["NO_USER_VIEW"]);
+        if ($this->current_user->view_users != "yes" && !$this->current_user->isStaff) {
+            $this->showMessage(URLROOT, LANG["NO_USER_VIEW"]);
         }
 
         // Search Users
@@ -40,7 +43,7 @@ class Members extends Controller
         ];
 
         // Load View
-        $this->view('member', $data, 'user');
+        $this->view('user-member', $data, 'user');
     }
 
 }

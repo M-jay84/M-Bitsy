@@ -1,6 +1,6 @@
 <?php
 
-use App\Libs\MDBS;
+use App\Libs\Torrents\MDBS;
 use App\Models\TorrentsModel;
 
 if ($_SESSION['id']) {

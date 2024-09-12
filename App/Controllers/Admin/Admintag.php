@@ -16,9 +16,10 @@ class Admintag extends Controller
   // Get Current User
   public function __construct()
   {
-      $this->current_user = (new Auth)->user(2);
-      if ($this->current_user->class < CONFIG['_MODERATOR']) {
-          showMessage(CONFIG['URLROOT'], LANG["NO_PERMISSION"]);
+      $this->current_user = new Auth();
+  
+      if (!$this->current_user->isStaff) {
+          $this->showMessage(URLROOT, LANG["NO_PERMISSION"]);
       }
   }
 
@@ -26,24 +27,22 @@ class Admintag extends Controller
   public function index()
   {
     if (!empty($_POST)) {
-      (new TagsModel)->insertOrUpdate();
+      TagsModel::insertOrUpdate();
     } else {
-      // Get Tag Data
-      $tags = (new TagsModel)->getAll();
-
+      
       // Data For View
       $data = [
         'page_title' => LANG['TAGS'],
-        'V_tags' => $tags
+        'V_tags' => TagsModel::getAll()
       ];
 
       // Load View
-      $this->view('tag', $data, 'admin');
+      $this->view('admin-tag', $data, 'admin');
     }
   }
 
   public function delete()
   {
-    (new TagsModel)->delete();
+    TagsModel::delete();
   }
 }

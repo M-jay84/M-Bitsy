@@ -16,19 +16,23 @@ class Attachment extends Controller
     // Get Current User
     public function __construct()
     {
-        $this->current_user = (new Auth)->user(1);
+        $this->current_user = new Auth();
+
+        if (!$this->current_user->loggedin && CONFIG['MEMBERSONLY']) {
+            $this->showMessage(URLROOT, LANG["NO_PERMISSION"]);
+        }
     }
 
     // Download Attachment Page
     public function index($id, $hash)
     {
-        $file = CONFIG['UPLOADDIR'] . "/attachment/$hash.data";
-        $attachment = (new AttachmentsModel)->fetchRow('*', ['id ='], [$id]);
+        $file = UPLOAD_PATH . "/attachment/$hash.data";
+        $attachment = AttachmentsModel::fetchRow('*', ['id ='], [$id]);
         $extension = substr($attachment['filename'], -3);
         
         // Download
         if (!file_exists($file)) {
-            showMessage(Url($_SERVER['HTTP_REFERER']), "The file $hash does not exists");
+            $this->showMessage(URLROOT, "The file $hash does not exists");
         } else {
             header('Content-Disposition: attachment; filename="' . $attachment['filename'] . '"');
             header('Content-Length: ' . filesize($file));

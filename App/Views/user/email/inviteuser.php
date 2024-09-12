@@ -10,11 +10,10 @@ Message:
 
 This is a private site and you must agree to the rules before you can enter:
 %links%/rule
-%links%/faq
 
 To confirm your invitation, you have to follow this link:
 %links%/signup?invite=%id%&secret=%secret%
 
 After you do this, you will be able to use your new account. If you fail to
 do this, your account will be deleted within a few days. We urge you to read
-the RULES and FAQ before you start using %sitename%.
+the RULES before you start using %sitename%.

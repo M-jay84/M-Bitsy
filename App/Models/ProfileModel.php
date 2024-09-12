@@ -3,10 +3,9 @@
 namespace App\Models;
 
 use App\Libs\DB;
-use App\Models\FriendsModel;
+use App\Libs\Validate;
 use App\Models\CountriesModel;
 use App\Models\SnatchedModel;
-use App\Models\StylesheetsModel;
 use App\Models\PostsModel;
 use App\Models\TorrentsModel;
 use App\Models\CommentsModel;
@@ -20,75 +19,62 @@ use App\Models\LogsModel;
 class ProfileModel
 {
     // Get User Profile
-    public function getProfile($id, $current_user)
+    public static function getProfile($id, $current_user)
     {
         $user = DB::fetchRow('users', '*', ['id='], [$id]);
 
         if (!$user) {
-            showMessage(Url(), LANG["NO_USER"] . " $id.");
+            showMessage(URLROOT, LANG["NO_USER"] . " $id.");
         }
 
         if (($user["enabled"] == "no" || ($user["status"] == "pending")) && !$current_user->edit_users == 'yes') {
-            showMessage(Url(), LANG["NO_ACCESS_ACCOUNT_DISABLED"]);
+            showMessage(URLROOT, LANG["NO_ACCESS_ACCOUNT_DISABLED"]);
         }
 
-        // Start Blocked Users
-        $show = (new FriendsModel)->fetchRow('id', ['userid=','friend=','friendid='], [$user['id'],'enemy',$current_user->id]);
-
-        if ($show && $current_user->control_panel != "yes") {
-            showMessage(Url(), LANG["USER_PRIVATE"]);
-        }
-
-        $dropdown['stylesheets'] = (new StylesheetsModel)->getStyleDropDown($user['stylesheet']);
-        $dropdown['countries'] = (new CountriesModel)->dropdown($user['country']);
+        $dropdown['countries'] = CountriesModel::dropdown($user['country']);
         $dropdown['tz'] = timeZoneDropDown($user['tzoffset']);
-        $dropdown['teams'] = (new TeamsModel)->dropDownTeams($user['team']);
         $dropdown['gender'] = "<option value='Male'" . ($user['gender'] == "Male" ? " selected='selected'" : "") . ">" . LANG["MALE"] . "</option>\n"
             . "<option value='Female'" . ($user['gender'] == "Female" ? " selected='selected'" : "") . ">" . LANG["FEMALE"] . "</option>\n";
 
-        $count['numtorrents'] = (new TorrentsModel)->fetchColumn('count(id)', ['owner='], [$id]);
-        $count['numcomments'] = (new CommentsModel)->fetchColumn('count(id)', ['user='], [$id]);
-        $count['numforumposts'] = (new PostsModel)->fetchColumn('count(id)', ['userid='], [$id]);
-        $count['numhnr'] = (new SnatchedModel)->fetchColumn('COUNT(`hnr`)', ['uid='], [$id]);
+        $count['numtorrents'] = TorrentsModel::fetchColumn('count(id)', ['owner='], [$id]);
+        $count['numcomments'] = CommentsModel::fetchColumn('count(id)', ['user='], [$id]);
+        $count['numforumposts'] = PostsModel::fetchColumn('count(id)', ['userid='], [$id]);
+        $count['numhnr'] = SnatchedModel::fetchColumn('COUNT(`hnr`)', ['uid='], [$id]);
 
         $html['userratio'] = $user["downloaded"] > 0 ? number_format($user["uploaded"] / $user["downloaded"], 1) : "---";
-        $html['avatar'] = htmlspecialchars($user["avatar"]) ? htmlspecialchars($user["avatar"]) : CONFIG['URLROOT'] . "/assets/images/misc/default_avatar.webp";
+        $html['avatar'] = htmlspecialchars($user["avatar"]) ? htmlspecialchars($user["avatar"]) : URLROOT . "/assets/images/misc/default_avatar.webp";
         $html['usersignature'] = stripslashes($user["signature"]);
-        $html['team'] = (new TeamsModel)->getTeam($user['team']);
         $html['country'] = CountriesModel::fetchRow($user['country']);
-        $friend = (new FriendsModel)->countFriendAndEnemy($current_user->id, $id);
 
         // Init Data
         $data = [
             'dropdown' => $dropdown,
             'count' => $count,
             'user' => $user,
-            'html' => $html,
-            'friend' => $friend
+            'html' => $html
         ];
         return $data;
     }
 
     // Edit Profile Form Submit
-    public function submit($id, $data)
+    public static function submit($id, $data)
     {
 
         if (!empty($_POST)) {
             // Init Data
             $data = [
-                'privacy' => Input('privacy'),
-                'notifs' => Input('pmnotif') == 'yes' ? "[pm]" : "",
-                'stylesheet' => Input('stylesheet'),
-                'client' => Input('client'),
-                'age' => Input('age', 'int'),
-                'gender' => Input('gender'),
-                'country' => Input('country'),
-                'team' => Input('teams'),
-                'avatar' => Input('avatar'),
-                'title' => Input('title'),
-                'hideshoutbox' => Input('hideshoutbox') == 'yes' ? 'yes' : 'no',
-                'tzoffset' => Input('tzoffset', 'int'),
-                'signature' => Input('signature')
+                'privacy' => Validate::Input('privacy'),
+                'notifs' => Validate::Input('pmnotif') == 'yes' ? "[pm]" : "",
+                'stylesheet' => Validate::Input('stylesheet'),
+                'client' => Validate::Input('client'),
+                'age' => Validate::Input('age', 'int'),
+                'gender' => Validate::Input('gender'),
+                'country' => Validate::Input('country'),
+                'avatar' => Validate::Input('avatar'),
+                'title' => Validate::Input('title'),
+                'hideshoutbox' => Validate::Input('hideshoutbox') == 'yes' ? 'yes' : 'no',
+                'tzoffset' => Validate::Input('tzoffset', 'int'),
+                'signature' => Validate::Input('signature')
             ];
 
             if ($_POST['resetpasskey']) {
@@ -98,55 +84,55 @@ class ProfileModel
             }
 
             // Update
-            UsersModel::updateset($data, $id);
-            showMessage(Url("profile/$id"), LANG["UPDATE_COMPLETE"]);
+            DB::updateset("users", $data, ['id' => $id]);
+            showMessage(("profile/$id"), LANG["UPDATE_COMPLETE"]);
         }
     }
 
     // Admin Edit Profile Form Submit
-    public function adminSubmited($id, $data)
+    public static function adminSubmited($id, $data)
     {
-        $email = Input('email', 'email');
+        $email = Validate::Input('email', 'email');
 
         // Check User
         if ($data['current_user']->class < 5 && $id != $data['current_user']->id) {
-            showMessage(Url("profile/$id"), LANG["NO_PERMISSION"]);
+            showMessage(("profile/$id"), LANG["NO_PERMISSION"]);
         }
 
         // Init Data
         $data = [
-            'downloaded' => strtobytes(Input('downloaded')),
-            'uploaded' => strtobytes(Input('uploaded')),
-            'ip' => Input('ip'),
-            'class' => Input('class'),
-            'donated' => Input('donated'),
-            'password' => Input('password'),
-            'warned' => Input('warned'),
-            'downloadbanned' => Input('downloadbanned'),
-            'shoutboxpos' => Input('shoutboxpos'),
-            'modcomment' => Input('modcomment'),
-            'enabled' => Input('enabled'),
-            'invites' => Input('invites'),
+            'downloaded' => strtobytes(Validate::Input('downloaded')),
+            'uploaded' => strtobytes(Validate::Input('uploaded')),
+            'ip' => Validate::Input('ip'),
+            'class' => Validate::Input('class'),
+            'donated' => Validate::Input('donated'),
+            'password' => Validate::Input('password'),
+            'warned' => Validate::Input('warned'),
+            'downloadbanned' => Validate::Input('downloadbanned'),
+            'shoutboxpos' => Validate::Input('shoutboxpos'),
+            'modcomment' => Validate::Input('modcomment'),
+            'enabled' => Validate::Input('enabled'),
+            'invites' => Validate::Input('invites'),
             'email' => $email,
-            'seedbonus' => Input('bonus'),
+            'seedbonus' => Validate::Input('bonus'),
         ];
 
         // Change User Class
         if ($data['class'] != 0 && $data['class'] != $data['current_user']->class) {
             // change user class
-            $arr = UsersModel::fetchRow('class', ['id ='], [$id]);
+            $arr = DB::fetchRow('users', 'class', ['id ='], [$id]);
             $uc = $arr['class'];
             // skip if class is same as current
             if ($uc != $data['class'] && $uc > $data['current_user']->class) {
-                showMessage(Url(), LANG["YOU_CANT_DEMOTE_YOURSELF"]);
+                showMessage(URLROOT, LANG["YOU_CANT_DEMOTE_YOURSELF"]);
             } elseif ($uc == $data['current_user']->class) {
-                showMessage(Url(), LANG["YOU_CANT_DEMOTE_SOMEONE_SAME_LVL"]);
+                showMessage(URLROOT, LANG["YOU_CANT_DEMOTE_SOMEONE_SAME_LVL"]);
             } else {
-                UsersModel::update(['class'], ['id='], [$data['class'], $id]);
+                DB::update('users', ['class'], ['id='], [$data['class'], $id]);
                 // Notify user
                 $prodemoted = ($data['class'] > $uc ? "promoted" : "demoted");
-                $msg = "You have been $prodemoted to " . (new GroupsModel)->GetUserClassName($data['class'], $data['current_user']) . " by " . $data['current_user']->username . "";
-                MessagesModel::insert(['sender' => 0, 'receiver' => $id, 'added' => get_date_time(), 'subject' => 'Group Change', 'msg' => $msg]);
+                $msg = "You have been $prodemoted to " . GroupsModel::GetUserClassName($data['class'], $data['current_user']) . " by " . $data['current_user']->username . "";
+                MessagesModel::insert(['sender' => 0, 'receiver' => $id, 'added' => CONFIG['TT_DATE'], 'subject' => 'Group Change', 'msg' => $msg]);
             }
         }
 
@@ -158,55 +144,55 @@ class ProfileModel
         }
 
         // Change Password
-        $chgpasswd = Input('chgpasswd') == 'yes' ? true : false;
+        $chgpasswd = Validate::Input('chgpasswd') == 'yes' ? true : false;
         if ($chgpasswd) {
-            $passres = UsersModel::fetchRow('password', ['id ='], [$id]);
+            $passres = DB::fetchRow('users', 'password', ['id ='], [$id]);
             if ($data['password'] != $passres['password']) {
                 $password = password_hash($data['password'], PASSWORD_BCRYPT);
                 $data = ['password' => $password];
-                (new LogsModel)->write($data['current_user']->username . " has changed password for user: $id");
+                LogsModel::write($data['current_user']->username . " has changed password for user: $id");
             }
         }
 
         // Update
-        UsersModel::updateset($data, $id);
-        (new LogsModel)->write($data['current_user']->username . " has edited user: $id details");
-        showMessage(Url("profile/$id"), LANG["UPDATE_COMPLETE"]);
+        DB::updateset("users", $data, ['id' => $id]);
+        LogsModel::write($data['current_user']->username . " has edited user: $id details");
+        showMessage(("profile/$id"), LANG["UPDATE_COMPLETE"]);
     }
 
     // Delete Profile Default Page otdo (tidy up)
-    public function deleteprofile($data)
+    public static function deleteprofile($data)
     {
         // Check User Input
-        $userid = Input('userid', 'int');
-        $delreason = Input('delreason', 'int');
-        $sure = Input('sure', 'int');
+        $userid = Validate::Input('userid', 'int');
+        $delreason = Validate::Input('delreason', 'int');
+        $sure = Validate::Input('sure', 'int');
 
         // Check User
         if (!$data['current_user']->delete_users) {
-            showMessage(Url("profile/$userid"), LANG["NO_PERMISSION"]);
+            showMessage(("profile/$userid"), LANG["NO_PERMISSION"]);
         }
 
-        if (!Id($userid)) {
-            showMessage(Url("profile/$userid"), LANG["MISSING_ID"]);
+        if (!intval($userid)) {
+            showMessage(("profile/$userid"), LANG["MISSING_ID"]);
         }
 
         if ($data['current_user']->id == $userid) {
-            showMessage(Url("profile/$userid"), LANG["YOU_CANT_DELETE_ADMIN"]);
+            showMessage(("profile/$userid"), LANG["YOU_CANT_DELETE_ADMIN"]);
         }
 
         if (!$delreason) {
-            showMessage(Url("profile/$userid"), LANG["MISSING_FORM_DATA"]);
+            showMessage(("profile/$userid"), LANG["MISSING_FORM_DATA"]);
         }
 
         if ($sure == "0") {
-            showMessage(Url('profile/delete'), "Sanity check: You are about to delete user. Click <a href='" . CONFIG['URLROOT'] . "/profile/delete?sure=1'>here</a> if you are sure.");
+            showMessage(('profile/delete'), "Sanity check: You are about to delete user. Click <a href='" . URLROOT . "/profile/delete?sure=1'>here</a> if you are sure.");
         }
 
         // Delete Profile
         UsersModel::deleteUser($userid);
-        (new LogsModel)->write($data['current_user']->username . " has deleted account: " . coloredname($userid) . "");
-        showMessage(Url("profile/$userid"), LANG["DEL_COMPLETE"]);
+        LogsModel::write($data['current_user']->username . " has deleted account: " . coloredname($userid) . "");
+        showMessage(("profile/$userid"), LANG["DEL_COMPLETE"]);
     }
 
 }

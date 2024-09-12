@@ -28,8 +28,8 @@ class Errors
             error_reporting(0);
             ini_set('display_errors', 0);
             ini_set('display_startup_errors', 0);
-            ini_set('error_log', CONFIG['LOGGER'] . '/errors_log.txt');
-            set_error_handler(array($this, 'error_runtime_handler'));
+            ini_set('error_log', LOG_PATH . '/errors_log.txt');
+            //set_error_handler(array($this, 'error_runtime_handler'));
         } else {
             error_reporting(E_ALL);
             ini_set('display_errors', 1);
@@ -123,15 +123,16 @@ class Errors
         // Add verbose trace and debug output
         $error .= "\n" . $this->get_verbose_backtrace($e->getTrace());
         // Log details of error in a file
-        error_log($error, 3, CONFIG['LOGGER'] . '/exception_log.txt"');
+        error_log($error, 3, LOG_PATH . '/exception_log.txt"');
         $_SESSION['FLASH'] = LANG["OOPS_ERR"];
         $data = [
             'page_title' => 'Message',
             'V_msg' => LANG["OOPS_ERR"],
-            'V_url' => CONFIG['URLROOT']
+            'V_url' => URLROOT,
+            'refresh'  => 2
         ];
         extract($data);
-        require_once CONFIG['APPROOT'] . "/Views/user/error_page.php";
+        require_once VIEW_PATH . "/inc/error-page.php";
         exit();
     }
 
@@ -160,7 +161,7 @@ class Errors
             'Date: ' . $date . "\n" .
             'Line: ' . $errline . "\n" .
             'File: ' . $errfile . "\n";
-        file_put_contents(CONFIG['LOGGER'] . '/runtime_errors.txt', $err_msg, FILE_APPEND);
+        file_put_contents(LOG_PATH . '/runtime_errors.txt', $err_msg, FILE_APPEND);
 
         if ($errno === E_USER_ERROR) {
             exit(1);

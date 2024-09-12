@@ -1,5 +1,5 @@
 <?php
-use App\Libs\MDBS;
+use App\Libs\Torrents\MDBS;
 use App\Models\TorrentsModel;
 if (!CONFIG['MEMBERSONLY'] || $_SESSION['id']) {
     $res = TorrentsModel::getAll("WHERE visible = ? AND banned = ?", ['yes', 'no']);

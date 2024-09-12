@@ -16,18 +16,18 @@ class Adminwarning extends Controller
     // Get Current User
     public function __construct()
     {
-        $this->current_user = (new Auth)->user(2);
-        if ($this->current_user->class < CONFIG['_MODERATOR']) {
-            showMessage(CONFIG['URLROOT'], LANG["NO_PERMISSION"]);
+        $this->current_user = new Auth();
+
+        if (!$this->current_user->isStaff) {
+            $this->showMessage(URLROOT, LANG["NO_PERMISSION"]);
         }
     }
 
     // Warning Default Page
     public function index()
     {
-    
         // Get Warnings
-        $warnings = (new WarningsModel)->getAll($this->current_user->id);
+        $warnings = WarningsModel::getAll($this->current_user->id);
 
         // Data For View
         $data = [
@@ -38,14 +38,13 @@ class Adminwarning extends Controller
         ];
 
         // Load View
-        $this->view('warning', $data, 'admin');
+        $this->view('admin-warning', $data, 'admin');
     }
 
     // Warning Form Submit
     public function submit()
     {
-    
-        (new WarningsModel)->deleteAllAdmin();
+        WarningsModel::deleteAllAdmin();
     }
     
 }

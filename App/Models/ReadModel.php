@@ -10,16 +10,16 @@ use App\Libs\DB;
 class ReadModel
 {
     // Delete Read
-    public function delete($data)
+    public static function delete($data)
     {
         $stmt = DB::delete('forum_readposts', $data);
         return $stmt;
     }
 
     // Insert Forum Read
-    public function insert($updateset)
+    public static function insert($updateset)
     {
-        $stmt = (new ReadModel)->insert('forum_readposts', $updateset);
+        $stmt = ReadModel::insert('forum_readposts', $updateset);
         return $stmt;
 	}
 	
@@ -31,14 +31,14 @@ class ReadModel
 	}
 	
     // Fetch Forum Read Column
-    public function fetchColumn($columns = '*', $where = '', $values = '', $other = '')
+    public static function fetchColumn($columns = '*', $where = '', $values = '', $other = '')
     {
         $stmt = DB::newSelect('forum_readposts', $columns, $where, $values, $other)->fetchColumn();
 		return $stmt;
 	}
 
     // Fetch Forum Read Row
-    public function fetchRow($columns = '*', $where = '', $values = '', $other = '')
+    public static function fetchRow($columns = '*', $where = '', $values = '', $other = '')
     {
         $stmt = DB::fetchRow('forum_readposts', $columns, $where, $values, $other);
 		return $stmt;

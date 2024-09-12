@@ -1,22 +1,5 @@
 <?php
 define('CONFIG', array (
-    // DB Details
-    'DB_HOST' => 'localhost',
-    'DB_USER' => 'dbusername',
-    'DB_PASS' => 'dbpassword',
-    'DB_NAME' => 'dbname',
-    'DB_CHAR' => 'utf8mb4',
-    // URL Root
-    'URLROOT' => 'http://localhost/M-BiTsy',
-    // App Root
-    'APPROOT' => '../App',
-    'NAME_SPACE' => '../',
-    // Paths
-    'BACUP' => '../Core/files/db_backups',
-    'CACHE' => '../Core/files/cache',
-    'EMAILDIR' => '../Core/files/email',
-    'LOGGER' => '../Core/files/logs',
-    'UPLOADDIR' => '../Core/files/uploaded',
     // Quick Time
     'TT_TIME' => time(),
     'TT_DATE' => date('Y-m-d H:i:s'),
@@ -26,8 +9,6 @@ define('CONFIG', array (
     'ANNOUNCELIST' => '/announce.php',
     // Passkey Url
     'PASSKEYURL' => '/announce.php?passkey=%s',
-    // Can edit Settings
-    '_OWNERS' => array('M-jay' => 'test'), // Example & with more 'CONFIG['_OWNERS']' => array('mjay' => 'mjay' => 'mjay'));
     // Image upload settings
     'USE_WEBP' => true, // Use Webp 
     'IMAGEMAXFILESIZE' => 524288, // Max uploaded image size in bytes (Default: 512 kB)
@@ -42,12 +23,9 @@ define('CONFIG', array (
     // category,name,dl,magnet,uploader,tube,tmdb,comments,nfo,size,completed,seeders,leechers,health,external,added,speed,wait,rating
     'TORRENTTABLE_COLUMNS' => 'category,name,dl,magnet,uploader,tube,tmdb,comments,nfo,size,completed,seeders,leechers,health,external,added,speed,wait,rating,admin',
     // Set User Group
-    '_USER' => 1,
-    '_POWERUSER' => 2,
     '_VIP' => 3,
     '_UPLOADER' => 4,
     '_MODERATOR' => 5,
-    '_SUPERMODERATOR' => 6,
     '_ADMINISTRATOR' => 7,
     // Cat arrays
     'PopularCats' => array(1), // popular cat id for popular block
@@ -61,13 +39,9 @@ define('CONFIG', array (
     '_OMDBAPIKEY' => 'Place_Key', // Place Key Here ////////
     '_OMDBswitch' => true, // TMDB On - Off
     'SITENAME' => 'M-BiTsy',
-    '_SITEDESC' => 'A PHP support forum for M-BiTsy',
     'SITEEMAIL' => 'something@email.com',
-    'SITENOTICEON' => true,
-    'SITENOTICE' => 'Welcome To M-BiTsy support @https://torrenttrader.uk',
     'SITE_ONLINE' => true,
     'OFFLINEMSG' => 'Site is down for a little while',
-    'WELCOMEPM_ON' => true,
     'WELCOMEPM_MSG' => 'Thank you for registering at our tracker! Please remember to keep your ratio at 1.00 or greater',
     'UPLOADRULES' => 'You should also include a .nfo file wherever possible<br />Try to make sure your torrent is well-seeded for at least 24 hours<br />Do not re-release material that is still active',
     'CAPTCHA_ON' => false,
@@ -75,7 +49,7 @@ define('CONFIG', array (
     'CAPTCHA_SECRET' => 'googlecaptchasecret',
     'CSRF_Token' => false,
     'DEFAULTLANG' => 'english',
-    'DEFAULTTHEME' => 'default',
+    'DEFAULTTHEME' => 'inc',
     'MEMBERSONLY' => false,
     'MEMBERSONLY_WAIT' => true,
     'ALLOWEXTERNAL' => true,
@@ -85,18 +59,12 @@ define('CONFIG', array (
     'CONFIRMEMAIL' => false,
     'ACONFIRM' => false,
     'ANONYMOUSUPLOAD' => false,
-    'UPLOADSCRAPE' => true,
     'FORUMS' => true,
     'FORUMS_GUESTREAD' => true,
     'FORCETHANKS' => false,
     'ALLOWLIKES' => true,
-    'REQUESTSON' => true,
-    'LEFTNAV' => true,
-    'RIGHTNAV' => true,
-    'MIDDLENAV' => true,
     'SHOUTBOX' => true,
     'NEWSON' => true,
-    'DONATEON' => true,
     'DISCLAIMERON' => true,
     'FORUMONINDEX' => true,
     'LATESTFORUMPOSTONINDEX' => true,

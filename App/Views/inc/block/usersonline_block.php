@@ -8,7 +8,7 @@ if ($_SESSION['id']) {
     if (($rows = $TTCache->Get("sql_cache/usersonline_block", $expires)) === false) {
         $res = DB::fetchAll('users', 'id, username',
          ['enabled=','status=','privacy !=', "UNIX_TIMESTAMP(?) - UNIX_TIMESTAMP(users.last_access) <="],
-        ['yes','confirmed','strong', get_date_time(), 900]);
+        ['yes','confirmed','strong', CONFIG['TT_DATE'], 900]);
         $rows = array();
         foreach ($res as $row) {
             $rows[] = $row;

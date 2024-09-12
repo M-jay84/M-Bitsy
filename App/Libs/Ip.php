@@ -41,7 +41,7 @@ class Ip
         $ip = Ip::getIP();
         $ipq = DB::fetchColumn('users', 'count(id)', ['ip ='], [$ip]);
         if ($ipq >= CONFIG['ACCOUNTMAX']) {
-            showMessage(Url('login'), LANG["IP_USED"]);
+            showMessage(('login'), LANG["IP_USED"]);
         }
     }
 

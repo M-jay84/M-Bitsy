@@ -16,16 +16,20 @@ class Reseed extends Controller
     // Get Current User
     public function __construct()
     {
-        $this->current_user = (new Auth)->user(1);
+        $this->current_user = new Auth();
+
+        if (!$this->current_user->loggedin) {
+            $this->showMessage(URLROOT, LANG["NO_PERMISSION"]);
+        }
     }
 
     // Request Reseed Form Submit todo (tidy up)
     public function index($id)
     {
         if ($this->current_user->view_torrents != "yes" && CONFIG['MEMBERSONLY']) {
-            showMessage(Url(), LANG["NO_TORRENT_VIEW"]);
+            $this->showMessage(URLROOT, LANG["NO_TORRENT_VIEW"]);
         }
-        (new TorrentsModel)->reseed($id, $this->current_user);
+        TorrentsModel::reseed($id, $this->current_user);
     }
 
 }

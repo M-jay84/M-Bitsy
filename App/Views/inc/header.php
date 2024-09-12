@@ -2,7 +2,7 @@
 
 use App\Libs\Cache;
 
- require CONFIG['APPROOT'] . "/Views/inc/blocks.php"; ?>
+?>
 <?php $GLOBALS['tstart'] = array_sum(explode(" ", microtime())); ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -18,7 +18,7 @@ use App\Libs\Cache;
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/css/bootstrap.min.css" rel="stylesheet">
   <script src="https://kit.fontawesome.com/2da665f0cd.js" crossorigin="anonymous"></script>
   <!-- Custom CSS -->
-  <link href="<?= CONFIG['URLROOT'] ?>/assets/default_style.css" rel="stylesheet">
+  <link href="<?= URLROOT ?>/assets/css/default_style.css" rel="stylesheet">
   <!-- Highlight CSS -->
   <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/styles/atom-one-dark.min.css">
   <!-- Ajax -->
@@ -27,28 +27,22 @@ use App\Libs\Cache;
 
 <body class='d-flex flex-column min-vh-100'>
   <!-- Navbar -->
-   <?php require CONFIG['APPROOT'] . "/Views/inc/navbar.php"; ?>
+   <?php require VIEW_PATH . "/inc/navbar.php"; ?>
    <!-- Content Start -->
     <div class="container-fluid" style="margin-top:5px;">
       <div class="row">
         <div class="col  portal_sidebar">
         <?php
-        $TTCache = new Cache();
-        include CONFIG['APPROOT'] . "/Views/inc/block/login_block.php";
-        include CONFIG['APPROOT']."/Views/inc/block/themelang_block.php";
-        include CONFIG['APPROOT']."/Views/inc/block/maincats_block.php";
-        include CONFIG['APPROOT']."/Views/inc/block/seedwanted_block.php";
-        include CONFIG['APPROOT']."/Views/inc/block/popular_block.php";
-        include CONFIG['APPROOT']."/Views/inc/block/latestuploads_block.php";
-        include CONFIG['APPROOT']."/Views/inc/block/mostactivetorrents_block.php";
-        include CONFIG['APPROOT']."/Views/inc/block/qbit_block.php";
-        include CONFIG['APPROOT']."/Views/inc/block/advancedstats_block.php";
-        include CONFIG['APPROOT']."/Views/inc/block/maincats_block.php";
-        include CONFIG['APPROOT']."/Views/inc/block/seedwanted_block.php";
-        include CONFIG['APPROOT']."/Views/inc/block/popular_block.php";
-        include CONFIG['APPROOT']."/Views/inc/block/latestuploads_block.php";
-        include CONFIG['APPROOT']."/Views/inc/block/mostactivetorrents_block.php";
-        include CONFIG['APPROOT']."/Views/inc/block/qbit_block.php";
+        if (!in_array($_GET['url'], CONFIG['ISURL'])) {
+          $TTCache = new Cache();
+          include VIEW_PATH . "/inc/block/login_block.php";
+          include VIEW_PATH . "/inc/block/maincats_block.php";
+          include VIEW_PATH . "/inc/block/popular_block.php";
+          include VIEW_PATH . "/inc/block/latestuploads_block.php";
+          include VIEW_PATH . "/inc/block/mostactivetorrents_block.php";
+          include VIEW_PATH . "/inc/block/latestimages_block.php";
+        }
+
         ?>
         </div>
         <!-- Main Page Start -->

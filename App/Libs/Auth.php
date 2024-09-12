@@ -11,10 +11,10 @@ use App\Libs\DB;
 class Auth
 {
     public $data = array();
-    public $currentuser = null;
+    public $currentuser;
     
     // Check User/Visitor & Set $_SESSION
-    public function user($force = 0, $autoclean = false)
+    public function __construct($autoclean = false)
     {
         // Check Ip
         self::ipBanned();
@@ -28,7 +28,6 @@ class Auth
             $_SESSION["id"] = 0;
             $_SESSION['class'] = 0;
             self::isClosed($session_class);
-            self::isLoggedIn($force);
             return;
         } else {
             // Is User A Member
@@ -56,8 +55,8 @@ class Auth
                     $data[$key] = $value;
                 }
             } catch (\Exception $e) {
-                destroy_cookies();
-                showMessage(Url('logout'), LANG['AUTH_ISSUE']);
+                self::destroy_cookies();
+                showMessage(('logout'), LANG['AUTH_ISSUE']);
             }
 
             // Site closeed
@@ -65,10 +64,10 @@ class Auth
 
             // Now Compare Checks
             if ($data['password'] != $_COOKIE['password']) {
-                showMessage(Url('logout'), true);
+                showMessage(('logout'), true);
             }
             if ($data['id'] != $_COOKIE['id']) {
-                showMessage(Url('logout'), true);
+                showMessage(('logout'), true);
             }
 
             // User So Update & Set Session
@@ -76,18 +75,18 @@ class Auth
                 if ($data['passkey'] == '') {
                     $rand = array_sum(explode(" ", microtime()));
                     $passkey = md5($data['username'] . $rand . $data['secret'] . ($rand * mt_rand()));
-                    DB::update('users', ['passkey','last_access','ip','page'], ['id='], [$passkey, get_date_time(), Ip::getIP(), $_SERVER['REQUEST_URI'], $data["id"]]);
+                    DB::update('users', ['passkey','last_access','ip','page'], ['id='], [$passkey, CONFIG['TT_DATE'], Ip::getIP(), $_SERVER['REQUEST_URI'], $data["id"]]);
                 } else {
-                    DB::update('users', ['last_access','ip','page'], ['id='], [get_date_time(), Ip::getIP(), $_SERVER['REQUEST_URI'], $data["id"]]);
+                    DB::update('users', ['last_access','ip','page'], ['id='], [CONFIG['TT_DATE'], Ip::getIP(), $_SERVER['REQUEST_URI'], $data["id"]]);
                 }
-				$_SESSION = $data;
+                $_SESSION = $data;
                 $_SESSION['loggedin'] = true;
                 $data['loggedin'] = true;
                 if ($data['class'] >= CONFIG['_MODERATOR']) {
                     $data['isStaff'] = true;
                 }
-                //$this->data = $data;
-                //unset($data);
+                $this->currentuser = $data;
+                unset($data);
             }
 
             // Run Cleanup
@@ -95,22 +94,18 @@ class Auth
                 Cleanup::autoClean();
             }
 
-            $this->currentuser =  $data;
-
-            return (object) $data;
+            return $this->currentuser;
         }
     }
 
-
     // Get User Value
-    public function get($var){
+    public function __get($var){
         if ($this->currentuser[$var]) {
             return $this->currentuser[$var];
         } else {
             return 0;
         }
     }
-
 
     // Check Ip Banned
     public static function ipBanned()
@@ -122,21 +117,6 @@ class Auth
         Ip::checkIpBan($ip);
     }
 
-    // Check Logged In Level
-    public static function isLoggedIn($force = 0)
-    {
-        // If force 0 guest view, force 1 use config CONFIG['MEMBERSONLY'], force 2 always hidden from guest
-        if ($force == 1 && CONFIG['MEMBERSONLY']) {
-            if (!$_SESSION['id']) {
-                showMessage(Url('logout'), true);
-            }
-        } elseif ($force == 2) {
-            if (!$_SESSION['id']) {
-                showMessage(Url('login'), true);
-            }
-        }
-    }
-
     // Check Site Closed
     public static function isClosed($class = false)
     {
@@ -144,14 +124,24 @@ class Auth
             if ($class < CONFIG['_MODERATOR']) {
                 ob_start();
                 ob_clean();
-                require_once CONFIG['APPROOT']."/Views/inc/header.php";
+                require_once VIEW_PATH . "/inc/header.php";
                 echo '<div class="alert ttalert"><center>' . stripslashes(CONFIG['OFFLINEMSG']) . '</center></div>';
-                require_once CONFIG['APPROOT']."/Views/inc/footer.php";
+                require_once VIEW_PATH . "/inc/footer.php";
                 die();
             } else {
                 echo '<center>' . stripslashes(CONFIG['OFFLINEMSG']) . '</center>';
             }
         }
+    }
+
+    public static function destroy_cookies()
+    {
+        setcookie('id', '', CONFIG['TT_TIME']-45);
+        setcookie('password', '', CONFIG['TT_TIME']-45);
+        setcookie('PHPSESSID', '', CONFIG['TT_TIME']-45);
+        $_SESSION = array();
+        unset($_SESSION);
+        @session_destroy();
     }
 
 }

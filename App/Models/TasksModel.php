@@ -17,7 +17,7 @@ class TasksModel
     }
 
     // Update Task
-    public function update($cols, $where, $vals, $other = '')
+    public static function update($cols, $where, $vals, $other = '')
     {
         $stmt = DB::update('tasks', $cols, $where, $vals, $other);
         return $stmt;
@@ -35,6 +35,12 @@ class TasksModel
     {
         $stmt = DB::insert('tasks', $updateset);
         return $stmt;
+	}
+	
+    // Insert Task
+    public static function clear($sure = '')
+    {
+        ShoutboxModel::truncate($sure);
 	}
 	
 }

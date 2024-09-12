@@ -1,21 +1,15 @@
         </div>
        <!-- Right Block Start -->
       <div class="col  portal_sidebar">
-      <?php
-        include CONFIG['APPROOT']."/Views/inc/block/navigate_block.php";
-        include CONFIG['APPROOT']."/Views/inc/block/usersonline_block.php";
-        include CONFIG['APPROOT']."/Views/inc/block/invite_block.php";
-        include CONFIG['APPROOT']."/Views/inc/block/poweredby_block.php";
-        include CONFIG['APPROOT']."/Views/inc/block/simplesearch_block.php";
-        include CONFIG['APPROOT']."/Views/inc/block/advancedsearch_block.php";
-        include CONFIG['APPROOT']."/Views/inc/block/admincp_block.php";
-        include CONFIG['APPROOT']."/Views/inc/block/polls_block.php";
-        include CONFIG['APPROOT']."/Views/inc/block/newestmember_block.php";
-        include CONFIG['APPROOT']."/Views/inc/block/donate_block.php";
-        include CONFIG['APPROOT']."/Views/inc/block/request_block.php";
-        include CONFIG['APPROOT']."/Views/inc/block/ipconnected_block.php";
-        include CONFIG['APPROOT']."/Views/inc/block/rss_block.php";
-        include CONFIG['APPROOT']."/Views/inc/block/serverload.php";
+        <?php
+        if (!in_array($_GET['url'], CONFIG['ISURL'])) {
+        include VIEW_PATH . "/inc/block/navigate_block.php";
+        include VIEW_PATH . "/inc/block/usersonline_block.php";
+        include VIEW_PATH . "/inc/block/invite_block.php";
+        include VIEW_PATH . "/inc/block/newestmember_block.php";
+        include VIEW_PATH . "/inc/block/search_block.php";
+        include VIEW_PATH . "/inc/block/statistics_block.php";
+        }
         ?>
       </div>
     </div>

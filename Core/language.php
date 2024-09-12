@@ -54,8 +54,8 @@ define('LANG', array (
 'UPLOAD_ERR[8]' => 'A PHP extension stopped the file upload.',
 'EMPTY_FILENAME' => 'Empty filename.',
 'UPLOAD' => 'Upload',
-'TORRENT_UPLOAD_EXTERNAL' => "Torrent Uploaded OK:<br /><br />%s was uploaded.<br /><br /><a href='" . CONFIG['URLROOT'] . "/torrent/%d'>View Uploaded Torrent</a><br /><br />",
-'TORRENT_UPLOAD_LOCAL' => "Torrent Uploaded OK:<br /><br />%s was uploaded.<br /><br />  Please remember to re-download so that your passkey is added and you can seed this torrent.<br /><br /><a href='" . CONFIG['URLROOT'] . "/download/%d'>Download Now</a><br /><a href='" . CONFIG['URLROOT'] . "/torrent/%d'>View Uploaded Torrent</a><br /><br />",
+'TORRENT_UPLOAD_EXTERNAL' => "Torrent Uploaded OK:<br /><br />%s was uploaded.<br /><br /><a href='" . URLROOT . "/torrent/%d'>View Uploaded Torrent</a><br /><br />",
+'TORRENT_UPLOAD_LOCAL' => "Torrent Uploaded OK:<br /><br />%s was uploaded.<br /><br />  Please remember to re-download so that your passkey is added and you can seed this torrent.<br /><br /><a href='" . URLROOT . "/download/%d'>Download Now</a><br /><a href='" . URLROOT . "/torrent/%d'>View Uploaded Torrent</a><br /><br />",
 'TORRENT_UPLOADED' => 'Torrent %s uploaded by %s',
 'UPLOAD_COULD_NOT_BE_COPIED' => 'File Could not be copied',
 'NFO_UPLOAD_SIZE' => 'NFO is too big! Max 65,535 bytes.',
@@ -129,10 +129,6 @@ You will have to wait for the approval of an admin before you can use your new a
 'VERSION_MYSQL' => 'Sql Version',
 'VERSION_PHP' => 'PHP Version',
 'VERSION_APACHE' => 'Apache Version',
-// Back Up
-'BACKUPS' => 'Backups',
-'BACKUP_COMPLETE' => 'Completed Please Check File',
-'BACKUP_DB' => 'Backup Database</a> (or create a CRON task on <?= Url() ?>adminbackup/submit)',
 // Ban
 'BANNED' => 'Bans.',
 'ADD_BAN' => 'Add Ban',
@@ -146,20 +142,10 @@ You will have to wait for the approval of an admin before you can use your new a
 'SEEDBONUS_REWARD' => 'You receive <font color=red> %s </font> points per %s minutes the system registers you as a seeder by torrent.',
 'POINTS' => 'Points',
 'EXCHANGE' => 'Exchange',
-// Bookmarks
-'BOOKMARK' => 'Bookmark',
-'UNBOOKMARK' => 'UnBookmark',
-'BOOKMARKS' => 'Bookmarks',
-'NO_BOOKMARKED' => 'No items bookmarked.',
-'ITEM_BOOKMARKED' => 'Item was successfully bookmarked.',
-'BOOKMARK_MESSAGE' => ' You have bookmarked <b> %s </b> items</b>',
 // Cats
 'TORRENT_CATEGORIES' => 'Torrent Categories',
 'CAT_IMAGE_HELP' => 'Please note that if no image is specified, the category name will be displayed',
-// Cheats
-'CHEAT' => 'Cheat',
-'NO_OF_DAYS' => 'No of days',
-'MB_UPLOADED' => 'MB Uploaded',
+
 // Clients
 'CLIENTS' => 'Clients',
 // COMMENTS
@@ -193,8 +179,6 @@ You will have to wait for the approval of an admin before you can use your new a
 // Exceptions
 'EXCEPTIONS' => 'Exceptions',
 'SEND_EXCEPTION' => 'Please Report any exceptions to help improve M-BiTsy. Please keep this file blank.',
-// FAQ
-'FAQ' => 'Faqs',
 // Forum
 'FORUM_CATAGORY' => 'Forum categorys',
 'CP_FORUM_CATAGORY_WAS_EMPTY' => 'Forum category was empty',
@@ -214,7 +198,7 @@ You will have to wait for the approval of an admin before you can use your new a
 'FORUMS_MOD_OPTIONS' => 'Moderator Options',
 'FORUM_INVALID' => 'Invalid Forum.',
 'FORUM_INVALID_CAT' => 'Invalid Forum Category.',
-'FORUMS_DEL_POST_ONLY_POST' => "Can't delete post; it is the only post of the topic. You should <a href='" . CONFIG['URLROOT'] . "/topic/delete/%s/1'>delete the topic</a> instead.\n",
+'FORUMS_DEL_POST_ONLY_POST' => "Can't delete post; it is the only post of the topic. You should <a href='" . URLROOT . "/topic/delete/%s/1'>delete the topic</a> instead.\n",
 'MIN_CLASS_POST' => 'Mininum Class Needed to Post',
 'MIN_CLASS_READ' => 'Mininum Class Needed to Read',
 'SUB_FORUM_HELP' => 'Sub Forum To (If not sub Forum Leave as none)',
@@ -239,10 +223,6 @@ You will have to wait for the approval of an admin before you can use your new a
 'FORUM_RANK' => 'Rank',
 'FORUM_USER' => 'User',
 'FORUM_ADD_NEW_CAT' => 'Add new category',
-// Friend
-'FRIEND' => 'Friend',
-'ENEMY' => 'Blocked',
-'FRIENDS' => 'Friends',
 // Footer
 'PAGE_GENERATED_IN' => 'Page Generated In %f secs.',
 // Groups
@@ -318,10 +298,6 @@ You will have to wait for the approval of an admin before you can use your new a
 // News
 'NEWS' => 'News',
 'LATEST_NEWS' => 'Latest News',
-// Notifications
-'NOTIFICATION' => 'Notifications',
-'NO_NEW_NOTIFICATIONS' => 'No new notifications',
-'SEE_ALL_NOTIFICATIONS' => 'See all notifications',
 // Peers
 'PEERS' => 'Peers',
 'MANY_PEERS' => "We have %s peers Online currently",
@@ -367,21 +343,6 @@ You will have to wait for the approval of an admin before you can use your new a
 'VOTE' => 'Vote',
 'BLANK_VOTES' => 'Votes',
 'POLL_MUST_LOGIN' => 'You must be logged in to view polls',
-// Blockss
-'BLOCKS' => 'Blocks',
-'_CHARS_' => 'chars',
-'_FILE_NAME_' => 'File Name',
-'_FL_NM_IF_NO_SET_' => 'file name if not set',
-'_MUST_ENB_FIRST' => 'Block must be enabled first',
-'_MUST_ENB_MOVE_' => 'Must be enabled to move',
-'_MUST_ENB_SORT_' => 'Must be enabled to resort',
-'_AT_BOTTOM_' => 'This block is on most-down position',
-'_AT_CENTER_' => 'Block is in center',
-'_AT_LEFT_' => 'Block is located left',
-'_AT_RIGHT_' => 'Block is located right',
-'_AT_TOP_' => 'This block is top sorted',
-'RIGHT' => 'Right',
-'LEFT' => 'Left',
 // Profile
 'PROFILE' => 'Profile',
 // Privacy
@@ -439,7 +400,7 @@ You will have to wait for the approval of an admin before you can use your new a
 'WE_HAVE_X_SNATCH' => "We have %s snatched torrents",
 'YOU_MOST_KEEP_SEEDING' => 'You most keep seeding',
 'TRADE_TO_DELETE' => "trade bonus",
-'HIT&RUNNOTICE' => "%s You Have %s Hit & Runs <a href='".CONFIG['URLROOT']."/snatch/%s/user'>here</a><br>Keep Most keep seeding. <a href='".CONFIG['URLROOT']."/snatch/trade'>Remove Hit & Run</a>",
+'HIT&RUNNOTICE' => "%s You Have %s Hit & Runs <a href='".URLROOT."/snatch/%s/user'>here</a><br>Keep Most keep seeding. <a href='".URLROOT."/snatch/trade'>Remove Hit & Run</a>",
 'PREF_BITTORRENT_CLIENT' => 'prefered client',
 'COOKIES' => "we only use cookies to remember your login we do not collect data",
 // Snatched Cleanup
@@ -490,7 +451,6 @@ You will have to wait for the approval of an admin before you can use your new a
 'NO_TORRENT_NEED_SEED' => 'There are no torrents currently needing seeds',
 'NO_TORRENT_NEED_SEED' => 'There are no torrents currently needing seeds',
 'BROWSE_TORRENTS' => 'Browse Torrents',
-'CATALOGUE' => 'Catalog',
 'TMDB_OFF' => 'TMDB turned off',
 'NO_TORRENT_NEED_SEED' => 'There are no torrents currently needing seeds',
 'NO_ACTIVE_PEERS' => 'No Active Peers',
@@ -511,7 +471,6 @@ You will have to wait for the approval of an admin before you can use your new a
 'NOT_TORRENT' => 'This is not a torrent',
 'UPLOAD' => 'Upload',
 'UPLOAD_ONLY_FOR_UPLOADERS' => 'Only uploaders can upload.',
-'TODAYS_TORRENTS' => "Today's Torrents",
 'SCRAPE_DEAD' => 'The Torrent seems to be dead.',
 'TORRENT_NOT_FOUND' => 'Sorry no .torrent found with this ID.',
 'UPLOADED_TORRENTS_ERROR' => 'This member has not uploaded any torrents',
@@ -571,7 +530,6 @@ You will have to wait for the approval of an admin before you can use your new a
 'CHECK_VIP' => 'Check Vip',
 'UPLOAD_TORRENT' => 'Upload Torrent',
 'SEARCH_TORRENTS' => 'Search',
-'CATALOG' => 'Catalog',
 'NEED_SEED' => 'Needs Seed',
 'ACCEPTED_FORMATS' => 'Accepted Formats',
 'LOCATION' => 'Location',
@@ -587,7 +545,6 @@ You will have to wait for the approval of an admin before you can use your new a
 'NEWEST_MEMBERS' => 'Newest Members',
 'DONATE' => 'Donate',
 'THIS_WOULD_BE_DONATION_INFO' => 'You can enter your donation Info here',
-'NEW_TODAY' => 'New Today',
 'NEW_PASSWORD' => 'New Password',
 'RESET_PASSWORD' => 'Reset Password',
 'RESET_EMAIL' => 'Reset Email',
@@ -632,7 +589,6 @@ You will have to wait for the approval of an admin before you can use your new a
 'PRIVACY' => 'Privacy',
 'CONNECTION' => 'Connection',
 'CLIENT_BAN' => 'Clent Ban',
-'CHEATS' => 'Cheats',
 'LATEST_POST' => 'Recent Posts',
 'VISITED_USERS' => 'Visited in last 24 hours',
 'DUPLICATEIP' => 'Duplicate Ips',
@@ -793,7 +749,6 @@ You will have to wait for the approval of an admin before you can use your new a
 'FILE' => 'File',
 'FILE_LIST' => 'File List',
 'FINISHED' => 'Finished',
-'FRIEND' => 'Friend',
 'GENDER' => 'Gender',
 'GO' => 'Go',
 'HEALTH' => 'Health',

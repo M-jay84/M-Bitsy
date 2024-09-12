@@ -4,6 +4,7 @@ namespace App\Controllers\User;
 
 use App\Libs\Auth;
 use App\Libs\Controller;
+use App\Libs\DB;
 use App\Models\CatagoriesModel;
 use App\Models\TorrentsModel;
 use App\Models\UsersModel;
@@ -18,7 +19,7 @@ class Rss extends Controller
     // Get Current User
     public function __construct()
     {
-        $this->current_user = (new Auth)->user(0);
+        $this->current_user = new Auth();
     }
 
     // RSS Default Page todo (simplify)
@@ -34,7 +35,7 @@ class Rss extends Controller
         if ($passkey == ''){
             $passkey = $this->current_user->passkey;
         }
-        $member = UsersModel::fetchColumn('count(id)', ['passkey ='], [$passkey]);
+        $member = DB::fetchColumn('users', 'count(id)', ['passkey ='], [$passkey]);
         if ($member == 1) {
             $link = "$passkey";
         } else {
@@ -42,7 +43,7 @@ class Rss extends Controller
         }
         
         if ($link == "" && CONFIG['MEMBERSONLY']) {
-            showMessage(Url(), LANG["NO_PERMISSION"]);
+            $this->showMessage(URLROOT, LANG["NO_PERMISSION"]);
         }
 
         // Sort Input
@@ -55,7 +56,7 @@ class Rss extends Controller
             $cats = implode(", ", array_unique(array_map("intval", explode(",", (string) $cat))));
             $wherea[] = "category in ($cats)";
         }
-        if (Id($user)) {
+        if (intval($user)) {
             $wherea[] = "owner=$user";
         }
         if ($wherea) {
@@ -64,7 +65,7 @@ class Rss extends Controller
         $limit = "LIMIT 50";
 
         // Get Data
-        $res = (new TorrentsModel)->rssInfo($where, $limit);
+        $res = TorrentsModel::rssInfo($where, $limit);
 
         // start the RSS feed output
         header( "Content-type: text/xml; charset=".CONFIG['CHARSET']."");
@@ -77,11 +78,11 @@ class Rss extends Controller
         <language>en-us</language>";
 
         foreach ($res as $row) {
-            $pubdate = date("r", sql_timestamp_to_unix_timestamp($row['added']));
+            $pubdate = date("r", strtotime($row['added']));
             echo "<item>
                   <title>" . htmlspecialchars($row['name']) . "</title>
-                  <guid>" . CONFIG['URLROOT'] . "/torrent/$row[id]/hit</guid>
-                  <link>" . CONFIG['URLROOT'] . "/download/$row[id]/$link</link>
+                  <guid>" . URLROOT . "/torrent/$row[id]/hit</guid>
+                  <link>" . URLROOT . "/download/$row[id]/$link</link>
                   <pubDate>" . $pubdate . "</pubDate>
                   <category> " . $row["cat_parent"] . ": " . $row["cat_name"] . "</category>
                   <description>Size: " . mksize($row['size']) . " Seeders: " . $row['seeders'] . " Leechers: " . $row['leechers'] . "</description>
@@ -95,7 +96,7 @@ class Rss extends Controller
     {
         // Check User
         if ($this->current_user->view_torrents != "yes" && CONFIG['MEMBERSONLY']) {
-            showMessage(Url(), LANG["NO_TORRENT_VIEW"]);
+            $this->showMessage(URLROOT, LANG["NO_TORRENT_VIEW"]);
         }
 
         // Data For View
@@ -105,7 +106,7 @@ class Rss extends Controller
         ];
 
         // Load View
-        $this->view('Rss', $data, 'user');
+        $this->view('user-Rss', $data, 'user');
     }
 
     // RSS Form Submit
@@ -113,7 +114,7 @@ class Rss extends Controller
     {
         // Check User
         if ($this->current_user->view_torrents != "yes" && CONFIG['MEMBERSONLY']) {
-            showMessage(Url(), LANG["NO_TORRENT_VIEW"]);
+            $this->showMessage(URLROOT, LANG["NO_TORRENT_VIEW"]);
         }
 
         if (!empty($_POST)) {
@@ -137,7 +138,7 @@ class Rss extends Controller
             if ($_POST["incldead"]) {
                 $params[] = "incldead=1";
             }
-            if (Id($_POST['user'])) {
+            if (intval($_POST['user'])) {
                 $params[] = "user=$_POST[user]";
             }
             if ($params) {
@@ -146,10 +147,10 @@ class Rss extends Controller
                 $param = "";
             }
             
-            showMessage(Url(), "Your RSS link is: <a href='".CONFIG['URLROOT']."/rss$param'>".CONFIG['URLROOT']."/rss$param</a>");
+            $this->showMessage(URLROOT, "Your RSS link is: <a href='".URLROOT."/rss$param'>".URLROOT."/rss$param</a>");
 
         } else {
-            showMessage(Url(), LANG['NOTHING_SELECTED']);
+            $this->showMessage(URLROOT, LANG['NOTHING_SELECTED']);
         }
     }
 

@@ -16,25 +16,28 @@ class Snatch extends Controller
     // Get Current User
     public function __construct()
     {
-        $this->current_user = (new Auth)->user(2);
+        $this->current_user = new Auth();
+
+        if (!$this->current_user->loggedin) {
+            $this->showMessage(URLROOT, LANG["NO_PERMISSION"]);
+        }
     }
 
     // Snatched Torrent Default Page // todo more test
     public function index($id, $type)
     {
-    
         if ($this->current_user->view_torrents && $id != $this->current_user->id) {
-            showMessage(Url(), LANG["NO_TORRENT_VIEW"]);
+            $this->showMessage(URLROOT, LANG["NO_TORRENT_VIEW"]);
         }
         
         if ($type == 'complete') {
-            $snatched = (new SnatchedModel)->join('snatched.tid = ? AND snatched.completed != 0', $id);
+            $snatched = SnatchedModel::join('snatched.tid = ? AND snatched.completed != 0', $id);
             $cols = 'torrent';
         } elseif ($type == 'torrent') {
-            $snatched = (new SnatchedModel)->join('snatched.tid = ?', $id);
+            $snatched = SnatchedModel::join('snatched.tid = ?', $id);
             $cols = 'torrent';
         } elseif ($type == 'user') {
-            $snatched = (new SnatchedModel)->join('snatched.uid = ?', $id);
+            $snatched = SnatchedModel::join('snatched.uid = ?', $id);
             $cols = 'user';
         }
 
@@ -48,27 +51,23 @@ class Snatch extends Controller
         ];
 
         // Load View
-        $this->view('snatch', $data, 'user');
+        $this->view('user-snatch', $data, 'user');
     }
 
     // Trade Snatched Default Page
     public function trade()
     {
-    
         if (!empty($_POST)) {
-            (new SnatchedModel)->submitTrade($this->current_user);
+            SnatchedModel::submitTrade($this->current_user);
         } else {
-            // Get Snatched Data
-            $snatched = (new SnatchedModel)->trade($this->current_user->id);
-
             // Data For View
             $data = [
                 'page_title' => LANG['TRADE'],
-                'V_snatched' => $snatched
+                'V_snatched' => SnatchedModel::trade($this->current_user->id)
             ];
 
             // Load View
-            $this->view('snatch_trade', $data, 'user');
+            $this->view('user-snatch-trade', $data, 'user');
         }
     }
 

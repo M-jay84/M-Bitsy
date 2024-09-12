@@ -16,17 +16,21 @@ class Tag extends Controller
     // Get Current User
     public function __construct()
     {
-        $this->current_user = (new Auth)->user(1);
+        $this->current_user = new Auth();
+
+        if (!$this->current_user->loggedin && CONFIG['MEMBERSONLY']) {
+            $this->showMessage(URLROOT, LANG["NO_PERMISSION"]);
+        }
     }
 
     // Search By Tag Default Page
     public function index($name)
     {
         if ($this->current_user->view_torrents != "yes" && CONFIG['MEMBERSONLY']) {
-            showMessage(Url(), LANG["NO_TORRENT_VIEW"]);
+            $this->showMessage(URLROOT, LANG["NO_TORRENT_VIEW"]);
         }
         // Get Tag Data
-        $tags = (new TagsModel)->search($name);
+        $tags = TagsModel::search($name);
 
         // Data For View
         $data = [
@@ -35,7 +39,7 @@ class Tag extends Controller
         ];
 
         // Load View
-        $this->view('tag', $data, 'user');
+        $this->view('user-tag', $data, 'user');
     }
 
 }

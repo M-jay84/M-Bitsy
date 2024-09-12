@@ -16,9 +16,10 @@ class Adminpermission extends Controller
     // Get Current User
     public function __construct()
     {
-        $this->current_user = (new Auth)->user(2);
-        if ($this->current_user->class < CONFIG['_MODERATOR']) {
-            showMessage(CONFIG['URLROOT'], LANG["NO_PERMISSION"]);
+        $this->current_user = new Auth();
+
+        if (!$this->current_user->isStaff) {
+            $this->showMessage(URLROOT, LANG["NO_PERMISSION"]);
         }
     }
 
@@ -26,10 +27,10 @@ class Adminpermission extends Controller
     public function index()
     {
         if (!empty($_POST)) {
-            (new PermissionsModel)->insertOrUpdate();
+            PermissionsModel::insertOrUpdate();
         } else {
             // Get Permissions Data
-            $permissions = (new PermissionsModel)->fetchAll('*', '', 'ORDER BY permission_id'); 
+            $permissions = PermissionsModel::fetchAll('*', '', 'ORDER BY permission_id'); 
 		
             // Data For View
             $data = [
@@ -38,7 +39,7 @@ class Adminpermission extends Controller
             ];
        
             // Load View
-            $this->view('permission', $data, 'admin');
+            $this->view('admin-permission', $data, 'admin');
         }
         
     }
@@ -46,7 +47,7 @@ class Adminpermission extends Controller
     // Delete Permissions Submit
     public function delete($id)
     {
-        (new PermissionsModel)->delete($id);
+        PermissionsModel::delete($id);
     }
 
 }

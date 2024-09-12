@@ -16,18 +16,18 @@ class Adminpeer extends Controller
     // Get Current User
     public function __construct()
     {
-        $this->current_user = (new Auth)->user(2);
-        if ($this->current_user->class < CONFIG['_MODERATOR']) {
-            showMessage(CONFIG['URLROOT'], LANG["NO_PERMISSION"]);
+        $this->current_user = new Auth();
+
+        if (!$this->current_user->isStaff) {
+            $this->showMessage(URLROOT, LANG["NO_PERMISSION"]);
         }
     }
 
     // Peers Default Page
     public function index()
     {
-    
         // Get Data
-        $peers = (new PeersModel)->getPeers('admin', $id, $this->current_user, 'adminpeer?');
+        $peers = PeersModel::getPeers('admin', 0, $this->current_user, 'adminpeer?');
 
         // Data For View
         $data = [
@@ -38,7 +38,7 @@ class Adminpeer extends Controller
         ];
         
         // Load View
-        $this->view('peer', $data, 'admin');
+        $this->view('admin-peer', $data, 'admin');
    }
 
 }

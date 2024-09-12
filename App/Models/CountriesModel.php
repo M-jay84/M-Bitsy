@@ -14,15 +14,15 @@ class CountriesModel
     { 
         $carr = DB::fetchRow('countries', 'name,flagpic', ['id='], [$country], 'LIMIT 1');
         if ($carr) {
-            $country = $pic == 1 ? "<img src='" . CONFIG['URLROOT'] . "/assets/images/languages/$carr[flagpic]' title='" . htmlspecialchars($carr['name']) . "' alt='" . htmlspecialchars($carr['name']) . "' />" : htmlspecialchars($carr['name']);
+            $country = $pic == 1 ? "<img src='" . URLROOT . "/assets/images/languages/$carr[flagpic]' title='" . htmlspecialchars($carr['name']) . "' alt='" . htmlspecialchars($carr['name']) . "' />" : htmlspecialchars($carr['name']);
         } else {
-            $country = $pic == 1 ? "<img src='" . CONFIG['URLROOT'] . "/assets/images/languages/unknown.webp' alt='Unknown' />" : "<b>Unknown</b>";
+            $country = $pic == 1 ? "<img src='" . URLROOT . "/assets/images/languages/unknown.webp' alt='Unknown' />" : "<b>Unknown</b>";
         }
         return $country;
     }
 
     //Country Dropdown
-    public function dropdown($country = 0)
+    public static function dropdown($country = 0)
     {
         $data = array();
         $stmt = DB::fetchAll('countries', 'id, name', '', 'ORDER BY name');

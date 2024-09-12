@@ -5,6 +5,7 @@ namespace App\Models;
 use PDO;
 use App\Libs\DB;
 use App\Libs\TTMail;
+use App\Libs\Validate;
 use App\Models\UsersModel;
 use App\Models\GroupsModel;
 use App\Models\LogsModel;
@@ -15,7 +16,7 @@ use App\Models\LogsModel;
 class MessagesModel
 {
     // Count Messages
-    public function countMsg($data = [])
+    public static function countMsg($data = [])
     {
         $res = DB::run("SELECT COUNT(*), COUNT(`unread` = 'yes') FROM messages WHERE `receiver` = ".$data['current_user']->id." AND `location` IN ('in','both')");
         $res = DB::run("SELECT COUNT(*) FROM messages WHERE receiver=" . $data['current_user']->id . " AND `location` IN ('in','both')");
@@ -40,7 +41,7 @@ class MessagesModel
     }
 
     // Templates Drop Down
-    public function echoTemplates($id)
+    public static function echoTemplates($id)
     {
         $templates = "<option value=\"0\">---- " . LANG["NOTHING_SELECTED"] . " ----</option>\n";
         $stmt = DB::fetchAll('messages', '*', ['sender=', 'location='], [$id, 'template'], 'ORDER BY `subject`');
@@ -55,9 +56,9 @@ class MessagesModel
     {
         DB::insert('messages', $data);
         // email notif
-        $user = UsersModel::fetchRow('id, username, acceptpms, notifs, email', ['id='], [$data['receiver']]);
+        $user = DB::fetchRow('users', 'id, username, acceptpms, notifs, email', ['id='], [$data['receiver']]);
         if (strpos($user['notifs'], '[pm]') !== false) {
-            $url = CONFIG['URLROOT'];
+            $url = URLROOT;
             $body = "You have received a PM\n\nYou can use the URL below to view the message (you may have to login).\n\n$url/message/mailbox\n\n".CONFIG['SITENAME']."";
             $email = CONFIG['SITEEMAIL'];
             $TTMail = new TTMail();
@@ -66,28 +67,28 @@ class MessagesModel
     }
 
     // Get Messages
-    public function msgPagination($type, $id)
+    public static function msgPagination($type, $id)
     {
         switch ($type) {
             case 'inbox':
                 $where = "`receiver` = ".$id." AND `location` IN ('in','both') ORDER BY added DESC";
                 $count = DB::run("SELECT COUNT(*) FROM messages WHERE $where")->fetchColumn();
-                list($pagerbuttons, $limit) = pagination(25, $count, CONFIG['URLROOT']."/message/mailbox/inbox&");
+                list($pagerbuttons, $limit) = pagination(25, $count, URLROOT."/message/mailbox/inbox&");
                 break;
             case 'outbox':
                 $where = "`sender` = ".$id." AND `location` IN ('out','both') ORDER BY added DESC";
                 $count= DB::run("SELECT COUNT(*) FROM messages WHERE $where")->fetchColumn();
-                list($pagerbuttons, $limit) = pagination(25, $count, CONFIG['URLROOT']."/message/mailbox/outbox&");
+                list($pagerbuttons, $limit) = pagination(25, $count, URLROOT."/message/mailbox/outbox&");
                 break;
             case 'templates':
                 $where = "`sender` = ".$id." AND `location` = 'template' ORDER BY added DESC";
                 $count= DB::run("SELECT COUNT(*) FROM messages WHERE $where")->fetchColumn();
-                list($pagerbuttons, $limit) = pagination(25, $count, CONFIG['URLROOT']."/message/mailbox/templates&");
+                list($pagerbuttons, $limit) = pagination(25, $count, URLROOT."/message/mailbox/templates&");
                 break;
             case 'draft':
                 $where = "`sender` = ".$id." AND `location` = 'draft' ORDER BY added DESC";
                 $count = DB::run("SELECT COUNT(*) FROM messages WHERE $where")->fetchColumn();
-                list($pagerbuttons, $limit) = pagination(25, $count, CONFIG['URLROOT']."/message/mailbox/draft&");
+                list($pagerbuttons, $limit) = pagination(25, $count, URLROOT."/message/mailbox/draft&");
                 break;
             }
         $messages = DB::run("SELECT * FROM messages WHERE $where $limit")->fetchAll();
@@ -98,53 +99,53 @@ class MessagesModel
     }
 
     // Add Message Type
-    public function insertByType($id)
+    public static function insertByType($id)
     {
         // Check User Input
-        $receiver = Input('receiver');
-        $subject = Input('subject');
-        $body = Input('body');
-        $history = Input('history', 'int');
+        $receiver = Validate::Input('receiver');
+        $subject = Validate::Input('subject');
+        $body = Validate::Input('body');
+        $history = Validate::Input('history', 'int');
 
         // Check Correct Input
         if (strlen($body) < 5 || strlen($subject) < 3) {
-            showMessage(Url('message/mailbox/inbox'), LANG['SMALL_INPUT']);
+            showMessage(('message/mailbox/inbox'), LANG['SMALL_INPUT']);
         }
 
         // Get User Id
         if (!is_numeric($receiver)) {
-            $receiver = UsersModel::fetchColumn('id', ['username ='], [$receiver]);
+            $receiver = DB::fetchColumn('users', 'id', ['username ='], [$receiver]);
         }
         
         if ($receiver == 0 && $_REQUEST['Update'] == 'create') {
-            showMessage(Url('message/mailbox/inbox'), LANG['MISSING_ID']);
+            showMessage(('message/mailbox/inbox'), LANG['MISSING_ID']);
         }
         
 
         switch ($_REQUEST['Update']) {
             case 'create':
                 if (isset($_POST['save'])) {
-                    MessagesModel::insert(['sender'=>$id, 'receiver'=>$receiver, 'added'=>get_date_time(), 'subject'=>$subject, 'msg'=>$body, 'unread'=>'yes', 'location'=>'both', 'history' => $history]);
+                    MessagesModel::insert(['sender'=>$id, 'receiver'=>$receiver, 'added'=>CONFIG['TT_DATE'], 'subject'=>$subject, 'msg'=>$body, 'unread'=>'yes', 'location'=>'both', 'history' => $history]);
                 } else {
-                    MessagesModel::insert(['sender'=>$id, 'receiver'=>$receiver, 'added'=>get_date_time(), 'subject'=>$subject, 'msg'=>$body, 'unread'=>'yes', 'location'=>'in', 'history' => $history]);
+                    MessagesModel::insert(['sender'=>$id, 'receiver'=>$receiver, 'added'=>CONFIG['TT_DATE'], 'subject'=>$subject, 'msg'=>$body, 'unread'=>'yes', 'location'=>'in', 'history' => $history]);
                 }
-                showMessage(Url('message/mailbox/outbox'), LANG['MESSAGES_SENT']);
+                showMessage(('message/mailbox/outbox'), LANG['MESSAGES_SENT']);
                 break;
             case 'draft':
-                MessagesModel::insert(['sender'=>$id, 'receiver'=>$receiver, 'added'=>get_date_time(), 'subject'=>$subject, 'msg'=>$body, 'unread'=>'no', 'location'=>'draft']);
-                showMessage(Url('message/mailbox/draft'), LANG['SAVED_DRAFT']);
+                MessagesModel::insert(['sender'=>$id, 'receiver'=>$receiver, 'added'=>CONFIG['TT_DATE'], 'subject'=>$subject, 'msg'=>$body, 'unread'=>'no', 'location'=>'draft']);
+                showMessage(('message/mailbox/draft'), LANG['SAVED_DRAFT']);
                 break;
             case 'template':
-                MessagesModel::insert(['sender'=>$id, 'receiver'=>$receiver, 'added'=>get_date_time(), 'subject'=>$subject, 'msg'=>$body, 'unread'=>'no', 'location'=>'template']);
-                showMessage(Url('message/mailbox/templates'), LANG['SAVED_TEMPLATE']);
+                MessagesModel::insert(['sender'=>$id, 'receiver'=>$receiver, 'added'=>CONFIG['TT_DATE'], 'subject'=>$subject, 'msg'=>$body, 'unread'=>'no', 'location'=>'template']);
+                showMessage(('message/mailbox/templates'), LANG['SAVED_TEMPLATE']);
                 break;
         }
     }
 
     // Delete Message
-    public function delete($type, $id)
+    public static function delete($type, $id)
     {
-        $ids = multiIds('del');
+        $ids = Validate::multiIds('del');
 
         if ($_POST["read"]) {
             DB::updateWhereIn('meesages', ['unread' => 'no'], $ids);
@@ -173,11 +174,11 @@ class MessagesModel
                 );
             }
         }
-        showMessage(Url("message/mailbox/$type"), LANG["SUCCESS"]);
+        showMessage(("message/mailbox/$type"), LANG["SUCCESS"]);
     }
 
     // Get Message Id
-    public function getById($id, $userid)
+    public static function getById($id, $userid)
     {
         $arr = DB::fetchRow('messages', '*', ['id='], [$id]);
         
@@ -187,7 +188,7 @@ class MessagesModel
 
         // Check User
         if ($arr["sender"] != $userid && $arr["receiver"] != $userid) {
-            showMessage(Url(), LANG['NO_PERMISSION']);
+            showMessage(URLROOT, LANG['NO_PERMISSION']);
         }
         
         // Mark Read
@@ -202,16 +203,16 @@ class MessagesModel
     }
 
     // Update Message
-    public function update($id, $userid)
+    public static function update($id, $userid)
     {
         // Get Message
         $row = DB::fetchRow('messages', '*', ['id='], [$id]);
         
         if ($row["sender"] != $userid && $row["receiver"] != $userid) {
-            showMessage(Url(), LANG['NO_PERMISSION']);
+            showMessage(URLROOT, LANG['NO_PERMISSION']);
         }
         if (!$row) {
-            showMessage(Url('message/mailbox/inbox'), LANG["MISSING_ID"]);
+            showMessage(('message/mailbox/inbox'), LANG["MISSING_ID"]);
         }
         
         // Submit Form
@@ -219,44 +220,44 @@ class MessagesModel
             $msg = isset($_POST['msg']) ? $_POST['msg'] : '';
             // Update Message
             DB::update('messages', ['msg'], ['id='], [$msg,$id]);
-            showMessage(Url('message/mailbox/inbox'), LANG["UPDATE_COMPLETE"]);
+            showMessage(('message/mailbox/inbox'), LANG["UPDATE_COMPLETE"]);
         }
-        showMessage(Url('message/mailbox/inbox'), LANG["EDIT_FAILED"]);
+        showMessage(('message/mailbox/inbox'), LANG["EDIT_FAILED"]);
     }
 
     // Admin Delete Messages
-    public function deleteByIds()
+    public static function deleteByIds()
     {
-        $ids = multiIds('ids');
+        $ids = Validate::multiIds('ids');
         DB::deleteByIds('messages', 'id', $ids);
-        showMessage(Url('adminmessage'), LANG["DEL_COMPLETE"]);
+        showMessage(('adminmessage'), LANG["DEL_COMPLETE"]);
     }
 
     // Admin Send Multiple Messages
-    public function multiPM($userid)
+    public static function multiPM($userid)
     {
-        $sender_id = Input('sender_id');
-        $receiver = Input('receiver');
-        $id = Input('id');
-        $msg = Input('msg');
-        $subject = Input('sebject');
+        $sender_id = Validate::Input('sender_id');
+        $receiver = Validate::Input('receiver');
+        $id = Validate::Input('id');
+        $msg = Validate::Input('msg');
+        $subject = Validate::Input('sebject');
         // Check Correct Input
         if (!$msg) {
-            showMessage(Url('adminmessage/masspm'), LANG["MISSING_FORM_DATA"]);
+            showMessage(('adminmessage/masspm'), LANG["MISSING_FORM_DATA"]);
         }
 
         $updateset = array_map("intval", $_POST['classes']);
         $query = DB::run("SELECT id FROM users WHERE class IN (" . implode(",", $updateset) . ")");// AND enabled = 'yes' AND status = 'confirmed'
         while ($dat = $query->fetch(PDO::FETCH_ASSOC)) {
-            DB::insert('messages', ['sender' => $sender_id, 'receiver' => $dat['id'], 'added' => get_date_time(), 'msg' => $msg, 'subject' => $subject]);
+            DB::insert('messages', ['sender' => $sender_id, 'receiver' => $dat['id'], 'added' => CONFIG['TT_DATE'], 'msg' => $msg, 'subject' => $subject]);
         }
         
-        (new LogsModel)->write("A Mass PM was sent by " . $userid . "");
-        showMessage(Url('adminmessage/masspm'), LANG["SUCCESS"]);
+        LogsModel::write("A Mass PM was sent by " . $userid . "");
+        showMessage(('adminmessage/masspm'), LANG["SUCCESS"]);
     }
 
     // Admin Get All Messages
-    public function getAll()
+    public static function getAll()
     {
         // Pagination
         $count = DB::run("SELECT COUNT(*) FROM messages WHERE location in ('in', 'both')")->fetchColumn();
@@ -264,7 +265,7 @@ class MessagesModel
         $stmt = DB::run("SELECT * FROM messages WHERE location in ('in', 'both') ORDER BY id DESC $limit")->fetchAll();
 
         // Get Groups
-        $groups = (new GroupsModel)->fetchAll('group_id, level', '');
+        $groups = GroupsModel::fetchAll('group_id, level', '');
         $array = [
             'res' => $stmt,
             'pager' => $pager,

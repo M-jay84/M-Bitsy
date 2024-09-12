@@ -16,9 +16,10 @@ class Adminban extends Controller
     // Get Current User
     public function __construct()
     {
-        $this->current_user = (new Auth)->user(2);
+        $this->current_user = new Auth();
+
         if (!$this->current_user->isStaff) {
-            showMessage(CONFIG['URLROOT'], LANG["NO_PERMISSION"]);
+            $this->showMessage(URLROOT, LANG["NO_PERMISSION"]);
         }
     }
 
@@ -26,10 +27,9 @@ class Adminban extends Controller
     public function index($type = 'email')
     {
         if (!empty($_POST)) {
-            (new BansModel)->insert($this->current_user);
+            BansModel::insert($this->current_user);
         } else {
-            // Get Ban Data
-            $bans = (new BansModel)->getAll($type);
+            $bans = BansModel::getAll($type);
 
             // Data For View
             $data = [
@@ -41,13 +41,13 @@ class Adminban extends Controller
             ];
 
             // Load View
-            $this->view('ban', $data, 'admin');
+            $this->view('admin-ban', $data, 'admin');
         }
     }
 
     // Delete Bans
     public function delete()
     {
-        (new BansModel)->delete($this->current_user);
+        BansModel::delete($this->current_user);
     }
 }

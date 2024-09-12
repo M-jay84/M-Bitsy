@@ -4,6 +4,8 @@ use App\Libs\Errors;
 // Start Session
 session_start();
 
+date_default_timezone_set('Europe/London');
+
 // Load Paths / Autoload
 require 'paths.php';
 

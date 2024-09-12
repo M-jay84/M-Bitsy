@@ -4,6 +4,7 @@ namespace App\Controllers\User;
 
 use App\Libs\Auth;
 use App\Libs\Controller;
+use App\Libs\DB;
 use App\Models\PeersModel;
 use App\Models\UsersModel;
 
@@ -17,16 +18,19 @@ class Peer extends Controller
     // Get Current User
     public function __construct()
     {
-        $this->current_user = (new Auth)->user(2);
+        $this->current_user = new Auth();
+
+        if (!$this->current_user->loggedin) {
+            $this->showMessage(URLROOT, LANG["NO_PERMISSION"]);
+        }
     }
 
     // No Default Page // todo
     public function index($type, $id)
     {
-    
         // Check User Input
-        $user =  UsersModel::fetchRow('id,username,privacy', ['id ='], [$id]);
-        $peers = (new PeersModel)->getPeers($type, $id, $this->current_user);
+        $user =  DB::fetchRow('users', 'id,username,privacy', ['id ='], [$id]);
+        $peers = PeersModel::getPeers($type, $id, $this->current_user);
 
         // Data For View
         $data = [
@@ -40,6 +44,6 @@ class Peer extends Controller
         ];
 
         // Load View
-        $this->view('peer', $data, 'user');
+        $this->view('user-peer', $data, 'user');
     }
 }

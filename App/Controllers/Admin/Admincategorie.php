@@ -16,9 +16,10 @@ class Admincategorie extends Controller
     // Get Current User
     public function __construct()
     {
-        $this->current_user = (new Auth)->user(2);
-        if ($this->current_user->class < CONFIG['_MODERATOR']) {
-            showMessage(CONFIG['URLROOT'], LANG["NO_PERMISSION"]);
+        $this->current_user = new Auth();
+
+        if (!$this->current_user->isStaff) {
+            $this->showMessage(URLROOT, LANG["NO_PERMISSION"]);
         }
     }
 
@@ -27,10 +28,10 @@ class Admincategorie extends Controller
     {
     
         if (!empty($_POST)) {
-            (new CatagoriesModel)->insertOrUpdate();
+            CatagoriesModel::insertOrUpdate();
         } else {
             // Get Categorie
-            $cats = (new CatagoriesModel)->fetchAll('*', '', 'ORDER BY parent_cat ASC, sort_index ASC');
+            $cats = CatagoriesModel::fetchAll('*', '', 'ORDER BY parent_cat ASC, sort_index ASC');
         
             // Data For View
             $data = [
@@ -39,15 +40,14 @@ class Admincategorie extends Controller
             ];
         
             // Load View
-            $this->view('categorie', $data, 'admin');
+            $this->view('admin-categorie', $data, 'admin');
         }
     }
 
     // Categorie Delete
     public function delete($id, $sure = false)
     {
-    
-        (new CatagoriesModel)->deleteAndUpdateTorrent($id, $sure);
+        CatagoriesModel::deleteAndUpdateTorrent($id, $sure);
     }
 
 }

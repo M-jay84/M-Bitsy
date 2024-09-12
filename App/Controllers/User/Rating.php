@@ -16,13 +16,21 @@ class Rating extends Controller
     // Get Current User
     public function __construct()
     {
-        $this->current_user = (new Auth)->user(2);
+        $this->current_user = new Auth();
+
+        if (!$this->current_user->loggedin) {
+            $this->showMessage(URLROOT, LANG["NO_PERMISSION"]);
+        }
     }
 
     // Torrent Rating Submit
     public function index($id)
     {
-        (new RatingsModel)->addRating($id, $this->current_user->id);
+        if (!empty($_POST)) {
+            RatingsModel::addRating($id, $this->current_user->id);
+        } else {
+            $this->showMessage(URLROOT, LANG["NOTHING_SELECTED"]);
+        }
     }
 
 }

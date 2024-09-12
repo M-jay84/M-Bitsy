@@ -4,6 +4,8 @@ namespace App\Controllers\Admin;
 
 use App\Libs\Auth;
 use App\Libs\Controller;
+use App\Libs\DB;
+use App\Libs\Validate;
 use App\Models\InvitesModel;
 use App\Models\UsersModel;
 
@@ -17,20 +19,19 @@ class Admininvite extends Controller
     // Get Current User
     public function __construct()
     {
-        $this->current_user = (new Auth)->user(2);
-        if ($this->current_user->class < CONFIG['_MODERATOR']) {
-            showMessage(CONFIG['URLROOT'], LANG["NO_PERMISSION"]);
+        $this->current_user = new Auth();
+        if (!$this->current_user->isStaff) {
+            $this->showMessage(URLROOT, LANG["NO_PERMISSION"]);
         }
     }
 
     // Invited Default Page
     public function index()
     {
-    
         // Pagination
-        $count = UsersModel::fetchColumn('COUNT(id)', ['status =', 'invited_by !='], ['confirmed',0]);
-        list($pager, $limit) = pagination(25, $count, CONFIG['URLROOT'].'/admininvite?');
-        $users = (new InvitesModel)->invitedUser($limit);
+        $count = DB::fetchColumn('users', 'COUNT(id)', ['status =', 'invited_by !='], ['confirmed',0]);
+        list($pager, $limit) = pagination(25, $count, URLROOT.'/admininvite?');
+        $users = InvitesModel::invitedUser($limit);
 
         // Data For View
         $data = [
@@ -41,36 +42,28 @@ class Admininvite extends Controller
         ];
  
         // Load View
-        $this->view('invited_users', $data, 'admin');
+        $this->view('admin-invited-users', $data, 'admin');
     }
 
     // Invite Form Submit
     public function submit()
     {
-    
         // Check User Input
-        $url = Input('pending') == 0 ? '/admininvite' : '/admininvite/pending';
-        $ids = multiIds('users');
-        
-        $res = (new InvitesModel)->checkInvite($ids);
-        foreach ($res as $row) {
-            # We remove the invitee from the inviter and give them back there invite.
-            $invitees = str_replace("$row[id] ", "", $row["invitees"]);
-            $views = $row["invites"] + 1;
-            UsersModel::update(['invites','invitees'], ['id='], [$views,$invitees,$row['invited_by']]);
-            UsersModel::deleteUser($row['id']);
+        if (!empty($_POST)) {
+            $url = InvitesModel::submitInvite();
+            $this->showMessage(URLROOT . $url, LANG["DEL_COMPLETE"]);
+        } else {
+            $this->showMessage(URLROOT, LANG['NOTHING_FOUND']);
         }
-        showMessage(Url(CONFIG['URLROOT'] . $url), LANG["DEL_COMPLETE"]);
     }
 
     // Pendings Invites Default Page
     public function pending()
     {
-    
         // Pagination
-        $count = UsersModel::fetchColumn('COUNT(id)', ['status =', 'invited_by !='], ['pending',0]);
-        list($pager, $limit) = pagination(25, $count, CONFIG['URLROOT'].'/admininvite/pending?');
-        $stmt = (new InvitesModel)->pendingUser($limit);
+        $count = DB::fetchColumn('users', 'COUNT(id)', ['status =', 'invited_by !='], ['pending',0]);
+        list($pager, $limit) = pagination(25, $count, URLROOT.'/admininvite/pending?');
+        $stmt = InvitesModel::pendingUser($limit);
 
         // Data For View
         $data = [
@@ -81,7 +74,7 @@ class Admininvite extends Controller
         ];
 
         // Load View
-        $this->view('invites_pending', $data, 'admin');
+        $this->view('admin-invites-pending', $data, 'admin');
     }
 
 }

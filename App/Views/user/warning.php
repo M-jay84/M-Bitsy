@@ -1,13 +1,13 @@
 <?php block_begin($page_title) ?>
 <?php usermenu($user_id, 'warning');
 
-if ($current_user->class > CONFIG['_MODERATOR']) : ?>
+if ($current_user->isStaff) : ?>
     <p class="text-center">
         <a type="button" class="model_form ttbtn btn-sm" data-bs-toggle="modal" data-bs-target="#addModal"><?= LANG["ADD"] ?></a>
     <p>
 <?php endif; ?>
 
-<?php if ($current_user->class > CONFIG['_MODERATOR']) : ?>
+<?php if ($current_user->isStaff) : ?>
     <form id="deleteall" method="post" action="<?= Url("warning/delete/$user_id") ?>">
 <?php endif; ?>
 
@@ -20,15 +20,15 @@ if ($current_user->class > CONFIG['_MODERATOR']) : ?>
                 <th><?= LANG["REASON"] ?></th>
                 <th><?= LANG["WARNED_BY"] ?></th>
                 <th><?= LANG["TYPE"] ?></th>
-                <?php if ($current_user->class > CONFIG['_MODERATOR']) { ?>
+                <?php if ($current_user->isStaff) { ?>
                     <th><?= LANG["ACTION"] ?>&nbsp;<input type="checkbox" name="checkall" onclick="checkAll(this.form.id);" /></th>
                 <?php } ?>
             </tr>
         </thead>
         <tbody>
         <?php foreach ($warnings as $row) {
-            $row['added'] = utc_to_tz($row['added']);
-            $row['expiry'] = utc_to_tz($row['expiry']);
+            $row['added'] = user_timezone_date($row['added']);
+            $row['expiry'] = user_timezone_date($row['expiry']);
             $addeddate = substr($row['added'], 0, strpos($row['added'], " "));
             $expirydate = substr($row['expiry'], 0, strpos($row['expiry'], " "));  ?>
             <tr>
@@ -37,7 +37,7 @@ if ($current_user->class > CONFIG['_MODERATOR']) : ?>
                 <td><?=  format_comment($row['reason']) ?></td>
                 <td><?= coloredname($row['warnedby']) ?></td>
                 <td><?=  $row['type'] ?></td>
-                <?php if ($current_user->class > CONFIG['_MODERATOR']) { ?>
+                <?php if ($current_user->isStaff) { ?>
                     <td><input type="checkbox" name="ids[]" value="<?= $row['id'] ?>" /></td>
                 <?php }  ?>
             </tr>
@@ -46,7 +46,7 @@ if ($current_user->class > CONFIG['_MODERATOR']) : ?>
     </table>
 </div>
 
-<?php if ($current_user->class > CONFIG['_MODERATOR']) { ?>
+<?php if ($current_user->class->isStaff) { ?>
     <p class="text-center"><button type="submit" class="btn btn-sm ttbtn"><?= LANG['DEL'] ?></button><p>
     </form>
 <?php } ?>

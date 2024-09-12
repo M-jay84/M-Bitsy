@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Libs\DB;
+use App\Libs\Validate;
 
 /*
 * Clients Table Data
@@ -10,21 +11,21 @@ use App\Libs\DB;
 class ClientsModel
 {
     // Admin Add Client
-    public function insert()
+    public static function insert()
     {
-        $name = Input('type'); // todo type ???
-        $peer_id = Input('peer_id');
+        $name = Validate::Input('type'); // todo type ???
+        $peer_id = Validate::Input('peer_id');
         $peer = hex2bin($_POST['peer_id']);
         $code = substr($peer, 0, 8);
         $banned = 'yes';
 
-        DB::insert('clients', ['agent_name'=>$name, 'hits'=>$banned, 'ins_date'=>get_date_time(), 'code'=>$code, 'peer_id'=>$peer_id]);
-        showMessage(Url('adminclient'), LANG["SUCCESS"]);
+        DB::insert('clients', ['agent_name'=>$name, 'hits'=>$banned, 'ins_date'=>CONFIG['TT_DATE'], 'code'=>$code, 'peer_id'=>$peer_id]);
+        showMessage(('adminclient'), LANG["SUCCESS"]);
 
     }
 
     // Admin Get All
-    public function select($type)
+    public static function select($type)
     {
         $array = array(); 
         if ($type == 'clients') {
@@ -46,10 +47,10 @@ class ClientsModel
     }
 
     // Admin Delete Client
-    public function delete($id)
+    public static function delete($id)
     {
         DB::delete('clients', ['agent_id'=>$id]);
-        showMessage(Url('adminclient'), LANG["SUCCESS"]);
+        showMessage(('adminclient'), LANG["SUCCESS"]);
     }
 
 }

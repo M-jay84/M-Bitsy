@@ -3,32 +3,48 @@
 namespace App\Libs;
 
 /*
-* Cache
+* Base Controller
 */
 class Controller
 {
-    public $currentuser = null;
-    public $view = null;
-    public $model = null;
-    public $data = null;
-
     // Display View Template
     public function view($file, $data = [], $page = false)
     {
-        $this->view = View::template($file, $data, $page);
+        //$session_id = isset($data['current_user']->id) ? $data['current_user']->id : 0;
+        //if (!$session_id) {
+        //    DB::run("INSERT INTO `guests` (`ip`, `time`) VALUES (?, ?) ON DUPLICATE KEY UPDATE `time` = ?", [Ip::getIP(), CONFIG['TT_TIME'], CONFIG['TT_TIME']]);
+        //}
 
-    }
-    
-    public function showMessage($url, $message1)
-    {
-        showMessage(Url($url), $message1);
+        extract($data);
+
+        if ($page == 'user' && file_exists("../App/Views/user/$file.php")) {
+            $default_theme = (isset($_SESSION['stylesheet']) && $_SESSION['stylesheet']) != '' ? $_SESSION['stylesheet'] : 'inc';
+            require_once VIEW_PATH . "/$default_theme/theme.php";
+        } elseif ($page == 'admin' && file_exists("../App/Views/admin/$file.php")) {
+            require_once VIEW_PATH . "/admin/admin-cp.php";
+        } elseif (file_exists("../App/Views/user/user-shoutboxload.php")) {
+            require_once VIEW_PATH . "/user/user-shoutboxload.php";
+        } else {
+            showMessage(URLROOT, "View $file does not exist");
+        }
         return;
     }
-
-        
+    
+    // Display Message & Redirect
+    public function showMessage($url, $message1)
+    {
+        showMessage($url, $message1);
+        return;
+    }
+      
+    // Redirect
     public function redirect($url)
     {
-        $url = CONFIG['URLROOT'] . $url;
+        if ($url != URLROOT) {
+            $url = URLROOT . '/' . $url;
+        } else {
+            $url = URLROOT;
+        }
         if (!headers_sent()) {
             header("Location: " . $url, true, 302);
             exit();

@@ -16,18 +16,18 @@ class Adminreport extends Controller
     // Get Current User
     public function __construct()
     {
-        $this->current_user = (new Auth)->user(2);
-        if ($this->current_user->class < CONFIG['_MODERATOR']) {
-            showMessage(CONFIG['URLROOT'], LANG["NO_PERMISSION"]);
+        $this->current_user = new Auth();
+
+        if (!$this->current_user->isStaff) {
+            $this->showMessage(URLROOT, LANG["NO_PERMISSION"]);
         }
     }
 
     // Reports Default Page
     public function index()
     {
-    
         // Check User Input
-        $reports = (new ReportsModel)->pagination();
+        $reports = ReportsModel::pagination();
 
         // Data For View
         $data = [
@@ -37,22 +37,21 @@ class Adminreport extends Controller
         ];
 
         // Load View
-        $this->view('report', $data, 'admin');
+        $this->view('admin-report', $data, 'admin');
     }
 
     // Reports Form Submit
     public function submit()
     {
-    
         if ($_POST["mark"]) {
-            (new ReportsModel)->update($this->current_user->id);
+            ReportsModel::update($this->current_user->id);
         }
         
         if ($_POST["delete"]) {
-            (new ReportsModel)->deleteByIds();
+            ReportsModel::deleteByIds();
         }
 
-        showMessage(Url('adminreport'), LANG["ACTION_FAILED"]);
+        $this->showMessage('adminreport', LANG["ACTION_FAILED"]);
     }
 
 }

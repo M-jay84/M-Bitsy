@@ -10,14 +10,14 @@ use App\Libs\DB;
 class TorrentTagModel
 {
     // Update Tags
-    public function insert($updateset)
+    public static function insert($updateset)
     {
         $stmt = DB::insert('tagtorrent', $updateset);
         return $stmt;
     }
 
     // Fetch Tag Row
-    public function fetchRow($columns = '*', $where = '', $values = '', $other = '')
+    public static function fetchRow($columns = '*', $where = '', $values = '', $other = '')
     {
         $stmt = DB::fetchRow('tagtorrent', $columns, $where, $values, $other);
         return $stmt;

@@ -18,42 +18,32 @@ class Admintask extends Controller
     // Get Current User
     public function __construct()
     {
-        $this->current_user = (new Auth)->user(2);
-        if ($this->current_user->class < CONFIG['_MODERATOR']) {
-            showMessage(CONFIG['URLROOT'], LANG["NO_PERMISSION"]);
-        }
-    }
+        $this->current_user = new Auth();
 
-    // No Default Page
-    public function index()
-    {
-        Url(Url('admincp'), true);
+        if (!$this->current_user->isStaff) {
+            $this->showMessage(URLROOT, LANG["NO_PERMISSION"]);
+        }
     }
 
     // Cleanup
     public function cleanup()
     {
-    
-        (new TasksModel)->update(['last_time'], ['task='], [gmtime(),'cleanup']);
+        TasksModel::update(['last_time'], ['task='], [CONFIG['TT_TIME'],'cleanup']);
         Cleanup::run();
-        showMessage(Url('admincp'), LANG["FORCE_CLEAN_COMPLETED"]);
+        $this->showMessage('admincp', LANG["FORCE_CLEAN_COMPLETED"]);
     }
 
     // Prune Cache
     public function cache()
     {
-    
         $TTCache = new Cache();
-        $TTCache->Delete("sql_cache/blocks_left");
-        $TTCache->Delete("sql_cache/blocks_middle");
-        $TTCache->Delete("sql_cache/blocks_right");
         $TTCache->Delete("sql_cache/latestuploadsblock");
         $TTCache->Delete("sql_cache/mostactivetorrents_block");
         $TTCache->Delete("sql_cache/newestmember_block");
         $TTCache->Delete("sql_cache/seedwanted_block");
         $TTCache->Delete("sql_cache/usersonline_block");
         $TTCache->Delete("sql_cache/request_block");
-        showMessage(Url('admincp'), LANG['PURGE_COMPLETED']);
+        $this->showMessage('admincp', LANG['PURGE_COMPLETED']);
     }
 
 }

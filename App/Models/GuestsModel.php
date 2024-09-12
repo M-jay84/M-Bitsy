@@ -11,9 +11,9 @@ use App\Libs\Ip;
 class GuestsModel
 {
     // Add Guest
-    public function add()
+    public static function add()
     {
-        $time = gmtime();
+        $time = CONFIG['TT_TIME'];
         DB::run(
             "INSERT INTO `guests` (`ip`, `time`) 
             VALUES (?, ?) 
@@ -22,9 +22,9 @@ class GuestsModel
     }
 
     // Delete Guest
-    public function clean()
+    public static function clean()
     {
-        $past = (gmtime() - 2400);
+        $past = (CONFIG['TT_TIME'] - 2400);
         DB::run("DELETE FROM `guests` WHERE `time` < ?", [$past]);
         $stmt = DB::fetchColumn('guests', 'count(ip)', '');
         return $stmt;

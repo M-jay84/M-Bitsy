@@ -2,6 +2,7 @@
 
 namespace App\Libs;
 
+
 /*
 * Cache
 */
@@ -12,7 +13,7 @@ class Cache
 
     public function __construct()
     {
-        $this->cachedir = CONFIG['CACHE'];
+        $this->cachedir = CACHE_PATH;
         $this->type = strtolower(trim(CONFIG['CACHE_TYPE']));
         // Cache Connection
         switch ($this->type) {
@@ -71,7 +72,7 @@ class Cache
                 break;
             case "disk":
                 $file = $this->cachedir . "/$var.cache";
-                if (file_exists($file) && (time() - filemtime($file)) < $expire) {
+                if (file_exists($file) && (CONFIG['TT_TIME'] - filemtime($file)) < $expire) {
                     return unserialize(file_get_contents($file));
                 }
                 return false;

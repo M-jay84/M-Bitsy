@@ -4,7 +4,7 @@ namespace App\Controllers\User;
 
 use App\Libs\Auth;
 use App\Libs\Controller;
-use App\Models\AccountsModel;
+use App\Models\RecoverModel;
 
 /*
 * Recover Controller
@@ -16,46 +16,42 @@ class Recover extends Controller
     // Get Current User
     public function __construct()
     {
-        $this->current_user = (new Auth)->user(0);
+        $this->current_user = new Auth();
+
+        if ($this->current_user->id) {
+            $this->showMessage(URLROOT, LANG["ALREADY_LOGGED"]);
+        }
     }
 
     // Recover Page
     public function index()
     {
-        // User Already Logged In
-        if ($this->current_user->id) {
-            showMessage(Url(), LANG["ALREADY_LOGGED"]);
-        }
-        if (!empty($_POST) && csrf_check()) {
-            (new AccountsModel)->recoverPassword();
+        if (!empty($_POST)) {
+            RecoverModel::recoverPassword();
         } else {
             $data = [
                 'page_title' => LANG['RECOVER']
             ];
-            $this->view('recover', $data, 'user');
+            $this->view('user-recover', $data, 'user');
         }
     }
 
     // Confirm Recover
     public function confirm($id, $secret)
     {
-        // User Already Logged In
-        if ($this->current_user->id) {
-            showMessage(Url(), LANG["ALREADY_LOGGED"]);
-        }
-        if (!Id($id) && !strlen($secret) == 20) {
-            showMessage(Url(), LANG["NOTHING_FOUND"]);
+        if (!intval($id) && !strlen($secret) == 20) {
+            $this->showMessage(URLROOT, LANG["NOTHING_FOUND"]);
         }
 
-        if (!empty($_POST) && csrf_check()) {
-            (new AccountsModel)->changePassword($id, $secret);
+        if (!empty($_POST)) {
+            RecoverModel::changePassword($id, $secret);
         } else {
             $data = [
                 'page_title' => LANG['RECOVER'],
                 'V_id' => $id,
                 'V_secret' => $secret
             ];
-            $this->view('recover_confirm', $data, 'user');
+            $this->view('user-recover-confirm', $data, 'user');
         }
     }
 }

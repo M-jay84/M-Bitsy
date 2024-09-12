@@ -3,16 +3,18 @@
 namespace App\Controllers\User;
 
 use App\Libs\Auth;
+use App\Libs\Controller;
+
 /*
 * Logout Controller
 */
-class Logout 
+class Logout extends Controller
 {
     // Destroy $_COOKIE/$_SESSION
     public function index()
     {
-        destroy_cookies();
-        Url(Url('login'), true);
+        Auth::destroy_cookies();
+        $this->redirect('login');
     }
 
 }

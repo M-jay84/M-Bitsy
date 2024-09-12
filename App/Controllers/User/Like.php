@@ -16,15 +16,17 @@ class Like extends Controller
     // Get Current User
     public function __construct()
     {
-        $this->current_user = (new Auth)->user(2);
+        $this->current_user = new Auth();
+
+        if (!$this->current_user->loggedin) {
+            $this->showMessage(URLROOT, LANG["NO_PERMISSION"]);
+        }
     }
 
     // Like Submit
     public function index($id, $type)
     {
-        $data['current_user'] = $this->current_user;
-    
-        (new LikesModel)->switch($id, $type, $data);
+        LikesModel::switch($id, $type, $this->current_user);
     }
 
 }

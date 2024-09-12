@@ -8,7 +8,7 @@ namespace App\Libs;
 */
 class Router
 {
-    protected $currentController;
+    protected $currentController = 'Home';
     protected $currentMethod;
     protected $params = [];
 
@@ -21,15 +21,17 @@ class Router
         $this->currentController = empty($url[0]) ? 'Home' : ucwords($url[0]);
         unset($url[0]);
 
-        // Set Namespace
-        if (str_contains($this->currentController, 'Admin')) {
-            $namepace = '\\App\\Controllers\\Admin\\' . $this->currentController;
+        // Get Controller
+        if (file_exists('../App/Controllers/User/' . $this->currentController . '.php')) {
+            $namespace = "App\\Controllers\\User\\" . $this->currentController;
+        } elseif (file_exists('../App/Controllers/Admin/' . $this->currentController . '.php')) {
+            $namespace = "App\\Controllers\\Admin\\" . $this->currentController;
         } else {
-            $namepace = '\\App\\Controllers\\User\\' . $this->currentController;
+            die('Page not found');
         }
    
         // Instantiate the current controller
-        $this->currentController = new $namepace;
+        $this->currentController = new $namespace;
 
         // Get Method
         if (isset($url[1]) && method_exists($this->currentController, $url[1])) {

@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Libs\DB;
+use App\Libs\Validate;
 
 /*
 *  Torrent Langauage Table Data
@@ -33,7 +34,7 @@ class TorrentLangModel
     }
 
     // Fetch All Torrent Languages
-    public function fetchAll()
+    public static function fetchAll()
     {
         $sql = DB::newSelect('torrentlang', '*', '', 'ORDER BY sort_index ASC');
 
@@ -41,16 +42,16 @@ class TorrentLangModel
     }
 
     // Admin Lang Add/Insert
-    public function insertOrUpdate()
+    public static function insertOrUpdate()
     {
-        $name=Input('name');
-        $sort_index=Input('sort_index');
-        $image=Input('image');
-        $id=Input('id');
+        $name = Validate::Input('name');
+        $sort_index = Validate::Input('sort_index');
+        $image = Validate::Input('image');
+        $id = Validate::Input('id', 'int');
 
         // Check Correct Input
         if ($name == "") {
-            showMessage(Url('admintorrentlang'), LANG["MISSING_FORM_DATA"]);
+            showMessage(('admintorrentlang'), LANG["MISSING_FORM_DATA"]);
         }
                 
         if (!$id) {
@@ -59,28 +60,28 @@ class TorrentLangModel
         } else {
             // Update Torrent Lang
             DB::update('torrentlang', ['name','sort_index','image'], ['id='], [$name, $sort_index, $image, $id]);
-            showMessage(Url('admintorrentlang'), LANG["UPDATE_COMPLETE"]);
+            showMessage(('admintorrentlang'), LANG["UPDATE_COMPLETE"]);
         }
 
         if ($ins) {
-            showMessage(Url('admintorrentlang'), LANG["SUCCESS"]);
+            showMessage(('admintorrentlang'), LANG["SUCCESS"]);
         } else {
-            showMessage(Url('admintorrentlang/add'), LANG["ACTION_FAILED"]);
+            showMessage(('admintorrentlang/add'), LANG["ACTION_FAILED"]);
         }
     }
 
     // Admin Torrent Lang Update
-    public function update($id, $sure)
+    public static function update($id, $sure)
     {
         if ($sure == 'sure') {
-            $newlangid = Input('newlangid', 'int');
+            $newlangid = Validate::Input('newlangid', 'int');
             DB::update('torrents', ['torrentlang'], ['torrentlang='], [$newlangid, $id]);
         DB::delete('torrentlang', ['id' => $id]);
-            showMessage(Url('admintorrentlang'), LANG["ACTION_COMPLETE"]);
+            showMessage(('admintorrentlang'), LANG["ACTION_COMPLETE"]);
         } else {
             showMessage(
                 Url('admintorrentlang'), 
-                "<form method='post' action='". CONFIG['URLROOT'] ."/admintorrentlang/delete/$id/sure'>
+                "<form method='post' action='". URLROOT ."/admintorrentlang/delete/$id/sure'>
             <label for='newlangid'>".LANG["MOVE_LANG"]."</label>
             <input id='newlangid' type='text' class='form-control' name='newlangid'>
             <input type='submit' class='btn btn-sm ttbtn' value='". LANG["SUBMIT"]."' />

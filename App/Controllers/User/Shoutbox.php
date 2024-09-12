@@ -16,62 +16,52 @@ class Shoutbox extends Controller
     // Get Current User
     public function __construct()
     {
-        $this->current_user = (new Auth)->user(0);
-    }
-
-    // No Default Page
-    public function index()
-    {
-        Url(CONFIG['URLROOT'], true);
+        $this->current_user = new Auth();
     }
 
     // Ajax Shoutbox Load
     public function chat()
     {
-        $shouts = (new ShoutboxModel)->shouts(20);
-
         // Data For View
         $data = [
             'page_title' => LANG['SHOUTBOX'],
-            'V_shouts' => $shouts,
+            'V_shouts' => ShoutboxModel::shouts(20),
             'current_user' => $this->current_user
         ];
         
         // Load View
-        $this->view('shoutboxload', $data);
+        $this->view('user-shoutboxload', $data);
     }
 
     // Add Shout Submit
     public function add()
     {
-        (new ShoutboxModel)->add($this->current_user);
+        ShoutboxModel::add($this->current_user);
     }
 
     // Delete Shout Submit
     public function delete($id, $sure = 0)
     {
-        (new ShoutboxModel)->delete($id, $sure);
+        ShoutboxModel::delete($id, $sure);
     }
 
     // Edit Shout Default Page
     public function edit()
     {
-        (new ShoutboxModel)->edit($this->current_user);
+        ShoutboxModel::edit($this->current_user);
     }
 
     // Shoutbox History Default Page
     public function history()
     {
-        $shouts = (new ShoutboxModel)->shouts(80);
-        
         // Data For View
         $data = [
             'page_title' => LANG['HISTORY'],
-            'V_shouts' => $shouts
+            'V_shouts' => ShoutboxModel::shouts(80)
         ];
 
         // Load View
-        $this->view('shoutbox', $data, 'user');
+        $this->view('user-shoutbox', $data, 'user');
     }
 
 }

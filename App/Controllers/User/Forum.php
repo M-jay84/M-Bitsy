@@ -16,42 +16,40 @@ class Forum extends Controller
     // Get Current User
     public function __construct()
     {
-        $this->current_user = (new Auth)->user(1);
+        $this->current_user = new Auth();
+
         if (!CONFIG['FORUMS']) {
-            showMessage(Url(), LANG["FORUM_AVAILABLE"]);
+            $this->showMessage(URLROOT, LANG["FORUM_AVAILABLE"]);
         }
-        if (!CONFIG['FORUMS_GUESTREAD'] && !$this->current_user->id) {
-            showMessage(Url(), LANG["NO_PERMISSION"]);
+        if (!CONFIG['FORUMS_GUESTREAD'] && !$this->current_user->loggedin) {
+            $this->showMessage(URLROOT, LANG["NO_PERMISSION"]);
         }
         if ($this->current_user->forumbanned == "yes" || $this->current_user->view_forum == "no") {
-            showMessage(Url(), LANG["FORUM_BANNED"]);
+            $this->showMessage(URLROOT, LANG["FORUM_BANNED"]);
         }
     }
 
     // Forum Page
     public function index()
     {
-        // Get Forum Data
-        $forums = (new ForumsModel)->getCatForums();
-
         // Data For View
         $data = [
             'page_title' => LANG["FORUM"],
-            'V_forums' => $forums
+            'V_forums' => ForumsModel::getCatForums()
         ];
 
         // Load View
-        $this->view('forum', $data, 'user');
+        $this->view('user-forum', $data, 'user');
     }
 
     // Search Forum Page
     public function search()
     {
-        $data = (new ForumsModel)->search();
+        $data = ForumsModel::search();
 		$data['curremt_user'] = $this->current_user;
 
         // Load View
-        $this->view('forum_search', $data, 'user');
+        $this->view('user-forum-search', $data, 'user');
     }
 
     // View Unread Topics Page
@@ -62,8 +60,7 @@ class Forum extends Controller
         }
         
         // Get Data
-        $data['current_user'] = $this->current_user;
-        $forums = (new ForumsModel)->unread($data);
+        $forums = ForumsModel::unread($this->current_user);
         
 		// Data For View
         $data = [
@@ -73,7 +70,7 @@ class Forum extends Controller
         ];
 
         // Load View
-        $this->view('forum_unread', $data, 'user');
+        $this->view('user-forum-unread', $data, 'user');
     }
 
 }

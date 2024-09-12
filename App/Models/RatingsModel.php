@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Libs\DB;
+use App\Libs\Validate;
 
 /*
 * Ratings Table Data
@@ -10,13 +11,13 @@ use App\Libs\DB;
 class RatingsModel
 {
     // Show Rating
-    public function ratingTor($id, $userid, $rating = 0)
+    public static function ratingTor($id, $userid, $rating = 0)
     {
         if (!$rating) {
             $rating = "<b>" . LANG["RATINGS"] . ":</b> <b>Not Yet Rated</b><br>";
         } else {
             $average = ceil($rating);
-            $rating = "<img src=\"" . CONFIG['URLROOT'] . "/assets/images/rating/$average.webp\" alt=\"rating: $average/5\" title=\"rating: $average/5\" /></a><br>";
+            $rating = "<img src=\"" . URLROOT . "/assets/images/rating/$average.webp\" alt=\"rating: $average/5\" title=\"rating: $average/5\" /></a><br>";
         }
         if ($userid) {
             $ratings = [
@@ -31,7 +32,7 @@ class RatingsModel
             if ($row) {
                 $rating .= "<i>(" . LANG["YOU_RATED"] . " \"" . $row["rating"] . " - " . $ratings[$row["rating"]] . "\")</i>";
             } else {
-                $rating .= "<form style=\"display:inline;\" method=\"post\" action=\"" . CONFIG['URLROOT'] . "/rating/$id\"><input type=\"hidden\" name=\"id\" value=\"$id\" />";
+                $rating .= "<form style=\"display:inline;\" method=\"post\" action=\"" . URLROOT . "/rating/$id\"><input type=\"hidden\" name=\"id\" value=\"$id\" />";
                 $rating .= "<select name=\"rating\" class='ttbtn'>";
                 $rating .= "<option value=\"0\">(" . LANG["ADD_RATING"] . ")</option>";
                 foreach ($ratings as $k => $v) {
@@ -47,26 +48,26 @@ class RatingsModel
     }
 
     // Add Rating
-    public function addRating($id, $userid)
+    public static function addRating($id, $userid)
     {
         // Check User Input
-        $rating = Input('rating', 'int');
+        $rating = Validate::Input('rating', 'int');
 
         if ($rating <= 0 || $rating > 5) {
-            showMessage(Url("torrent/$id"), LANG["INVAILD_RATING"]);
+            showMessage(("torrent/$id"), LANG["INVAILD_RATING"]);
         }
         
-        $res = DB::insert('ratings', ['torrent'=>$id, 'user'=>$userid , 'rating'=>$rating, 'added'=>get_date_time()]);
+        $res = DB::insert('ratings', ['torrent'=>$id, 'user'=>$userid , 'rating'=>$rating, 'added'=>CONFIG['TT_DATE']]);
         if ($res) {
             if ($res->errorCode() == 1062) {
-                showMessage(Url("torrent/$id"), LANG["YOU_ALREADY_RATED_TORRENT"]);
+                showMessage(("torrent/$id"), LANG["YOU_ALREADY_RATED_TORRENT"]);
             } else {
-                showMessage(Url("torrent/$id"), LANG["ACTION_FAILED"]);
+                showMessage(("torrent/$id"), LANG["ACTION_FAILED"]);
             }
         }
         
         DB::run("UPDATE torrents SET numratings = numratings + 1, ratingsum = ratingsum + $rating WHERE id = $id");
-        showMessage(Url("torrent/$id"), LANG["RATING_THANK"]);
+        showMessage(("torrent/$id"), LANG["RATING_THANK"]);
     }
     
 }

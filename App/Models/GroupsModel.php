@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Libs\DB;
+use App\Libs\Validate;
 use PDO;
 
 /*
@@ -11,23 +12,23 @@ use PDO;
 class GroupsModel
 {
     // Fetch Groups Level
-    public function fetchlevel($ids)
+    public static function fetchlevel($ids)
     {
         $stmt = DB::run("SELECT DISTINCT level FROM `groups` WHERE group_id IN ($ids)")->fetchAll();
 		return $stmt;
 	}
 		
     // Fetch All Groups
-    public function fetchAll($columns = '*', $where = '', $values = '', $other = '')
+    public static function fetchAll($columns = '*', $where = '', $values = '', $other = '')
     {
         $stmt = DB::newSelect('groups', $columns, $where, $values, $other);
 		return $stmt;
 	}
 
     // Get Staff
-    public function getStaffTable($data = [])
+    public static function getStaffTable($data = [])
     {
-        $dt = get_date_time(gmtime() - 180);
+        $dt = date("Y-m-d H:i:s", CONFIG['TT_TIME'] - 180);
 
         // Get Staff Data
         $res = DB::run("SELECT `users`.`id`, `users`.`username`, `users`.`class`, `users`.`last_access`
@@ -42,8 +43,8 @@ class GroupsModel
         while ($row = $res->fetch(PDO::FETCH_ASSOC)) {
             $table[$row['class']] = ($table[$row['class']] ?? '') .
             "<td><i class='fa fa-user' aria-hidden='true' title='Profile'></i>
-                 <a href='" . CONFIG['URLROOT'] . "/profile/$row[id]'>" . coloredname($row["id"]) . "</a>
-                 <a href='" . CONFIG['URLROOT'] . "/message/create/$row[id]'><i class='fa fa-comment' title='Send PM'></i></a></td>";
+                 <a href='" . URLROOT . "/profile/$row[id]'>" . coloredname($row["id"]) . "</a>
+                 <a href='" . URLROOT . "/message/create/$row[id]'><i class='fa fa-comment' title='Send PM'></i></a></td>";
             $col[$row['class']] = ($col[$row['class']] ?? 0) + 1;
             if ($col[$row["class"]] <= 4) {
                 $table[$row["class"]] = $table[$row["class"]] . "<td></td>";
@@ -63,7 +64,7 @@ class GroupsModel
         WHERE `staff_page` = 'yes' $where
         ORDER BY `staff_sort`");
         if ($res->rowCount() == 0) {
-            showMessage(Url(), LANG["NO_STAFF_HERE"]);
+            showMessage(URLROOT, LANG["NO_STAFF_HERE"]);
         }
 
         $array = [
@@ -75,7 +76,7 @@ class GroupsModel
     }
 
     // Function That Returns The Group Name
-    public function GetUserClassName($i, $data = [])
+    public static function GetUserClassName($i, $data = [])
     {
         $row = DB::fetchRow('`groups`', 'level', ['group_id ='], [$i]);
         if ($i == $data['current_user']->class) {
@@ -85,7 +86,7 @@ class GroupsModel
     }
 
     // Function To List Groups Of Members Of The Database
-    public function getGroups()
+    public static function getGroups()
     {
         $stmt = DB::run("SELECT * FROM `groups` 
                          LEFT OUTER JOIN `permissions` 
@@ -94,33 +95,33 @@ class GroupsModel
     }
 
     // Admin Delete Group
-    public function delete($group_id)
+    public static function delete($group_id)
     {
         // Protect Groups
         if (($group_id == "1") || ($group_id == CONFIG['_ADMINISTRATOR'])) {
-            showMessage(Url('admingroup'), LANG["YOU_CANT_DEL_THIS_GRP"]);
+            showMessage(('admingroup'), LANG["YOU_CANT_DEL_THIS_GRP"]);
         }
 
         DB::delete('`groups`', ['group_id'=>$group_id]);
-        showMessage(Url('admingroup/groups'), LANG["DEL_COMPLETE"]);
+        showMessage(('admingroup/groups'), LANG["DEL_COMPLETE"]);
     }
 
     // Admin Add/Edit Group
-    public function insertOrUpdate()
+    public static function insertOrUpdate()
     {
-        $group_id = Input('group_id', 'int');
+        $group_id = Validate::Input('group_id', 'int');
         if (!$group_id) {
             DB::insert('`groups`', [
                 'level' => $_POST["level"], 'Color' => $_POST["group_color"], 'group_role_id' => $_POST["group_role_id"], 'maxslots' => $_POST["maxslots"],
                 'control_panel' => $_POST["control_panel"], 'staff_page' => $_POST["staff_page"], 'staff_public' => $_POST["staff_public"], 'staff_sort' => intval($_POST['staff_sort'])
             ]);
-            showMessage(Url('admingroup'), LANG["SUCCESS"]);
+            showMessage(('admingroup'), LANG["SUCCESS"]);
         } else {
             DB::update('`groups`',
                ['level','Color','group_role_id','maxslots','control_panel','staff_page','staff_public','staff_sort'], 
                ['group_id='], 
                [$_POST["level"], $_POST["group_color"], $_POST["group_role_id"], $_POST["maxslots"], $_POST["control_panel"], $_POST["staff_page"], $_POST["staff_public"], intval($_POST['staff_sort']), $group_id]);
-            showMessage(Url('admingroup'), LANG["UPDATE_COMPLETE"]);
+            showMessage(('admingroup'), LANG["UPDATE_COMPLETE"]);
         }
     }
 

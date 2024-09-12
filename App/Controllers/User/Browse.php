@@ -16,16 +16,20 @@ class Browse extends Controller
     // Get Current User
     public function __construct()
     {
-        $this->current_user = (new Auth)->user(1);
+        $this->current_user = new Auth();
+
+        if (!$this->current_user->loggedin && CONFIG['MEMBERSONLY']) {
+            $this->showMessage(URLROOT, LANG["NO_PERMISSION"]);
+        }
     }
 
     // Search Browse Default Page todo (tidy up)
     public function index()
     {
         if ($this->current_user->view_torrents != "yes" && CONFIG['MEMBERSONLY']) {
-            showMessage(Url(), LANG["NO_TORRENT_VIEW"]);
+            $this->showMessage(URLROOT, LANG["NO_TORRENT_VIEW"]);
         } else {
-            $browse =(new TorrentsModel)->countBrowse();
+            $browse =TorrentsModel::countBrowse();
 
             // Data For View
             $data = [
@@ -38,11 +42,11 @@ class Browse extends Controller
                 'V_count' => $browse['count'],
                 'V_wherecatina' => $browse['search']['wherecatina'],
                 'V_cats' => $browse['cats'],
-            'current_user' => $this->current_user
+                'current_user' => $this->current_user
             ];
 
             // Load View
-            $this->view('browse', $data, 'user');
+            $this->view('user-browse', $data, 'user');
         }
     }
 

@@ -4,6 +4,7 @@ namespace App\Controllers\User;
 
 use App\Libs\Auth;
 use App\Libs\Controller;
+use App\Libs\Validate;
 use App\Models\WarningsModel;
 
 /*
@@ -16,74 +17,61 @@ class Warning extends Controller
     // Get Current User
     public function __construct()
     {
-        $this->current_user = (new Auth)->user(2);
+        $this->current_user = new Auth();
+
+        if (!$this->current_user->loggedin) {
+            $this->showMessage(URLROOT, LANG["NO_PERMISSION"]);
+        }
     }
 
     // User Warnings Page
     public function index($user_id)
     {
         // Check Current User
-        if (!$this->current_user->staff && $this->current_user->id != $user_id) {
-            showMessage(CONFIG['APPROOT'], LANG['NO_PERMISSION']);
+        if (!$this->current_user->isStaff && $this->current_user->id != $user_id) {
+            $this->showMessage(URLROOT, LANG['NO_PERMISSION']);
         }
-
-        // Get Warnings Data
-        $warnings = (new WarningsModel)->getByUserId($user_id);
 
         // Data For View
         $data = array(
             'page_title' => LANG["USER_DETAILS_FOR"] . coloredname($user_id),
             'user_id' => $user_id,
-            'warnings' => $warnings,
+            'warnings' => WarningsModel::getByUserId($user_id),
             'current_user' => $this->current_user
         );
 
         // Load View
-        $this->view('warning', $data, 'user');
+        $this->view('user-warning', $data, 'user');
     }
 
     // Warnings Form Submit
     public function submit($userid)
     {
-        // Check User Input
-        $data = [
-            'reason' => Input('reason'),
-            'expiry' => Input('expiry', 'int'),
-            'type' => Input('type'),
-            'current_user' => $this->current_user,
-            'userid' => $userid
-        ];
-
-        // Check Input
-        if (!$data['reason'] || !$data['expiry'] || !$data['type']) {
-            showMessage(Url("profile/$data[userid]"), LANG["MISSING_FORM_DATA"]);
-        }
-
         // Check User
-        if (!$this->current_user->staff_page == 'yes') {
-            showMessage(Url("profile/$data[userid]"), LANG["NO_PERMISSION"]);
+        if (!$this->current_user->isSstaff) {
+            $this->showMessage("profile/$userid", LANG["NO_PERMISSION"]);
         }
 
         // Add New Warning
-        (new WarningsModel)->newwarn($data);
+        WarningsModel::newwarn($userid);
     }
 
     // Delete User Warning
     public function delete($userid)
     {
         // Check User
-        if (!$this->current_user->staff_page == 'yes') {
-            showMessage(Url("profile/$userid"), LANG["NO_PERMISSION"]);
+        if (!$this->current_user->isStaff) {
+            $this->showMessage("profile/$userid", LANG["NO_PERMISSION"]);
         }
 
         // Set Data
         $data = [
             'current_user' => $this->current_user,
             'userid' => $userid,
-            'post_id' => multiIds("ids")
+            'post_id' => Validate::multiIds("ids")
         ];
 
         // Delete Warning/s
-        (new WarningsModel)->deleteAll($data);
+        WarningsModel::deleteAll($data);
     }
 }

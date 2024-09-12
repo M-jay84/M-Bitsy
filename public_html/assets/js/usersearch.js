@@ -3,10 +3,10 @@
         $("#search-box").keyup(function() {
             $.ajax({
                 type: "POST",
-                url: "<?php echo CONFIG['URLROOT']; ?>/message/findUser",
+                url: "<?php echo URLROOT; ?>/message/findUser",
                 data: 'keyword=' + $(this).val(),
                 beforeSend: function() {
-                    $("#search-box").css("background", "#FFF url(<?php echo CONFIG['URLROOT']; ?>/LoaderIcon.gif) no-repeat 165px");
+                    $("#search-box").css("background", "#FFF url(<?php echo URLROOT; ?>/LoaderIcon.gif) no-repeat 165px");
                 },
                 success: function(data) {
                     $("#suggesstion-box").show();

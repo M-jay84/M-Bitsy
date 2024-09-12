@@ -16,22 +16,22 @@ class Adminforum extends Controller
     // Get Current User
     public function __construct()
     {
-        $this->current_user = (new Auth)->user(2);
-        if ($this->current_user->class < CONFIG['_MODERATOR']) {
-            showMessage(CONFIG['URLROOT'], LANG["NO_PERMISSION"]);
+        $this->current_user = new Auth();
+
+        if (!$this->current_user->isStaff) {
+            $this->showMessage(URLROOT, LANG["NO_PERMISSION"]);
         }
     }
 
     // Forum Default Page
     public function index($id, $forumid = 0, $move = false)
     {
-    
         if ($move) {
-            (new ForumsModel)->reorderForum($id, $forumid, $move);
+            ForumsModel::reorderForum($id, $forumid, $move);
         }
 
         // Get Forum Data
-        $forum = (new ForumsModel)->getForums($id);
+        $forum = ForumsModel::getForums($id);
 
         // Data For View
         $data = [
@@ -44,21 +44,19 @@ class Adminforum extends Controller
         ];
         
         // Load View
-        $this->view('forum', $data, 'admin');
+        $this->view('admin-forum', $data, 'admin');
     }
 
     // Add Forum Submit
     public function submit()
     {
-    
-        (new ForumsModel)->insertOrUpdateForum();
+        ForumsModel::insertOrUpdateForum();
     }
 
     // Delete Forum Submit
     public function delete($id, $sure = '')
     {
-    
-        (new ForumsModel)->delete($id, $sure);
+        ForumsModel::delete($id, $sure);
     }
 
 }

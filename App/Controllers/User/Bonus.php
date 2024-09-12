@@ -11,17 +11,15 @@ use App\Models\BonusModel;
 */
 class Bonus extends Controller
 {
-    public $bonus;
     public $current_user;
 
     // Get Current User Object
     public function __construct()
     {
-        $this->bonus = new BonusModel();
-        $this->current_user = (new Auth)->user(2);
+        $this->current_user = new Auth();
 
         if (!$this->current_user->loggedin) {
-            $this->redirect('home');
+            $this->showMessage(URLROOT, LANG["NO_PERMISSION"]);
         }
     }
 
@@ -30,19 +28,19 @@ class Bonus extends Controller
     {
         $data = [
             'page_title' => LANG['BONUS'],
-            'bonus_result' => $this->bonus->getAll(),
-            'set_bonus_interval' => $this->bonus->interval(),
+            'bonus_result' => BonusModel::getAll(),
+            'set_bonus_interval' => BonusModel::interval(),
             'current_user' => $this->current_user
         ];
 
-        $this->view('bonus', $data, 'user');
+        $this->view('user-bonus', $data, 'user');
     }
 
     // Bonus Form Submit
     public function submit()
     {
-        if (Inputexsist('post')) {
-            $this->bonus->getById($this->current_user);
+        if (!empty($_POST)) {
+            BonusModel::getById($this->current_user);
         } else {
             $this->showMessage('bonus', LANG["NOTHING_FOUND"]);
         }
@@ -53,13 +51,13 @@ class Bonus extends Controller
     public function update()
     {
         if ($this->current_user->isStaff) {
-            if (Inputexsist('post')) {
-                $this->bonus->insertOrUpdate();
+            if (!empty($_POST)) {
+                BonusModel::insertOrUpdate();
             } else {
                 $this->showMessage('bonus', LANG["NOTHING_FOUND"]);
             }
         } else {
-            $this->showMessage('home', LANG["NO_PERMISSION"]);
+            $this->showMessage(URLROOT, LANG["NO_PERMISSION"]);
         } 
         $this->showMessage('bonus', LANG["SUCCESS"]);
     }
@@ -68,9 +66,9 @@ class Bonus extends Controller
     public function delete($id)
     {
         if ($this->current_user->isStaff) {
-            $this->bonus->delete($id);
+            BonusModel::delete($id);
         } else {
-            $this->showMessage('home', LANG["NO_PERMISSION"]);
+            $this->showMessage(URLROOT, LANG["NO_PERMISSION"]);
         }
         $this->showMessage('bonus', LANG["SUCCESS"]);
     }

@@ -11,21 +11,21 @@ use App\Models\TorrentsModel;
 class PeersModel
 {
     // Get Peers
-    public function getPeers($type, $id, $current_user, $pagination = false)
+    public static function getPeers($type, $id, $current_user, $pagination = false)
     {
         if ($current_user->view_users != "yes" && $current_user->id != $id && $current_user->class < CONFIG['_UPLOADER'] && $type == ('seeding' || 'leeching')) {
-            showMessage(Url(), LANG["NO_USER_VIEW"]);
+            showMessage(URLROOT, LANG["NO_USER_VIEW"]);
         }
 
         $title = LANG["USER_DETAILS_FOR" . coloredname($id)];
 
         if ($type == 'torrent') {
             if ($current_user->torrents == "no" && $current_user->id != $id && $current_user->class < CONFIG['_UPLOADER']) {
-                showMessage(Url(), LANG["NO_TORRENT_VIEW"]);
+                showMessage(URLROOT, LANG["NO_TORRENT_VIEW"]);
             }
             $where = 'peers.torrent = ?';
             $values = [$id];
-            $name = (new TorrentsModel)->fetchRow('name', ['id ='], [$id]);
+            $name = TorrentsModel::fetchRow('name', ['id ='], [$id]);
             $title = LANG["TORRENT_DETAILS_FOR"] . $name;
         } elseif ($type == 'admin') {
             $where = 'torrents.id > ?';
@@ -45,7 +45,7 @@ class PeersModel
              WHERE $where", $values
         )->fetchColumn();
 
-        list($pager, $limit) = pagination(25, $count, CONFIG['URLROOT'] . "/$pagination&");
+        list($pager, $limit) = pagination(25, $count, URLROOT . "/$pagination&");
 
         $stmt = DB::run(
             "SELECT peers.id as pid, peers.torrent, peers.peer_id, peers.ip, peers.port, peers.uploaded, peers.downloaded,

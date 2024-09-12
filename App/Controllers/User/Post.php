@@ -17,22 +17,23 @@ class Post extends Controller
     // Get Current User
     public function __construct()
     {
-        $this->current_user = (new Auth)->user(1);
+        $this->current_user = new Auth();
+
         if (!CONFIG['FORUMS']) {
-            showMessage(Url(), LANG["FORUM_AVAILABLE"]);
+            $this-> $this->showMessage(URLROOT, LANG["FORUM_AVAILABLE"]);
         }
-        if (!CONFIG['FORUMS_GUESTREAD'] && !$this->current_user->id) {
-            showMessage(Url(), LANG["NO_PERMISSION"]);
+        if (!CONFIG['FORUMS_GUESTREAD'] && !$this->current_user->loggedin) {
+            $this->showMessage(URLROOT, LANG["NO_PERMISSION"]);
         }
         if ($this->current_user->forumbanned == "yes" || $this->current_user->view_forum == "no") {
-            showMessage(Url(), LANG["FORUM_BANNED"]);
+            $this->showMessage(URLROOT, LANG["FORUM_BANNED"]);
         }
     }
 
     // View Forum Topic Default Page
     public function index($topicid)
     {
-        $post = (new PostsModel)->getTopicPages($topicid, $this->current_user);
+        $post = PostsModel::getTopicPages($topicid, $this->current_user);
 
         // Data For View
         $data = [
@@ -45,36 +46,38 @@ class Post extends Controller
         ];
 
         // Load View
-        $this->view('post', $data, 'user');
+        $this->view('user-post', $data, 'user');
     }
 
     public function submit($topicid) // todo
     {
-        (new PostsModel)->addPost($topicid, $this->current_user);
+        if (!empty($_POST)) {
+            PostsModel::addPost($topicid, $this->current_user);
+        } else {
+            $this->showMessage(URLROOT, LANG["NOTHING_FOUND"]);
+        }
     }
 
     // Post Edit Form Submit
     public function edit()
     {
         if (!empty($_POST)) {
-            (new PostsModel)->edit($this->current_user);
+            PostsModel::edit($this->current_user);
         } else {
-            showMessage(Url(), LANG["NOTHING_SELECTED"]);
+            $this->showMessage(URLROOT, LANG["NOTHING_SELECTED"]);
         }
-        
     }
     
     // Post Delete Submit
     public function delete($postid, $sure = 0)
     {
-        (new PostsModel)->deletePost($postid, $this->current_user, $sure);
+        PostsModel::deletePost($postid, $this->current_user, $sure);
     }
 
     // Users Posts Default Page
     public function user($id)
     {
-        $data['current_user'] = $this->current_user;
-        $posts = (new ForumsModel)->getUsersPost($id, $data);
+        $posts = ForumsModel::getUsersPost($id, $this->current_user);
 
         // Data For View To View
         $data = [
@@ -86,7 +89,7 @@ class Post extends Controller
         ];
 
         // Load View
-        $this->view('post_user', $data, 'user');
+        $this->view('user-post-user', $data, 'user');
     }
     
 }

@@ -16,15 +16,16 @@ class Topic extends Controller
     // Get Current User
     public function __construct()
     {
-        $this->current_user = (new Auth)->user(1);
+        $this->current_user = new Auth();
+    
         if (!CONFIG['FORUMS']) {
-            showMessage(Url(), LANG["FORUM_AVAILABLE"]);
+            $this->showMessage(URLROOT, LANG["FORUM_AVAILABLE"]);
         }
-        if (!CONFIG['FORUMS_GUESTREAD'] && !$this->current_user->id) {
-            showMessage(Url(), LANG["NO_PERMISSION"]);
+        if (!CONFIG['FORUMS_GUESTREAD'] && !$this->current_user->loggedind) {
+            $this->showMessage(URLROOT, LANG["NO_PERMISSION"]);
         }
-        if ($this->current_user->view_forum != "yes" && $this->current_user->class <= CONFIG['_MODERATOR']) {
-            showMessage(Url(), LANG["FORUM_BANNED"]);
+        if ($this->current_user->view_forum != "yes" && !$this->current_user->isStaff) {
+            $this->showMessage(URLROOT, LANG["FORUM_BANNED"]);
         }
     }
 
@@ -32,7 +33,7 @@ class Topic extends Controller
     public function index($forumid)
     {
         // Get Topics Data
-        $topics = (new TopicsModel)->getForumTopics($forumid, $this->current_user);
+        $topics = TopicsModel::getForumTopics($forumid, $this->current_user);
 
         // Data For View
         $data = [
@@ -45,38 +46,37 @@ class Topic extends Controller
         ];
 
         // Load View
-        $this->view('topic', $data, 'user');
+        $this->view('user-topic', $data, 'user');
     }
 
     // Post Topic
     public function submit($forumid)
     {
-        $data['current_user'] = $this->current_user;
-        (new TopicsModel)->insertTopic($forumid, $data);
+        TopicsModel::insertTopic($forumid, $this->current_user);
     }
 
     // Delete a Topic Submit
     public function delete($topicid, $sure = 0)
     {
-        (new TopicsModel)->delTopic($topicid, $sure);
+        TopicsModel::delTopic($topicid, $sure);
     }
 
     // Rename a Topic Submit
     public function rename($topicid)
     {
-        (new TopicsModel)->rename($topicid, $this->current_user);
+        TopicsModel::rename($topicid, $this->current_user);
     }
 
     // Move a Topic Submit
     public function move($topicid)
     {
-        (new TopicsModel)->move($topicid, $this->current_user);
+        TopicsModel::move($topicid, $this->current_user);
     }
 
     // Lock a Topic Submit
     public function action($forumid, $topicid, $type)
     {
-        (new TopicsModel)->action($forumid, $topicid, $type, $this->current_user);
+        TopicsModel::action($forumid, $topicid, $type, $this->current_user);
     }
 
 }

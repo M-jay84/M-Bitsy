@@ -16,43 +16,48 @@ class Rule extends Controller
     // Get Current User
     public function __construct()
     {
-        $this->current_user = (new Auth)->user(1);
+        $this->current_user = new Auth();
+
+        if (!$this->current_user->loggedin && CONFIG['MEMBERSONLY']) {
+            $this->showMessage(URLROOT, LANG["NO_PERMISSION"]);
+        }
     }
 
     // Rules Page
     public function index()
     {
-        // Get Rules
-        $rules = (new RulesModel)->gettAll();
-
         // Data For View
         $data = [
             'page_title' => LANG['RULE'],
-            'V_rules' => $rules,
+            'V_rules' => RulesModel::gettAll(),
             'current_user' => $this->current_user
         ];
 
         // Load View
-        $this->view('rule', $data, 'user');
+        $this->view('user-rule', $data, 'user');
     }
 
     // Edit/Add Rule
     public function edit()
     {
-        if (!$this->current_user->class > CONFIG['_MODERATOR']) {
-            showMessage(Url(), LANG["NO_PERMISSION"]);
+        if (!$this->current_user->isStaff) {
+            $this->showMessage('rule', LANG["NO_PERMISSION"]);
         } else {
-            (new RulesModel)->insertOrUpdate($this->current_user->username);
+            if (!empty($_POST)) {
+                RulesModel::insertOrUpdate($this->current_user->username);
+            } else {
+                $this->showMessage('rule', LANG["NOTHING_SELECTED"]);
+            }
         }
     }
 
     // Delete Rule
     public function delete($id)
     {
-        if (!$this->current_user->class > CONFIG['_MODERATOR']) {
-            showMessage(Url(), LANG["NO_PERMISSION"]);
+        if (!$this->current_user->isStaff) {
+            $this->showMessage(URLROOT, LANG["NO_PERMISSION"]);
         } else {
-            (new RulesModel)->delete($id, $this->current_user->username);
+            RulesModel::delete($id, $this->current_user->username);
         }
     }
 }

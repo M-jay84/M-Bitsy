@@ -16,21 +16,21 @@ class Adminnews extends Controller
     // Get Current User
     public function __construct()
     {
-        $this->current_user = (new Auth)->user(2);
-        if ($this->current_user->class < CONFIG['_MODERATOR']) {
-            showMessage(CONFIG['URLROOT'], LANG["NO_PERMISSION"]);
+        $this->current_user = new Auth();
+
+        if (!$this->current_user->isStaff) {
+            $this->showMessage(URLROOT, LANG["NO_PERMISSION"]);
         }
     }
 
     // News Default Page
     public function index()
     {
-    
         if (!empty($_POST)) {
-            (new NewsModel)->insertOrUpdate();
+            NewsModel::insertOrUpdate();
         } else {
             // Get News Data
-            $news = (new NewsModel)->fetchAll('*', '', 'ORDER BY added DESC');
+            $news = NewsModel::fetchAll('*', '', 'ORDER BY added DESC');
 
             // Data For View
             $data = [
@@ -39,15 +39,14 @@ class Adminnews extends Controller
             ];
        
             // Load View
-            $this->view('news', $data, 'admin');
+            $this->view('admin-news', $data, 'admin');
         }
     }
 
     // Delete News Form Submit
     public function delete($id)
     {
-    
-        (new NewsModel)->delete($id, $this->current_user->id);
+        NewsModel::delete($id, $this->current_user->id);
     }
 
 }

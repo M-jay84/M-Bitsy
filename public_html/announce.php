@@ -3,25 +3,18 @@
 error_reporting(0);
 
 // Get Settings
-require '../App/Config/config.php';
-define('ANNOUNCEINTERVAL', 900);
+require '../Core/paths.php';
+define('ANNOUNCEINTERVAL', 600);
 define('MEMBERSONLY', true);
-
-// Debug
-define('DEBUG_OUTPUT', false);
-define('DEBUG_CODE', true);
-if (DEBUG_CODE) {
-    // todo add log instead for exception !!!
-    //include "../App/Helpers/exception_helper.php";
-    //set_exception_handler("handleUncaughtException");
-}
+define('DEBUG', false);
+define('TT_DATE', date('Y-m-d H:i:s'));
 
 // Debug Function
 function mydebug($msg)
 {
-    if (is_writeable('test.txt')) {
-        $fh = fopen('test.txt', 'a+');
-        fputs($fh, "[Log] " . date("d.m.Y H:i:s") . " $msg\n");
+    if (DEBUG) {
+        $fh = fopen(LOG_PATH . '/announce.txt', 'a+');
+        fwrite($fh, "[Log] " . date("d.m.Y H:i:s") . " - $msg\n");
         fclose($fh);
     }
 }
@@ -37,10 +30,6 @@ function pdo($pdo, $sql, $args = NULL)
         $stmt->execute($args);
         return $stmt;
     } catch (\Exception $e) {
-        if (DEBUG_CODE) {
-            mydebug($e);
-            throw $e;
-        }
         die(response('Database Error'));
     }
 }
@@ -49,7 +38,9 @@ function pdo($pdo, $sql, $args = NULL)
 function response($peer_array, $seeders = 0, $leechers = 0)
 {
     if (is_string($peer_array)) {
-        return 'd14:failure reason' . strlen($peer_array) . ':' . $peer_array . 'e';
+        $error = 'd14:failure reason' . strlen($peer_array) . ':' . $peer_array . 'e';
+        mydebug($error);
+        return $error;
     }
     $peer_list = '';
     foreach ($peer_array as $peer) {
@@ -61,9 +52,8 @@ function response($peer_array, $seeders = 0, $leechers = 0)
         $peer_list .= 'd2:ip' . strlen($peer['ip']) . ':' . $peer['ip'] . $pid . '4:porti' . $peer['port'] . 'ee';
     }
     $response = 'd8:intervali' . ANNOUNCEINTERVAL . 'e12:min intervali30e8:completei' . $seeders . 'e10:incompletei' . $leechers . 'e5:peersl' . $peer_list . 'ee';
-    if (DEBUG_OUTPUT) {
-        mydebug($response);
-    }
+    mydebug($response);
+
     return $response;
 }
 
@@ -73,9 +63,9 @@ $opt = array(
     PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
     PDO::ATTR_EMULATE_PREPARES => false,
 );
-$dsn = 'mysql:host=' . CONFIG['DB_HOST'] . ';dbname=' . CONFIG['DB_NAME'] . ';charset=' . CONFIG['DB_CHAR'];
+$dsn = 'mysql:host=' . DB_HOST . ';dbname=' . DB_NAME . ';charset=' . DB_CHAR;
 try {
-    $pdo = new PDO($dsn, CONFIG['DB_USER'], CONFIG['DB_PASS'], $opt);
+    $pdo = new PDO($dsn, DB_USER, DB_PASS, $opt);
 } catch (\Exception $e) {
     die(response('The Database Details Are Incorrect'));
 }
@@ -83,7 +73,7 @@ try {
 // Block Browsers
 $agent = $_SERVER["HTTP_USER_AGENT"];
 if (preg_match("/^Mozilla|^Opera|^Links|^Lynx/i", $agent)) {
-    die('What Are you doing ???');
+    die(response('What Are you doing ???'));
 }
 
 // Block Unwanted Clients
@@ -95,36 +85,19 @@ foreach ($stmt as $bannedclient) {
     }
 }
 
-// Get Client Data
-foreach (['info_hash', 'peer_id', 'port', 'uploaded', 'downloaded', 'left'] as $key) {
-    $client[$key] = $_GET[$key];
-    if (!isset($client[$key])) {
-        die(response("Missing Key - $client[$key]"));
-    }
-}
-foreach (["info_hash", "peer_id"] as $key) {
-    if (strlen($client[$key]) != 20) {
-        die(response("Wrong Length " . strlen($client[$key]) . " - $client[$key]"));
-    }
-    $client[$key] = bin2hex($client[$key]);
-}
-foreach (['uploaded', 'downloaded', 'left'] as $key) {
-    if (!is_numeric($client[$key]) || $client[$key] < 0) {
-        die(response("Wierd Number - $client[$key]"));
-    }
-}
-foreach (['event'] as $key) {
-    $client[$key] = strtolower($_GET[$key]);
-}
-$client['passkey'] = $_GET['passkey'];
-if (strlen($client['passkey']) != 32 && MEMBERSONLY) {
-     die(response("Invalid passkey (" . strlen($client['passkey']) . " - $client[passkey])"));
-}
-if (!ctype_digit($client['port']) || $client['port'] < 1 || $client['port'] > 65535) {
-    die(response("Invalid client port $client[port]"));
-}
-$client['seeder'] = ($client['left'] == 0) ? "yes" : "no";
-$client['ip'] = $_SERVER["REMOTE_ADDR"] ?? $_GET['ip'];
+// Client Data
+$client = [
+    'info_hash' => strlen($_GET['info_hash']) == 20 ? bin2hex($_GET['info_hash']) : die(response("Wrong Length " . strlen($_GET['info_hash']) . " - $_GET[info_hash]")),
+    'peer_id' => strlen($_GET['peer_id']) == 20 ? bin2hex($_GET['peer_id']) : die(response("Wrong Length " . strlen($_GET['peer_id']) . " - $_GET[peer_id]")),
+    'ip' => $_GET['ip'] ?? $_SERVER["REMOTE_ADDR"],
+    'port' => (!ctype_digit($_GET['port']) || $_GET['port'] < 1 || $_GET['port'] > 65535) ? $_GET['port'] : die(response("Invalid client port $_GET[port]")),
+    'uploaded' => (!is_numeric($_GET['uploaded']) || $_GET['uploaded'] < 0) ? $_GET['uploaded'] : die(response("Wierd Number - $_GET[uploaded]")),
+    'downloaded' => (!is_numeric($_GET['downloaded']) || $_GET['downloaded'] < 0) ? $_GET['downloaded'] : die(response("Wierd Number - $_GET[downloaded]")),
+    'left' => (!is_numeric($_GET['left']) || $_GET['left'] < 0) ? $_GET['left'] : die(response("Wierd Number - $_GET[left]")),
+    'event' => strtolower($_GET['event']) ?? '',
+    'passkey' => (strlen($_GET['passkey']) != 32 && MEMBERSONLY) ? $_GET['passkey'] : die(response("Invalid passkey (" . strlen($_GET['passkey']) . " - $_GET[passkey])")),
+    'seeder' => ($_GET['left'] == 0) ? "yes" : "no"
+];
 
 // Get User
 $user = array();
@@ -172,9 +145,9 @@ if (!$peer) {
         if ($slot >= $user['maxslots']) {
             die(response("Maximum Slot exceeded! You may only download $slot torrent at a time."));
         }
-        pdo($pdo, "INSERT INTO `snatched` (`uid`, `tid`, `start_time`, `upload_time`, `completed`) VALUES (?,?,?,?,?) ON DUPLICATE KEY UPDATE `upload_time` = ?", [$user['id'], $torrent['id'], strtotime(CONFIG['TT_DATE']), strtotime(CONFIG['TT_DATE']), $client['seeder'], strtotime(CONFIG['TT_DATE'])]);
+        pdo($pdo, "INSERT INTO `snatched` (`uid`, `tid`, `start_time`, `upload_time`, `completed`) VALUES (?,?,?,?,?) ON DUPLICATE KEY UPDATE `upload_time` = ?", [$user['id'], $torrent['id'], strtotime(TT_DATE), strtotime(TT_DATE), $client['seeder'], strtotime(TT_DATE)]);
     }
-    pdo($pdo, "INSERT INTO peers (connectable, torrent, peer_id, ip, passkey, port, uploaded, downloaded, to_go, started, last_action, seeder, userid, client)VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?) ON DUPLICATE KEY UPDATE last_action = ?", ['yes', $torrent['id'], $client['peer_id'], $client['ip'], $client['passkey'], $client['port'], $client['uploaded'], $client['downloaded'], $client['left'], CONFIG['TT_DATE'], CONFIG['TT_DATE'], $client['seeder'], $user['id'], $agent, CONFIG['TT_DATE']]);
+    pdo($pdo, "INSERT INTO peers (connectable, torrent, peer_id, ip, passkey, port, uploaded, downloaded, to_go, started, last_action, seeder, userid, client)VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?) ON DUPLICATE KEY UPDATE last_action = ?", ['yes', $torrent['id'], $client['peer_id'], $client['ip'], $client['passkey'], $client['port'], $client['uploaded'], $client['downloaded'], $client['left'], TT_DATE, TT_DATE, $client['seeder'], $user['id'], $agent, TT_DATE]);
 } else {
     // Update Peer
     $elapsed = ($peer['seeder'] == 'yes') ? ANNOUNCEINTERVAL - floor(($peer['ez'] - time()) / 60) : 0;
@@ -183,19 +156,18 @@ if (!$peer) {
     if (($upthis > 0 || $downthis > 0 || $elapsed > 0) && (is_int($user['id']) && $user['id'] > 0)) {
         if ($torrent["freeleech"] == 1) {
             pdo($pdo, "UPDATE users SET uploaded = uploaded + ? WHERE id=?", [$upthis, $userid]);
-            pdo($pdo,  "UPDATE `snatched` SET `upload` = `upload` + '$upthis', `upload_time` = ?, `last_time` = `last_time` + '$elapsed', completed = ? WHERE `tid` = ? AND `uid` = ?", [strtotime(CONFIG['TT_DATE']), $client['seeder'], $torrent['id'], $user['id']]);
+            pdo($pdo,  "UPDATE `snatched` SET `upload` = `upload` + '$upthis', `upload_time` = ?, `last_time` = `last_time` + '$elapsed', completed = ? WHERE `tid` = ? AND `uid` = ?", [strtotime(TT_DATE), $client['seeder'], $torrent['id'], $user['id']]);
         } else {
             pdo($pdo, "UPDATE users SET uploaded = uploaded + ?, downloaded = downloaded + ? WHERE id=?", [$upthis, $downthis, $user['id']]);
-            pdo($pdo, "UPDATE `snatched` SET `upload` = `upload` + '$upthis', `download` = `download` + '$downthis', `upload_time` = ?, `last_time` = `last_time` + '$elapsed', completed = ? WHERE `tid` = ? AND `uid` = ?", [strtotime(CONFIG['TT_DATE']), $client['seeder'], $torrent['id'], $user['id']]);
+            pdo($pdo, "UPDATE `snatched` SET `upload` = `upload` + '$upthis', `download` = `download` + '$downthis', `upload_time` = ?, `last_time` = `last_time` + '$elapsed', completed = ? WHERE `tid` = ? AND `uid` = ?", [strtotime(TT_DATE), $client['seeder'], $torrent['id'], $user['id']]);
         }
     }
-    pdo($pdo, "UPDATE peers SET ip = ?, passkey = ?, port = ?, uploaded = ?, downloaded = ?, to_go = ?, last_action = ?, client = ?, seeder = ? WHERE torrent = ? AND peer_id = ?", [$client['ip'], $client['passkey'], $client['port'], $client['uploaded'], $client['downloaded'], $client['left'], CONFIG['TT_DATE'], $agent, $client['seeder'], $torrent['id'], $client['peer_id']]);
+    pdo($pdo, "UPDATE peers SET ip = ?, passkey = ?, port = ?, uploaded = ?, downloaded = ?, to_go = ?, last_action = ?, client = ?, seeder = ? WHERE torrent = ? AND peer_id = ?", [$client['ip'], $client['passkey'], $client['port'], $client['uploaded'], $client['downloaded'], $client['left'], TT_DATE, $agent, $client['seeder'], $torrent['id'], $client['peer_id']]);
 }
 
 // Event Completed
 if ($client['event'] == "completed") {
     if (MEMBERSONLY) {
-        pdo($pdo, "INSERT INTO completed (userid, torrentid, date) VALUES (?,?,?) ON DUPLICATE KEY UPDATE date = ?", [$user['id'], $torrent['id'], CONFIG['TT_DATE'], CONFIG['TT_DATE']]);
         pdo($pdo, "UPDATE `snatched`  SET `completed` = ? WHERE `tid` = ? AND `uid` = ?", [1, $torrent['id'], $user['id']]);
     }
     $torrent['times_completed']++;
@@ -221,7 +193,7 @@ foreach ($all_peers as $peer) {
 }
 
 // Update Torrent
-pdo($pdo, "UPDATE torrents SET last_action = ?, leechers = ?, seeders = ?, times_completed = ?, visible = ? WHERE id=?", [CONFIG['TT_DATE'], $leechers, $seeders, $torrent['times_completed'], 'yes', $torrent['id']]);
+pdo($pdo, "UPDATE torrents SET last_action = ?, leechers = ?, seeders = ?, times_completed = ?, visible = ? WHERE id=?", [TT_DATE, $leechers, $seeders, $torrent['times_completed'], 'yes', $torrent['id']]);
 
 // Show Response
 die(response($response_array, $seeders, $leechers));

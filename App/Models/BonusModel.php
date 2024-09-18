@@ -35,7 +35,7 @@ class BonusModel
 
         $row = DB::fetchRow('bonus', '*', ['id ='], [$id]);
         if (!$row || $current_user->seedbonus < $row['cost']) {
-            showMessage(('bonus'), LANG["NO_BONUS"]);
+            showMessage('bonus', LANG["NO_BONUS"]);
         }
         DB::run("UPDATE `users` SET `seedbonus` = `seedbonus` - '$row[cost]' WHERE `id` = " . $current_user->id . "");
 
@@ -91,7 +91,7 @@ class BonusModel
         $type = Validate::Input('type');
     
         if (empty($title) or empty($descr) or empty($type) or !is_numeric($cost)) {
-            showMessage(('bonus'), LANG["MISSING_FORM_DATA"]);
+            showMessage('bonus', LANG["MISSING_FORM_DATA"]);
         }
     
         if (!$id) {

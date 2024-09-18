@@ -109,7 +109,7 @@ class MessagesModel
 
         // Check Correct Input
         if (strlen($body) < 5 || strlen($subject) < 3) {
-            showMessage(('message/mailbox/inbox'), LANG['SMALL_INPUT']);
+            showMessage('message/mailbox/inbox', LANG['SMALL_INPUT']);
         }
 
         // Get User Id
@@ -118,7 +118,7 @@ class MessagesModel
         }
         
         if ($receiver == 0 && $_REQUEST['Update'] == 'create') {
-            showMessage(('message/mailbox/inbox'), LANG['MISSING_ID']);
+            showMessage('message/mailbox/inbox', LANG['MISSING_ID']);
         }
         
 
@@ -129,15 +129,15 @@ class MessagesModel
                 } else {
                     MessagesModel::insert(['sender'=>$id, 'receiver'=>$receiver, 'added'=>CONFIG['TT_DATE'], 'subject'=>$subject, 'msg'=>$body, 'unread'=>'yes', 'location'=>'in', 'history' => $history]);
                 }
-                showMessage(('message/mailbox/outbox'), LANG['MESSAGES_SENT']);
+                showMessage('message/mailbox/outbox', LANG['MESSAGES_SENT']);
                 break;
             case 'draft':
                 MessagesModel::insert(['sender'=>$id, 'receiver'=>$receiver, 'added'=>CONFIG['TT_DATE'], 'subject'=>$subject, 'msg'=>$body, 'unread'=>'no', 'location'=>'draft']);
-                showMessage(('message/mailbox/draft'), LANG['SAVED_DRAFT']);
+                showMessage('message/mailbox/draft', LANG['SAVED_DRAFT']);
                 break;
             case 'template':
                 MessagesModel::insert(['sender'=>$id, 'receiver'=>$receiver, 'added'=>CONFIG['TT_DATE'], 'subject'=>$subject, 'msg'=>$body, 'unread'=>'no', 'location'=>'template']);
-                showMessage(('message/mailbox/templates'), LANG['SAVED_TEMPLATE']);
+                showMessage('message/mailbox/templates', LANG['SAVED_TEMPLATE']);
                 break;
         }
     }
@@ -212,7 +212,7 @@ class MessagesModel
             showMessage(URLROOT, LANG['NO_PERMISSION']);
         }
         if (!$row) {
-            showMessage(('message/mailbox/inbox'), LANG["MISSING_ID"]);
+            showMessage('message/mailbox/inbox', LANG["MISSING_ID"]);
         }
         
         // Submit Form
@@ -220,9 +220,9 @@ class MessagesModel
             $msg = isset($_POST['msg']) ? $_POST['msg'] : '';
             // Update Message
             DB::update('messages', ['msg'], ['id='], [$msg,$id]);
-            showMessage(('message/mailbox/inbox'), LANG["UPDATE_COMPLETE"]);
+            showMessage('message/mailbox/inbox', LANG["UPDATE_COMPLETE"]);
         }
-        showMessage(('message/mailbox/inbox'), LANG["EDIT_FAILED"]);
+        showMessage('message/mailbox/inbox', LANG["EDIT_FAILED"]);
     }
 
     // Admin Delete Messages
@@ -230,7 +230,7 @@ class MessagesModel
     {
         $ids = Validate::multiIds('ids');
         DB::deleteByIds('messages', 'id', $ids);
-        showMessage(('adminmessage'), LANG["DEL_COMPLETE"]);
+        showMessage('adminmessage', LANG["DEL_COMPLETE"]);
     }
 
     // Admin Send Multiple Messages
@@ -243,7 +243,7 @@ class MessagesModel
         $subject = Validate::Input('sebject');
         // Check Correct Input
         if (!$msg) {
-            showMessage(('adminmessage/masspm'), LANG["MISSING_FORM_DATA"]);
+            showMessage('adminmessage/masspm', LANG["MISSING_FORM_DATA"]);
         }
 
         $updateset = array_map("intval", $_POST['classes']);
@@ -253,7 +253,7 @@ class MessagesModel
         }
         
         LogsModel::write("A Mass PM was sent by " . $userid . "");
-        showMessage(('adminmessage/masspm'), LANG["SUCCESS"]);
+        showMessage('adminmessage/masspm', LANG["SUCCESS"]);
     }
 
     // Admin Get All Messages
@@ -261,7 +261,7 @@ class MessagesModel
     {
         // Pagination
         $count = DB::run("SELECT COUNT(*) FROM messages WHERE location in ('in', 'both')")->fetchColumn();
-        list($pager, $limit) = pagination(40, $count, "/adminmessage?;");
+        list($pager, $limit) = pagination(40, $count, '/adminmessage&');
         $stmt = DB::run("SELECT * FROM messages WHERE location in ('in', 'both') ORDER BY id DESC $limit")->fetchAll();
 
         // Get Groups

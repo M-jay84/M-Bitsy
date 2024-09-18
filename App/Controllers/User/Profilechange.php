@@ -23,6 +23,8 @@ class Profilechange extends Controller
         }
     }
 
+    public function index() {}
+
     // Profile Avatar Upload Submit
     public function changeavatar($user_id)
     {
@@ -62,7 +64,7 @@ class Profilechange extends Controller
         }
 
         if (!empty($_POST)) {
-            Profilechange::changeemail($user_id);
+            ProfilechangeModel::changeemail($user_id);
         } else {
             $this->showMessage("profile/$user_id", LANG["MISSING_FORM_DATA"]);
         }

@@ -5,13 +5,13 @@ use App\Libs\DB;
 if ($_SESSION['id']) {
 	block_begin(LANG["NEWEST_MEMBERS"]);
     $expire = 600; // time in seconds
-    if (($rows = $TTCache->Get("sql_cache/newestmember_block", $expire)) === false) {
+    if (($rows = $TTCache->Get("sql.newestmember_block", $expire)) === false) {
         $res = DB::fetchAll('users', 'id, username', ['enabled=','status=','privacy !='], ['yes','confirmed','strong'], "ORDER BY id DESC LIMIT 5");
         $rows = array();
         foreach ($res as $row) {
             $rows[] = $row;
         }
-        $TTCache->Set("sql_cache/newestmember_block", $rows, $expire);
+        $TTCache->Set("sql.newestmember_block", $rows, $expire);
     }
 
     if (!$rows) { ?>

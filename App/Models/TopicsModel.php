@@ -49,7 +49,7 @@ class TopicsModel
             $arr1 = ForumsModel::fetchRow('*', ['id='], [$forumid]);
 
             if (!$arr1['name'] || $current_user->class < $arr1["minclassread"] && $arr1["guest_read"] == "no") {
-                showMessage(('forum'), LANG["FORUMS_NOT_PERMIT"]);
+                showMessage('forum', LANG["FORUMS_NOT_PERMIT"]);
             }
 
             $arr2 = PostsModel::fetchColumn('count(id)', ['topicid='], [$arr['id']]);
@@ -112,18 +112,18 @@ class TopicsModel
         $body = htmlspecialchars_decode($_POST["body"]);
 
         if (!$body || !$subject) {
-            showMessage(('forum'), LANG["MISSING_FORM_DATA"]);
+            showMessage('forum', LANG["MISSING_FORM_DATA"]);
         }
 
         // Make sure sure user has write access in forum
-        $arr = ForumsModel::getForumAccessLevels($forumid) or showMessage(('forum'), "Bad forum ID");
+        $arr = ForumsModel::getForumAccessLevels($forumid) or showMessage('forum', "Bad forum ID");
         if ($current_user->class < $arr["write"]) {
-            showMessage(('forum'), LANG["FORUMS_NOT_PERMIT"]);
+            showMessage('forum', LANG["FORUMS_NOT_PERMIT"]);
         }
 
         // Create Topic / Reply
         DB::insert('forum_topics', ['userid'=>$current_user->id, 'forumid'=>$forumid, 'subject'=>$subject]);
-        $topicid = DB::lastInsertId() or showMessage(('forum'), "Topics id n/a");
+        $topicid = DB::lastInsertId() or showMessage('forum', "Topics id n/a");
 
         // Insert the new post
         PostsModel::insert(['topicid'=>$topicid, 'userid'=>$current_user->id, 'added'=>CONFIG['TT_DATE'], 'body'=>$body]);
@@ -150,18 +150,18 @@ class TopicsModel
     {
        /*- 
         if (!intval(intval$topicid) || !$data['current_user']->delete_news'] == 'yes') {
-            showMessage(('forum'), LANG["NO_PERMISSION"));
+            showMessage('forum', LANG["NO_PERMISSION"));
         }
        */
         if ($sure == "0") {
-            showMessage(('forum'), "Sanity check: You are about to delete a topic. Click <a href='" . URLROOT . "/topic/delete/$topicid/1'>here</a> if you are sure.");
+            showMessage('forum', "Sanity check: You are about to delete a topic. Click <a href='" . URLROOT . "/topic/delete/$topicid/1'>here</a> if you are sure.");
         }
 
         DB::delete('forum_topics', ['id'=>$topicid]);
         PostsModel::delete(['topicid'=>$topicid]);
         ReadModel::delete(['topicid'=>$topicid]);
         AttachmentsModel::deleteAll($topicid);
-        showMessage(('forum'), LANG["DEL_COMPLETE"]);
+        showMessage('forum', LANG["DEL_COMPLETE"]);
     }
 
     // Delete Post
@@ -180,14 +180,14 @@ class TopicsModel
     public static function rename($topicid, $current_user)
     {
         if (!$current_user->delete_news == 'yes' || !$current_user->edit_forum == 'yes') {
-            showMessage(('forum'), LANG["NO_PERMISSION"]);
+            showMessage('forum', LANG["NO_PERMISSION"]);
         }
 
         // Check User Input
         $subject = Validate::Input('subject');
 
         if ($subject == '') {
-            showMessage(('forum'), LANG["MISSING_FORM_DATA"]);
+            showMessage('forum', LANG["MISSING_FORM_DATA"]);
         }
 
         // Update
@@ -203,28 +203,28 @@ class TopicsModel
 
         // Check User
         if (!intval($forumid) || !$current_user->delete_news == 'yes' || !$current_user->edit_forum == 'yes') {
-            showMessage(('forum'), LANG["NO_PERMISSION"]);
+            showMessage('forum', LANG["NO_PERMISSION"]);
         }
 
         // Check Permisson To View
         $arr = ForumsModel::fetchRow('minclasswrite', ['id ='], [$forumid]);
         if ($arr->rowCount() != 1) {
-            showMessage(('forum'), LANG["NOTHING_FOUND"]);
+            showMessage('forum', LANG["NOTHING_FOUND"]);
         }
         if ($current_user->class < $arr['minclasswrite']) {
-            showMessage(('forum'), LANG["NO_PERMISSION"]);
+            showMessage('forum', LANG["NO_PERMISSION"]);
         }
 
         // Move Topic
         $arr = TopicsModel::fetchRow('subject,forumid', ['id ='], $topicid);
         if ($arr->rowCount() != 1) {
-            showMessage(('forum'), LANG["NOTHING_FOUND"]);
+            showMessage('forum', LANG["NOTHING_FOUND"]);
         }
         if ($arr["forumid"] != $forumid) {
             TopicsModel::update(['forumid', 'moved'], ['id='], [$forumid,'yes',$topicid]);
         }
 
-        Url(Url("topic/$forumid", true));
+        Url("topic/$forumid", true);
     }
 
     // Lock/Sticky Topic Submit
@@ -246,12 +246,12 @@ class TopicsModel
 
         // Check User
         if (!intval($topicid) || !$current_user->delete_news == 'yes' || !$current_user->edit_forum == 'yes') {
-            showMessage(('forum'), LANG["NO_PERMISSION"]);
+            showMessage('forum', LANG["NO_PERMISSION"]);
         }
 
         // Update
         TopicsModel::update($action, ['id='], $values);
-        Url(Url("topic/$forumid"), true);
+        Url("topic/$forumid", true);
     }
 
 }

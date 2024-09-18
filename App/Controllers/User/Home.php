@@ -18,7 +18,7 @@ class Home extends Controller
         $this->current_user = new Auth(true);
 
         if (!$this->current_user->loggedin && CONFIG['MEMBERSONLY']) {
-            $this->showMessage(URLROOT, LANG["NO_PERMISSION"]);
+            $this->showMessage('login', LANG['MEMBERS_ONLY']); 
         }
     }
 

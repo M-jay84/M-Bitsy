@@ -27,7 +27,7 @@ class Adminwarning extends Controller
     public function index()
     {
         // Get Warnings
-        $warnings = WarningsModel::getAll($this->current_user->id);
+        $warnings = WarningsModel::getAll($this->current_user);
 
         // Data For View
         $data = [

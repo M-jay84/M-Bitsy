@@ -99,11 +99,11 @@ class GroupsModel
     {
         // Protect Groups
         if (($group_id == "1") || ($group_id == CONFIG['_ADMINISTRATOR'])) {
-            showMessage(('admingroup'), LANG["YOU_CANT_DEL_THIS_GRP"]);
+            showMessage('admingroup', LANG["YOU_CANT_DEL_THIS_GRP"]);
         }
 
         DB::delete('`groups`', ['group_id'=>$group_id]);
-        showMessage(('admingroup/groups'), LANG["DEL_COMPLETE"]);
+        showMessage('admingroup/groups', LANG["DEL_COMPLETE"]);
     }
 
     // Admin Add/Edit Group
@@ -115,13 +115,13 @@ class GroupsModel
                 'level' => $_POST["level"], 'Color' => $_POST["group_color"], 'group_role_id' => $_POST["group_role_id"], 'maxslots' => $_POST["maxslots"],
                 'control_panel' => $_POST["control_panel"], 'staff_page' => $_POST["staff_page"], 'staff_public' => $_POST["staff_public"], 'staff_sort' => intval($_POST['staff_sort'])
             ]);
-            showMessage(('admingroup'), LANG["SUCCESS"]);
+            showMessage('admingroup', LANG["SUCCESS"]);
         } else {
             DB::update('`groups`',
                ['level','Color','group_role_id','maxslots','control_panel','staff_page','staff_public','staff_sort'], 
                ['group_id='], 
                [$_POST["level"], $_POST["group_color"], $_POST["group_role_id"], $_POST["maxslots"], $_POST["control_panel"], $_POST["staff_page"], $_POST["staff_public"], intval($_POST['staff_sort']), $group_id]);
-            showMessage(('admingroup'), LANG["UPDATE_COMPLETE"]);
+            showMessage('admingroup', LANG["UPDATE_COMPLETE"]);
         }
     }
 

@@ -14,7 +14,6 @@
                 <tr>
                     <th><?= LANG["DATE_ADDED"] ?></th>
                     <th><?= LANG['FIRST'] ?></th>
-                    <th><?= LANG["LAST"] ?></th>
                     <th><?= LANG["ADDED_BY"] ?></th>
                     <th><?= LANG["COMMENT"] ?></th>
                     <th><?= LANG["TYPE"] ?></th>
@@ -24,7 +23,8 @@
             <tbody>
                 <?php foreach ($V_bans as $row) : ?>
                     <tr>
-                    <td><?= user_timezone_date($row["added"]) ?></td>
+                        <td><?= user_timezone_date($row["added"]) ?></td>
+                        <td><?= $row['first'] ?></td>
                         <td><?= coloredname($row['addedby']) ?></td>
                         <td><?= $row['comment'] ?></td>
                         <td><?= $row['type'] ?></td>
@@ -45,7 +45,6 @@
                     <div class="text-center">
                         <b><?= LANG["ADD_BAN"] ?></b><br>
                         <input id="first" type="text" class="form-control fullwidth" name="first" placeholder="<?= LANG["BAN_EMAIL_IP"] ?>"><br>
-                        <input id="last" type="text" class="form-control fullwidth" name="last" placeholder="<?= LANG["Other Ip"] ?>"><br>
                         <select name="type" class='form-select'>
                             <option value="email"><?= LANG["EMAIL"] ?></option>
                             <option value="ip"><?= LANG["IP"] ?></option>
@@ -55,7 +54,7 @@
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-sm ttbtn" data-bs-dismiss="modal"><?= LANG["CLOSE"] ?></button>
-                        <button type="submit" class="btn btn-sm ttbtn"><?= LANG['BAN'] ?></button>
+                        <button type="submit" class="btn btn-sm ttbtn"><?= LANG['SUBMIT'] ?></button>
                     </div>
                 </div>
             </div>

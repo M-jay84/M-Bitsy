@@ -51,7 +51,7 @@ class TorrentLangModel
 
         // Check Correct Input
         if ($name == "") {
-            showMessage(('admintorrentlang'), LANG["MISSING_FORM_DATA"]);
+            showMessage('admintorrentlang', LANG["MISSING_FORM_DATA"]);
         }
                 
         if (!$id) {
@@ -60,13 +60,13 @@ class TorrentLangModel
         } else {
             // Update Torrent Lang
             DB::update('torrentlang', ['name','sort_index','image'], ['id='], [$name, $sort_index, $image, $id]);
-            showMessage(('admintorrentlang'), LANG["UPDATE_COMPLETE"]);
+            showMessage('admintorrentlang', LANG["UPDATE_COMPLETE"]);
         }
 
         if ($ins) {
-            showMessage(('admintorrentlang'), LANG["SUCCESS"]);
+            showMessage('admintorrentlang', LANG["SUCCESS"]);
         } else {
-            showMessage(('admintorrentlang/add'), LANG["ACTION_FAILED"]);
+            showMessage('admintorrentlang/add', LANG["ACTION_FAILED"]);
         }
     }
 
@@ -77,7 +77,7 @@ class TorrentLangModel
             $newlangid = Validate::Input('newlangid', 'int');
             DB::update('torrents', ['torrentlang'], ['torrentlang='], [$newlangid, $id]);
         DB::delete('torrentlang', ['id' => $id]);
-            showMessage(('admintorrentlang'), LANG["ACTION_COMPLETE"]);
+            showMessage('admintorrentlang', LANG["ACTION_COMPLETE"]);
         } else {
             showMessage(
                 Url('admintorrentlang'), 

@@ -25,13 +25,13 @@
             <dt class="col-sm-2"><?= LANG["NAME"] ?></dt>
             <dd class="col-sm-10"><input class="form-control fullwidth" type='text' name='name' placeholder="<?= LANG["TORRENT_NAME"]; ?>"><?= LANG["THIS_WILL_BE_TAKEN_TORRENT"]; ?></dd>
         </dl>
-        <?php if (CONFIG['_OMDBswitch']) : ?>
+        <?php if (CONFIG['_TMDBswitch']) : ?>
             <dl class="row p-4">
             <dt class="col-sm-2"><?= LANG["TMDB"] ?></dt>
             <dd class="col-sm-10"><input class="form-control fullwidth" type='text' name='tmdb' placeholder="TMDB Link">Example https://www.themoviedb.org/movie/399566-godzilla-vs-kong</dd>
         </dl>
         <?php endif; ?>
-        <?php if (CONFIG['_TMDBswitch']) : ?>
+        <?php if (CONFIG['_OMDBswitch']) : ?>
             <dl class="row p-4">
             <dt class="col-sm-2"><?= LANG["IMDB"] ?></dt>
             <dd class="col-sm-10"><input class="form-control fullwidth" type='text' name='imdb' placeholder="IMDB Link">Example https://www.imdb.com/title/tt5034838</a></dd>

@@ -21,7 +21,7 @@ echo messagemenu(); ?><br>
         <input type="text" name="subject" class="form-control fullwidth" placeholder="<?= LANG["SUBJECT"] ?>" id="subject"><br><br>
         <?php print textbbcode("form", "body"); ?><br>
         <div class="text-center">
-            <button type="submit" class="btn btn-sm ttbtn" name="Update" value="create"><?= LANG["SEND"] ?></button>&nbsp;
+            <button type="submit" class="btn btn-sm ttbtn" name="Update" value="create"><?= LANG["SUBMIT"] ?></button>&nbsp;
             <label><?= LANG["SAVE_COPY"] ?></label>
             <input type="checkbox" name="save" checked='Checked'>&nbsp;
             <button type="submit" class="btn btn-sm ttbtn" name="Update" value="draft"><?= LANG["DRAFT"] ?></button>

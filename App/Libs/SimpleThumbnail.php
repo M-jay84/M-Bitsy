@@ -103,47 +103,39 @@ class SimpleThumbnail
     // Save Image
     public function copyImage($source, $destination, $redirect = URLROOT)
     {
-        if (extension_loaded('gd') && CONFIG['USE_WEBP']) {
-            // compress size max 100
-            $compression_quality = 25;
-            // set type
-            $type = substr($destination, -3);
-            $jpeg = substr($destination, -4);
-            // set destination
-            $new_destination = substr($destination, 0, -3) . 'webp';
+        // compress size max 100
+        $compression_quality = 25;
+        // set type
+        $type = substr($destination, -3);
+        $jpeg = substr($destination, -4);
+        // set destination
+        $new_destination = substr($destination, 0, -3) . 'webp';
 
-            if ($type == 'png') {
-                $image = imagecreatefrompng($source);
-                imagepalettetotruecolor($image);
-                imagealphablending($image, true);
-                imagesavealpha($image, true);
-            } elseif ($type == 'jpg') {
-                $image = imagecreatefromjpeg($source);
-            } elseif ($type == 'gif') {
-                $image = imagecreatefromgif($source);
-                imagepalettetotruecolor($image);
-            } elseif ($jpeg == 'jpeg') {
-                $image = imagecreatefromjpeg($source);
-                $new_destination = substr($destination, 0, -4) . 'webp';
-            } else {
-                showMessage(URLROOT, sprintf(LANG["Strange Image Type - Only Gif, Png, Jpeg & Jpg allowed"]));
-            }
-
-            // convert image
-            $result = imagewebp($image, $new_destination, $compression_quality);
-            // check result
-            if (false === $result) {
-                showMessage(URLROOT, sprintf(LANG["No Image Result"]));
-            }
-            // destroy temp
-            imagedestroy($image);
-            return $new_destination;
+        if ($type == 'png') {
+            $image = imagecreatefrompng($source);
+            imagepalettetotruecolor($image);
+            imagealphablending($image, true);
+            imagesavealpha($image, true);
+        } elseif ($type == 'jpg') {
+            $image = imagecreatefromjpeg($source);
+        } elseif ($type == 'gif') {
+            $image = imagecreatefromgif($source);
+            imagepalettetotruecolor($image);
+        } elseif ($jpeg == 'jpeg') {
+            $image = imagecreatefromjpeg($source);
+            $new_destination = substr($destination, 0, -4) . 'webp';
         } else {
-            $copy = copy($source, $destination);
-            if (!$copy) {
-                showMessage(URLROOT, LANG["IMAGE_UPLOAD_FAILED"]);
-            }
-            return $destination;
+            showMessage(URLROOT, 'Strange Image Type - Only Gif, Png, Jpeg & Jpg allowed');
         }
+
+        // convert image
+        $result = imagewebp($image, $new_destination, $compression_quality);
+        // check result
+        if (false === $result) {
+            showMessage(URLROOT, sprintf(LANG["No Image Result"]));
+        }
+        // destroy temp
+        imagedestroy($image);
+        return $new_destination;
     }
 }

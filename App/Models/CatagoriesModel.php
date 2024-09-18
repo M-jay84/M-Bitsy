@@ -34,9 +34,9 @@ class CatagoriesModel
             $newcatid = Validate::Input('newcat', 'int');
             TorrentsModel::update(['category'], ['category='], [$newcatid, $id]); //move torrents to a new cat
             DB::delete('categories', ['id' => $id]);
-            showMessage(('admincategorie'), LANG["DEL_COMPLETE"]);
+            showMessage('admincategorie', LANG["DEL_COMPLETE"]);
         } else {
-                    showMessage(('admincategorie'), 
+                    showMessage('admincategorie', 
                         "<form method='post' action='".URLROOT."/admincategorie/delete/$id/sure'>                                 <div class='tt_blockcenter rounded'>
                             <b>Category ID to move all Torrent To: </b>
                             <input type='text' name='newcat' /> (Cat ID)<br><br>
@@ -59,28 +59,28 @@ class CatagoriesModel
 
         // Check Correct Input
         if ($parent_cat == "" || $name == "") {
-            showMessage(('admincategorie/add'), LANG["MISSING_FORM_DATA"]);
+            showMessage('admincategorie/add', LANG["MISSING_FORM_DATA"]);
         }
         
         if (!$id) {
             // Insert Categorie
             $ins = DB::insert('categories', ['name' => $name, 'parent_cat' => $parent_cat, 'sort_index' => $sort_index, 'image' => $image]);
             if ($ins) {
-                showMessage(('admincategorie'), LANG["SUCCESS"]);
+                showMessage('admincategorie', LANG["SUCCESS"]);
             } else {
-                showMessage(('admincategorie/add'), LANG["ACTION_FAILED"]);
+                showMessage('admincategorie/add', LANG["ACTION_FAILED"]);
             }
         } else {
             // Update
             DB::update('categories', ['parent_cat','name','sort_index','image'], ['id='], [$parent_cat, $name, $sort_index, $image, $id]);
-            showMessage(('admincategorie'), LANG["SUCCESS"]);
+            showMessage('admincategorie', LANG["SUCCESS"]);
         }
     }
 
     // Get Parent
     public static function getCatByParent()
     {
-        $row = DB::run("SELECT distinct parent_cat  FROM categories ORDER BY parent_cat");
+        $row = DB::run("SELECT distinct parent_cat FROM categories ORDER BY parent_cat");
         return $row;
     }
 

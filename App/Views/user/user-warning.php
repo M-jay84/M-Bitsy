@@ -46,15 +46,14 @@ if ($current_user->isStaff) : ?>
     </table>
 </div>
 
-<?php if ($current_user->class->isStaff) { ?>
+<?php if ($current_user->isStaff) { ?>
     <p class="text-center"><button type="submit" class="btn btn-sm ttbtn"><?= LANG['DEL'] ?></button><p>
     </form>
 <?php } ?>
 
 <?php if ($current_user->delete_users == 'yes' && $current_user->control_panel == "yes") { ?>
     <div class="tt_blockcenter rounded p-3">
-        <form method='post' action='<?= Url('profile/delete') ?>'>
-            <input type='hidden' name='userid' value='<?= $user_id ?>' />
+        <form method='post' action='<?= Url("profile/delete/$user_id") ?>'>
             <div class='text-center'>
                 <p class='text-center'><b><?= LANG["DELETE_USER"] ?></b></p>
                 <div class="form-floating mb-4">

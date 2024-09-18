@@ -4,7 +4,7 @@ namespace App\Models;
 
 use App\Libs\DB;
 use PDO;
-use App\Libs\Torrents\MDBS;
+use App\Models\TmdbModel;
 use App\Models\LikesModel;
 use App\Models\TorrentTagModel;
 use App\Models\TagsModel;
@@ -249,25 +249,26 @@ class TorrentsModel
         // Name
         $name = $stmt["name"];
         $views = $stmt['views'];
+
         // TMDB
-        $tmdb1 = MDBS::createMDB($stmt['id'], $stmt);
+        $tmdb1 = TmdbModel::createMDB($stmt['id'], $stmt['tmdb'], 'film'); // todo
 
         // Image
-        if ($stmt["imdb"] != "") {
-            $image = "<img src=" . $tmdb1['POSTER'] . " class='scaleA'><br>";
-        } elseif ($stmt["tmdb"] != "") {
-            $image = "<img src='" . data_uri($tmdb1['POSTER'], $tmdb1['POSTER']) . "' height='450' width='100%' />";
-        } elseif ($stmt["image1"] != "") {
+        if ($tmdb1['link'] != "") {
+            $image = "<img src='" . data_uri($tmdb1['link'], $stmt['tmdb'] . '.webp') . "' height='250' width='100%' />";$tmdb1['link'];
+        } elseif ($tmdb1['link'] = "" && $stmt["image1"] != "") {
             $image = "<img src='" . data_uri(UPLOAD_PATH . "/images/" . $stmt["image1"], $stmt['image1']) . "' height='250' width='100%' />";
         } else {
             $image = "";
         }
-        unset($tmdb1['POSTER']);
+
+        /*
         // Video
         if (array_key_exists('video', $tmdb1)) {
             $video = $tmdb1['video'];
             unset($tmdb1['video']);
         }
+        */
         // Thanks/Likes
         $thanks = LikesModel::showThanks($stmt['id']);
         $likes = LikesModel::showLikes($stmt);
@@ -344,7 +345,7 @@ class TorrentsModel
         }
         DB::delete('completed', ['torrentid' => $id]);
         if (file_exists(UPLOAD_PATH . "/torrents/$id.torrent")) {
-            unlink(UPLOAD_PATH . "/torrents$id.torrent");
+            unlink(UPLOAD_PATH . "/torrents/$id.torrent");
         }
         if ($row["image1"]) {
             unlink(UPLOAD_PATH . "/images/" . $row["image1"]);
@@ -352,7 +353,7 @@ class TorrentsModel
         if ($row["image2"]) {
             unlink(UPLOAD_PATH . "/images/" . $row["image2"]);
         }
-        @unlink(UPLOAD_PATH . "/torrents/nfos/$id.nfo");
+        @unlink(UPLOAD_PATH . "/nfos/$id.nfo");
         DB::delete('torrents', ['id' => $id]);
         DB::delete('files', ['torrent' => $id]);
         ReportsModel::delete(['votedfor' => $id, 'type' => 'torrent']);
@@ -362,30 +363,45 @@ class TorrentsModel
         LogsModel::write("Torrent ID $id was deleted by ".$current_userid."");
     }
 
-    // search torrent
-    public static function countSearch()
-    {
-        // Search Torrent ($_GET)
+    // Browse Page
+    public static function countBrowse()
+    { 
+       // Search Torrent ($_GET)
         $search = search();
 
-        $count = DB::run("SELECT COUNT(*) FROM torrents " . $search['where'], $search['params'])->fetchcolumn();
-        list($pager, $limit) = pagination(25, $count, URLROOT . "/search?$search[url]$search[pagerlink]");
+        $catsquery = CatagoriesModel::getCatByParent();
+        $count = DB::run("SELECT COUNT(*) FROM torrents LEFT JOIN categories ON category = categories.id $search[where]", $search['params'])->fetchColumn();
+        list($pagerbuttons, $limit) = pagination(25, $count, URLROOT . "/browse" . $search['url'] . $search['pagerlink']);
 
-        $torrents = DB::run("SELECT torrents.id, torrents.anon, torrents.announce, torrents.tube,  torrents.tmdb, torrents.imdb, torrents.category, torrents.sticky, torrents.leechers, torrents.nfo, torrents.seeders, torrents.name, torrents.times_completed,
-        torrents.size, torrents.added, torrents.comments, torrents.numfiles, torrents.filename, torrents.owner, torrents.external, torrents.freeleech, categories.name
-        AS cat_name, categories.parent_cat AS cat_parent, categories.image AS cat_pic, users.username, users.privacy,
-        IF(torrents.numratings < 2, NULL, ROUND(torrents.ratingsum / torrents.numratings, 1))
-        AS rating FROM torrents
-        LEFT JOIN categories
-        ON category = categories.id
-        LEFT JOIN users
-        ON torrents.owner = users.id
-        $search[where] $search[orderby] $limit", $search['params']);
+        $res = DB::run(
+                    "SELECT torrents.id, torrents.anon, torrents.announce, torrents.category, torrents.sticky, 
+                    torrents.leechers, torrents.nfo, torrents.seeders, torrents.name, torrents.times_completed, 
+                    torrents.tube, torrents.tmdb, torrents.imdb, torrents.size, torrents.added, torrents.comments, torrents.numfiles, 
+                    torrents.filename, torrents.owner, torrents.external, torrents.freeleech, 
+                    categories.name AS cat_name,
+                    categories.parent_cat AS cat_parent, 
+                    categories.image AS cat_pic,
+                    users.username, users.privacy, 
+                    IF(torrents.numratings < 2, NULL, ROUND(torrents.ratingsum / torrents.numratings, 1)) AS rating 
+                    FROM torrents 
+                    LEFT JOIN categories 
+                    ON category = categories.id 
+                    LEFT JOIN users 
+                    ON torrents.owner = users.id 
+                    $search[where] 
+                    $search[orderby] 
+                    $limit",
+                    $search['params']
+                );
+
         $cats = CatagoriesModel::genreList();
         $lang = TorrentLangModel::langList();
+        $cats = CatagoriesModel::fetchAll('*', '', 'ORDER BY parent_cat, name');
+
         $title = $search['keyword'] == '' ? LANG["SEARCH"] :LANG["SEARCH_RESULTS_FOR"] . " \"" . htmlspecialchars($search['keyword']) . "\"";
-        
-        return  array('title' => $title, 'torrents' => $torrents, 'pager' => $pager, 'search' => $search, 'cats' => $cats, 'lang' => $lang);
+                
+        // Get Cat Data
+        return array('title' => $title, 'res' => $res, 'pagerbuttons' => $pagerbuttons, 'catsquery' => $catsquery, 'count' => $count, 'search' => $search, 'cats' => $cats, 'lang' => $lang);
     }
 
     // Scrape Info
@@ -411,44 +427,6 @@ class TorrentsModel
                         ORDER BY added 
                         DESC $limit")->fetchAll();
         return $cres;
-    }
-
-    // Browse Page
-    public static function countBrowse()
-    { 
-       // Search Torrent ($_GET)
-        $search = search();
-
-        $count = DB::run("SELECT COUNT(*) FROM torrents LEFT JOIN categories ON category = categories.id $search[where]", $search['params'])->fetchColumn();
-        
-        $catsquery = CatagoriesModel::getCatByParent();
-
-        if ($count) {
-            // Pagination
-            list($pagerbuttons, $limit) = pagination(25, $count, URLROOT . "/browse" . $search['url'] . $search['pagerlink']);
-            $res = DB::run("SELECT torrents.id, torrents.anon, torrents.announce, torrents.category, torrents.sticky, 
-            torrents.leechers, torrents.nfo, torrents.seeders, torrents.name, torrents.times_completed, 
-            torrents.tube, torrents.tmdb, torrents.imdb, torrents.size, torrents.added, torrents.comments, torrents.numfiles, 
-            torrents.filename, torrents.owner, torrents.external, torrents.freeleech, 
-            categories.name AS cat_name, categories.parent_cat AS cat_parent, 
-            categories.image AS cat_pic, users.username, users.privacy, 
-            IF(torrents.numratings < 2, NULL, ROUND(torrents.ratingsum / torrents.numratings, 1)) AS rating 
-            FROM torrents 
-            LEFT JOIN categories 
-            ON category = categories.id 
-            LEFT JOIN users 
-            ON torrents.owner = users.id $search[where] $search[orderby] $limit",
-            $search['params']);
-
-        } else {
-            unset($res);
-            $pagerbuttons = $res = '';
-        }
-
-        // Get Cat Data
-        $cats = CatagoriesModel::fetchAll('*', '', 'ORDER BY parent_cat, name');
-
-        return array('res' => $res, 'pagerbuttons' => $pagerbuttons, 'catsquery' => $catsquery, 'count' => $count, 'search' => $search, 'cats' => $cats,);
     }
 
     public static function reseed($id, $current_user)

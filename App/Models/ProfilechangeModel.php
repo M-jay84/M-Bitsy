@@ -49,7 +49,7 @@ class ProfilechangeModel
         $secret = mksecret();
         $in = DB::update('users', ['password', 'secret'], ['id='], [$chpassword,$secret,$id]);
         if ($in > 0) {
-            showMessage(('logout'), LANG["PASSWORD_CHANGED_OK"]);
+            showMessage('logout', LANG["PASSWORD_CHANGED_OK"]);
         } else {
             showMessage(("profile/$id"), LANG["ACTION_FAILED"]);
         }

@@ -20,7 +20,7 @@ class ClientsModel
         $banned = 'yes';
 
         DB::insert('clients', ['agent_name'=>$name, 'hits'=>$banned, 'ins_date'=>CONFIG['TT_DATE'], 'code'=>$code, 'peer_id'=>$peer_id]);
-        showMessage(('adminclient'), LANG["SUCCESS"]);
+        showMessage('adminclient', LANG["SUCCESS"]);
 
     }
 
@@ -50,7 +50,7 @@ class ClientsModel
     public static function delete($id)
     {
         DB::delete('clients', ['agent_id'=>$id]);
-        showMessage(('adminclient'), LANG["SUCCESS"]);
+        showMessage('adminclient', LANG["SUCCESS"]);
     }
 
 }

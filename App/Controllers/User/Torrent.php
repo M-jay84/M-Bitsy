@@ -56,15 +56,15 @@ class Torrent extends Controller
         // Data For View
         $data = [
             'page_title' => LANG["TORRENT_DETAILS_FOR"] . " " . $torrent['name'] . "",
-            'V_torrent' => $torrent['torrent'],
-            'V_tmdb1' => $torrent['tmdb1'],
-            'V_image' => $torrent['image'],
-            'V_video' => $torrent['video'],
-            'V_likes' => $torrent['likes'],
+            'torrent' => $torrent['torrent'],
+            'tmdb1' => $torrent['tmdb1'],
+            'image' => $torrent['image'],
+            'video' => $torrent['video'],
+            'likes' => $torrent['likes'],
             'V_thanks' => $torrent['thanks'],
-            'V_tags' => $torrent['tags'],
-            'V_html' => $torrent['html'],
-            'V_scraper' => $torrent['scraper'],
+            'tags' => $torrent['tags'],
+            'html' => $torrent['html'],
+            'scraper' => $torrent['scraper'],
             'current_user' => $this->current_user
         ];
 
@@ -99,11 +99,11 @@ class Torrent extends Controller
                 }
                 $nfofilename = $nfofile['tmp_name'];
                 if (@is_uploaded_file($nfofilename) && @filesize($nfofilename) > 0) {
-                    @move_uploaded_file($nfofilename, UPLOAD_PATH . "/torrents/nfos/$id.nfo");
+                    @move_uploaded_file($nfofilename, UPLOAD_PATH . "/nfos/$id.nfo");
                     $updateset['nfo'] = 'yes';
                 } //success
             } elseif ($nfoaction == "delete") {
-                unlink(UPLOAD_PATH . "/torrents/nfos/$id");
+                unlink(UPLOAD_PATH . "/nfos/$id");
                 $updateset['nfo'] = 'no';
             }
 

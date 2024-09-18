@@ -56,7 +56,7 @@ class Auth
                 }
             } catch (\Exception $e) {
                 self::destroy_cookies();
-                showMessage(('logout'), LANG['AUTH_ISSUE']);
+                showMessage('logout', LANG['AUTH_ISSUE']);
             }
 
             // Site closeed
@@ -64,10 +64,10 @@ class Auth
 
             // Now Compare Checks
             if ($data['password'] != $_COOKIE['password']) {
-                showMessage(('logout'), true);
+                showMessage('logout', true);
             }
             if ($data['id'] != $_COOKIE['id']) {
-                showMessage(('logout'), true);
+                showMessage('logout', true);
             }
 
             // User So Update & Set Session

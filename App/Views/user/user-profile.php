@@ -7,7 +7,7 @@ use App\Libs\DB;
 
 <div class="row p-4">
     <div class="col-md-2 text-center">
-        <img class="embed-responsive" src="<?= $html['avatar'] ?>" width="70%" height="200px"><br><br>
+        <img class="embed-responsive" src="<?= $V_html['avatar'] ?>" width="70%" height="200px"><br><br>
         <?php if ($current_user->id == $V_id or $current_user->class > CONFIG['_UPLOADER']) : ?>
             <a href='#' data-bs-toggle="modal" data-bs-target="#changepassModal"><?= LANG["RESET_PASSWORD"] ?></a><br>
             <a href='#' data-bs-toggle="modal" data-bs-target="#changeemailModal"><?= LANG["RESET_EMAIL"] ?></a>
@@ -31,7 +31,7 @@ use App\Libs\DB;
     <div class="col-md-3">
         <b><?= LANG["INFO"] ?></b><br>
         <?= LANG["AGE"] ?>: <?= htmlspecialchars($V_user["age"]) ?><br />
-        <?= LANG["GENDER"] ?>: <?= LANG[$V_user["gender"]] ?><br />
+        <?= LANG["GENDER"] ?>: <?= $V_user['gender'] ?><br />
         <?= LANG["CLIENT"] ?>: <?= htmlspecialchars($V_user["client"]) ?><br />
         <?= LANG["COUNTRY"] ?>: <?= $V_html['country'] ?><br />
         <?= LANG["DONATED"] ?> <?= CONFIG['CURRENCYSYMBOL']; ?><?= number_format($V_user["donated"], 2) ?><br />
@@ -66,11 +66,11 @@ use App\Libs\DB;
         <?= LANG["HNR"] ?>: <?= $V_count['numhnr'] ?><br />
         <?= LANG["AVG_DAILY_DL"] ?>: <?= mksize($V_user["downloaded"] / (CONFIG['TT_TIME'] - strtotime($V_user["added"]) / 86400)) ?><br />
         <?= LANG["AVG_DAILY_UL"] ?>: <?= mksize($V_user["uploaded"] / (CONFIG['TT_TIME'] - strtotime($V_user["added"]) / 86400)) ?><br />
-        <?= LANG["TORRENTS_POSTED"] ?>: <a href="<?= Url("snatch/$V_user[id]/user") ?>">
+        <?= LANG["TORRENTS"] ?>: <a href="<?= Url("snatch/$V_user[id]/user") ?>">
             <?= number_format($V_count['numtorrents']); ?></a><br>
-        <?= LANG["COMMENTS_POSTED"] ?>: <a href="<?= Url("comment/$V_user[id]/user") ?>">
+        <?= LANG["COMMENTS"] ?>: <a href="<?= Url("comment/$V_user[id]/user") ?>">
             <?= number_format($V_count['numcomments']); ?></a><br>
-        <?= LANG["Forum Posts"] ?>: <a href="<?= Url("post/user/$V_user[id]") ?>">
+        <?= LANG["POSTS"] ?>: <a href="<?= Url("post/user/$V_user[id]") ?>">
             <?= number_format($V_count['numforumposts']); ?></a><br>
     </div>
     <p>
@@ -295,7 +295,7 @@ use App\Libs\DB;
     </form>
 
     <!-- Changeemail Model-->
-    <form method="post" action="<?= Url("profilechange/changeemail/$id") ?>">
+    <form method="post" action="<?= Url("profilechange/changeemail/$V_id") ?>">
         <div class="modal fade" id="changeemailModal" tabindex="-1" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered modal-md" style="max-width:700px;">
                 <div class="modal-content">

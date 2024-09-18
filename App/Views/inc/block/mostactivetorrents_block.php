@@ -5,14 +5,14 @@ use App\Libs\DB;
 if ($_SESSION['id']) {
     block_begin(LANG["MOST_ACTIVE"]);
     $expires = 600; // Cache time in seconds
-    if (($rows = $TTCache->Get("sql_cache/mostactivetorrents_block", $expires)) === false) {
+    if (($rows = $TTCache->Get("sql.mostactivetorrents_block", $expires)) === false) {
         $res = DB::fetchAll('torrents', 'id, name, seeders, leechers', ['banned=', 'visible='], ['no', 'yes'], 'ORDER BY seeders + leechers DESC, seeders DESC, added ASC LIMIT 10');
         $catsquery = DB::fetchAll('categories', 'distinct parent_cat', '', 'ORDER BY parent_cat');
         $rows = array();
         foreach ($res as $row) {
             $rows[] = $row;
         }
-        $TTCache->Set("sql_cache/mostactivetorrents_block", $rows, $expires);
+        $TTCache->Set("sql.mostactivetorrents_block", $rows, $expires);
     }
     if ($rows) {
         foreach ($rows as $row) {

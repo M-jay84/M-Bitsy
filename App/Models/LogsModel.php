@@ -28,15 +28,15 @@ class LogsModel
         $count = DB::run("SELECT COUNT(*) FROM log $where")->fetchColumn();
         list($pager, $limit) = pagination(25, $count, Url('adminlog?'));
         $logs = DB::run("SELECT id, added, txt FROM log $where ORDER BY id DESC $limit")->fetchAll();
-        return array($logs, $pager);
+        return array('logs' => $logs, 'pager' => $pager);
     }
 
     // Admin Delete Logs
     public static function delete()
     {
         $ids = Validate::multiIds('ids');
-        DB::deleteByIds('logs', 'id', $ids);
-        showMessage(('adminlog'), LANG["DEL_COMPLETE"]);
+        DB::deleteByIds('log', 'id', $ids);
+        showMessage('adminlog', LANG["DEL_COMPLETE"]);
     }
 
 }

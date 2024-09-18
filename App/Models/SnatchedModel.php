@@ -52,7 +52,7 @@ class SnatchedModel
                         `sid`,
                         [86400, 'no', 'yes']
                     );
-                    showMessage(('adminsnatch'), LANG["DEL_COMPLETE"]);
+                    showMessage('adminsnatch', LANG["DEL_COMPLETE"]);
                 }
     }
 
@@ -136,15 +136,15 @@ class SnatchedModel
             DB::run("UPDATE users SET seedbonus = seedbonus - ?, modcomment = ? WHERE id = ?", [$torsize, $modcomment, $current_user->id]);
             SnatchedModel::update(['last_time','hnr','done'], ['tid=', 'uid='], [86400, 'no', 'yes', $torid,  $current_user->id]);
             LogsModel::write("<a href=" . URLROOT . "/profile/" . $current_user->id . "><b>" . $current_user->username . "</b></a> " . LANG["DELETED_RECORDING"] . ": <a href=" . URLROOT . "/torrent/$torid><b>$torid</b></a>  " . LANG["HIT_AND_RUN_WITH"] . " <b>$torsize</b> " . LANG["POINTS_OF_SEED_BONUS"] . "");
-            showMessage(('snatch/trade'), LANG["DEL_COMPLETE"]);
+            showMessage('snatch/trade', LANG["DEL_COMPLETE"]);
         } elseif ($_POST["requestupload"]) {
             $modcomment = date("d-M-Y") . " - " . LANG["DELETED_RECORDING"] . ": " . $torid . " with " . mksize($torsize) . " " . LANG["OF_UPLOAD"];
             DB::run("UPDATE users SET uploaded = uploaded - '$torsize', modcomment = ? WHERE id = ?", [$modcomment, $current_user->id]);
             SnatchedModel::update(['last_time','hnr','done'], ['tid=', 'uid='], [86400, 'no', 'yes', $torid,  $current_user->id]);
             LogsModel::write("<a href=" . URLROOT . "/profile/" . $current_user->id . "><b>" . $current_user->username . "</b></a> " . LANG["DELETED_RECORDING"] . ": <a href=" . URLROOT . "/torrent/$torid><b>$torid</b></a> " . LANG["HIT_AND_RUN_WITH"] . " <b>$torsize</b> " . LANG["OF_UPLOAD"] . "");
-            showMessage(('snatch/trade'), LANG["DEL_COMPLETE"]);
+            showMessage('snatch/trade', LANG["DEL_COMPLETE"]);
         } else {
-            showMessage(('snatch/trade'), LANG["ACTION_FAILED"]);
+            showMessage('snatch/trade', LANG["ACTION_FAILED"]);
         }
     }
 

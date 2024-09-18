@@ -7,29 +7,6 @@ namespace App\Libs;
 */
 class Validate
 {
-    public function testtt($name)
-    {
-        switch (strtolower($name)) {
-            case "id":
-                $msg = is_int($name) ? true : false;
-                break;
-            case "php":
-                $msg = is_int($name) ? true : false;
-                break;
-                case "pear":
-                $msg = is_int($name) ? true : false;
-                break;
-                case "php":
-                $msg = is_int($name) ? true : false;
-                break;
-            default:
-                $msg = false;
-                break;
-        }
-
-        return $msg;
-    }
-
     // Multi $_POST ids
     public static function multiIds($value)
     {
@@ -70,7 +47,7 @@ class Validate
     {
         if (CONFIG['CAPTCHA_ON']) {
             if (!$captcha) {
-                showMessage(('login'), LANG['CAPTCHA']);
+                showMessage('login', LANG['CAPTCHA']);
             }
             $verifyResponse = file_get_contents('https://www.google.com/recaptcha/api/siteverify?secret=' . CONFIG['CAPTCHA_SECRET'] . '&response=' . $captcha);
             $responseData = json_decode($verifyResponse);

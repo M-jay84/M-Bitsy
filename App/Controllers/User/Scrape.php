@@ -83,8 +83,7 @@ class Scrape extends Controller
         while ($rowu = $resu) {
             // No need parsing but lets update any old torrents first
             if ($rowu['announcelist'] == '') {
-                $torInfo = new Parse();
-                $tor = $torInfo->torr(UPLOAD_PATH."/torrents/$rowu[id].torrent");
+                $tor = Parse::torr(UPLOAD_PATH."/torrents/$rowu[id].torrent");
                 $infohash = $tor['hash'];
                 $infohash2 = $tor['hash2'];
                 $annlist = $tor['announce-list'];

@@ -5,7 +5,7 @@ use App\Libs\DB;
 if ($_SESSION['id']) {
     $expires = 120; // Cache time in seconds 2 mins
     block_begin(LANG["ONLINE_USERS"]);
-    if (($rows = $TTCache->Get("sql_cache/usersonline_block", $expires)) === false) {
+    if (($rows = $TTCache->Get("sql.usersonline_block", $expires)) === false) {
         $res = DB::fetchAll('users', 'id, username',
          ['enabled=','status=','privacy !=', "UNIX_TIMESTAMP(?) - UNIX_TIMESTAMP(users.last_access) <="],
         ['yes','confirmed','strong', CONFIG['TT_DATE'], 900]);
@@ -13,7 +13,7 @@ if ($_SESSION['id']) {
         foreach ($res as $row) {
             $rows[] = $row;
         }
-        $TTCache->Set("sql_cache/usersonline_block", $rows, $expires);
+        $TTCache->Set("sql.usersonline_block", $rows, $expires);
     }
 
     if (!$rows) { ?>

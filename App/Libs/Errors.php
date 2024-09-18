@@ -123,7 +123,7 @@ class Errors
         // Add verbose trace and debug output
         $error .= "\n" . $this->get_verbose_backtrace($e->getTrace());
         // Log details of error in a file
-        error_log($error, 3, LOG_PATH . '/exception_log.txt"');
+        error_log($error, 3, LOG_PATH . '/exception_log.txt');
         $_SESSION['FLASH'] = LANG["OOPS_ERR"];
         $data = [
             'page_title' => 'Message',

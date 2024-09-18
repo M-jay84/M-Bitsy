@@ -77,13 +77,7 @@ class AttachmentsModel
     // Set Attachment
     public static function set_attachment($data = [])
     {
-        foreach ($_FILES['file']['error'] as $ferror) {
-            if ($ferror != UPLOAD_ERR_NO_FILE) {
-                $upfile = true;
-            }
-        }
-        $upfile =  false;
-        if ($upfile) :
+        if (!empty($_FILES['file'])) :
             $array = array($_FILES['file']['name']);
             $result = array_filter($array);
             foreach ($result as $k => $ar) :
@@ -97,7 +91,7 @@ class AttachmentsModel
 
                 $allowedfileExtensions = array('jpg', 'gif', 'png', 'zip', 'rar', 'php', 'jpeg');
                 if (!in_array($extension, $allowedfileExtensions)) {
-                    showMessage(('forum'), "Sorry, only zip, rar, php, JPG, JPEG, PNG, GIF files are allowed.");
+                    showMessage('forum', "Sorry, only zip, rar, php, JPG, JPEG, PNG, GIF files are allowed.");
                 }
 
                 $targetPath = UPLOAD_PATH . "/attachment/" . $hash . ".data"; // Target path where file is to be stored
@@ -106,14 +100,14 @@ class AttachmentsModel
                 if ($extension == 'zip' || $extension == 'rar' || $extension == 'php') {
                     move_uploaded_file($sourcePath, $targetPath); // Moving Uploaded file
                     DB::insert('attachments', [
-                        'content_id' => $data['postid'], 'user_id' => $data['current_user']->id, 'upload_date' => CONFIG['TT_TIME'], 'filename' => $fileName,
+                        'content_id' => $data['postid'], 'user_id' => $_SESSION['id'], 'upload_date' => CONFIG['TT_TIME'], 'filename' => $fileName,
                         'file_size' => $fileSize, 'file_hash' => $hash, 'topicid' => $data['topicid']
                     ]);
                 } else {
                     if (move_uploaded_file($sourcePath, $targetPath)) { // Moving Uploaded file
                         SimpleThumbnail::create()->image($targetPath)->thumbnail(100)->to($thumbPath);
                         DB::insert('attachments', [
-                            'content_id' => $data['postid'], 'user_id' => $data['current_user']->id, 'upload_date' => CONFIG['TT_TIME'], 'filename' => $fileName,
+                            'content_id' => $data['postid'], 'user_id' => $_SESSION['id'], 'upload_date' => CONFIG['TT_TIME'], 'filename' => $fileName,
                             'file_size' => $fileSize, 'file_hash' => $hash, 'topicid' => $data['topicid']
                         ]);
                     }

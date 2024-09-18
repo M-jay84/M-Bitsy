@@ -42,6 +42,8 @@ class Browse extends Controller
                 'V_count' => $browse['count'],
                 'V_wherecatina' => $browse['search']['wherecatina'],
                 'V_cats' => $browse['cats'],
+                'V_lang' => $browse['lang'],
+                'V_keyword' => $browse['search']['keyword'],
                 'current_user' => $this->current_user
             ];
 

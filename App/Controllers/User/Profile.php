@@ -80,13 +80,13 @@ class Profile extends Controller
     }
 
     // Delete Profile Default Page otdo (tidy up)
-    public function delete()
+    public function delete($id)
     {
         if (!$this->current_user->isStaff) {
             $this->showMessage(URLROOT, LANG["NO_PERMISSION"]);
         }
-        if (!empty($_POST)) {
-            ProfileModel::deleteprofile($this->current_user);
+        if (!empty($id)) {
+            ProfileModel::deleteprofile($id, $this->current_user);
         } else {
             $this->showMessage(URLROOT, LANG["NOTHING_SELECTED"]);
         }

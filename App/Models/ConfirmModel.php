@@ -10,8 +10,8 @@ use App\Models\UsersModel;
 */
 class ConfirmModel
 {
-    // Email Reset Confirm
-    public static function confirmpassword($id, $secret, $email)
+    // Profile Email Reset Confirm
+    public static function confirmprofileemail($id, $secret, $email)
     {
         $editsecret = DB::fetchColumn('users', 'editsecret', ['enabled =', 'status =', 'editsecret =', 'id ='], ['yes', 'confirmed', $secret, $id]);
        
@@ -50,7 +50,7 @@ class ConfirmModel
         if ($stmt == 0) {
             showMessage(URLROOT, LANG["SIGNUP_UNABLE"]);
         }
-        showMessage(('login'), LANG["ACCOUNT_ACTIVATED"]);
+        showMessage('login', LANG["ACCOUNT_ACTIVATED"]);
     }
 
 }

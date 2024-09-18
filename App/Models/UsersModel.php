@@ -19,7 +19,7 @@ class UsersModel
     {
         $ids = Validate::multiIds('ids');
         DB::run("UPDATE `users` SET `status` = ? WHERE `status` = ? AND `invited_by` = ? AND `id` IN (?)", ['confirmed', 'pending', 0, $ids])->fetchAll();
-        showMessage(('adminconfirmreg'), LANG["ACTION_COMPLETE"]);
+        showMessage('adminconfirmreg', LANG["ACTION_COMPLETE"]);
     }
 
     // Get Members
@@ -83,10 +83,9 @@ class UsersModel
         WarningsModel::delete(['userid' => $userid]);
         DB::delete('ratings', ['user' => $userid]);
         DB::delete('peers', ['userid' => $userid]);
-        DB::delete('completed', ['userid' => $userid]);
         ReportsModel::delete(['addedby' => $userid]);
         ReportsModel::delete(['votedfor' => $userid, 'type' => 'user']);
-        ReadModel::delete($userid);
+        ReadModel::delete(['userid' => $userid]);
         DB::delete('pollanswers', ['userid' => $userid]);
         DB::delete('snatched', ['uid' => $userid]);
     }

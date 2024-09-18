@@ -13,7 +13,7 @@ define('APPROOT', '../');
 // Paths
 define('CACHE_PATH', '../Core/files/cache');
 define('LOG_PATH', '../Core/files/logs');
-define('UPLOAD_PATH', '../Core/files/uploaded');
+define('UPLOAD_PATH', '../Core/files');
 define('VIEW_PATH', '../App/Views');
 
 // Autoload Classes By Nmanespace

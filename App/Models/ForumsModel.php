@@ -154,7 +154,7 @@ class ForumsModel
             $data['forums'] = $forums['res'];
             $data['pager'] = $forums['pager'];
         } else {
-            showMessage(('forum/search'), LANG["NOTHING_FOUND"]);
+            showMessage('forum/search', LANG["NOTHING_FOUND"]);
         }
     }
 
@@ -182,13 +182,13 @@ class ForumsModel
     public static function deleteCats($id, $action = 0)
     {
         if ($action != 'sure') {
-            showMessage(('adminforumcat'), "Are You Sure <a href='".URLROOT."/adminforumcat/delete/$id/sure'>Remove Cat $id</a>");
+            showMessage('adminforumcat', "Are You Sure <a href='".URLROOT."/adminforumcat/delete/$id/sure'>Remove Cat $id</a>");
         }
 
 
         $v = ForumCatsModel::fetchRow('*', ['id='], [$id]);
         if (!$v) {
-            showMessage(('adminforumcat'), LANG["FORUM_INVALID_CAT"]);
+            showMessage('adminforumcat', LANG["FORUM_INVALID_CAT"]);
         }
 
         ForumCatsModel::delete(['id' => $id]);
@@ -203,7 +203,7 @@ class ForumsModel
             DB::delete('forum_forums', ['id' => $row['id']]);
         }
         
-        showMessage(('adminforumcat'), LANG["DEL_COMPLETE"]);
+        showMessage('adminforumcat', LANG["DEL_COMPLETE"]);
     }
 
     // Admin Get Cats
@@ -225,7 +225,7 @@ class ForumsModel
             ForumCatsModel::update(['sort'], ['id ='], [$_GET["sort"] + 1, $id]);
             ForumCatsModel::update(['sort'], ['sort =', 'category =', 'id !='], [$_GET["sort"], $_GET["sort"] + 1, $id]);
         }
-        showMessage(('adminforumcat'), LANG["MOVED"]);
+        showMessage('adminforumcat', LANG["MOVED"]);
     }
 
     // Admin Reorder Forums
@@ -251,20 +251,20 @@ class ForumsModel
         $id = Validate::Input('id');
         
         if ($name == "") {
-            showMessage(('adminforumcat'), LANG["MISSING_FORM_DATA"]);
+            showMessage('adminforumcat', LANG["MISSING_FORM_DATA"]);
         }
         
         // Admin Insert Forum Cat
         if (!$id) {
             $res = ForumCatsModel::insert(['name' => $name, 'sort' => intval($sort)]);
             if (!empty($res)) {
-                showMessage(('adminforumcat'), LANG["SUCCESS"]);
+                showMessage('adminforumcat', LANG["SUCCESS"]);
             } else {
-                showMessage(('adminforumcat'), LANG["ACTION_FAILED"]);
+                showMessage('adminforumcat', LANG["ACTION_FAILED"]);
             }
         } else {
             ForumCatsModel::update(['sort','name'], ['id='], [$sort, $name, $id]);
-            showMessage(('adminforumcat'), "<center><b>" . LANG["UPDATE_COMPLETE"] . "</b></center>");
+            showMessage('adminforumcat', "<center><b>" . LANG["UPDATE_COMPLETE"] . "</b></center>");
         }
     }
 
@@ -385,18 +385,18 @@ class ForumsModel
     public static function delete($id, $sure = 0)
     {
         if ($sure != 'sure') {
-            showMessage(('adminforum'), "Are You Sure <a href='".URLROOT."/adminforum/delete/$id/sure'>Remove Forum $id</a>");
+            showMessage('adminforum', "Are You Sure <a href='".URLROOT."/adminforum/delete/$id/sure'>Remove Forum $id</a>");
         }
 
         $v = DB::fetchRow('forum_forums', '*', ['id='], [$id]);
         if (!$v) {
-            showMessage(('adminforum'), LANG["FORUM_INVALID"]);
+            showMessage('adminforum', LANG["FORUM_INVALID"]);
         }
 
         DB::delete('forum_forums', ['id' => $id]);
         TopicsModel::delete(['forumid' => $id]);
         PostsModel::delete(['topicid' => $id]);
         ReadModel::delete(['topicid' => $id]);
-        showMessage(('adminforumcat'), LANG["DEL_COMPLETE"]);
+        showMessage('adminforumcat', LANG["DEL_COMPLETE"]);
     }
 }

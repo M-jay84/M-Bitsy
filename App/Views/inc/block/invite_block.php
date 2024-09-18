@@ -7,7 +7,7 @@ if ((CONFIG['INVITEONLY'] || CONFIG['ENABLEINVITES']) && $_SESSION['id']) {
 	<?= $message ?>
    <?php
    if ($invites > 0) {  ?>
-      <a href="<?= Url('invite') ?>" class="btn ttbtn"><?= LANG["SEND"] ?></a> <?php
+      <a href="<?= Url('invite') ?>" class="btn ttbtn"><?= LANG["INVITE"] ?></a> <?php
    }
    if ($_SESSION['invitees'] > 0) { ?>
       <a href="<?= Url("invite/invitetree/$_SESSION[id]") ?>" class="btn ttbtn"><?= LANG["INVITED"] ?></a> <?php

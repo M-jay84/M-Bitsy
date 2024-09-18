@@ -41,9 +41,9 @@ class ShoutboxModel
             LogsModel::write("Shoutbox cleared by ".$current_user->username."");
             $msg_shout = "[color=#ff0000]" . LANG["SHOUTBOX_CLEARED_MESSAGE"] . "[/color]";
             ShoutboxModel::insert(['userid'=>0, 'date'=>CONFIG['TT_DATE'], 'user'=>'System', 'message'=>$msg_shout]);
-            showMessage(('admincp'), "<b><font color='#ff0000'>Shoutbox Cleared....</font></b>");
+            showMessage('admincp', "<b><font color='#ff0000'>Shoutbox Cleared....</font></b>");
         } else {
-            showMessage(('admincp'), "<b>Are You Sure <a href='".URLROOT."/adminshoutbox/clear/sure'>Clear Shoutbox</a></b>");
+            showMessage('admincp', "<b>Are You Sure <a href='".URLROOT."/adminshoutbox/clear/sure'>Clear Shoutbox</a></b>");
         }
     }
 
@@ -69,7 +69,7 @@ class ShoutboxModel
     public static function delete($id, $current_user, $sure = 0)
     {
         if ($sure == 0) {
-            showMessage(URLROOT, "Sanity check: Click <a href='".URLROOT."/shoutbox/delete/$id/1'>here</a> if you are sure.");
+            showMessage(URLROOT, "Sanity check: Click <a href='".URLROOT."/shoutbox/delete/$id'>here</a> if you are sure.");
         }
 
         $row = DB::fetchColumn('shoutbox', 'user', ['msgid ='], [$id]);
@@ -85,16 +85,16 @@ class ShoutboxModel
     {
         // Check User Input
         $user = Validate::Input('user', 'int');
-        if ($current_user > CONFIG['_UPLOADER'] || $current_user->id == $user) {
+        if ($current_user->isStaff || $current_user->id == $user) {
             // Check User Input
-            $id = Validate::Input('íd', 'int');
+            $msgid = $_POST['íd'];
             $message = Validate::Input('text');
             if ($message) {
-                DB::update('shoutbox', ['message'], ['msgid='], [$message, $id]);
+                DB::update('shoutbox', ['message'], ['msgid='], [$message, $msgid]);
                 showMessage(URLROOT, LANG["UPDATE_COMPLETE"]);
             }
         } else {
-            showMessage(('logout'), LANG["NO_PERMISSION"]);
+            showMessage('logout', LANG["NO_PERMISSION"]);
         }
     }
 

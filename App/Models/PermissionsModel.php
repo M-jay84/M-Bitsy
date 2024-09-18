@@ -29,11 +29,11 @@ class PermissionsModel
     {
         // Protect Permissions
         if ($id == 1) {
-            showMessage(('permission'), LANG["YOU_CANT_DEL_THIS_GRP"]);
+            showMessage('permission', LANG["YOU_CANT_DEL_THIS_GRP"]);
         }
 
         DB::delete('`permissions`', ['permission_id'=>$id]);
-        showMessage(('adminpermission'), LANG["DEL_COMPLETE"]);
+        showMessage('adminpermission', LANG["DEL_COMPLETE"]);
     }
 
     // Admin Add/Update Permissions
@@ -59,7 +59,7 @@ class PermissionsModel
                 $_POST["view_forum"], $_POST["edit_forum"], $_POST["delete_forum"], $_POST["can_upload"], $_POST["can_download"], $group_id]);
         }
 
-        showMessage(('adminpermission'), LANG["ACTION_COMPLETE"]);
+        showMessage('adminpermission', LANG["ACTION_COMPLETE"]);
     }
 
 }

@@ -39,7 +39,7 @@ class WarningsModel
 
         $expiretime = date("Y-m-d H:i:s", CONFIG['TT_TIME'] + (86400 * $input['expiry']));
         WarningsModel::insert(['userid'=>$input['userid'], 'reason'=>$input['reason'], 'added'=>CONFIG['TT_DATE'],'expiry'=>$expiretime,'warnedby'=>'staff','type'=>$input['type']]);
-        showMessage(("warning/$input[userid]"), LANG["SUCCESS"]);
+        showMessage("warning/$input[userid]", LANG["SUCCESS"]);
     }
 
     // Delete All Warnings
@@ -51,9 +51,9 @@ class WarningsModel
             if ($count == $deleted || $count <= $deleted) {
                 DB::update('users', ['warned'], ['id='], ['no', $data['userid']]);
             }
-            showMessage(("warning/$data[userid]"), LANG["DEL_COMPLETE"]);
+            showMessage("warning/$data[userid]", LANG["DEL_COMPLETE"]);
         }  
-        showMessage(("warning/$data[userid]"), LANG["ACTION_FAILED"]);
+        showMessage("warning/$data[userid]", LANG["ACTION_FAILED"]);
     }
 
     // Add Warning
@@ -82,14 +82,14 @@ class WarningsModel
     }
 
     // Get All Warnings
-    public static function getAll($data, $id = 0)
+    public static function getAll($current_user, $id = 0)
     {
         // Check User
-        if ($data['current_user']->view_users != "yes" && $data['current_user']->id != $id) {
+        if ($current_user->view_users != "yes" && $current_user->id != $id) {
             showMessage(URLROOT, LANG["NO_USER_VIEW"]);
         }
-        if (($data['current_user']->enabled == "no" || ($data['current_user']->status == "pending")) && !$data['current_user']->edit_users == 'yes') {
-            showMessage(('members'), LANG["NO_ACCESS_ACCOUNT_DISABLED"]);
+        if (($current_user->enabled == "no" || ($current_user->status == "pending")) && !$current_user->edit_users == 'yes') {
+            showMessage('members', LANG["NO_ACCESS_ACCOUNT_DISABLED"]);
         }
         
         if ($id) {
@@ -126,7 +126,7 @@ class WarningsModel
         $ids = Validate::multiIds('ids');
         DB::deleteByIds('warnings', ['active ='], $ids, 'userid', ['yes']);
         DB::updateWhereIn('users', ['warned' => 'no'], $ids);
-        showMessage(('adminwarning'), LANG["SUCCESS"]);
+        showMessage('adminwarning', LANG["SUCCESS"]);
     }
 
     // Delete Warnings

@@ -48,7 +48,7 @@ class Warning extends Controller
     public function submit($userid)
     {
         // Check User
-        if (!$this->current_user->isSstaff) {
+        if (!$this->current_user->isStaff) {
             $this->showMessage("profile/$userid", LANG["NO_PERMISSION"]);
         }
 

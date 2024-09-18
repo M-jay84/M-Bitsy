@@ -23,7 +23,7 @@ class RulesModel
     {
         DB::delete('rules', ['id' => $id]);
         LogsModel::write("Rules have been deleted by ".$current_user_username."");
-        showMessage(('rule'), LANG["SUCCESS"]);
+        showMessage('rule', LANG["SUCCESS"]);
     }
 
     // Admin Add/Update Rules
@@ -41,7 +41,7 @@ class RulesModel
                 DB::update('rules', ['title','text','public', 'class'], ['id='], [$title, $text, $public, $class, $id]);
             }
             LogsModel::write("Rules have been changed by ".$current_user_username."");
-            showMessage(('rule'), LANG["SUCCESS"]);
+            showMessage('rule', LANG["SUCCESS"]);
         } else {
             showMessage(URLROOT, LANG["MISSING_FORM_DATA"]);
         }

@@ -11,7 +11,6 @@ if (!$row) {
 }
 $row = DB::run("SELECT VERSION() AS version")->fetch();
 $mysqlver = $row['version'];
-$newstaffmessage = DB::fetchColumn('staffmessages', 'count(id)', ['answered='], [0]);
 $pending = DB::fetchColumn('users', 'count(id)', ['status=', 'invited_by='], ['pending',0])
 ?>
     <div class="text-center">
@@ -23,7 +22,6 @@ $pending = DB::fetchColumn('users', 'count(id)', ['status=', 'invited_by='], ['p
             return ($ver[0] . " " . $ver[1]);
         }
         ?>
-        <b><?= LANG["STAFF_MESSAGES"] ?>:</b> <a href='<?= Url('admincontact') ?>'><b>(<?= $newstaffmessage ?>)</b></a><br>
         <b><?= LANG["USERS_AWAITING_VALIDATION"] ?>:</b> <a href='<?= Url('adminconfirmreg') ?>'><b>(<?= $pending ?>)</b></a><br>
         <?= LANG["VERSION_MYSQL"] ?>: <b><?= $mysqlver ?></b>&nbsp;-&nbsp;
         <?= LANG["VERSION_PHP"] ?>: <b><?= phpversion() ?></b>&nbsp;-&nbsp;

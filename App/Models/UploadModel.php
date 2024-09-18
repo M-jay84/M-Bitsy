@@ -5,7 +5,6 @@ namespace App\Models;
 use App\Libs\DB;
 use App\Libs\SimpleThumbnail;
 use App\Libs\Torrents\Parse;
-use App\Libs\Torrents\Tscraper;
 use App\Libs\Validate;
 use App\Models\LogsModel;
 use App\Models\ShoutboxModel;
@@ -28,7 +27,7 @@ class UploadModel
     }
     // Upload File
     if (($num = $_FILES['torrent']['error'])) {
-        showMessage(('upload'), LANG["UPLOAD_ERR[$num]"]);
+        showMessage('upload', LANG["UPLOAD_ERR[$num]"]);
     }
     // Get Name
     if (!($fname = $_FILES["torrent"]["name"])) {
@@ -65,7 +64,7 @@ class UploadModel
         $nfo = 'yes';
     }
     // Check User Inputs
-    $descr = Validate::Input('desscr') ?? LANG["UPLOAD_NO_DESC"];
+    $descr = Validate::Input('descr') ?? LANG["UPLOAD_NO_DESC"];
     $vip = Validate::Input('vip', 'int');
     $free = Validate::Input('free', 'int');
 
@@ -85,23 +84,22 @@ class UploadModel
     }
     // If Message Show
     if ($message) {
-        showMessage(('upload'), $message);
+        showMessage('upload', $message);
     }
 
     // No Message So Continue
     if (!$message) {
         // Torrent / NFO Dir
         $torrent_dir = UPLOAD_PATH."/torrents";
-        $nfo_dir = UPLOAD_PATH."/torrents/nfos";
+        $nfo_dir = UPLOAD_PATH."/nfos";
 
         // Move Torrent File
         if (!move_uploaded_file($_FILES["torrent"]["tmp_name"], "$torrent_dir/$fname")) {
-            showMessage(('upload'), LANG["ERROR"] . ": " . LANG["UPLOAD_COULD_NOT_BE_COPIED"] . " $torrent_dir - $fname");
+            showMessage('upload', LANG["ERROR"] . ": " . LANG["UPLOAD_COULD_NOT_BE_COPIED"] . " $torrent_dir - $fname");
         }
 
         // Parse Torrent File
-        $torInfo = new Parse();
-        $tor = $torInfo->torr("$torrent_dir/$fname");
+        $tor = Parse::torr("$torrent_dir/$fname");
 
         // Check External
         $announce_urls = explode(",", URLROOT . CONFIG['ANNOUNCELIST']);
@@ -124,7 +122,7 @@ class UploadModel
     // Error So Delete File
     if ($message) {
         unlink("$torrent_dir/$fname");
-        showMessage(('upload'), $message);
+        showMessage('upload', $message);
     }
 
     // Check Name
@@ -141,22 +139,22 @@ class UploadModel
         if (!($_FILES['image' . $x]['name'] == "")) {
             $y = $x + 1;
             if ($_FILES['image$x']['size'] > CONFIG['IMAGEMAXFILESIZE']) {
-                showMessage(('upload'), LANG["INVAILD_FILE_SIZE_IMAGE"]);
+                showMessage('upload', LANG["INVAILD_FILE_SIZE_IMAGE"]);
             }
             $uploaddir = UPLOAD_PATH . '/images/';
             $ifile = $_FILES['image' . $x]['tmp_name'];
             $im = getimagesize($ifile);
             if (!$im[2]) {
-                showMessage(('upload'), sprintf(LANG["INVALID_IMAGE"]));
+                showMessage('upload', sprintf(LANG["INVALID_IMAGE"]));
             }
             if (!array_key_exists($im['mime'], $allowed_types)) {
-                showMessage(('upload'), LANG["INVALID_FILETYPE_IMAGE"]);
+                showMessage('upload', LANG["INVALID_FILETYPE_IMAGE"]);
             }
             $row = DB::run("SHOW TABLE STATUS LIKE 'torrents'")->fetch();
             $next_id = $row['Auto_increment'];
             $ifilename = $next_id . $x . $allowed_types[$im['mime']];
-            $image_name = SimpleThumbnail::create()->copyImage($ifile, $uploaddir . $ifilename);
-            $inames[] = $ifilename;
+            SimpleThumbnail::create()->copyImage($ifile, $uploaddir . $ifilename);
+            $inames[] = $next_id . $x . '.webp';
         }
     }
 
@@ -171,7 +169,7 @@ class UploadModel
     } catch (\PDOException $e) {
         TorrentsModel::deleteTorrent(DB::lastInsertId(), $current_user->id);
         rename("$torrent_dir/$fname", "$torrent_dir/duplicate.torrent"); // todo
-        showMessage(('upload'), LANG['ACTION_FAILED']);
+        showMessage('upload', LANG['ACTION_FAILED']);
     }
 
     $id = DB::lastInsertId();
@@ -203,7 +201,7 @@ class UploadModel
     } else {
         $message = sprintf(LANG["TORRENT_UPLOAD_EXTERNAL"], $name, $id);
         // Scrape External
-        Tscraper::ScrapeId($id, $tor["announce-list"], $tor['hash']);
+        Parse::ScrapeId($id, $tor["announce-list"], $tor['hash']);
     }
 
         $data = ['id' => $id, 'message' => $message];

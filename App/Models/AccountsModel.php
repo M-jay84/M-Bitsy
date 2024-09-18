@@ -33,11 +33,11 @@ class AccountsModel
 
         // Run Some Checks
         if (!$sql || !password_verify($password, $sql['password'])) {
-            showMessage(('logout'), LANG["LOGIN_INCORRECT"]);
+            showMessage('logout', LANG["LOGIN_INCORRECT"]);
         } elseif ($sql['status'] == "pending") {
-            showMessage(('logout'), LANG["ACCOUNT_PENDING"]);
+            showMessage('logout', LANG["ACCOUNT_PENDING"]);
         } elseif ($sql['enabled'] == "no") {
-            showMessage(('logout'), LANG["ACCOUNT_DISABLED"]);
+            showMessage('logout', LANG["ACCOUNT_DISABLED"]);
         }
 
         // Set Cookies
@@ -147,7 +147,7 @@ class AccountsModel
 
         // Check Message Error
         if ($message != "") {
-            showMessage(('login'), $message);
+            showMessage('login', $message);
         }
 
         // No Message So Proceed
@@ -164,7 +164,7 @@ class AccountsModel
                 // Post Shout
                 ShoutboxModel::insert(['userid' => 0, 'date' => CONFIG['TT_DATE'], 'user' => 'System', 'message' => "new user: " . $data['username'] . " has joined."]);
                 // Invite Activated
-                showMessage(('login'), LANG["ACCOUNT_ACTIVATED"]);
+                showMessage('login', LANG["ACCOUNT_ACTIVATED"]);
             }
 
             // Check To Confirm
@@ -216,9 +216,9 @@ class AccountsModel
             if (CONFIG['CONFIRMEMAIL'] || CONFIG['ACONFIRM']) {
                 $TTMail = new TTMail();
                 $TTMail->Send($data['email'], "Your " . CONFIG['SITENAME'] . " User Account", $body, "", "-f" . CONFIG['SITEEMAIL'] . "");
-                showMessage(('login'), LANG["A_CONFIRMATION_EMAIL_HAS_BEEN_SENT"] . " (" . htmlspecialchars($data['email']) . "). " . LANG["ACCOUNT_CONFIRM_SENT_TO_ADDY_REST"] . " <br/ >");
+                showMessage('login', LANG["A_CONFIRMATION_EMAIL_HAS_BEEN_SENT"] . " (" . htmlspecialchars($data['email']) . "). " . LANG["ACCOUNT_CONFIRM_SENT_TO_ADDY_REST"] . " <br/ >");
             } else {
-                showMessage(('login'), LANG["ACCOUNT_ACTIVATED"]);
+                showMessage('login', LANG["ACCOUNT_ACTIVATED"]);
             }
         }
     }

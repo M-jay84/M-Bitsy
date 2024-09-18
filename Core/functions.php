@@ -1,6 +1,6 @@
 <?php
 
-use App\Libs\Torrents\MDBS;
+use App\Models\TmdbModel;
 use App\Libs\DB;
 
 // Redidect Page
@@ -385,21 +385,40 @@ $tzs["660"] = array("(GMT + 11:00 hours) Magadan, New Caledonia, Solomon Islands
 $tzs["720"] = array("(GMT + 12:00 hours) Auckland, Wellington, Fiji, Marshall Island", "Pacific/Auckland");
 
 // Get Date By User Timezone 
-function user_timezone_date($timestamp)
+function user_timezone_date($timestamp, $return_int = false)
 {
     global $tzs;
 
+    /*
     $date = new DateTime($timestamp, new DateTimeZone("UTC"));
     $ZONE = $tzs[$_SESSION['tzoffset']][1] ?? "Europe/London";
     $date->setTimezone(new DateTimeZone($ZONE));
         
     if (is_numeric($timestamp)) {
         $time = strtotime($date->format('Y-m-d H:i:s'));
-        return (int) $time;
+        return $time;
     } else {
         return $date->format('Y-m-d H:i:s');
     }
+    */
+
+	if (!is_numeric($timestamp)) {
+	    $timestamp = strtotime($timestamp); // date to time
+	}
+
+	$timestamp = $timestamp + ($_SESSION['tzoffset']*60); // do time adjust
+	if (date("I")) {
+	    $timestamp += 3600; // DST Fix
+	}
+	
+	if ($return_int) {
+	    return $timestamp;
+	}
+	
+	return date("Y-m-d H:i:s", $timestamp);
+
 }
+
 
 // Drop Down for Time Zones
 function timeZoneDropDown($tzoffset)
@@ -717,7 +736,7 @@ function torrenttable($res, $columns = CONFIG['TORRENTTABLE_COLUMNS'])
                     }
                     //print("<td class='ttable_col$x' nowrap='nowrap'><a href=\"" . URLROOT . "/torrent/$id/hit\">$dispname</a></td>");
                     // BALLOON TOOLTIP MOD
-                    print("<td nowrap='nowrap'><a href=\"" . URLROOT . "/torrent/$id/hit\" onMouseover=\"return overlib('<table class=ballooncolor border=1 width=300px align=center><tr><td class=balloonheadercolor colspan=2 align=center>$smallname</td></tr><tr valign=top><td class=ballooncolor align=center><img border=0 height=200 width=120 src=".MDBS::getImage($row)."></td><td width=80%  class=ballooncolor><div align=left><b>" . LANG["UPLOADED"] . ": </b>" . user_timezone_date($row["added"]) . "<br /><b>" . LANG["SIZE"] . ": </b>". mksize($row["size"]) . "<br /><b>" . LANG["COMPLETED"] . ": </b>" . $row["times_completed"] . "<br /></div><div align=left><b>Views: </b>" . $row["views"] . "<br /><b>" . LANG["HITS"] . ": </b>" . $row["hits"] . "<br /><b>" . LANG["SEEDERS"] . ": </b><font color=green>" . $row["seeders"] . "</font><br /><b>" . LANG["LEECHERS"] . ": </b><font color=red>" . $row["leechers"] . "</font><br /><b>" . LANG["BY"] . ": </b>" . $row['username'] . "</div></td></tr><tr><td class=balloonheadercolor colspan=2 align=center>".LANG["DESCRIPTION"]."</td></tr><tr><td  class=ballooncolor colspan=2>" . $row['descr'] . "</td></tr></table>', CENTER, HEIGHT, 200, WIDTH, 300)\"; onMouseout=\"return nd()\">".$dispname."</a>".$type."");
+                    print("<td nowrap='nowrap'><a href=\"" . URLROOT . "/torrent/$id/hit\" onMouseover=\"return overlib('<table class=ballooncolor border=1 width=300px align=center><tr><td class=balloonheadercolor colspan=2 align=center>$smallname</td></tr><tr valign=top><td class=ballooncolor align=center><img border=0 height=200 width=120 src=".TmdbModel::getImage($row)."></td><td width=80%  class=ballooncolor><div align=left><b>" . LANG["UPLOADED"] . ": </b>" . user_timezone_date($row["added"]) . "<br /><b>" . LANG["SIZE"] . ": </b>". mksize($row["size"]) . "<br /><b>" . LANG["COMPLETED"] . ": </b>" . $row["times_completed"] . "<br /></div><div align=left><b>Views: </b>" . $row["views"] . "<br /><b>" . LANG["HITS"] . ": </b>" . $row["hits"] . "<br /><b>" . LANG["SEEDERS"] . ": </b><font color=green>" . $row["seeders"] . "</font><br /><b>" . LANG["LEECHERS"] . ": </b><font color=red>" . $row["leechers"] . "</font><br /><b>" . LANG["BY"] . ": </b>" . $row['username'] . "</div></td></tr><tr><td class=balloonheadercolor colspan=2 align=center>".LANG["DESCRIPTION"]."</td></tr><tr><td  class=ballooncolor colspan=2>" . $row['descr'] . "</td></tr></table>', CENTER, HEIGHT, 200, WIDTH, 300)\"; onMouseout=\"return nd()\">".$dispname."</a>".$type."");
 
                     $tags = get_tags($id);
                     print($tags."</td>");
@@ -810,7 +829,7 @@ function torrenttable($res, $columns = CONFIG['TORRENTTABLE_COLUMNS'])
                     }
                     break;
                 case 'added':
-                    print("<td style='min-width:110px;'>" . user_timezone_date(get_elapsed_time($row['added'])) . "</td>");
+                    print("<td style='min-width:110px;'>" . get_elapsed_time(user_timezone_date($row["added"], true)) . "</td>");
                     break;
                 case 'speed':
                     if ($row["external"] != "yes" && $row["leechers"] >= 1) {
@@ -1211,7 +1230,7 @@ function lastpostdetails($lastpostid)
 {
     $post_res = DB::fetchRow('forum_posts', 'added,topicid,userid', ['id ='], [$lastpostid]);
     if ($post_res) {
-        $post_arr = $post_res or showMessage(('forum'), "Bad forum last_post");
+        $post_arr = $post_res or showMessage('forum', "Bad forum last_post");
         $lastposterid = $post_arr["userid"];
         $lastpostdate = user_timezone_date($post_arr["added"]);
         $lasttopicid = $post_arr["topicid"];
@@ -1704,7 +1723,7 @@ function health($leechers, $seeders)
 // Return Tags
 function get_tags($id) 
 {
-    $tag =  DB::fetchRow('torrenttag', 'type1, type2, type3', ['torrentid ='], [$id]);
+    $tag =  DB::fetchRow('tagtorrent', 'type1, type2, type3', ['torrentid ='], [$id]);
 
     $tags = '';
     if (!empty($tag['type1'])) {
@@ -1781,7 +1800,7 @@ function magnetlink($data)
 // VIEW NFO BY ID
 function displaynfo($id)
 {
-    $nfofilelocation = UPLOAD_PATH . "/torrents/nfos/$id.nfo";
+    $nfofilelocation = UPLOAD_PATH . "/nfos/$id.nfo";
     $filegetcontents = file_get_contents($nfofilelocation);
     $nfo = $filegetcontents;
     if ($nfo) {

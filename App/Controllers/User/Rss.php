@@ -35,6 +35,7 @@ class Rss extends Controller
         if ($passkey == ''){
             $passkey = $this->current_user->passkey;
         }
+
         $member = DB::fetchColumn('users', 'count(id)', ['passkey ='], [$passkey]);
         if ($member == 1) {
             $link = "$passkey";

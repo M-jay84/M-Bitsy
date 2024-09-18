@@ -4,7 +4,7 @@ if ($_SESSION['id']) {
     block_begin(LANG["SEARCH"]);
 	$search = $_GET['search'] ?? '';
     ?>
-	<form method="get" action="<?= Url('search') ?>">
+	<form method="get" action="<?= Url('browse') ?>">
 		<input type="text" name="search" style="width: 95%" class="form-control" value="<?= htmlspecialchars($search) ?>" placeholder="<?= LANG["SEARCH"] ?>"/><br />
 		    <select name="cat"  style="width: 95%" class='form-select'>
 			<option value="0">(<?= LANG["ALL"] ?>)</option>

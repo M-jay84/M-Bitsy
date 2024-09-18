@@ -15,7 +15,7 @@ class Cleanup
     {
         $row = DB::fetchRow('tasks', 'last_time', ['task ='], ['cleanup']);
         if (!$row) {
-            DB::insert('taskS', ['task =','last_time ='], ['cleanup',CONFIG['TT_TIME']]);
+            DB::insert('tasks', ['task =','last_time ='], ['cleanup',CONFIG['TT_TIME']]);
             return;
         }
 
@@ -23,7 +23,7 @@ class Cleanup
             return;
         }
 
-        $planned_clean = DB::update('taskS', ['last_time'], ['task=', 'last_time ='], [CONFIG['TT_TIME'], 'cleanup', $row['last_time']]);
+        $planned_clean = DB::update('tasks', ['last_time'], ['task=', 'last_time ='], [CONFIG['TT_TIME'], 'cleanup', $row['last_time']]);
         if (!$planned_clean) {
             return;
         }
@@ -75,7 +75,7 @@ class Cleanup
     {
         $row = DB::fetchRow('tasks', 'last_time', ['task='], ['bonus']);
         if (!$row) {
-            DB::insert('taskS', [ 'task'=>'bonus','last_time'=>CONFIG['TT_TIME']]);
+            DB::insert('tasks', [ 'task'=>'bonus','last_time'=>CONFIG['TT_TIME']]);
         }
         if ($row['last_time'] + CONFIG['ADDBONUS'] < CONFIG['TT_TIME']) {
             $res1 = DB::run("SELECT DISTINCT userid as peer, (

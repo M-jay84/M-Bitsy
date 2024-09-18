@@ -68,16 +68,15 @@ use App\Libs\Cache;
                 <p class="text-center">
                 <a href="<?= Url() ?>"><b><?= LANG["HOME"] ?></b></a><br>
                 <a href="<?= Url('adminban') ?>"><b><?= LANG["BANNED"] ?></b></a><br>
-                <a href="<?= Url('admincategorie') ?>"><b><?= LANG["TORRENT_CATEGORIES"] ?></b></a><br>
+                <a href="<?= Url('admincategorie') ?>"><b><?= LANG["CATEGORIES"] ?></b></a><br>
                 <a href="<?= Url('adminclient/peers') ?>"><b><?= LANG["CLIENT_BAN"] ?></b></a><br>
                 <a href="<?= Url('admincomment') ?>"><b><?= LANG["COMMENT"] ?></b></a><br>
-                <a href="<?= Url('adminemail') ?>"><b><?= LANG["MASS_EMAIL"] ?></b></a><br>
+                <a href="<?= Url('adminemail') ?>"><b><?= LANG["EMAIL"] ?></b></a><br>
                 <a href="<?= Url('adminforumcat') ?>"><b><?= LANG["FORUM"] ?></b></a><br>
                 <a href="<?= Url('admingroup') ?>"><b><?= LANG["GROUPS"] ?></b></a><br>
                 <a href="<?= Url('admininactive') ?>"><b><?= LANG["INACTIVE"] ?></b></a><br>
-                <a href="<?= Url('admininvite') ?>"><b><?= LANG["INVITED_USER"] ?></b></a><br>
-                <a href="<?= Url('admininvite/pending') ?>"><b><?= LANG["PENDING_INVITE"] ?></b></a><br>
-                <a href="<?= Url('adminlog') ?>"><b><?= LANG["SITE_LOG"]; ?></b></a><br>
+                <a href="<?= Url('admininvite') ?>"><b><?= LANG["INVITES"] ?></b></a>/<a href="<?= Url('admininvite/pending') ?>"><b><?= LANG["PENDING"] ?></b></a><br>
+                <a href="<?= Url('adminlog') ?>"><b><?= LANG["LOG"]; ?></b></a><br>
                 </p>
                 <?php block_end(); ?>
                 <?php require_once VIEW_PATH . "/inc/block/statistics_block.php"; ?>
@@ -98,7 +97,7 @@ use App\Libs\Cache;
                 <a href="<?= Url('adminpeer') ?>"><b><?= LANG["PEERS"] ?></b></a><br>
                 <a href="<?= Url('adminreport') ?>"><b><?= LANG["REPORT"] ?></b></a><br>
                 <a href="<?= Url('admintask/clear') ?>"><b><?= LANG["CLEAR_SHOUTBOX"] ?></b></a><br>
-                <a href="<?= Url('adminsnatch') ?>"><b><?= LANG["HNR"] ?></b></a><br>
+                <a href="<?= Url('adminsnatch') ?>"><b><?= LANG["SNATCH"] ?></b></a><br>
                 <a href="<?= Url('admintag') ?>"><b><?= LANG["TAGS"] ?></b></a><br>
                 <a href="<?= Url('admintorrent') ?>"><b><?= LANG["TORRENT"] ?></b></a><br>
                 <a href="<?= Url('adminusersearch') ?>"><b><?= LANG["USER_SEARCH"] ?></b></a><br>

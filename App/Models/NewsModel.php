@@ -26,7 +26,7 @@ class NewsModel
 	}
 
     // Admin Add/Edit News
-    public static function insertOrUpdate($data = [])
+    public static function insertOrUpdate()
     {
         // Check User Input
         $body = Validate::Input('body');
@@ -36,7 +36,7 @@ class NewsModel
        
         // Check Correct Input
         if (!$body || !$title) {
-            showMessage(('adminnews'), LANG["MISSING_FORM_DATA"]);
+            showMessage('adminnews', LANG["MISSING_FORM_DATA"]);
         }
         
         if (!$added) {
@@ -44,11 +44,11 @@ class NewsModel
         }
 
         if (!$id) {
-            DB::insert('news', ['userid'=>$data['current_user']->id, 'added'=>CONFIG['TT_DATE'], 'body'=>$body, 'title'=>$title]);
+            DB::insert('news', ['userid'=>$id, 'added'=>CONFIG['TT_DATE'], 'body'=>$body, 'title'=>$title]);
         } else {
             DB::update('news', ['body', 'title'], ['id='], [$body, $title, $id]);
         }
-        showMessage(('adminnews'), LANG["ACTION_COMPLETE"]);
+        showMessage('adminnews', LANG["ACTION_COMPLETE"]);
     }
 
     // Admin Delete News
@@ -56,7 +56,7 @@ class NewsModel
     {
         DB::delete('news', ['id'=>$id]);
         CommentsModel::delete($id, $userid, 'news');
-        showMessage(('adminnews'), LANG["DEL_COMPLETE"]);
+        showMessage('adminnews', LANG["DEL_COMPLETE"]);
     }
 
 }

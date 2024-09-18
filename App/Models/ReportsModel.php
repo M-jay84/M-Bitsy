@@ -81,7 +81,7 @@ class ReportsModel
     {
         $ids = Validate::multiIds('ids');
         DB::run("UPDATE reports SET complete = '1', dealtwith = '1', dealtby = ".$userid." WHERE id IN ($ids)");
-        showMessage(('adminreport'), LANG["ACTION_COMPLETE"]);
+        showMessage('adminreport', LANG["ACTION_COMPLETE"]);
      }
 
     // Admin Delete Report
@@ -90,7 +90,7 @@ class ReportsModel
         
         $ids = Validate::multiIds('ids');
         $stmt = DB::deleteByIds('reports', ['complete ='], $ids , 'id', [1]);
-        showMessage(('adminreport'), LANG["SUCCESS"]);
+        showMessage('adminreport', LANG["SUCCESS"]);
     }
 	
     // Delete Report

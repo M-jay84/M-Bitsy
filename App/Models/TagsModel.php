@@ -26,18 +26,18 @@ class TagsModel
     $id = Validate::Input('id', 'int');
 
     if (!$name) {
-      showMessage(('admintag'), LANG["MISSING_FORM_DATA"]);
+      showMessage('admintag', LANG["MISSING_FORM_DATA"]);
     }
 
     if (!$id) {
       DB::insert('tags', ['name' => $name, 'colour' => $colour]);
-      showMessage(('admintag'), LANG['SUCCESS']);
+      showMessage('admintag', LANG['SUCCESS']);
     } else {
       $stmt = DB::update('tags', ['name', 'colour'], ['id='], [$name,$colour,$id]);
       return $stmt;
     }
     
-    showMessage(('admintag'), LANG["ACTION_COMPLETE"]);
+    showMessage('admintag', LANG["ACTION_COMPLETE"]);
   }
 
   // Admin Delete Tag
@@ -46,7 +46,7 @@ class TagsModel
     // Check User Input
     $ids = Validate::multiIds('ids');
     DB::deleteByIds('tags', 'id', $ids);
-    showMessage(('admintag'), LANG["DEL_COMPLETE"]);
+    showMessage('admintag', LANG["DEL_COMPLETE"]);
   }
 
   // Search By Tag

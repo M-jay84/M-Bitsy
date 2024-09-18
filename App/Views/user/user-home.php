@@ -3,7 +3,7 @@
 use App\Libs\DB;
 use App\Models\ForumsModel;
 use App\Models\PostsModel;
-use App\Libs\Torrents\MDBS;
+use App\Models\TmdbModel;
 use App\Models\ShoutboxModel;
 use App\Models\TorrentsModel;
 $shouts = ShoutboxModel::shouts(20);
@@ -161,7 +161,7 @@ if ($current_user->view_torrents != "yes" && CONFIG['MEMBERSONLY']) {
                 <div class='carousel-item <?= $set_; ?>'>
                     <div class="col-md-1">
                         <div class='scaleA'>
-                            <a href='<?= Url("torrent/$row[id]") ?>'><img src="<?php echo MDBS::getImage($row); ?>" width="100" height="250" title="<?= $row['name'] ?>"></a>
+                            <a href='<?= Url("torrent/$row[id]") ?>'><img src="<?php echo TmdbModel::getImage($row); ?>" width="100" height="250" title="<?= $row['name'] ?>"></a>
                             <div class='text-center'>
                                 <font color="#00cc00"><b>S</b></font> <?= $row['seeders'] ?><font color="#FF0000"><b> L </b></font><?= $row['leechers'] ?>
                             </div>
@@ -190,7 +190,7 @@ if ($current_user->view_torrents != "yes" && CONFIG['MEMBERSONLY']) {
             <div class="col-2">
                 <a href='<?= Url("torrent/$row[id]") ?>'>
 
-                    <img src="<?= MDBS::getImage($row) ?>" width="200" height="350">
+                    <img src="<?= TmdbModel::getImage($row) ?>" width="100" height="250">
                 </a><br>
                 <p class="text-center"> <?php
                     echo CutName($row['name'], 20); ?><br>
@@ -211,8 +211,7 @@ if (CONFIG['MEMBERSONLY'] && !$current_user->id) {
     if ($res['count'] > 0) {
         ?>
         <div class="text-center">
-            <a href='<?= Url('browse') ?>'><?= LANG["BROWSE_TORRENTS"] ?></a> - 
-            <a href='<?= Url('search') ?>'><?= LANG["SEARCH_TORRENTS"] ?></a>
+            <a href='<?= Url('browse') ?>'><?= LANG["BROWSE_TORRENTS"] ?></a>
         </div>
         <?php
         torrenttable($res['stmt']);

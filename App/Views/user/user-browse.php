@@ -1,11 +1,13 @@
 <?php
 
 use App\Libs\DB;
+use App\Models\TorrentLangModel;
 
  block_begin($page_title) ?>
 <div class="tt_blockcenter rounded">
-<form method="get" action="<?= Url('browse') ?>">
+<form method="get" action="<?= Url("browse/$V_url") ?>">
 <p class="text-center">
+<input type="text" name="keyword" placeholder="<?= LANG["SEARCH"] ?>" size="40" value="<?= stripslashes(htmlspecialchars($V_keyword)) ?>" /><br>
 <?php
 $i = 0;
 foreach ($V_cats as $cat) {
@@ -16,7 +18,7 @@ foreach ($V_cats as $cat) {
     $i++;
 }
 echo "<br><br><a href='". Url('browse') ."' type='submit' class='ttbtn'>".LANG["RESET"]."</a>&nbsp;<input type='submit' class='ttbtn' value='".LANG["GO"]."' />";
-echo "</p></form></div>";
+echo "</p></div>";
 //if we are browsing, display all subcats that are in same cat
 if ($V_parent_cat) {
     $V_url .= "parent_cat=" . urlencode($V_parent_cat) . "&amp;";
@@ -33,31 +35,125 @@ if (intval($V_pager)) {
 }
 
 echo "</center><br /><br />"; //some spacing
-// New code (TorrentialStorm)
-echo "<div align='right'><form id='sort' action=''>" . LANG["SORT_BY"] . ": <select name='sort' onchange='window.location=\"{$V_url}sort=\"+this.options[this.selectedIndex].value+\"&amp;order=\"+document.forms[\"sort\"].order.options[document.forms[\"sort\"].order.selectedIndex].value'>";
-echo "<option value='id'" . ($_GET["sort"] == "id" ? " selected='selected'" : "") . ">" . LANG["ADDED"] . "</option>";
-echo "<option value='name'" . ($_GET["sort"] == "name" ? " selected='selected'" : "") . ">" . LANG["NAME"] . "</option>";
-echo "<option value='comments'" . ($_GET["sort"] == "comments" ? " selected='selected'" : "") . ">" . LANG["COMMENTS"] . "</option>";
-echo "<option value='size'" . ($_GET["sort"] == "size" ? " selected='selected'" : "") . ">" . LANG["SIZE"] . "</option>";
-echo "<option value='times_completed'" . ($_GET["sort"] == "times_completed" ? " selected='selected'" : "") . ">" . LANG["COMPLETED"] . "</option>";
-echo "<option value='seeders'" . ($_GET["sort"] == "seeders" ? " selected='selected'" : "") . ">" . LANG["SEEDERS"] . "</option>";
-echo "<option value='leechers'" . ($_GET["sort"] == "leechers" ? " selected='selected'" : "") . ">" . LANG["LEECHERS"] . "</option>";
-echo "</select>&nbsp;";
-echo "<select name='order' onchange='window.location=\"{$V_url}order=\"+this.options[this.selectedIndex].value+\"&amp;sort=\"+document.forms[\"sort\"].sort.options[document.forms[\"sort\"].sort.selectedIndex].value'>";
-echo "<option selected='selected' value='asc'" . ($_GET["order"] == "asc" ? " selected='selected'" : "") . ">" . LANG["ASCEND"] . "</option>";
-echo "<option value='desc'" . ($_GET["order"] == "desc" ? " selected='selected'" : "") . ">" . LANG["DESCEND"] . "</option>";
-echo "</select>";
-echo "</form></div>";
-// End
 
-if ($V_count) {
-    torrenttable($V_torrents);
-    print($V_pager);
-} else {
-    print(LANG["NOTHING_FOUND"] . "&nbsp;&nbsp;");
-    print LANG["NO_UPLOADS"];
-}
-if ($_SESSION) {
-    DB::update('users', ['last_access'], ['id='], [CONFIG['TT_DATE'],$current_user->id]);
-}
-block_end() ?>
+
+
+?>
+
+
+<div class="tt_blockcenter rounded p-2">
+<div class='text-center'><a data-bs-toggle='collapse' data-bs-target='#collapseExample' aria-expanded='false' aria-controls='collapseExample'>More Search</a></div>
+<div class="collapse" id="collapseExample">
+    
+        <div class="input-group mb-3">
+            <span></span>
+            <select name="cat" class='form-control'>
+                <option value="0"><?php echo "(" . LANG["ALL"] . " " . LANG["TYPES"] . ")"; ?></option>
+                <?php
+                $catdropdown = "";
+                foreach ($V_cats as $cat) {
+                    $catdropdown .= "<option value=\"" . $cat["id"] . "\"";
+                    if ($cat["id"] == $_GET["cat"]) {
+                        $catdropdown .= " selected=\"selected\"";
+                    }
+                    $catdropdown .= ">" . htmlspecialchars($cat["parent_cat"]) . ": " . htmlspecialchars($cat["name"]) . "</option>\n";
+                }
+                echo $catdropdown ?>
+            </select>
+        </div>
+        <div class="input-group mb-3">
+            <select name="incldead" class='form-control'>
+                <option value="0"><?= LANG["ACTIVE_TRANSFERS"] ?></option>
+                <option value="1">
+                    <?php
+                    if ($_GET["incldead"] == 1) {
+                        echo "selected='selected'";
+                    }
+                    echo LANG["INC_DEAD"];
+                    ?>
+                </option>
+                <option value="2">
+                    <?php
+                    if ($_GET["incldead"] == 2) {
+                        echo "selected='selected'";
+                    }
+                    echo LANG["ONLY_DEAD"];
+                    ?>
+                </option>
+            </select>
+            <span></span>
+            <select name="freeleech" class='form-control'>
+                <option value="0"><?= LANG["ALL"] ?></option>
+                <option value="1">
+                    <?php
+                    if ($_GET["freeleech"] == 1) {
+                        echo "selected='selected'";
+                    }
+                    echo LANG["NOT_FREELEECH"];
+                    ?>
+                </option>
+                <option value="2">
+                    <?php
+                    if ($_GET["freeleech"] == 2) {
+                        echo "selected='selected'";
+                    }
+                    echo LANG["ONLY_FREELEECH"];
+                    ?>
+                </option>
+            </select>
+            <span></span>
+            <?php
+            if (CONFIG['ALLOWEXTERNAL']) { ?>
+                <select name="inclexternal" class='form-control'>
+                    <option value="0">
+                        <?php echo LANG["LOCAL_EXTERNAL"]; ?>
+                    </option>
+                    <option value="1">
+                        <?php
+                        if ($_GET["inclexternal"] == 1) {
+                            echo "selected='selected'";
+                        }
+                        echo LANG["LOCAL_ONLY"];
+                        ?>
+                    </option>
+                    <option value="2">
+                        <?php
+                        if ($_GET["inclexternal"] == 2) {
+                            echo "selected='selected'";
+                        }
+                        echo LANG["EXTERNAL_ONLY"];
+                        ?>
+                    </option>
+                </select>
+            <?php } ?>
+            <span></span>
+            <?= TorrentLangModel::langList($_GET['language']); ?><br><br>
+        </div>
+        <div class="text-center">
+            <button type='submit' class='btn btn-sm ttbtn'><?= LANG["SEARCH"] ?></button>
+        </div>
+    </form>
+    </div>
+</div>
+
+<form id='sort' action=''>
+    <div class='text-end'><?= LANG["SORT_BY"] ?>:
+        <select name='sort' onchange='window.location="<?= $V_url ?>sort="+this.options[this.selectedIndex].value+"&amp;order="+document.forms["sort"].order.options[document.forms["sort"].order.selectedIndex].value'>
+            <option value='id' <?php ($_GET["sort"] == "id" ? " selected='selected'" : "") ?>><?= LANG["ADDED"] ?></option>
+            <option value='name' <?php ($_GET["sort"] == "name" ? " selected='selected'" : "") ?>><?= LANG["NAME"] ?></option>
+            <option value='comments' <?php ($_GET["sort"] == "comments" ? " selected='selected'" : "") ?>><?= LANG["COMMENTS"] ?></option>
+            <option value='size' <?php ($_GET["sort"] == "size" ? " selected='selected'" : "") ?>><?= LANG["SIZE"] ?></option>
+            <option value='times_completed' <?php ($_GET["sort"] == "times_completed" ? " selected='selected'" : "") ?>><?= LANG["COMPLETED"] ?></option>
+            <option value='seeders' <?php ($_GET["sort"] == "seeders" ? " selected='selected'" : "") ?>><?= LANG["SEEDERS"] ?></option>
+            <option value='leechers' <?php ($_GET["sort"] == "leechers" ? " selected='selected'" : "") ?>><?= LANG["LEECHERS"] ?></option>
+        </select>&nbsp;
+        <select name='order' onchange='window.location="<?= $V_url ?>order="+this.options[this.selectedIndex].value+"&amp;sort="+document.forms["sort"].sort.options[document.forms["sort"].sort.selectedIndex].value'>
+            <option selected='selected' value='asc' <?php ($_GET["order"] == "asc" ? " selected='selected'" : "") ?>><?= LANG["ASCEND"] ?></option>
+            <option value='desc' <?php ($_GET["order"] == "desc" ? " selected='selected'" : "") ?>><?= LANG["DESCEND"] ?></option>
+        </select>
+    </div>
+</form>
+
+<?php torrenttable($V_torrents); ?>
+<?= $V_pager ?>
+<?php block_end(); ?>

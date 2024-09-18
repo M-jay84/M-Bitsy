@@ -161,15 +161,14 @@ class ProfileModel
     }
 
     // Delete Profile Default Page otdo (tidy up)
-    public static function deleteprofile($data)
+    public static function deleteprofile($userid, $current_user)
     {
         // Check User Input
-        $userid = Validate::Input('userid', 'int');
-        $delreason = Validate::Input('delreason', 'int');
+        $delreason = Validate::Input('delreason');
         $sure = Validate::Input('sure', 'int');
 
         // Check User
-        if (!$data['current_user']->delete_users) {
+        if (!$current_user->delete_users) {
             showMessage(("profile/$userid"), LANG["NO_PERMISSION"]);
         }
 
@@ -177,7 +176,7 @@ class ProfileModel
             showMessage(("profile/$userid"), LANG["MISSING_ID"]);
         }
 
-        if ($data['current_user']->id == $userid) {
+        if ($current_user->id == $userid) {
             showMessage(("profile/$userid"), LANG["YOU_CANT_DELETE_ADMIN"]);
         }
 
@@ -185,13 +184,9 @@ class ProfileModel
             showMessage(("profile/$userid"), LANG["MISSING_FORM_DATA"]);
         }
 
-        if ($sure == "0") {
-            showMessage(('profile/delete'), "Sanity check: You are about to delete user. Click <a href='" . URLROOT . "/profile/delete?sure=1'>here</a> if you are sure.");
-        }
-
         // Delete Profile
         UsersModel::deleteUser($userid);
-        LogsModel::write($data['current_user']->username . " has deleted account: " . coloredname($userid) . "");
+        LogsModel::write($current_user->username . " has deleted account: " . coloredname($userid) . "");
         showMessage(("profile/$userid"), LANG["DEL_COMPLETE"]);
     }
 

@@ -236,7 +236,7 @@ You will have to wait for the approval of an admin before you can use your new a
 'HOME' => 'Home',
 // Import
 'IMPORT' => 'Import',
-'ADD_IMPORT_FILES' => 'Add files to Core/files/uploaded/torrents/Import folder',
+'ADD_IMPORT_FILES' => 'Add files to Core/files/torrents/Import folder',
 // Inactive
 'INACTIVE' => 'Inactive',
 'INACTIVE_FOR' => 'Inactive for',
@@ -337,12 +337,9 @@ You will have to wait for the approval of an admin before you can use your new a
 'DOWNLOAD_BANNED' => 'Download Banned',
 'SHOUTBOX_BANNED' => 'Shoutbox Banned',
 'ACCOUNT_STATUS' => 'Account Status',
-// Polls
-'POLLS' => 'Polls',
-'BLANK_VOTE' => 'Blank Vote (Show Results)',
-'VOTE' => 'Vote',
-'BLANK_VOTES' => 'Votes',
-'POLL_MUST_LOGIN' => 'You must be logged in to view polls',
+
+"Current_Clients" => "Current_Clients",
+"Banned_Clients" => "Banned_Clients",
 // Profile
 'PROFILE' => 'Profile',
 // Privacy
@@ -552,7 +549,7 @@ You will have to wait for the approval of an admin before you can use your new a
 'THEME_NAME' => 'Theme',
 'INFO' => 'Info',
 'ACCOUNT_PRIVACY_LVL' => 'Privacy Lvl',
-'LINVIRE_TREE' => 'Invite Tree',
+'INVIRE_TREE' => 'Invite Tree',
 'AVG_DAILY_DL' => 'Daily Avg Download',
 'AVG_DAILY_UL' => 'Daily Avg Upload',
 'TORRENTS_POSTED' => 'Torrents Posted',

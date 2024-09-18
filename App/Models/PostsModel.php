@@ -63,7 +63,7 @@ class PostsModel
     public static function updateTopicLastPost($topicid)
     {
         $res = DB::fetchRow('forum_posts', 'id', ['topicid='], [$topicid], 'ORDER BY id DESC LIMIT 1');
-        $arr = $res or showMessage(('forum'), 'No post found');
+        $arr = $res or showMessage('forum', 'No post found');
         $postid = $arr[0];
         TopicsModel::update(['lastpost'], ['id='], [$topicid, $postid]);
     }
@@ -109,7 +109,7 @@ class PostsModel
 
         // Get Topic Data
         $arr = TopicsModel::fetchRow('*', ['id='], [$topicid]);
-        $levels = ForumsModel::getForumAccessLevels($arr['forumid']) or showMessage(('forum'), 'issue with access');
+        $levels = ForumsModel::getForumAccessLevels($arr['forumid']) or showMessage('forum', 'issue with access');
         $maypost = $current_user->class >= $levels["write"] ? true : false;
 
         // Update Topic Views
@@ -121,7 +121,7 @@ class PostsModel
         // Check if user has access to this forum
         $arr2 = ForumsModel::fetchRow('*', ['id='], [$arr['forumid']]);
         if (!$arr2 || $current_user->class < $arr2["minclassread"] && $arr2["guest_read"] == "no") {
-            showMessage(('forum'), LANG["NO_PERMISSION"]);
+            showMessage('forum', LANG["NO_PERMISSION"]);
         }
 
         // Update Last Read
@@ -156,12 +156,12 @@ class PostsModel
     public static function deletePost($postid, $data, $sure = 0)
     {        // Check User
         if (!$data['current_user']->delete_news == 'yes' || !intval($postid)) {
-            showMessage(('forum'), LANG["NO_PERMISSION"]);
+            showMessage('forum', LANG["NO_PERMISSION"]);
         }
         
 	    // Double Check
         if ($sure) {
-		    showMessage(('forum'), "Sanity check: You are about to delete a post. Click <a href='" . URLROOT . "/post/delete/$postid/1'>here</a> if you are sure.");
+		    showMessage('forum', "Sanity check: You are about to delete a post. Click <a href='" . URLROOT . "/post/delete/$postid/1'>here</a> if you are sure.");
         }
 
         $topicid = DB::fetchColumn('forum_posts', 'topicid', ['id='], [$postid]);
@@ -170,7 +170,7 @@ class PostsModel
         $arr = DB::fetchColumn('forum_posts', 'COUNT(id)', ['topicid='], [$topicid]);
         if ($arr == 1) {
             $msg = sprintf(LANG["FORUMS_DEL_POST_ONLY_POST"], $topicid);
-            showMessage(('forum'), $msg);
+            showMessage('forum', $msg);
         }
 
         // Delete post
@@ -185,21 +185,21 @@ class PostsModel
         $body = htmlspecialchars_decode($_POST["body"]);
 
         if (!$body) {
-            showMessage(('forum'), LANG["MISSING_FORM_DATA"]);
+            showMessage('forum', LANG["MISSING_FORM_DATA"]);
         }
 
-        $forumid = PostsModel::getTopicForum($topicid) or showMessage(('forum'), "Bad topic ID");
+        $forumid = PostsModel::getTopicForum($topicid) or showMessage('forum', "Bad topic ID");
 
         // Make sure sure user has write access in forum
-        $arr = ForumsModel::getForumAccessLevels($forumid) or showMessage(('forum'), "Bad forum ID");
+        $arr = ForumsModel::getForumAccessLevels($forumid) or showMessage('forum', "Bad forum ID");
         if ($current_user->class < $arr["write"]) {
-            showMessage(('forum'), LANG["FORUMS_NOT_PERMIT"]);
+            showMessage('forum', LANG["FORUMS_NOT_PERMIT"]);
         }
 
         //Make sure topic exists and is unlocked
         $arr = TopicsModel::fetchRow('*', ['id ='], [$topicid]);
         if ($arr["locked"] == 'yes') {
-            showMessage(('forum'), LANG["LOCKED"]);
+            showMessage('forum', LANG["LOCKED"]);
         }
         //Get forum ID
         $forumid = $arr["forumid"];
@@ -229,18 +229,18 @@ class PostsModel
 
         // Check Correct Input
         if ($body == "") {
-            showMessage(('forum'), LANG["MISSING_FORM_DATA"]);
+            showMessage('forum', LANG["MISSING_FORM_DATA"]);
         }
 
         // Get Topic Data
         $arr = PostsModel::fetchRow('*', ['id ='], [$postid]);
         if (!$arr) {
-            showMessage(('forum'), LANG["MISSING_ID"]. $postid);
+            showMessage('forum', LANG["MISSING_ID"]. $postid);
         }
             
         // Check User
         if ($data['current_user']->id != $arr["userid"] && !$data['current_user']->delete_news == 'yes' && !$data['current_user']->edit_forum == 'yes') {
-            showMessage(('forum'), LANG["NO_PERMISSION"]);
+            showMessage('forum', LANG["NO_PERMISSION"]);
         }
 
         // Edit Post

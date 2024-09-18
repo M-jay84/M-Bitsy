@@ -42,7 +42,7 @@ class Shoutbox extends Controller
     // Delete Shout Submit
     public function delete($id, $sure = 0)
     {
-        ShoutboxModel::delete($id, $sure);
+        ShoutboxModel::delete($id, $this->current_user, $sure);
     }
 
     // Edit Shout Default Page

@@ -21,7 +21,7 @@ class BansModel
         // Delete Ban
         $bans = DB::run("SELECT * FROM bans WHERE id IN ($ids)")->fetchAll();
         foreach ($bans as $row) {
-            showMessage(('adminban'), LANG["ACTION_COMPLETE"]);
+            showMessage('adminban', LANG["ACTION_COMPLETE"]);
             $stmt = DB::delete('bans', ['id' => $row['id']], false);
             LogsModel::write("Ban ($row[first] - $row[last]) was removed by " . $data['current_user']->id . " (" . $data['current_user']->username . ")");    
         }
@@ -36,12 +36,12 @@ class BansModel
         $type = Validate::Input('type');
 
         if ($first == "" || $type == "" || $comment == "") {
-            showMessage(('adminban'), LANG["MISSING_FORM_DATA"]);
+            showMessage('adminban', LANG["MISSING_FORM_DATA"]);
         }
 
         $stmt = DB::insert('bans', ['added'=>CONFIG['TT_DATE'],' addedby'=>$current_user->id, 'first'=>$first, 'last'=>$last, 'comment'=>$comment, 'type'=>$type]);
         LogsModel::write(sprintf(LANG["BAN_ADDED"], $first, $current_user->username));
-        showMessage(('adminban'), LANG["SUCCESS"]);
+        showMessage('adminban', LANG["SUCCESS"]);
     }
 
     // Admin Get Bans
@@ -85,7 +85,7 @@ class BansModel
         }
         $a = DB::fetchColumn('bans', 'count(*)', 'first LIKE ', ['%$maildomain%']);
         if ($a != 0) {
-            $message = sprintf(LANG["EMAIL_ADDRESS_BANNED_S"], $email);
+            //$message = sprintf(LANG["EMAIL_ADDRESS_BANNED_S"], $email);
         }
         // check if email addy is already in use
         $a = DB::fetchColumn('users', 'COUNT(id)', ['email ='], [$email]);

@@ -20,9 +20,15 @@ class Confirm extends Controller
     }
 
     // Email Reset Confirm
-    public function confirmpassword($id, $secret, $email)
+    public function index()
     {
-        ConfirmModel::confirmpassword($id, $secret, $email);
+        die('no controller index');
+    }
+
+    // Profile Email Reset Confirm
+    public function confirmprofileemail($id, $secret, $email)
+    {
+        ConfirmModel::confirmprofileemail($id, $secret, $email);
     }
 
     // Signup Email Confirm

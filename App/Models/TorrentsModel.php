@@ -251,15 +251,26 @@ class TorrentsModel
         $views = $stmt['views'];
 
         // TMDB
-        $tmdb1 = TmdbModel::createMDB($stmt['id'], $stmt['tmdb'], 'film'); // todo
+        $type = '';
+        $image = '';
+        if (!empty($stmt["imdb"])) {
+            $item_id = $stmt["imdb"];
+            $type = 'imdb';
+        } elseif (!empty($stmt["tmdb"]) && in_array($stmt["cat_parent"], CONFIG['SerieCats'])) {
+            $item_id = $stmt["tmdb"];
+            $type = 'tv';
+        } elseif (!empty($stmt["tmdb"]) && in_array($stmt["cat_parent"], CONFIG['MovieCats'])) {
+            $item_id = $stmt["tmdb"];
+            $type = 'film';
+        }
+        if ($type == 'tv' || 'film' || 'imdb') {
+            $tmdb1 = TmdbModel::createMDB($stmt['id'], $item_id, $type);
+            $image = "<img src='" . data_uri($tmdb1['link'], $stmt['tmdb'] . '.webp') . "' height='250' width='100%' />";
+        }
 
         // Image
-        if ($tmdb1['link'] != "") {
-            $image = "<img src='" . data_uri($tmdb1['link'], $stmt['tmdb'] . '.webp') . "' height='250' width='100%' />";$tmdb1['link'];
-        } elseif ($tmdb1['link'] = "" && $stmt["image1"] != "") {
+        if ($image == "" && $stmt["image1"] != "") {
             $image = "<img src='" . data_uri(UPLOAD_PATH . "/images/" . $stmt["image1"], $stmt['image1']) . "' height='250' width='100%' />";
-        } else {
-            $image = "";
         }
 
         /*

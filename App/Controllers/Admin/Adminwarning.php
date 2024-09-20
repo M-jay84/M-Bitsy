@@ -19,22 +19,22 @@ class Adminwarning extends Controller
         $this->current_user = new Auth();
 
         if (!$this->current_user->isStaff) {
-            $this->showMessage(URLROOT, LANG["NO_PERMISSION"]);
+            showMessage(URLROOT, LANG["NO_PERMISSION"]);
         }
     }
 
-    // Warning Default Page
+    // Warnings
     public function index()
     {
         // Get Warnings
-        $warnings = WarningsModel::getAll($this->current_user);
+        $warnings = WarningsModel::getAll();
 
         // Data For View
         $data = [
-            'page_title' => LANG["WARNINGS"],
-            'V_pager' => $warnings['pager'],
-            'V_count' => $warnings['count'],
-            'V_warnings' => $warnings['stmt']
+            'TITLE' => LANG["WARNINGS"],
+            'PAGER' => $warnings['pager'],
+            'COUNT' => $warnings['count'],
+            'WARNINGS' => $warnings['stmt']
         ];
 
         // Load View
@@ -44,7 +44,11 @@ class Adminwarning extends Controller
     // Warning Form Submit
     public function submit()
     {
-        WarningsModel::deleteAllAdmin();
+        if (!empty($_POST)) {
+            WarningsModel::deleteAllAdmin();
+        } else {
+            showMessage(URLROOT, LANG['NOTHING_SELECTED']);
+        }  
     }
     
 }

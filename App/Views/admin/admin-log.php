@@ -1,4 +1,4 @@
-<?php block_begin($page_title) ?>
+<?php block_begin($TITLE) ?>
 <form method='post' action='<?= Url('adminlog') ?>'>
     <p class="tt_blockcenter p-2 rounded text-center">
         <?= LANG["SEARCH"] ?>: <input type='text' size='30' name='search' />
@@ -18,7 +18,7 @@
                 </tr>
             </thead>
             <tbody> <?php
-                foreach ($V_logs as $row) {
+                foreach ($LOGS as $row) {
                     $row['added'] = user_timezone_date($row['added']);
                     $date = substr($row['added'], 0, strpos($row['added'], " "));
                     $time = substr($row['added'], strpos($row['added'], " ") + 1); ?>
@@ -37,5 +37,5 @@
         <input type='submit' class='btn btn-sm ttbtn' value='<?= LANG['SUBMIT'] ?>' />
     </div>
 </form>
-<?= $V_pager ?>
+<?= $PAGER ?>
 <?php block_end() ?>

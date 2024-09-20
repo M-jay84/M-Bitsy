@@ -1,8 +1,11 @@
-<?php block_begin($page_title) ?>
-<?php usermenu($current_user->id, 'messages'); ?>
-<form id='messages' method='post' action='<?= Url("message/delete/$V_type") ?>'>
+<?php block_begin($TITLE) ?>
+<form id='messages' method='post' action='<?= Url("message/delete/$TYPE") ?>'>
     <div class='table-responsive  rounded'>
-        <?php echo messagemenu(); ?>
+        <p class="text-center">
+        <a href="<?= URLROOT ?>/message/mailbox/inbox"><button type="button" class="<?= activelink('inbox', 'inbox') ?>"><?= LANG["INBOX"] ?></button></a>&nbsp;
+        <a href="<?= URLROOT ?>/message/mailbox/outbox"><button type="button" class="<?= activelink('outbox', 'outbox') ?>"><?= LANG["OUTBOX"] ?></button></a>&nbsp;
+        <a href="<?= URLROOT ?>/message/create"><button type="button" class="<?= activelink('messages/create') ?>"><?= LANG["COMPOSE"] ?></button></a>
+        </p>
         <table class='table table-striped'>
             <thead>
                 <tr>
@@ -15,8 +18,8 @@
                 </tr>
             </thead>
             <tbody>
-                <?php foreach ($V_messages as $arr) :
-                    $msgdetails = msgdetails($V_type, $arr); ?>
+                <?php foreach ($MESSAGES as $arr) :
+                    $msgdetails = msgdetails($TYPE, $arr); ?>
                     <tr>
                         <td><input type='checkbox' name='del[]' value='<?= $arr['id'] ?>' /></td>
                         <td><?= $msgdetails['unread'] ?></td>
@@ -37,11 +40,11 @@
 
     <div class='text-center'>
         <button type="submit" class="btn ttbtn" value='Delete Checked' name='delete'><?= LANG["DEL"] ?></button>
-        <?php if ($V_type == 'inbox') { ?>
+        <?php if ($TYPE == 'inbox') { ?>
             <button type="submit" class="btn ttbtn" value='Read Checked' name='read'><?= LANG["READ"] ?></button>
         <?php } ?>
     </div>
 </form>
 
-<?= $V_pager ?>
+<?= $PAGER ?>
 <?php block_end(); ?>

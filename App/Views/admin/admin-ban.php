@@ -1,13 +1,13 @@
-<?php block_begin($page_title) ?>
+<?php block_begin($TITLE) ?>
 <div class='text-center'>
     <a href="<?= Url('adminban/email') ?>"><?= LANG['EMAIL'] ?></a>&nbsp;
-    <a href="<?= Url('adminban/ip') ?>"><?= LANG["IP"] ?></a>
+    <a href="<?= Url('adminban/ip') ?>"><?= LANG["IP"] ?></a>&nbsp;
+    <a href="<?= Url('adminban/domain') ?>"><?= LANG["DOMAIN"] ?></a>
 </div>
 <p class="text-end">
     <a type="button" class="model_form ttbtn btn-sm" data-bs-toggle="modal" data-bs-target="#banModal"><?= LANG["ADD"] ?></a>
 <p>
 <form id='delete' action='<?= Url('adminban/delete') ?>' method='post'>
-    <p class="text-center"><?= LANG["BANNED_TYPE"] ?>  <?= $V_type ?></p>
     <div class='table-responsive'>
         <table class='table table-striped'>
             <thead>
@@ -21,7 +21,7 @@
                 </tr>
             </thead>
             <tbody>
-                <?php foreach ($V_bans as $row) : ?>
+                <?php foreach ($BANS as $row) : ?>
                     <tr>
                         <td><?= user_timezone_date($row["added"]) ?></td>
                         <td><?= $row['first'] ?></td>
@@ -37,7 +37,7 @@
     <p class="text-center"><button type="submit" class="btn btn-sm ttbtn"><?= LANG['DEL'] ?></button></p>
 </form>
 
-<form id="submit" method="post" action="<?= Url('adminban'); ?>">
+<form id="submit" method="post" action="<?= Url('adminban') ?>">
     <div class="modal fade" id="banModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-md" style="max-width:700px;">
             <div class="modal-content">
@@ -50,7 +50,7 @@
                             <option value="ip"><?= LANG["IP"] ?></option>
                             <option value="domain"><?= LANG["DOMAIN"] ?></option>
                         </select><br>
-                        <input id="comment" type="text" class="form-control fullwidth" name="comment" placeholder="<?= LANG["ADDCOMMENT"] ?>"><br>
+                        <input id="comment" type="text" class="form-control fullwidth" name="comment" placeholder="<?= LANG["COMMENT"] ?>"><br>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-sm ttbtn" data-bs-dismiss="modal"><?= LANG["CLOSE"] ?></button>
@@ -62,5 +62,5 @@
     </div>
 </form>
 
-<?= $V_pager ?>
+<?= $PAGER ?>
 <?php block_end() ?>

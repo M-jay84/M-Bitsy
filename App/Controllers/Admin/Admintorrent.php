@@ -19,11 +19,11 @@ class Admintorrent extends Controller
         $this->current_user = new Auth();
 
         if (!$this->current_user->isStaff) {
-            $this->showMessage(URLROOT, LANG["NO_PERMISSION"]);
+            showMessage(URLROOT, LANG["NO_PERMISSION"]);
         }
     }
 
-    // Torrents Default Page
+    // Torrents
     public function index($type = '') // todo like %?%
     {
         // Check User Input
@@ -43,11 +43,12 @@ class Admintorrent extends Controller
 
         // Data For View
         $data = [
-            'page_title' => LANG["TORRENT"],
-            'V_count'=> $torrents['count'],
-            'V_pager' => $torrents['pager'],
-            'V_torrents' =>$torrents['stmt'],
-            'V_search' => $search
+            'TITLE' => LANG["TORRENT"],
+            'COUNT'=> $torrents['count'],
+            'PAGER' => $torrents['pager'],
+            'TORRENTS' =>$torrents['stmt'],
+            'TYPE' => $type,
+            'SEARCH' => $search
         ];
 
         // Load View
@@ -58,12 +59,12 @@ class Admintorrent extends Controller
     public function delete()
     {
         if (!count($_POST["ids"])) {
-            $this->showMessage('admintorrent', LANG["NOTHING_SELECTED"]);
+            showMessage('admintorrent', LANG["NOTHING_SELECTED"]);
         }
         foreach ($_POST["ids"] as $id) {
             TorrentsModel::deleteTorrent(intval($id), $this->current_user->id);
         }
-        $this->showMessage('admintorrent', LANG["DEL_COMPLETE"]);
+        showMessage('admintorrent', LANG["DEL_COMPLETE"]);
     }
 
 }

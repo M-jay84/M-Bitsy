@@ -1,5 +1,4 @@
-            'reports' => $reports['stmt'],
-<?php block_begin($page_title) ?>
+<?php block_begin($TITLE) ?>
 <form id='sort' action='<?= Url("adminreport") ?>'>
 <p class="text-center">
     <b><?= LANG["TYPE"] ?>:</b>
@@ -31,7 +30,7 @@
                 </tr>
             </thead>
             <tbody> <?php
-                foreach ($V_reports as $row) {
+                foreach ($REPORTS as $row) {
                     $dealtwith = $row["dealtby"] > 0 ? coloredname($row['dealtby']) : 'no'; ?>
                     <tr>
                         <td><?= coloredname($row['addedby']) ?></td>
@@ -53,5 +52,5 @@
     </div>
 </form>
 
-<?= $V_pager ?>
+<?= $PAGER ?>
 <?php block_end() ?>

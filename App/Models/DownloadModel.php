@@ -9,7 +9,7 @@ use App\Libs\DB;
 */
 class DownloadModel
 {
-    // Country Flag //todo view
+    // Download Torrent
     public static function torrent($id, $passkey)
     {
         // Get User
@@ -35,7 +35,7 @@ class DownloadModel
             
         if (CONFIG['MEMBERSONLY']) {
             if (!$user) {
-                showMessage($_SERVER['HTTP_REFERER'], LANG["MEMBERS_ONLY"]);
+                die(LANG["MEMBERS_ONLY"]);
             } elseif ($user["can_download"] == "no") {
                 showMessage(URLROOT, LANG["NO_PERMISSION_TO_DOWNLOAD"]);
             } elseif ($user["downloadbanned"] == "yes") {
@@ -63,7 +63,7 @@ class DownloadModel
         // Thanks
         if (CONFIG['FORCETHANKS'] && CONFIG['MEMBERSONLY']) {
             if ($user["id"] != $torrent["owner"]) {
-                $like = LikesModel::fetchRow(['liked =', 'type =', 'user ='], [$id, 'torrent', $user['id']]);
+                $like = DB::fetchRow('likes', ['liked =', 'type =', 'user ='], [$id, 'torrent', $user['id']]);
                 if (!$like) {
                     showMessage(URLROOT, LANG["PLEASE_THANK"]);
                 }

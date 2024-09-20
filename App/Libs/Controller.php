@@ -17,6 +17,8 @@ class Controller
 
         extract($data);
 
+        $TTCache = new Cache();
+
         if ($page == 'user' && file_exists("../App/Views/user/$file.php")) {
             $default_theme = (isset($_SESSION['stylesheet']) && $_SESSION['stylesheet']) != '' ? $_SESSION['stylesheet'] : 'inc';
             require_once VIEW_PATH . "/$default_theme/theme.php";
@@ -29,14 +31,7 @@ class Controller
         }
         return;
     }
-    
-    // Display Message & Redirect
-    public function showMessage($url, $message1)
-    {
-        showMessage($url, $message1);
-        return;
-    }
-      
+
     // Redirect
     public function redirect($url)
     {

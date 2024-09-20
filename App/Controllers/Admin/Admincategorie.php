@@ -19,24 +19,24 @@ class Admincategorie extends Controller
         $this->current_user = new Auth();
 
         if (!$this->current_user->isStaff) {
-            $this->showMessage(URLROOT, LANG["NO_PERMISSION"]);
+            showMessage(URLROOT, LANG["NO_PERMISSION"]);
         }
     }
 
-    // Categorie Default Page
+    // Categorie Page
     public function index()
     {
-    
         if (!empty($_POST)) {
+            // Add/Edit Catagories
             CatagoriesModel::insertOrUpdate();
         } else {
-            // Get Categorie
+            // Show All Catagories
             $cats = CatagoriesModel::fetchAll('*', '', 'ORDER BY parent_cat ASC, sort_index ASC');
         
             // Data For View
             $data = [
-                'page_title' => LANG["TORRENT_CATEGORIES"],
-                'V_cats' => $cats
+                'TITLE' => LANG["CATEGORIES"],
+                'CATAGORIES' => $cats
             ];
         
             // Load View
@@ -45,8 +45,9 @@ class Admincategorie extends Controller
     }
 
     // Categorie Delete
-    public function delete($id, $sure = false)
+    public function delete($id, $sure = 0)
     {
+        // Delete Catagorie
         CatagoriesModel::deleteAndUpdateTorrent($id, $sure);
     }
 

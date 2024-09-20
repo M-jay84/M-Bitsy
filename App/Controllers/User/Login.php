@@ -19,20 +19,24 @@ class Login extends Controller
         $this->current_user = new Auth();
 
         if ($this->current_user->loggedin) {
-            $this->showMessage(URLROOT, LANG["ALREADY_LOGGED"]);
+            showMessage(URLROOT, LANG["ALREADY_LOGGED"]);
         }
     }
 
-    // Login Page
+    // Login
     public function index()
     {
         if (!empty($_POST)) {
+            // Log User In
             AccountsModel::login();
         }
     
+        // Data For View
         $data = [
-            'page_title' => LANG["LOGIN"]
+            'TITLE' => LANG["LOGIN"]
         ];
+
+        // Load View
         $this->view('user-login', $data, 'user');
     }
 }

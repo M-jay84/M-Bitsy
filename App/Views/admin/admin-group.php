@@ -1,4 +1,4 @@
-<?php block_begin($page_title) ?>
+<?php block_begin($TITLE) ?>
 <p class="text-center">
     <a type="button" class="model_form ttbtn btn-sm" data-bs-toggle="modal" data-bs-target="#groupModal"><?= LANG["ADD"] ?></a>
 <p>
@@ -16,7 +16,7 @@
             </tr>
         </thead>
         <tbody> <?php
-            foreach ($V_groups as $row) { ?>
+            foreach ($GROUPS as $row) { ?>
                 <tr>
                     <td><?= $row["group_id"] ?></td>
                     <td><font color="#<?= $row['Color'] ?>"><?= $row["level"] ?></font></td>
@@ -82,26 +82,23 @@
                     <?= LANG["COLOUR"] ?>
                     <input type="text" name="group_color" id="group_color" class='form-control fullwidth'/><br>
                     <?= LANG["ROLE_ID"] ?>
-                    <input type="text" name="group_role_id" id="group_role_id" size="10" class='form-control fullwidth'/><br>
+                    <input type="text" name="group_role_id" id="group_role_id" size="10" class='form-control fullwidth' placeholder="1"/><br>
                     <?= LANG["SLOTS"] ?>
                     <input type="number" name="maxslots" id="maxslots" size="3" class='form-control fullwidth'/><br>
                     <?= LANG["CAN_VIEW_CP"] ?>
                     <select name="control_panel" id="control_panel" class='form-select'>
-                        <option name="control_panel" id="control_panel"></option>
+                    <option name="control_panel" id="control_panel" value="no"><?= LANG["NO"] ?></option>
                         <option name="control_panel" id="control_panel" value="yes"><?= LANG["YES"] ?></option>
-                        <option name="control_panel" id="control_panel" value="no"><?= LANG["NO"] ?></option>
                     </select><br>
                     <?= LANG["STAFF_PAGE"] ?>
                     <select name="staff_page" id="staff_page" class='form-select'>
-                        <option name="staff_page" id="staff_page"></option>
+                    <option name="staff_page" id="staff_page" value="no"><?= LANG["NO"] ?></option>
                         <option name="staff_page" id="staff_page" value="yes"><?= LANG["YES"] ?></option>
-                        <option name="staff_page" id="staff_page" value="no"><?= LANG["NO"] ?></option>
                     </select><br>
                     <?= LANG["STAFF_PUBLIC"] ?>
                     <select name="staff_public" id="staff_public" class='form-select'>
-                        <option name="staff_public" id="staff_public"></option>
+                    <option name="staff_public" id="staff_public" value="no"><?= LANG["NO"] ?></option>
                         <option name="staff_public" id="staff_public" value="yes"><?= LANG["YES"] ?></option>
-                        <option name="staff_public" id="staff_public" value="no"><?= LANG["NO"] ?></option>
                     </select><br>
                     <?= LANG["STAFF_SORT"] ?>
                     <input type='text' name='staff_sort' size='3' id='staff_sort' class='form-control fullwidth'/>

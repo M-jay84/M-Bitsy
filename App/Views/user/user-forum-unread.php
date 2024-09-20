@@ -1,4 +1,4 @@
-<?php block_begin($page_title) ?>
+<?php block_begin($TITLE) ?>
 <?php forumheader('New Topics'); ?>
 
 <div class="p-4">
@@ -12,7 +12,7 @@
                 </tr>
             </thead>
             <tbody>
-            <?php foreach ($V_forums as $row) :
+            <?php foreach ($FORUMS as $row) :
                     if ($row['lastpostread'] == $row['lastpost']) {
                         continue;
                     }

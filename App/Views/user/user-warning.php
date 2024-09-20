@@ -1,5 +1,5 @@
-<?php block_begin($page_title) ?>
-<?php usermenu($user_id, 'warning');
+<?php block_begin($TITLE) ?>
+<?php usermenu($USER_ID, 'warning');
 
 if ($current_user->isStaff) : ?>
     <p class="text-center">
@@ -8,7 +8,7 @@ if ($current_user->isStaff) : ?>
 <?php endif; ?>
 
 <?php if ($current_user->isStaff) : ?>
-    <form id="deleteall" method="post" action="<?= Url("warning/delete/$user_id") ?>">
+    <form id="deleteall" method="post" action="<?= Url("warning/delete/$USER_ID") ?>">
 <?php endif; ?>
 
 <div class='table-responsive'>
@@ -26,7 +26,7 @@ if ($current_user->isStaff) : ?>
             </tr>
         </thead>
         <tbody>
-        <?php foreach ($warnings as $row) {
+        <?php foreach ($WARNINGS as $row) {
             $row['added'] = user_timezone_date($row['added']);
             $row['expiry'] = user_timezone_date($row['expiry']);
             $addeddate = substr($row['added'], 0, strpos($row['added'], " "));
@@ -53,7 +53,7 @@ if ($current_user->isStaff) : ?>
 
 <?php if ($current_user->delete_users == 'yes' && $current_user->control_panel == "yes") { ?>
     <div class="tt_blockcenter rounded p-3">
-        <form method='post' action='<?= Url("profile/delete/$user_id") ?>'>
+        <form method='post' action='<?= Url("profile/delete/$USER_ID") ?>'>
             <div class='text-center'>
                 <p class='text-center'><b><?= LANG["DELETE_USER"] ?></b></p>
                 <div class="form-floating mb-4">
@@ -68,7 +68,7 @@ if ($current_user->isStaff) : ?>
 
 <!-- Add Modal -->
 <?php if ($current_user->edit_users == 'yes' && $current_user->control_panel == "yes") { ?>
-    <form id="submit" method="post" action="<?= Url("warning/submit/$user_id") ?>">
+    <form id="submit" method="post" action="<?= Url("warning/submit/$USER_ID") ?>">
         <div class="modal fade" id="addModal" tabindex="-1" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered modal-md" style="max-width:700px;">
                 <div class="modal-content">

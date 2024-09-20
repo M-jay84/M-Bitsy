@@ -19,24 +19,24 @@ class Profilechange extends Controller
         $this->current_user = new Auth();
 
         if (!$this->current_user->loggedin) {
-            $this->showMessage(URLROOT, LANG["NO_PERMISSION"]);
+            showMessage(URLROOT, LANG["NO_PERMISSION"]);
         }
     }
 
-    public function index() {}
+    public function index() {die;}
 
     // Profile Avatar Upload Submit
     public function changeavatar($user_id)
     {
         if (!$this->current_user->isStaff && $this->current_user->id != $user_id )
         {
-            $this->showMessage(URLROOT, LANG["NO_PERMISSION"]);
+            showMessage(URLROOT, LANG["NO_PERMISSION"]);
         }
 
         if (!empty($_FILES['file'])) {
             ProfilechangeModel::addavatar($user_id);
         } else {
-            $this->showMessage("profile/$user_id", LANG["ACTION_FAILED"]);
+            showMessage("profile/$user_id", LANG["ACTION_FAILED"]);
         }
     }
 
@@ -44,14 +44,13 @@ class Profilechange extends Controller
     public function changepassword($user_id)
     {
         if (!$this->current_user->isStaff && $this->current_user->id != $user_id) {
-            $this->showMessage(URLROOT, LANG["NO_PERMISSION"]);
+            showMessage(URLROOT, LANG["NO_PERMISSION"]);
         }
-
 
         if (!empty($_POST)) {
             ProfilechangeModel::submitPassword($user_id);
         } else {
-            $this->showMessage("profile/$user_id", LANG["MISSING_FORM_DATA"]);
+            showMessage("profile/$user_id", LANG["MISSING_FORM_DATA"]);
         }
 
     }
@@ -60,13 +59,13 @@ class Profilechange extends Controller
     public function changeemail($user_id)
     {
         if (!$this->current_user->isStaff && $this->current_user->id != $user_id) {
-            $this->showMessage(URLROOT, LANG["NO_PERMISSION"]);
+            showMessage(URLROOT, LANG["NO_PERMISSION"]);
         }
 
         if (!empty($_POST)) {
             ProfilechangeModel::changeemail($user_id);
         } else {
-            $this->showMessage("profile/$user_id", LANG["MISSING_FORM_DATA"]);
+            showMessage("profile/$user_id", LANG["MISSING_FORM_DATA"]);
         }
     }
 

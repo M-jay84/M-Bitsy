@@ -1,4 +1,4 @@
-<?php block_begin($page_title) ?>
+<?php block_begin($TITLE) ?>
 <p class="text-center">
     <a type="button" class="model_form ttbtn btn-sm" data-bs-toggle="modal" data-bs-target="#groupModal"><?= LANG["ADD"] ?></a>
 <p>
@@ -18,7 +18,7 @@
             </tr>
         </thead>
         <tbody>
-            <?php foreach ($V_permissions as $row) : ?>
+            <?php foreach ($PERMISSIONS as $row) : ?>
                 <tr>
                     <td><?= $row["permission_id"] ?></td>
                     <td><?= $row["permission_name"] ?></td>

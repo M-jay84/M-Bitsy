@@ -19,7 +19,7 @@ class Report extends Controller
         $this->current_user = new Auth();
 
         if (!$this->current_user->loggedin) {
-            $this->showMessage(URLROOT, LANG["NO_PERMISSION"]);
+            showMessage(URLROOT, LANG["NO_PERMISSION"]);
         }
     }
 
@@ -29,7 +29,7 @@ class Report extends Controller
         if (!empty($_POST)) {
             ReportsModel::reportItem($this->current_user);
         } else {
-            $this->showMessage(URLROOT, LANG["NOTHING_SELECTED"]);
+            showMessage(URLROOT, LANG["NOTHING_SELECTED"]);
         }
     }
 

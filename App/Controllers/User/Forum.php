@@ -19,34 +19,35 @@ class Forum extends Controller
         $this->current_user = new Auth();
 
         if (!CONFIG['FORUMS']) {
-            $this->showMessage(URLROOT, LANG["FORUM_AVAILABLE"]);
+            showMessage(URLROOT, LANG["FORUM_AVAILABLE"]);
         }
         if (!CONFIG['FORUMS_GUESTREAD'] && !$this->current_user->loggedin) {
-            $this->showMessage(URLROOT, LANG["NO_PERMISSION"]);
+            showMessage(URLROOT, LANG["NO_PERMISSION"]);
         }
         if ($this->current_user->forumbanned == "yes" || $this->current_user->view_forum == "no") {
-            $this->showMessage(URLROOT, LANG["FORUM_BANNED"]);
+            showMessage(URLROOT, LANG["FORUM_BANNED"]);
         }
     }
 
-    // Forum Page
+    // Forums
     public function index()
     {
         // Data For View
         $data = [
-            'page_title' => LANG["FORUM"],
-            'V_forums' => ForumsModel::getCatForums()
+            'TITLE' => LANG["FORUM"],
+            'FORUMS' => ForumsModel::getCatForums()
         ];
 
         // Load View
         $this->view('user-forum', $data, 'user');
     }
 
-    // Search Forum Page
+    // Search Forum
     public function search()
     {
+        // Search Forum
         $data = ForumsModel::search();
-		$data['curremt_user'] = $this->current_user;
+		$data['USER'] = $this->current_user;
 
         // Load View
         $this->view('user-forum-search', $data, 'user');
@@ -64,13 +65,12 @@ class Forum extends Controller
         
 		// Data For View
         $data = [
-            'V_forums' => $forums,
-            'page_title' => LANG["Forums"],
+            'FORUMS' => $forums,
+            'TITLE' => LANG["Forums"],
             'current_user' => $this->current_user
         ];
 
         // Load View
         $this->view('user-forum-unread', $data, 'user');
     }
-
 }

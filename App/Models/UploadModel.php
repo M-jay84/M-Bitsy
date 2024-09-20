@@ -4,8 +4,8 @@ namespace App\Models;
 
 use App\Libs\DB;
 use App\Libs\SimpleThumbnail;
-use App\Libs\Torrents\Parse;
 use App\Libs\Validate;
+use App\Libs\Torrents\Parse;
 use App\Models\LogsModel;
 use App\Models\ShoutboxModel;
 use App\Models\TorrentsModel;
@@ -204,7 +204,6 @@ class UploadModel
         Parse::ScrapeId($id, $tor["announce-list"], $tor['hash']);
     }
 
-        $data = ['id' => $id, 'message' => $message];
-    return $data;
+    showMessage("torrent/$id", $message);
 	}
 }

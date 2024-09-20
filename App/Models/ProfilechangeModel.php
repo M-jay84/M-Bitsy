@@ -5,10 +5,9 @@ namespace App\Models;
 use App\Libs\DB;
 use App\Libs\TTMail;
 use App\Libs\Validate;
-use App\Models\UsersModel;
 
 /*
-* Account Data
+* Profile Change Data
 */
 class ProfilechangeModel
 {

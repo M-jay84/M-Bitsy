@@ -4,14 +4,14 @@ namespace App\Models;
 
 use App\Libs\DB;
 use App\Libs\Validate;
-use App\Models\CountriesModel;
-use App\Models\SnatchedModel;
-use App\Models\PostsModel;
-use App\Models\TorrentsModel;
 use App\Models\CommentsModel;
+use App\Models\CountriesModel;
 use App\Models\GroupsModel;
-use App\Models\MessagesModel;
 use App\Models\LogsModel;
+use App\Models\MessagesModel;
+use App\Models\PostsModel;
+use App\Models\SnatchedModel;
+use App\Models\TorrentsModel;
 
 /*
 * Users Table Data
@@ -90,12 +90,12 @@ class ProfileModel
     }
 
     // Admin Edit Profile Form Submit
-    public static function adminSubmited($id, $data)
+    public static function adminSubmited($id, $current_user)
     {
         $email = Validate::Input('email', 'email');
 
         // Check User
-        if ($data['current_user']->class < 5 && $id != $data['current_user']->id) {
+        if ($current_user->class < 5 && $id != $current_user->id) {
             showMessage(("profile/$id"), LANG["NO_PERMISSION"]);
         }
 
@@ -118,20 +118,20 @@ class ProfileModel
         ];
 
         // Change User Class
-        if ($data['class'] != 0 && $data['class'] != $data['current_user']->class) {
+        if ($data['class'] != 0 && $data['class'] != $current_user->class) {
             // change user class
             $arr = DB::fetchRow('users', 'class', ['id ='], [$id]);
             $uc = $arr['class'];
             // skip if class is same as current
-            if ($uc != $data['class'] && $uc > $data['current_user']->class) {
+            if ($uc != $data['class'] && $uc > $current_user->class) {
                 showMessage(URLROOT, LANG["YOU_CANT_DEMOTE_YOURSELF"]);
-            } elseif ($uc == $data['current_user']->class) {
+            } elseif ($uc == $current_user->class) {
                 showMessage(URLROOT, LANG["YOU_CANT_DEMOTE_SOMEONE_SAME_LVL"]);
             } else {
                 DB::update('users', ['class'], ['id='], [$data['class'], $id]);
                 // Notify user
                 $prodemoted = ($data['class'] > $uc ? "promoted" : "demoted");
-                $msg = "You have been $prodemoted to " . GroupsModel::GetUserClassName($data['class'], $data['current_user']) . " by " . $data['current_user']->username . "";
+                $msg = "You have been $prodemoted to " . GroupsModel::GetUserClassName($data['class'], $current_user) . " by " . $current_user->username . "";
                 MessagesModel::insert(['sender' => 0, 'receiver' => $id, 'added' => CONFIG['TT_DATE'], 'subject' => 'Group Change', 'msg' => $msg]);
             }
         }
@@ -139,7 +139,7 @@ class ProfileModel
         // Reset Passkey Check
         if ($_POST['resetpasskey'] == 'yes') {
             $rand = array_sum(explode(" ", microtime()));
-            $passkey = md5($data['current_user']->username . $rand . $data['current_user']->secret . ($rand * mt_rand()));
+            $passkey = md5($current_user->username . $rand . $current_user->secret . ($rand * mt_rand()));
             $data = ['passkey' => $passkey];
         }
 
@@ -150,13 +150,13 @@ class ProfileModel
             if ($data['password'] != $passres['password']) {
                 $password = password_hash($data['password'], PASSWORD_BCRYPT);
                 $data = ['password' => $password];
-                LogsModel::write($data['current_user']->username . " has changed password for user: $id");
+                LogsModel::write($current_user->username . " has changed password for user: $id");
             }
         }
 
         // Update
         DB::updateset("users", $data, ['id' => $id]);
-        LogsModel::write($data['current_user']->username . " has edited user: $id details");
+        LogsModel::write($current_user->username . " has edited user: $id details");
         showMessage(("profile/$id"), LANG["UPDATE_COMPLETE"]);
     }
 

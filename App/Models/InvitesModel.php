@@ -11,37 +11,6 @@ use App\Libs\Validate;
 */
 class InvitesModel
 {
-    // Update Invites
-    public static function update($invitees, $id)
-    {
-        $sql = DB::run("UPDATE users SET invites = invites - 1, invitees='$invitees' WHERE id = ".$id."");
-
-        return $sql;
-    }
-	
-    // Admin Fetch All Invited Users
-    public static function invitedUser($limit)
-    {
-        $stmt = DB::run("SELECT u.id, u.username, u.email, u.added, u.last_access, u.class, u.invited_by, i.username as inviter FROM users u 
-		LEFT JOIN users i ON u.invited_by = i.id 
-		WHERE u.status = 'confirmed' AND u.invited_by != '0' ORDER BY u.added DESC $limit")->fetchAll();
-		return $stmt;
-	}
-
-    // Admin Check Invite
-    public static function checkInvite($ids)
-    {
-        $stmt = DB::run("SELECT u.id, u.invited_by, i.invitees FROM users u LEFT JOIN users i ON u.invited_by = i.id WHERE u.status = 'pending' AND u.invited_by != '0' AND u.id IN ($ids)");
-		return $stmt;
-	}
-	
-    // Admin Fetch All Pending Users
-    public static function pendingUser($limit)
-    {
-        $stmt = DB::run("SELECT u.id, u.username, u.email, u.added, u.invited_by, i.username as inviter FROM users u LEFT JOIN users i ON u.invited_by = i.id WHERE u.status = 'pending' AND u.invited_by != '0' ORDER BY u.added DESC $limit");
-		return $stmt;
-    }
-	
     // Admin Fetch All Pending Users
     public static function sendInvite($current_user)
     {
@@ -62,8 +31,7 @@ class InvitesModel
             'invited_by'=>$current_user->id, 'added'=>CONFIG['TT_DATE'], 'stylesheet'=>CONFIG['DEFAULTTHEME'], 'language'=>CONFIG['DEFAULTLANG']
         ]);
         $invitees = "$id ".$current_user->invitees."";
-        InvitesModel::update($invitees, $current_user->id);
-        
+        DB::run("UPDATE users SET invites = invites - 1, invitees=? WHERE id = ?", [$invitees,$current_user->id]);
         // Send Email
         $mess = strip_tags($_POST["mess"]);
         $names = CONFIG['SITENAME'];
@@ -112,7 +80,7 @@ class InvitesModel
         $url = Validate::Input('pending') == 0 ? '/admininvite' : '/admininvite/pending';
         $ids = Validate::multiIds('users');
         
-        $res = InvitesModel::checkInvite($ids);
+        $res = DB::run("SELECT u.id, u.invited_by, i.invitees FROM users u LEFT JOIN users i ON u.invited_by = i.id WHERE u.status = 'pending' AND u.invited_by != '0' AND u.id IN ($ids)");
         foreach ($res as $row) {
             # We remove the invitee from the inviter and give them back there invite.
             $invitees = str_replace("$row[id] ", "", $row["invitees"]);
@@ -123,4 +91,30 @@ class InvitesModel
 
         return $url;
     }
+
+    // Admin
+    public static function pendingA()
+    {
+        // Pagination
+        $count = DB::fetchColumn('users', 'COUNT(id)', ['status =', 'invited_by !='], ['pending',0]);
+        list($pager, $limit) = pagination(25, $count, URLROOT.'/admininvite/pending?');
+        $stmt = DB::run("SELECT u.id, u.username, u.email, u.added, u.invited_by, i.username as inviter FROM users u LEFT JOIN users i ON u.invited_by = i.id WHERE u.status = 'pending' AND u.invited_by != '0' ORDER BY u.added DESC $limit");
+        $array = ['invites'=>$stmt,'count'=>$count,'pager'=>$pager];
+        
+        return $array;
+	}
+	
+    // Admin
+    public static function inviteA()
+    {
+        // Pagination
+        $count = DB::fetchColumn('users', 'COUNT(id)', ['status =', 'invited_by !='], ['confirmed',0]);
+        list($pager, $limit) = pagination(25, $count, URLROOT.'/admininvite?');
+        $users = DB::run("SELECT u.id, u.username, u.email, u.added, u.last_access, u.class, u.invited_by, i.username as inviter FROM users u 
+		LEFT JOIN users i ON u.invited_by = i.id 
+		WHERE u.status = 'confirmed' AND u.invited_by != '0' ORDER BY u.added DESC $limit")->fetchAll();
+        $array = ['invites'=>$users,'count'=>$count,'pager'=>$pager];
+        return $array;
+    }
+
 }

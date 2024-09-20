@@ -4,7 +4,6 @@ namespace App\Models;
 
 use App\Libs\DB;
 use App\Libs\Validate;
-use App\Models\UsersModel;
 use App\Models\LogsModel;
 
 /*

@@ -19,21 +19,21 @@ class Adminclient extends Controller
         $this->current_user = new Auth();
 
         if (!$this->current_user->isStaff) {
-            $this->showMessage(URLROOT, LANG["NO_PERMISSION"]);
+            showMessage(URLROOT, LANG["NO_PERMISSION"]);
         }
     }
 
-    // Client Default Page
+    // Client Page
     public function index($type = 'peers')
     {
-        // Get Peer Client Data
+        // Get Client Data
         $client = ClientsModel::select($type);
 
         // Data For View
         $data = [
-            'page_title' => LANG["CLIENTS"],
-            'V_client' => $client,
-            'V_type' => $type
+            'TITLE' => LANG["CLIENTS"],
+            'CLIENTS' => $client,
+            'TYPE' => $type
         ];
         
         // Load View

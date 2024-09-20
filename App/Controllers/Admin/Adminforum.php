@@ -19,14 +19,15 @@ class Adminforum extends Controller
         $this->current_user = new Auth();
 
         if (!$this->current_user->isStaff) {
-            $this->showMessage(URLROOT, LANG["NO_PERMISSION"]);
+            showMessage(URLROOT, LANG["NO_PERMISSION"]);
         }
     }
 
-    // Forum Default Page
+    // Forum Index
     public function index($id, $forumid = 0, $move = false)
     {
         if ($move) {
+            // Sort/mMove Order
             ForumsModel::reorderForum($id, $forumid, $move);
         }
 
@@ -35,25 +36,25 @@ class Adminforum extends Controller
 
         // Data For View
         $data = [
-            'page_title' => LANG["FORUMS"],
-            'V_forumcat' => $forum['forumcat'],
-            'V_forumforum' => $forum['forumforum'],
-            'V_query' => $forum['query'],
-            'V_name' => $forum['name'],
-            'V_groups' => $forum['groups']
+            'TITLE' => LANG["FORUMS"],
+            'CATS' => $forum['forumcat'],
+            'FORUM' => $forum['forumforum'],
+            'STMT' => $forum['query'],
+            'NAME' => $forum['name'],
+            'GROUPS' => $forum['groups']
         ];
         
         // Load View
         $this->view('admin-forum', $data, 'admin');
     }
 
-    // Add Forum Submit
+    // Add/Edit Forum
     public function submit()
     {
         ForumsModel::insertOrUpdateForum();
     }
 
-    // Delete Forum Submit
+    // Delete Forum
     public function delete($id, $sure = '')
     {
         ForumsModel::delete($id, $sure);

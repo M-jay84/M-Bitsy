@@ -4,7 +4,7 @@
 define('DB_HOST', 'localhost');
 define('DB_USER', 'dbname');
 define('DB_PASS', 'dbpassword');
-define('DB_NAME', 'dbname1');
+define('DB_NAME', 'dbname');
 define('DB_CHAR', 'utf8mb4');
 // URL Root
 define('URLROOT', 'http://localhost/M-BiTsy');

@@ -1,9 +1,9 @@
-<?php block_begin($page_title) ?>
 <?php
+block_begin($TITLE);
 forumheader();
 latestforumposts();
 
-foreach ($V_forums as $country_id => $cat_info) : ?>
+foreach ($FORUMS as $country_id => $cat_info) : ?>
     <div class="table-responsive tt_block">
     <table class="table table-striped ">
         <thead class='tt_blockhead'>

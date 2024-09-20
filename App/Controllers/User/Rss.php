@@ -7,7 +7,6 @@ use App\Libs\Controller;
 use App\Libs\DB;
 use App\Models\CatagoriesModel;
 use App\Models\TorrentsModel;
-use App\Models\UsersModel;
 
 /*
 * Rss Controller
@@ -44,7 +43,7 @@ class Rss extends Controller
         }
         
         if ($link == "" && CONFIG['MEMBERSONLY']) {
-            $this->showMessage(URLROOT, LANG["NO_PERMISSION"]);
+            showMessage(URLROOT, LANG["NO_PERMISSION"]);
         }
 
         // Sort Input
@@ -97,17 +96,17 @@ class Rss extends Controller
     {
         // Check User
         if ($this->current_user->view_torrents != "yes" && CONFIG['MEMBERSONLY']) {
-            $this->showMessage(URLROOT, LANG["NO_TORRENT_VIEW"]);
+            showMessage(URLROOT, LANG["NO_TORRENT_VIEW"]);
         }
 
         // Data For View
         $data = [
-            'page_title' => LANG["MAKE_RSS_FEED"],
-            'V_cats' => CatagoriesModel::genreList()
+            'TITLE' => LANG["MAKE_RSS_FEED"],
+            'CATAGORYS' => CatagoriesModel::genreList()
         ];
 
         // Load View
-        $this->view('user-Rss', $data, 'user');
+        $this->view('user-rss', $data, 'user');
     }
 
     // RSS Form Submit
@@ -115,7 +114,7 @@ class Rss extends Controller
     {
         // Check User
         if ($this->current_user->view_torrents != "yes" && CONFIG['MEMBERSONLY']) {
-            $this->showMessage(URLROOT, LANG["NO_TORRENT_VIEW"]);
+            showMessage(URLROOT, LANG["NO_TORRENT_VIEW"]);
         }
 
         if (!empty($_POST)) {
@@ -148,10 +147,10 @@ class Rss extends Controller
                 $param = "";
             }
             
-            $this->showMessage(URLROOT, "Your RSS link is: <a href='".URLROOT."/rss$param'>".URLROOT."/rss$param</a>");
+            showMessage(URLROOT, "Your RSS link is: <a href='".URLROOT."/rss$param'>".URLROOT."/rss$param</a>");
 
         } else {
-            $this->showMessage(URLROOT, LANG['NOTHING_SELECTED']);
+            showMessage(URLROOT, LANG['NOTHING_SELECTED']);
         }
     }
 

@@ -1,4 +1,4 @@
-<?php block_begin($title) ?>
+<?php block_begin($TITLE) ?>
 <?php forumheader('search'); ?>
 <div class="tt_blockcenter p-2">
     <form method='get' action='<?= Url('forum/search') ?>'>
@@ -14,7 +14,7 @@
 
 <div class="table-responsive p-3">
     <p class="text-center">
-        <?= LANG['SEARCH'] ?>: <b><?= htmlspecialchars($keywords) ?></b>
+        <?= LANG['SEARCH'] ?>: <b><?= htmlspecialchars($KEYWORDS) ?></b>
     </p>
     <table class="table table-striped">
         <thead>
@@ -27,8 +27,8 @@
         </thead>
         <tbody>
             <?php
-            foreach ($forums as $row) {
-                if ($row["name"] == "" || ($row["minclassread"] > $current_user->class && $row["guest_read"] == "no")) {
+            foreach ($FORUMS as $row) {
+                if ($row["name"] == "" || ($row["minclassread"] > $USER->class && $row["guest_read"] == "no")) {
                     continue;
                 } ?>
                 <tr>
@@ -41,5 +41,5 @@
         </tbody>
     </table>
 </div>
-<?php $pager ?>
+<?php $PAGER ?>
 <?php block_end(); ?>

@@ -1,6 +1,6 @@
-<?php block_begin($page_title) ?>
-<?php usermenu($V_id);
-if ($V_user['privacy'] != "strong" || ($current_user->control_panel == "yes") || ($current_user->id == $V_user['id'])) {
+<?php block_begin($TITLE) ?>
+<?php usermenu($ID);
+if ($USER['privacy'] != "strong" || ($current_user->control_panel == "yes") || ($current_user->id == $USER['id'])) {
     ?>
     <div class='table-responsive p-3'>
     <table class='table table-striped'>
@@ -15,7 +15,7 @@ if ($V_user['privacy'] != "strong" || ($current_user->control_panel == "yes") ||
     </thead>
     <tbody>
     <?php
-    foreach ($V_peers as $arr) {
+    foreach ($PEERS as $arr) {
         $userratio = $arr["downloaded"] > 0 ? number_format($arr["uploaded"] / $arr["downloaded"], 1) : "---";
         ?>
         <tr>
@@ -30,6 +30,7 @@ if ($V_user['privacy'] != "strong" || ($current_user->control_panel == "yes") ||
     ?>
     </tbody>
     </table>
+    <?= $PAGER ?>
     </div>
     <?php
 }

@@ -36,9 +36,9 @@ class TasksModel
         $stmt = DB::insert('tasks', $updateset);
         return $stmt;
 	}
-	
+
     // Insert Task
-    public static function clear($sure = '')
+    public static function clearshoutbox($sure = '')
     {
         ShoutboxModel::truncate($sure);
 	}

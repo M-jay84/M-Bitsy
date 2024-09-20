@@ -1,4 +1,4 @@
-<?php block_begin($page_title) ?>
+<?php block_begin($TITLE) ?>
 <p class="text-center">
     <a type="button" class="model_form ttbtn btn-sm" data-bs-toggle="modal" data-bs-target="#addModal"><?= LANG['ADD'] ?></a>
 <p>
@@ -18,7 +18,7 @@
             </tr>
         </thead>
         <tbody><?php
-                foreach ($V_cats as $row) { ?>
+                foreach ($CATAGORIES as $row) { ?>
                 <tr>
                     <td><?= $row['sort_index'] ?></td>
                     <td><?= $row['parent_cat'] ?></td>
@@ -39,7 +39,7 @@
                             data-image="<?= $row['image'] ?>">
                             <i class="fa fa-edit"></i>
                         </a>
-                        <a href='<?= Url("admincategorie/delete/$row[id]"); ?>'>
+                        <a href='<?= Url("admincategorie/delete/$row[id]") ?>'>
                             <i class="fa fa-trash"></i>
                         </a>
                     </td>
@@ -80,7 +80,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-sm ttbtn" data-bs-dismiss="modal"><?= LANG['CLOSE'] ?></button>
-                    <button type="submit" class="btn btn-sm ttbtn"><?= LANG["SUBMIT"]; ?></button>
+                    <button type="submit" class="btn btn-sm ttbtn"><?= LANG["SUBMIT"] ?></button>
                 </div>
             </div>
         </div>

@@ -20,23 +20,23 @@ class Warning extends Controller
         $this->current_user = new Auth();
 
         if (!$this->current_user->loggedin) {
-            $this->showMessage(URLROOT, LANG["NO_PERMISSION"]);
+            showMessage(URLROOT, LANG["NO_PERMISSION"]);
         }
     }
 
-    // User Warnings Page
+    // User Warnings
     public function index($user_id)
     {
         // Check Current User
         if (!$this->current_user->isStaff && $this->current_user->id != $user_id) {
-            $this->showMessage(URLROOT, LANG['NO_PERMISSION']);
+            showMessage(URLROOT, LANG['NO_PERMISSION']);
         }
 
         // Data For View
         $data = array(
-            'page_title' => LANG["USER_DETAILS_FOR"] . coloredname($user_id),
-            'user_id' => $user_id,
-            'warnings' => WarningsModel::getByUserId($user_id),
+            'TITLE' => LANG["USER_DETAILS_FOR"] . coloredname($user_id),
+            'USER_ID' => $user_id,
+            'WARNINGS' => WarningsModel::getByUserId($user_id),
             'current_user' => $this->current_user
         );
 
@@ -49,7 +49,7 @@ class Warning extends Controller
     {
         // Check User
         if (!$this->current_user->isStaff) {
-            $this->showMessage("profile/$userid", LANG["NO_PERMISSION"]);
+            showMessage("profile/$userid", LANG["NO_PERMISSION"]);
         }
 
         // Add New Warning
@@ -61,7 +61,7 @@ class Warning extends Controller
     {
         // Check User
         if (!$this->current_user->isStaff) {
-            $this->showMessage("profile/$userid", LANG["NO_PERMISSION"]);
+            showMessage("profile/$userid", LANG["NO_PERMISSION"]);
         }
 
         // Set Data

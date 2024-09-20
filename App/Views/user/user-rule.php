@@ -1,4 +1,4 @@
-<?php foreach ($V_rules as $row) : ?>
+<?php foreach ($RULES as $row) : ?>
     <?php if ($row['public'] == "yes") { ?>
         <?php block_begin($row['title']) ?>
         <?= format_comment($row['text']); ?><br>
@@ -28,7 +28,7 @@
 
 <?php if ($current_user->class > CONFIG['_UPLOADER']) : ?>
     <p class="text-end">
-        <button class="ttbtn"><i class="fa fa-user-secret m-1 tt_prime" data-bs-toggle="modal" data-bs-target="#rulesModal" title="<?= LANG['STAFF'] ?>"><?= LANG[' Add new'] ?></i></button>
+        <button class="ttbtn"><i class="fa fa-user-secret m-1 tt_prime" data-bs-toggle="modal" data-bs-target="#rulesModal" title="<?= LANG['STAFF'] ?>"><?= LANG['ADD'] ?></i></button>
     <p>
 <?php endif; ?>
 

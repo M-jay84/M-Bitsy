@@ -19,11 +19,11 @@ class Attachment extends Controller
         $this->current_user = new Auth();
 
         if (!$this->current_user->loggedin && CONFIG['MEMBERSONLY']) {
-            $this->showMessage(URLROOT, LANG["NO_PERMISSION"]);
+            showMessage(URLROOT, LANG["NO_PERMISSION"]);
         }
     }
 
-    // Download Attachment Page
+    // Download Attachment
     public function index($id, $hash)
     {
         $file = UPLOAD_PATH . "/attachment/$hash.data";
@@ -32,7 +32,7 @@ class Attachment extends Controller
         
         // Download
         if (!file_exists($file)) {
-            $this->showMessage(URLROOT, "The file $hash does not exists");
+            showMessage(URLROOT, "The file $hash does not exists");
         } else {
             header('Content-Disposition: attachment; filename="' . $attachment['filename'] . '"');
             header('Content-Length: ' . filesize($file));

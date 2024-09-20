@@ -1,29 +1,31 @@
-<?php block_begin($page_title) ?>
-<?php usermenu($current_user->id, 'messages'); ?><br>
+<?php block_begin($TITLE) ?>
 <div class="row  rounded">
     <p class="text-center">
-        <?= messagemenu(); ?>
+        <a href="<?= URLROOT ?>/message/mailbox/inbox"><button type="button" class="<?= activelink('inbox', 'inbox') ?>"><?= LANG["INBOX"] ?></button></a>&nbsp;
+        <a href="<?= URLROOT ?>/message/mailbox/outbox"><button type="button" class="<?= activelink('outbox', 'outbox') ?>"><?= LANG["OUTBOX"] ?></button></a>&nbsp;
+        <a href="<?= URLROOT ?>/message/create"><button type="button" class="<?= activelink('messages/create') ?>"><?= LANG["COMPOSE"] ?></button></a>
+
     </p>
     <p class="text-center">
-        <b><?= $V_messages['subject'] ?></b>
+        <b><?= $MESSAGES['subject'] ?></b>
     </p>
     <span class="text-end">
-        <?= $V_button ?>
+        <a href='javascript:;' class='addAttr' data-bs-toggle='modal' data-bs-target='#replyModal' '><button class='btn ttbtn m-2'><i class='fa fa-home me-2'></i>Reply</button></a>
     </span>
     <div class='tt_block rounded p-3'>
         <div class='row'>
             <div class='col-12'>
-                <?= coloredname($V_messages['sender']) ?>
-                <small><?= LANG["POSTED_AT"] ?> <?= $V_messages['added'] ?> </small>
+                <?= coloredname($MESSAGES['sender']) ?>
+                <small><?= LANG["POSTED_AT"] ?> <?= $MESSAGES['added'] ?> </small>
             </div>
             <div class='col-md-12'>
-                <?= format_comment($V_messages['msg']); ?>
+                <?= format_comment($MESSAGES['msg']); ?>
             </div>
         </div>
     </div>
-    <?php if ($V_messages['previous']) : ?>
+    <?php if ($MESSAGES['previous']) : ?>
     <p class="text-center"><?= LANG["HISTORY"] ?></p>
-        <?php foreach ($V_messages['previous'] as $msg) : ?>
+        <?php foreach ($MESSAGES['previous'] as $msg) : ?>
        <div class='tt_block rounded p-3'>
         <div class='row'>
             <div class='col-12'>
@@ -45,20 +47,13 @@
     <div class="modal-dialog modal-dialog-centered modal-md" style="max-width:700px;">
         <div class="modal-content">
             <div class="modal-body">
-                <input type="hidden" name="receiver" value="<?= $V_messages['replyto'] ?>" />
+                <input type="hidden" name="receiver" value="<?= $MESSAGES['replyto'] ?>" />
                 <input type="hidden" name="Update" value="create" />
-                <input type="hidden" name="subject" value="<?= $V_messages['subject'] ?>" />
-                <input type="hidden" name="history" value="<?= $V_messages['history'] ?>" />
+                <input type="hidden" name="subject" value="<?= $MESSAGES['subject'] ?>" />
+                <input type="hidden" name="history" value="<?= $MESSAGES['history'] ?>" />
                 <div class="text-center">
-                    <?= LANG["TO"] ?> <?= coloredname($V_messages['replyto']) ?><br>
-                    <?= LANG["SUBJECT"] ?> <?= $V_messages['subject'] ?><br>
-                </div>
-                <div class="form-floating mb-4">
-                    <select name="template" class='form-select'>
-                        <option name='0'>---</option>
-                        <?php echo $V_messages['messages'] ?>
-                    </select>
-                    <label for="template"><?= LANG["TEMPLATE"] ?>:</label>
+                    <?= LANG["REPLY"] ?> <h4><b><?= coloredname($MESSAGES['replyto']) ?></b></h4><br>
+                    <?= LANG["SUBJECT"] ?> <?= $MESSAGES['subject'] ?><br>
                 </div>
                 <?php print textbbcode("form", "body"); ?>
                 <p class="text-center">
@@ -80,9 +75,9 @@
 <div class="modal fade" id="editModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-md" style="max-width:700px;">
         <div class="modal-content">
-            <form name="form1" action="<?= Url("message/update/$messages[id]") ?>" method="post"><br>
+            <form name="form1" action="<?= Url("message/update/$MESSAGES[id]") ?>" method="post"><br>
                 <div class="modal-body">
-                    <?php print textbbcode("form1", "msg", $V_messages['msg']); ?>
+                    <?php print textbbcode("form1", "msg", $MESSAGES['msg']); ?>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class='btn ttbtn m-2' data-bs-dismiss="modal"><?= LANG['CLOSE'] ?></button>

@@ -3,12 +3,11 @@
 namespace App\Models;
 
 use App\Libs\DB;
-use App\Libs\TTMail;
 use App\Libs\Ip;
+use App\Libs\TTMail;
 use App\Libs\Validate;
-use App\Models\MessagesModel;
 use App\Models\BansModel;
-use App\Models\UsersModel;
+use App\Models\MessagesModel;
 use App\Models\ShoutboxModel;
 
 /*

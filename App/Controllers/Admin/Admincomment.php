@@ -19,21 +19,21 @@ class Admincomment extends Controller
         $this->current_user = new Auth();
 
         if (!$this->current_user->isStaff) {
-            $this->showMessage(URLROOT, LANG["NO_PERMISSION"]);
+            showMessage(URLROOT, LANG["NO_PERMISSION"]);
         }
     }
 
-    // Comments Default Page
+    // Comments Page
     public function index()
     {
-        // Get Data
+        // Get All Comments
         $comments = CommentsModel::grabAll();
         
         // Data For View
         $data = [
-            'page_title' => LANG["COMMENT"],
-            'V_comments' => $comments['stmt'],
-            'V_pager' => $comments['pager']
+            'TITLE' => LANG["COMMENT"],
+            'COMMENTS' => $comments['stmt'],
+            'PAGER' => $comments['pager']
         ];
 
         // Load View

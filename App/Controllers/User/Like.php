@@ -19,13 +19,14 @@ class Like extends Controller
         $this->current_user = new Auth();
 
         if (!$this->current_user->loggedin) {
-            $this->showMessage(URLROOT, LANG["NO_PERMISSION"]);
+            showMessage(URLROOT, LANG["NO_PERMISSION"]);
         }
     }
 
     // Like Submit
     public function index($id, $type)
     {
+        // id of item / type of item 
         LikesModel::switch($id, $type, $this->current_user);
     }
 

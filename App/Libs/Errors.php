@@ -37,6 +37,7 @@ class Errors
         }
     }
 
+    // Back Trace Errors
     public function get_verbose_backtrace($backtrace = null, $depth = 0)
     {
         $skipFirst = false;
@@ -126,10 +127,10 @@ class Errors
         error_log($error, 3, LOG_PATH . '/exception_log.txt');
         $_SESSION['FLASH'] = LANG["OOPS_ERR"];
         $data = [
-            'page_title' => 'Message',
-            'V_msg' => LANG["OOPS_ERR"],
-            'V_url' => URLROOT,
-            'refresh'  => 2
+            'TITLE' => 'Error',
+            'MESSAGE' => LANG["OOPS_ERR"],
+            'URL' => URLROOT,
+            'REFRESH'  => 2
         ];
         extract($data);
         require_once VIEW_PATH . "/inc/error-page.php";

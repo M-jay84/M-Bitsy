@@ -16,31 +16,35 @@ class Admintag extends Controller
   // Get Current User
   public function __construct()
   {
-      $this->current_user = new Auth();
-  
-      if (!$this->current_user->isStaff) {
-          $this->showMessage(URLROOT, LANG["NO_PERMISSION"]);
-      }
-  }
+    $this->current_user = new Auth();
 
-  // Tag Default Page
-  public function index()
-  {
-    if (!empty($_POST)) {
-      TagsModel::insertOrUpdate();
-    } else {
-      
-      // Data For View
-      $data = [
-        'page_title' => LANG['TAGS'],
-        'V_tags' => TagsModel::getAll()
-      ];
-
-      // Load View
-      $this->view('admin-tag', $data, 'admin');
+    if (!$this->current_user->isStaff) {
+      showMessage(URLROOT, LANG["NO_PERMISSION"]);
     }
   }
 
+  // Tags
+  public function index()
+  {
+    if (!empty($_POST)) {
+      // Add/Edit Tags
+      TagsModel::insertOrUpdate();
+    }
+
+    // Get All Tags
+    $tags = TagsModel::getAll();
+
+    // Data For View
+    $data = [
+      'TITLE' => LANG['TAGS'],
+      'TAGS' => $tags
+    ];
+
+      // Load View
+    $this->view('admin-tag', $data, 'admin');
+  }
+
+  // Delete Tags
   public function delete()
   {
     TagsModel::delete();

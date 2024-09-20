@@ -22,13 +22,13 @@ class Upload extends Controller
         $this->current_user = new Auth();
 
         if (!$this->current_user->loggedin && CONFIG['MEMBERSONLY']) {
-            $this->showMessage(URLROOT, LANG["NO_PERMISSION"]);
+            showMessage(URLROOT, LANG["NO_PERMISSION"]);
         }
         if (!$this->current_user->can_upload == 'yes') {
-            $this->showMessage(URLROOT, LANG["NO_PERMISSION"]);
+            showMessage(URLROOT, LANG["NO_PERMISSION"]);
         }
         if (CONFIG['UPLOADERSONLY'] && !$this->current_user->isStaff) {
-            $this->showMessage(URLROOT, LANG["UPLOAD_ONLY_FOR_UPLOADERS"]);
+            showMessage(URLROOT, LANG["UPLOAD_ONLY_FOR_UPLOADERS"]);
         }
     }
 
@@ -40,11 +40,11 @@ class Upload extends Controller
 
         // Data For View
         $data = [
-            'page_title' => LANG["UPLOAD"],
-            'announce_urls' => $announce_urls,
-            'catagories' => CatagoriesModel::genreList(),
-            'tags' => TagsModel::getAll(),
-            'languages' => TorrentLangModel::langList(),
+            'TITLE' => LANG["UPLOAD"],
+            'ANNOUNCES' => $announce_urls,
+            'CATAGORYS' => CatagoriesModel::genreList(),
+            'TAGS' => TagsModel::getAll(),
+            'LANGUAGES' => TorrentLangModel::langList(),
             'current_user' => $this->current_user
         ];
         
@@ -52,14 +52,14 @@ class Upload extends Controller
         $this->view('user-upload', $data, 'user');
     }
 
-    // Upload Form Submit // TODO
+    // Upload Form Submit
     public function submit()
     {
         if (!empty($_POST)) {
-            $data = UploadModel::torrent($this->current_user);
-            $this->showMessage("torrent/$data[id]", $data['message']);
+            // Upload Torrent
+            UploadModel::torrent($this->current_user);
         } else {
-            $this->showMessage(URLROOT, LANG["ACTION_FAILED"]);
+            showMessage(URLROOT, LANG["ACTION_FAILED"]);
         }
     }
 

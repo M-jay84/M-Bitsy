@@ -4,8 +4,8 @@ namespace App\Controllers\Admin;
 
 use App\Libs\Auth;
 use App\Libs\Cache;
-use App\Libs\Cleanup;
 use App\Libs\Controller;
+use App\Models\ShoutboxModel;
 use App\Models\TasksModel;
 
 /*
@@ -21,9 +21,11 @@ class Admintask extends Controller
         $this->current_user = new Auth();
 
         if (!$this->current_user->isStaff) {
-            $this->showMessage(URLROOT, LANG["NO_PERMISSION"]);
+            showMessage(URLROOT, LANG["NO_PERMISSION"]);
         }
     }
+
+    public function index(){}
 
     // Cleanup
     public function cleanup()
@@ -40,10 +42,14 @@ class Admintask extends Controller
         $TTCache->Delete("sql_cache/latestuploadsblock");
         $TTCache->Delete("sql_cache/mostactivetorrents_block");
         $TTCache->Delete("sql_cache/newestmember_block");
-        $TTCache->Delete("sql_cache/seedwanted_block");
         $TTCache->Delete("sql_cache/usersonline_block");
-        $TTCache->Delete("sql_cache/request_block");
-        $this->showMessage('admincp', LANG['PURGE_COMPLETED']);
+        showMessage('admincp', LANG['PURGE_COMPLETED']);
     }
-
+	
+    // Clear Shoutbox
+    public static function clearshoutbox($sure = '')
+    {
+        ShoutboxModel::truncate($sure);
+	}
+	
 }

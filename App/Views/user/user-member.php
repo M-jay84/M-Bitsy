@@ -1,15 +1,16 @@
 <?php
 use App\Models\CountriesModel;
- block_begin($page_title) ?>
+block_begin($TITLE);
+ ?>
 <div class="row tt_blockcenter rounded">
-    <h3 class="text-center">Members</h3>
+    <h3 class="text-center"><?= LANG["USERS"] ?></h3>
     <form method='get' action='<?= Url('members') ?>'>
         <div class="input-group mb-3">
             <input type="text" class="form-control" placeholder="Search" name='search' aria-label="Search">
             <span></span>
             <select name='class' class='form-select'>
                 <option value='-'>(<?= LANG["ANY_CLASS"] ?>)</option>
-                <?php foreach ($V_groups as $row) : ?>
+                <?php foreach ($GROUPS as $row) : ?>
                     <option value='<?= $row['group_id'] ?>'><?= htmlspecialchars($row['level']) ?></option>
                 <?php endforeach; ?>
             </select>
@@ -46,18 +47,18 @@ use App\Models\CountriesModel;
             </tr>
         </thead>
         <tbody>
-            <?php foreach ($V_users as $row) : ?>
+            <?php foreach ($USERS as $row) : ?>
                 <?php $country = CountriesModel::fetchRow($row['country'], 1); ?>
                 <tr>
                     <td><b><?= coloredname($row['id']) ?></b><?php echo ($row["donated"] > 0 ? "<i class='fa fa-star' aria-hidden='true' style='color:orange' title='Donated'></i>" : "") ?></td>
                     <td><?= user_timezone_date($row["added"]); ?></td>
                     <td><?= user_timezone_date($row["last_access"]) ?></td>
-                    <td><?= LANG[$row["level"]]; ?></td>
+                    <td><?= $row["level"]; ?></td>
                     <td><?= $country ?></td>
                 </tr>
             <?php endforeach; ?>
         </tbody>
     </table>
 </div>
-<?= $V_pager ?>
+<?= $PAGER ?>
 <?php block_end(); ?>

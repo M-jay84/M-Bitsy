@@ -39,14 +39,7 @@ class LikesModel
                 break;
         }
     }
- 
-    // Fetch Thanks Row
-    public static function fetchRow($columns = '*', $where = '', $values = '', $other = '')
-    {
-        $stmt = DB::fetchRow('likes', $columns, $where, $values, $other);
-        return  $stmt;
-    }
- 
+
     // Show Who liked
     public static function showLikes($data)
     {

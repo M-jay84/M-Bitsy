@@ -6,7 +6,7 @@
     <form name="upload" enctype="multipart/form-data" action="<?= Url('upload/submit') ?>" method="post">
         <div class="text-center">
             <?= LANG["ANNOUNCE_URL"] ?><br>
-            <?php foreach ($announce_urls as $key => $value) : ?>
+            <?php foreach ($ANNOUNCES as $key => $value) : ?>
                 <b><?= $value ?></b>
             <?php endforeach; ?>
             <?php if (CONFIG['ALLOWEXTERNAL']) : ?>
@@ -56,7 +56,7 @@
             <?= LANG["ACCEPTED_FORMATS"]; ?>: <?php echo implode(", ", array_unique(CONFIG['ALLOWEDIMAGETYPES'])); ?>
         </div>
         <?php $category = "<select name=\"type\" class='form-select fullwidth'>\n<option value=\"0\">" . LANG["CATEGORY"] . "</option>\n";
-                foreach ($catagories as $row) {
+                foreach ($CATAGORYS as $row) {
                     $category .= "<option value=\"" . $row["id"] . "\">" . htmlspecialchars($row["parent_cat"]) . ": " . htmlspecialchars($row["name"]) . "</option>\n";
                 }
                 $category .= "</select>\n"; ?>
@@ -66,13 +66,13 @@
         <div class="form p-4">
             <select class="form-select" id="validationTags" name="tags[]" multiple data-allow-clear="true" data-suggestions-threshold="0">
                 <option selected disabled hidden value=""><?= LANG["CHOSE_TAG"] ?></option>
-                <?php foreach ($tags as $row) :
+                <?php foreach ($TAGS as $row) :
                     echo "<option value=" . $row['name'] . ">" . $row['name'] . "</option>";
                 endforeach; ?>
             </select>
         </div>
         <div class="form p-4">
-            <?php echo $languages ?>
+            <?php echo $LANGUAGES ?>
         </div>
         <?php if ($current_user->class > CONFIG['_VIP']) : ?>
             <div class="form p-4">
@@ -83,7 +83,7 @@
         <?php if ($current_user->class > CONFIG['_VIP']) : ?>
             <div class="form p-4">
                 <input class="form-check-input" type='checkbox' name='vip' value='yes'><span></span>
-                <?= LANG["CHECKCONFIG['_VIP']"] ?>
+                <?= LANG['VIP'] ?>
             </div>
         <?php endif; ?>
         <?php if (CONFIG['ANONYMOUSUPLOAD']) : ?>

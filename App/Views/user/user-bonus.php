@@ -1,7 +1,7 @@
-<?php block_begin($page_title) ?>
+<?php block_begin($TITLE) ?>
 <div class='table-responsive'>
     <div class='text-center'>
-        <?php echo sprintf(LANG['SEEDBONUS_MESSAGE'], $current_user->seedbonus) ?>
+        <?php echo sprintf(LANG['SEEDBONUS_MESSAGE'], $USER->seedbonus) ?>
     </div>
     <table class='table table-striped'>
         <thead>
@@ -10,13 +10,13 @@
                 <th><?= LANG["TYPE"] ?></th>
                 <th><?= LANG["POINTS"] ?></th>
                 <th><?= LANG["EXCHANGE"] ?></th>
-                <?php if ($current_user->isStaff) : ?>
+                <?php if ($USER->isStaff) : ?>
                     <th><?= LANG["STAFF"] ?></th>
                 <?php endif; ?>
             </tr>
         </thead>
         <tbody>
-            <?php foreach ($bonus_result as $row) : ?>
+            <?php foreach ($BONUS as $row) : ?>
                 <form method="post" action="<?= Url('bonus/submit') ?>">
                     <input type="hidden" name="id" value="<?= $row['id'] ?>" />
                     <tr>
@@ -24,7 +24,7 @@
                         <td><?= htmlspecialchars($row['descr']) ?></td>
                         <td><?= $row['cost'] ?></td>
                         <td><input type="submit" class='btn btn-sm ttbtn' value="<?= LANG['SUBMIT'] ?>"></td>
-                        <?php if ($current_user->isStaff) : ?>
+                        <?php if ($USER->isStaff) : ?>
                         <td>
                             <a href="<?= Url("bonus/delete/$row[id]") ?>"><i class="fa fa-trash"></i></a>
                             <a href="javascript:;" class="bonusAttr" data-bs-toggle="modal" data-bs-target="#bonusModal" 
@@ -42,12 +42,12 @@
         </tbody>
     </table>
     <div class='text-center'>
-        <?php echo sprintf(LANG["SEEDBONUS_REWARD"], CONFIG['BONUSPERTIME'], $set_bonus_interval ); ?>
+        <?php echo sprintf(LANG["SEEDBONUS_REWARD"], CONFIG['BONUSPERTIME'], $BONUS_INTERVAL); ?>
     </div>
 </div>
 <?php block_end() ?>
 
-<?php if ($current_user->isStaff) : ?>
+<?php if ($USER->isStaff) : ?>
     <p class="text-end">
        <button class="ttbtn"><i class="fa fa-user-secret" aria-hidden="true" title="Admin"></i><a href="#" data-bs-toggle="modal" data-bs-target="#bonusModal"><?= LANG["ADD"] ?></a></button>
     <p>

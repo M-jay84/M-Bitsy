@@ -1,6 +1,6 @@
 <div class="tt_blockcenter rounded">
     <div class="tt_blockhead text-center">
-        <?= $page_title ?>
+        <?= $TITLE ?>
     </div>
     <?php if (CONFIG['MEMBERSONLY']) : ?>
        <p class='text-center'><b><?= LANG["MEMBERS_ONLY"] ?></b></p>

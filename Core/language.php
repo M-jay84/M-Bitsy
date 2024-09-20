@@ -69,11 +69,22 @@ define('LANG', array (
 'UPLOAD_INVALID_FILENAME' => 'Invalid filename!',
 'IMAGE_UPLOAD_FAILED' => 'An error occured uploading image %s.',
 'UPLOAD_ANONY' => 'Upload Anonymous',
+'TORRENT_FILE' => 'TORRENT FILE',
 'UPLOAD_ANONY_MSG' => '(Your userid will not be associated to this upload)',
 'ANNOUNCE_URL' => 'Announce Url',
 "THIS_SITE_ACCEPTS_EXTERNAL" => "This site accepts ALL external torrents also!",
+'TORRENT_NAME' => 'name',
 "THIS_WILL_BE_TAKEN_TORRENT" => "This will be taken from .torrent if left empty",
 // Button
+'MIN_CLASS' => 'min class',
+'PUBLIC' => 'public',
+'TRADE' => 'Trade',
+'STICKY' => 'stick',
+'UNSTICKY' => 'Unstick',
+'LOCK' => 'Lock',
+'UNLOCK' => 'unLock',
+'CHOSE_TAG' => 'chose tag',
+'IMDB' => 'IMDB',
 'SUBMIT' => 'Submit',
 'DEL' => 'Delete',
 'ADD' => 'Add',
@@ -130,11 +141,11 @@ You will have to wait for the approval of an admin before you can use your new a
 'VERSION_PHP' => 'PHP Version',
 'VERSION_APACHE' => 'Apache Version',
 // Ban
-'BANNED' => 'Bans.',
+'BANNED' => 'Bans',
 'ADD_BAN' => 'Add Ban',
 'BAN_ADDED' => 'Ban Added.',
 'BANNED_TYPE' => 'Ban type',
-'BAN_EMAIL_IP' => 'Email or IP',
+'BAN_EMAIL_IP' => 'Item to ban (email, ip, domain)',
 // Bonus
 'BONUS' => 'Bonus.',
 'NO_BONUS' => 'Not enough Bonus.',
@@ -148,6 +159,7 @@ You will have to wait for the approval of an admin before you can use your new a
 
 // Clients
 'CLIENTS' => 'Clients',
+'CURRENT' => 'OnLine',
 // COMMENTS
 'COMMENT' => 'Comments',
 'COMMENT_FOR' => 'Comments for',
@@ -244,6 +256,7 @@ You will have to wait for the approval of an admin before you can use your new a
 'DISABLED_ACCOUNTS' => 'Disable Account',
 // Invites
 'INVITED_USER' => 'Invited Users',
+"INVITE" => "Invite",
 "YOU_HAVE_INVITES" => "You have %s Invites",
 'PENDING_INVITE' => 'Invited Pending',
 'INVITE_ONLY_MSG' => 'Sorry this site has disabled user registration, the only way to register is via an invite from an existing member.',
@@ -255,8 +268,10 @@ You will have to wait for the approval of an admin before you can use your new a
 'SEND_AN_INVITE' => 'Send an invite',
 'USER_NOT_INVITED' => 'This member has no invitees',
 'INVITED_PENDING' => "This page displays all invited users which have been sent invites but haven't yet activated there account.<br>By deleting a user the inviter will recieve their invite back and any data associated with the invitee will be deleted.<br> %s members are pending",
+'PENDING' => "Pending",
 'INVITED' => 'Invited',
 'INVITED_BY' => 'Invited By',
+'ADD_ATTACHMENT' => 'add attachment',
 // Lang
 'MOVE_LANG' => 'Language ID to move all Languages To:',
 'LANGUAGE' => 'Language',
@@ -269,6 +284,10 @@ You will have to wait for the approval of an admin before you can use your new a
 'ITEM_UNLIKED' => 'You have unliked.',
 'GIVE_APPRECIATE' => 'Thanks you for you appreciation.',
 // Logs
+'DATE' => 'date.',
+'EVENT' => 'event',
+'TIME' => 'time',
+'LOGS' => 'Logs',
 'SITE_LOG' => 'Site Log',
 // Message
 'MESSAGE' => 'Messag',
@@ -383,12 +402,15 @@ You will have to wait for the approval of an admin before you can use your new a
 // Shoutbox
 'SHOUTBOX' => 'Shoutbox',
 'HISTORY' => 'History',
-'CLEAR_SHOUTBOX' => 'clear shoutbox',
+'SHOUTBOX_CLEAR' => 'Shoutbox (clear)',
 'SHOUTBOX_CLEARED_MESSAGE' => 'The shoutbox has been cleared',
 // Snatched
+'USER' => 'user',
+'SEED_TIME' => 'seed time',
 'HNRS_BEEN_DISABLED' => 'Hit & Run Disabled in Config.php',
 'HNR' => 'Hit & Run',
 'SNATCH_RESULT' => 'Snatch result.',
+'SNATCH' => 'Snatched',
 'NO_SNATCH_RESULT' => 'No snatch result.',
 'POINTS_OF_SEED_BONUS' => 'of Seed Bonus.',
 'HIT_AND_RUN_WITH' => 'With',
@@ -443,6 +465,7 @@ You will have to wait for the approval of an admin before you can use your new a
 // Top 10
 'TOP_10' => 'Top 10',
 // Torrent
+'TOTAL' => 'Total',
 'BUMP' => 'Bump',
 'TORRENT' => 'Torrents',
 'NO_TORRENT_NEED_SEED' => 'There are no torrents currently needing seeds',
@@ -523,6 +546,7 @@ You will have to wait for the approval of an admin before you can use your new a
 'USERS' => 'Users',
 'VIP' => 'VIP',
 // Single Words
+'DOMAIN' => 'Domain',
 'CHECK_FREELEECH' => 'Check Freeleech',
 'CHECK_VIP' => 'Check Vip',
 'UPLOAD_TORRENT' => 'Upload Torrent',
@@ -619,9 +643,12 @@ You will have to wait for the approval of an admin before you can use your new a
 'SYSTEM' => 'System',
 'UPLOADED' => 'Uploaded',
 'SEEDING' => 'Seeding',
+'PRIVATE' => 'Rrivate',
 'USER_PRIVATE' => '<b>This member has elected to keep their details private</b>>',
 'REQUEST' => 'Requests',
 'REQ_OFF' => 'Request are not available',
+'TODAYS_TORRENTS' => 'Added Today',
+'NEW_TODAY' => 'New Today',
 'NO' => 'No',
 'YES' => 'Yes',
 'DESC' => 'Description',

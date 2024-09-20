@@ -4,11 +4,11 @@ namespace App\Models;
 
 use App\Libs\DB;
 use App\Libs\Validate;
-use App\Models\TopicsModel;
-use App\Models\ForumsModel;
-use App\Models\ForumCatsModel;
-use App\Models\ReadModel;
 use App\Models\AttachmentsModel;
+use App\Models\ForumCatsModel;
+use App\Models\ForumsModel;
+use App\Models\ReadModel;
+use App\Models\TopicsModel;
 
 /*
 * Post Table Data
@@ -21,13 +21,6 @@ class PostsModel
         $stmt =  DB::delete('forum_posts', $data);
         return $stmt;
     }
-
-    // Update Post
-    public static function update($cols, $where, $vals, $other = '')
-    {
-        $stmt = DB::update('forum_posts', $cols, $where, $vals, $other);
-        return $stmt;
-	}
 
     // Fetch Torrent Details
     public static function fetchColumn($columns = '*', $where = '', $values = '', $other = '')
@@ -50,15 +43,6 @@ class PostsModel
         return $stmt;
 	}
 
-    // Fetch Torrent Details
-    public static function postcount($id)
-    {
-        $stmt = DB::run("SELECT count(id) as count FROM forum_posts 
-		WHERE topicid IN (SELECT id FROM forum_topics 
-		WHERE forumid=?)", [$id])->fetchColumn();
-		return $stmt;
-	}
-	
     // Returns the ID of the last post of a forum
     public static function updateTopicLastPost($topicid)
     {

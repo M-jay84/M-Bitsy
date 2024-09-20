@@ -21,11 +21,11 @@ class Signup extends Controller
         $this->current_user = new Auth();
 
         if ($this->current_user->id) {
-            $this->showMessage(URLROOT, LANG["ALREADY_LOGGED"]);
+            showMessage(URLROOT, LANG["ALREADY_LOGGED"]);
         }
     }
 
-    // Verify User/Guest
+    // User Signup
     public function index()
     {
         // Check IP
@@ -33,14 +33,14 @@ class Signup extends Controller
             Ip::checkIP();
         }
 
-        // Check Input Else Return To Form
         if (!empty($_POST)) {
+            // Sign Account Up
             AccountsModel::signupUser();
         } else {
             $data = [
-                'page_title' => LANG["SIGNUP"],
-                'V_invite' => AccountsModel::checkinvite(),
-                'V_country' => CountriesModel::dropdown()
+                'TITLE' => LANG["SIGNUP"],
+                'CHECK_INVITE' => AccountsModel::checkinvite(),
+                'COUNTRY' => CountriesModel::dropdown()
             ];
             $this->view('user-signup', $data, 'user');
         }

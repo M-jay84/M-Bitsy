@@ -19,17 +19,17 @@ class Rule extends Controller
         $this->current_user = new Auth();
 
         if (!$this->current_user->loggedin && CONFIG['MEMBERSONLY']) {
-            $this->showMessage(URLROOT, LANG["NO_PERMISSION"]);
+            showMessage(URLROOT, LANG["NO_PERMISSION"]);
         }
     }
 
-    // Rules Page
+    // Rules
     public function index()
     {
         // Data For View
         $data = [
-            'page_title' => LANG['RULE'],
-            'V_rules' => RulesModel::gettAll(),
+            'TITLE' => LANG['RULE'],
+            'RULES' => RulesModel::gettAll(),
             'current_user' => $this->current_user
         ];
 
@@ -41,12 +41,12 @@ class Rule extends Controller
     public function edit()
     {
         if (!$this->current_user->isStaff) {
-            $this->showMessage('rule', LANG["NO_PERMISSION"]);
+            showMessage('rule', LANG["NO_PERMISSION"]);
         } else {
             if (!empty($_POST)) {
                 RulesModel::insertOrUpdate($this->current_user->username);
             } else {
-                $this->showMessage('rule', LANG["NOTHING_SELECTED"]);
+                showMessage('rule', LANG["NOTHING_SELECTED"]);
             }
         }
     }
@@ -55,7 +55,7 @@ class Rule extends Controller
     public function delete($id)
     {
         if (!$this->current_user->isStaff) {
-            $this->showMessage(URLROOT, LANG["NO_PERMISSION"]);
+            showMessage(URLROOT, LANG["NO_PERMISSION"]);
         } else {
             RulesModel::delete($id, $this->current_user->username);
         }

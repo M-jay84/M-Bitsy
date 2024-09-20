@@ -4,9 +4,9 @@ namespace App\Models;
 
 use App\Libs\DB;
 use App\Libs\Validate;
+use App\Models\LogsModel;
 use App\Models\NewsModel;
 use App\Models\TorrentsModel;
-use App\Models\LogsModel;
 
 /*
 * Comments Table Data
@@ -32,7 +32,7 @@ class CommentsModel
         
         DB::delete('comments', ['id' => $id]);
         LogsModel::write(coloredname($userid) . " has deleted comment: ID: $id");
-        showMessage(($_SERVER['HTTP_REFERER']), LANG["DEL_COMPLETE"]);
+        showMessage("comment", LANG["DEL_COMPLETE"]);
 	}
 
     // Admin Get All
@@ -113,7 +113,7 @@ class CommentsModel
 
         // Check Correct Input
         if (!$text) {
-            showMessage(($_SERVER['HTTP_REFERER']), LANG["MISSING_FORM_DATA"]);
+            showMessage("comment/$targetid/$type", LANG["MISSING_FORM_DATA"]);
         }
 
         if ($type == "torrent") {
@@ -124,14 +124,14 @@ class CommentsModel
             // Insert Comment
             $ins = DB::insert('comments', ['user' => $id, $type => $targetid, 'added' => CONFIG['TT_DATE'], 'text' => $text, 'type' => $type]);
             if ($ins) {
-                showMessage(($_SERVER['HTTP_REFERER']), LANG["SUCCESS"]);
+                showMessage("comment/$targetid/$type", LANG["SUCCESS"]);
             } else {
-                showMessage(($_SERVER['HTTP_REFERER']), LANG["ACTION_FAILED"]);
+                showMessage("comment/$targetid/$type", LANG["ACTION_FAILED"]);
             }
         } else {
             DB::update('comments', ['text'], ['id='], [$text, $comment_id]);
             LogsModel::write(coloredname($id) . " has edited comment: ID:$comment_id");
-            showMessage(($_SERVER['HTTP_REFERER']), LANG["UPDATE_COMPLETE"]);
+            showMessage("comment/$targetid/$type", LANG["UPDATE_COMPLETE"]);
         }
     }
 }

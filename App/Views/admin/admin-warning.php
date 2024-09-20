@@ -2,9 +2,9 @@
 
 use App\Models\WarningsModel;
 
- block_begin($page_title) ?>
+ block_begin($TITLE) ?>
 <p class="text-center">
-    <?php echo sprintf(LANG["X_USERS_WARNED"], $V_count); ?>
+    <?php echo sprintf(LANG["X_USERS_WARNED"], $COUNT); ?>
 </p>
 <form id="deleteall" method="post" action="<?= Url('adminwarning/submit') ?>">
     <div class='table-responsive '>
@@ -20,14 +20,14 @@ use App\Models\WarningsModel;
                 </tr>
             </thead>
             <tbody>
-                <?php foreach ($V_warnings as $row) { ?>
+                <?php foreach ($WARNINGS as $row) { ?>
                     <tr>
                         <td><?= coloredname($row["id"]) ?></td>
                         <td><?= get_user_class_name($row["class"]) ?></td>
                         <td><?= user_timezone_date($row["added"]) ?></td>
                         <td><?= user_timezone_date($row["last_access"]) ?></td>
-                        <?php $count = WarningsModel::fetchColumn('count(id)', ['userid=', 'active='], [$row['id'],'yes']); ?>
-                        <td><a href="<?= Url("warning/$row[id]") ?>"><?= number_format($count); ?></a></td>
+                        <?php $count_user_warn = WarningsModel::fetchColumn('count(id)', ['userid=', 'active='], [$row['id'],'yes']); ?>
+                        <td><a href="<?= Url("warning/$row[id]") ?>"><?= number_format($count_user_warn); ?></a></td>
                         <td><input type="checkbox" name="ids[]" value="<?= $row["id"] ?>" /></td>
                     </tr>
                 <?php } ?>
@@ -38,5 +38,5 @@ use App\Models\WarningsModel;
         <button type="submit" class="btn btn-sm ttbtn"><?= LANG["DEL"] ?>
     </div>
 </form>
-<?= $V_pager ?>
+<?= $PAGER ?>
 <?php block_end() ?>

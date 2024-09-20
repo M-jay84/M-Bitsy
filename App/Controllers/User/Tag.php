@@ -19,23 +19,23 @@ class Tag extends Controller
         $this->current_user = new Auth();
 
         if (!$this->current_user->loggedin && CONFIG['MEMBERSONLY']) {
-            $this->showMessage(URLROOT, LANG["NO_PERMISSION"]);
+            showMessage(URLROOT, LANG["NO_PERMISSION"]);
         }
     }
 
-    // Search By Tag Default Page
+    // Search By Tag
     public function index($name)
     {
         if ($this->current_user->view_torrents != "yes" && CONFIG['MEMBERSONLY']) {
-            $this->showMessage(URLROOT, LANG["NO_TORRENT_VIEW"]);
+            showMessage(URLROOT, LANG["NO_TORRENT_VIEW"]);
         }
         // Get Tag Data
         $tags = TagsModel::search($name);
 
         // Data For View
         $data = [
-            'page_title' => LANG["SEARCH"],
-            'V_tags' => $tags['stmt']
+            'TITLE' => LANG["SEARCH"],
+            'TAGS' => $tags['stmt']
         ];
 
         // Load View

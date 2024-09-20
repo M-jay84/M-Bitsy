@@ -21,7 +21,7 @@ class Scrape extends Controller
         $this->current_user = new Auth();
     }
 
-    // Scrape Torrent Submit
+    // Scrape Internal Torrent
     public function index()
     {
         //disable error reporting
@@ -99,7 +99,7 @@ class Scrape extends Controller
 
             if ( $scraper->has_errors() ) {
                 $error = implode(",", $scraper->get_errors());
-                $this->showMessage("torrent/$id", LANG[$error]);
+                showMessage("torrent/$id", LANG[$error]);
             }
 
             $myarray = array_shift($scraped);
@@ -127,9 +127,9 @@ class Scrape extends Controller
 
             // Redirect with message
             if ($seeders !== 0) {
-                $this->showMessage("torrent/$id", LANG["UPDATE_COMPLETE"]);
+                showMessage("torrent/$id", LANG["UPDATE_COMPLETE"]);
             } else {
-                $this->showMessage("torrent/$id", LANG["SCRAPE_DEAD"]);
+                showMessage("torrent/$id", LANG["SCRAPE_DEAD"]);
             }
         }
     }

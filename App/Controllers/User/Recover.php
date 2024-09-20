@@ -19,7 +19,7 @@ class Recover extends Controller
         $this->current_user = new Auth();
 
         if ($this->current_user->id) {
-            $this->showMessage(URLROOT, LANG["ALREADY_LOGGED"]);
+            showMessage(URLROOT, LANG["ALREADY_LOGGED"]);
         }
     }
 
@@ -27,10 +27,11 @@ class Recover extends Controller
     public function index()
     {
         if (!empty($_POST)) {
+            // Get New Password
             RecoverModel::recoverPassword();
         } else {
             $data = [
-                'page_title' => LANG['RECOVER']
+                'TITLE' => LANG['RECOVER']
             ];
             $this->view('user-recover', $data, 'user');
         }
@@ -40,16 +41,17 @@ class Recover extends Controller
     public function confirm($id, $secret)
     {
         if (!intval($id) && !strlen($secret) == 20) {
-            $this->showMessage(URLROOT, LANG["NOTHING_FOUND"]);
+            showMessage(URLROOT, LANG["NOTHING_FOUND"]);
         }
 
         if (!empty($_POST)) {
+            // Confirm New Password
             RecoverModel::changePassword($id, $secret);
         } else {
             $data = [
-                'page_title' => LANG['RECOVER'],
-                'V_id' => $id,
-                'V_secret' => $secret
+                'TITLE' => LANG['RECOVER'],
+                'ID' => $id,
+                'SECRET' => $secret
             ];
             $this->view('user-recover-confirm', $data, 'user');
         }

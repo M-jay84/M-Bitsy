@@ -19,21 +19,21 @@ class Adminreport extends Controller
         $this->current_user = new Auth();
 
         if (!$this->current_user->isStaff) {
-            $this->showMessage(URLROOT, LANG["NO_PERMISSION"]);
+            showMessage(URLROOT, LANG["NO_PERMISSION"]);
         }
     }
 
-    // Reports Default Page
+    // Reports
     public function index()
     {
-        // Check User Input
+        // Get Reports
         $reports = ReportsModel::pagination();
 
         // Data For View
         $data = [
-            'page_title' => LANG["REPORT"],
-            'V_reports' => $reports['stmt'],
-            'V_pager' => $reports['pager']
+            'TITLE' => LANG["REPORT"],
+            'REPORTS' => $reports['stmt'],
+            'PAGER' => $reports['pager']
         ];
 
         // Load View
@@ -51,7 +51,7 @@ class Adminreport extends Controller
             ReportsModel::deleteByIds();
         }
 
-        $this->showMessage('adminreport', LANG["ACTION_FAILED"]);
+        showMessage('adminreport', LANG["ACTION_FAILED"]);
     }
 
 }

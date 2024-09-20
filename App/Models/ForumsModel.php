@@ -5,10 +5,10 @@ namespace App\Models;
 use App\Libs\DB;
 use App\Libs\Validate;
 use App\Models\ForumCatsModel;
-use App\Models\TopicsModel;
+use App\Models\GroupsModel;
 use App\Models\PostsModel;
 use App\Models\ReadModel;
-use App\Models\GroupsModel;
+use App\Models\TopicsModel;
 
 /*
 * Forums Table Data
@@ -84,10 +84,10 @@ class ForumsModel
         $type = (isset($_GET['type'])) ? trim(filter_input(INPUT_GET, 'type')) : '';
 
         $data = [
-            'forums' => array(),
-            'keywords' => $keywords,
-            'title' => LANG["FORUM"],
-            'pager' => ''
+            'FORUMS' => array(),
+            'KEYWORDS' => $keywords,
+            'TITLE' => LANG["FORUM"],
+            'PAGER' => ''
         ];
 
         // Search Match
@@ -151,8 +151,8 @@ class ForumsModel
         $forums = ['res' => $res, 'pager' => $pager, 'count' => $count];
         if ($forums['count'] > 0) {   
             // Init Data
-            $data['forums'] = $forums['res'];
-            $data['pager'] = $forums['pager'];
+            $data['FORUMS'] = $forums['res'];
+            $data['PAGER'] = $forums['pager'];
         } else {
             showMessage('forum/search', LANG["NOTHING_FOUND"]);
         }
@@ -181,8 +181,8 @@ class ForumsModel
     // Admin Delete Cat
     public static function deleteCats($id, $action = 0)
     {
-        if ($action != 'sure') {
-            showMessage('adminforumcat', "Are You Sure <a href='".URLROOT."/adminforumcat/delete/$id/sure'>Remove Cat $id</a>");
+        if ($action == 0) {
+            showMessage('adminforumcat', "Are You Sure <a href='".URLROOT."/adminforumcat/delete/$id/1'>Remove Cat $id</a>");
         }
 
 
@@ -191,7 +191,7 @@ class ForumsModel
             showMessage('adminforumcat', LANG["FORUM_INVALID_CAT"]);
         }
 
-        ForumCatsModel::delete(['id' => $id]);
+        DB::delete('forumcats', ['id'=>$id]);
         $res = DB::fetchAll('forum_forums', 'id', ['category='], [$id]);
         foreach ($res as $row) {
             $res2 = TopicsModel::fetchAll('id', ['forumid='], [$row['id']]);
@@ -266,13 +266,6 @@ class ForumsModel
             ForumCatsModel::update(['sort','name'], ['id='], [$sort, $name, $id]);
             showMessage('adminforumcat', "<center><b>" . LANG["UPDATE_COMPLETE"] . "</b></center>");
         }
-    }
-
-    public static function getIndex()
-    {
-        $array = ForumCatsModel::fetchAll('*', '', 'ORDER BY sort');
-
-        return $array;
     }
 
     // Get User Forum Post By Id

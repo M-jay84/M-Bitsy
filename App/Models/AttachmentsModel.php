@@ -77,7 +77,7 @@ class AttachmentsModel
     // Set Attachment
     public static function set_attachment($data = [])
     {
-        if (!empty($_FILES['file'])) :
+        if (!empty($_FILES['file']['name'][0])) {
             $array = array($_FILES['file']['name']);
             $result = array_filter($array);
             foreach ($result as $k => $ar) :
@@ -113,6 +113,6 @@ class AttachmentsModel
                     }
                 }
             endforeach;
-        endif;
+        }
     }
 }

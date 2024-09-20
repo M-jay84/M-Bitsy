@@ -6,10 +6,6 @@ use App\Libs\Auth;
 use App\Libs\Controller;
 use App\Libs\Torrents\Bencode;
 use App\Models\DownloadModel;
-use App\Models\PermissionsModel;
-use App\Models\LikesModel;
-use App\Models\TorrentsModel;
-use App\Models\UsersModel;
 
 /*
 * Download Controller
@@ -24,18 +20,20 @@ class Download extends Controller
         $this->current_user = new Auth();
     }
 
-    // Download Torrent  todo (tidy up)
-    public function index($id, $key = '')
+    // Download Torrent
+    public function index($torrent_id, $key = '')
     {
+        // Get Passkey
         $passkey = $key == "" ?  $this->current_user->passkey : $key;
         
-        $data = DownloadModel::torrent($id, $passkey);
+        // Get File/Name/External
+        $data = DownloadModel::torrent($torrent_id, $passkey);
 
         // Local Torrent To Add Passkey
         if ($data["external"] != 'yes') {
             // Bencode
             $dict = Bencode::decode(file_get_contents($data['file']));
-            $dict['announce'] = sprintf(URLROOT . CONFIG['PASSKEYURL'], $passkey);
+            $dict['announce'] = URLROOT . "/announce.php?passkey=$passkey";
             unset($dict['announce-list']);
             $data = Bencode::encode($dict);
             header('Content-Disposition: attachment; filename="' . $data['name'] . '"');

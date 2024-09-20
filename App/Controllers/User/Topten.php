@@ -20,7 +20,7 @@ class Topten extends Controller
         $this->current_user = new Auth();
 
         if (!$this->current_user->loggedin && CONFIG['MEMBERSONLY']) {
-            $this->showMessage(URLROOT, LANG["NO_PERMISSION"]);
+            showMessage(URLROOT, LANG["NO_PERMISSION"]);
         }
     }
 

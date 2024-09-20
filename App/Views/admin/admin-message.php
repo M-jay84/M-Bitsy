@@ -1,4 +1,4 @@
-<?php block_begin($page_title) ?>
+<?php block_begin($TITLE) ?>
 <div class="text-center">
     <a type="button" class="model_form ttbtn btn-sm" data-bs-toggle="modal" data-bs-target="#messageModal"><?= LANG['CREATE_MASS'] ?></a>
 </div>
@@ -17,7 +17,7 @@
                 </tr>
             </thead>
             <tbody>
-                <?php foreach ($V_messages as $arr) : ?>
+                <?php foreach ($MESSAGES as $arr) : ?>
                     <tr>
                     <td col=1><input type='checkbox' name='ids[]' value='<?= $arr['id'] ?>' /></td>
                         <td col=1><?= coloredname($arr["sender"]) ?></td>
@@ -34,9 +34,9 @@
     </p>
   </form>
   
-   <?= $V_pager ?>
+   <?= $PAGER ?>
 
-<?php if ($current_user->id == 1) : ?>
+<?php if ($USER->id == 1) : ?>
 <p class="text-center"><?= LANG['MESSAGE_SPY'] ?></p>
 
 <form id="submit" method="post" action="<?= Url('adminmessage') ?>">
@@ -44,13 +44,13 @@
         <div class="modal-dialog modal-dialog-centered modal-md" style="max-width:700px;">
             <div class="modal-content">
                 <div class="modal-body">
-                    <?= LANG['SEND_TO'] ?><br>
-                    <?php foreach ($V_groups as $row) : ?>
-                        <input type='checkbox' name='clases[]' value='<?= $row['group_id']; ?>?' /><?= $row['level'] ?><br><br>
+                    <?= LANG['GROUPS'] ?><br>
+                    <?php foreach ($GROUPS as $row) : ?>
+                        <input type='checkbox' name='classes[]' value='<?= $row['group_id']; ?>?' /><?= $row['level'] ?><br><br>
                     <?php endforeach; ?>
                     <div class="input-group mb-3">
                         <?= LANG["SENDER"] ?> &nbsp;
-                        <?= $current_user->username ?>
+                        <?= $USER->username ?>
                         <input name="sender" type="radio" value="self" checked="checked" /> &nbsp;
                         <span></span>
                         <?= LANG['SYSTEM'] ?>

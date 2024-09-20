@@ -4,7 +4,6 @@ namespace App\Models;
 
 use App\Libs\DB;
 use App\Libs\Validate;
-use App\Models\UsersModel;
 use App\Models\LogsModel;
 
 /*
@@ -63,8 +62,17 @@ class BansModel
                          FROM bans 
                          LEFT JOIN users 
                          ON bans.addedby=users.id 
-                         WHERE bans.type=? OR bans.type=?
-                         ORDER BY added $limit", ['email', 'domain'])->fetchAll();
+                         WHERE bans.type=?
+                         ORDER BY added $limit", ['email'])->fetchAll();
+        } elseif ($type == 'domain') {
+            $count = DB::fetchColumn('bans', 'count(id)', '');
+            list($pager, $limit) = pagination(40, $count, URLROOT . "/adminban/email");
+            $stmt = DB::run("SELECT bans.id, bans.added, bans.addedby, bans.first, bans.last,bans.comment,bans.type, users.username 
+                         FROM bans 
+                         LEFT JOIN users 
+                         ON bans.addedby=users.id 
+                         WHERE bans.type=?
+                         ORDER BY added $limit", ['domain'])->fetchAll();
         }
 
         $array = [

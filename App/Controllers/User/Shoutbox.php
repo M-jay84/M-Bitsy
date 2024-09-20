@@ -3,7 +3,9 @@
 namespace App\Controllers\User;
 
 use App\Libs\Auth;
+use App\Libs\Cleanup;
 use App\Libs\Controller;
+use App\Libs\DB;
 use App\Models\ShoutboxModel;
 
 /*
@@ -19,13 +21,15 @@ class Shoutbox extends Controller
         $this->current_user = new Auth();
     }
 
+    public function index(){}
+
     // Ajax Shoutbox Load
     public function chat()
     {
         // Data For View
         $data = [
-            'page_title' => LANG['SHOUTBOX'],
-            'V_shouts' => ShoutboxModel::shouts(20),
+            'TITLE' => LANG['SHOUTBOX'],
+            'SHOUTS' => ShoutboxModel::shouts(20),
             'current_user' => $this->current_user
         ];
         
@@ -56,12 +60,20 @@ class Shoutbox extends Controller
     {
         // Data For View
         $data = [
-            'page_title' => LANG['HISTORY'],
-            'V_shouts' => ShoutboxModel::shouts(80)
+            'TITLE' => LANG['HISTORY'],
+            'SHOUTS' => ShoutboxModel::shouts(80)
         ];
 
         // Load View
         $this->view('user-shoutbox', $data, 'user');
+    }
+
+    // Run Cleanup
+    public function cleanup()
+    {
+        DB::update('tasks', ['last_time'], ['task='], [CONFIG['TT_TIME'],'cleanup']);
+        Cleanup::run();
+        showMessage('admincp', LANG["FORCE_CLEAN_COMPLETED"]);
     }
 
 }

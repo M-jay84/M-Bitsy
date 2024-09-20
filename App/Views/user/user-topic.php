@@ -1,5 +1,5 @@
-<?php block_begin($page_title) ?>
-<?php forumheader("$V_forum_name/$V_topic_name"); ?>
+<?php block_begin($TITLE) ?>
+<?php forumheader("$FORUM_NAME/$TOPIC_NAME"); ?>
 <div class="d-flex flex-row-reverse">
     <a type='button' class='model_form ttbtn' data-bs-toggle='modal' data-bs-target='#postModal'><?= LANG['NEW_TOPIC'] ?></a>
 </div><br>
@@ -21,7 +21,7 @@
                 </tr>
             </thead>
             <tbody>
-            <?php foreach ($V_topics['topics'] as $row) { ?>
+            <?php foreach ($TOPICS['topics'] as $row) { ?>
                     <tr>
                         <td><?= $row['read'] ?></td>
                         <td>
@@ -37,15 +37,15 @@
                         if ($current_user->edit_forum == 'yes' || $current_user->delete_news == 'yes') {
                             print("<td>");
                             if ($row['locked']) {
-                                print("<a href='" . Url("topic/action/$V_forumid/$row[id]/unlock") . "' title='Unlock'><i class='fa fa-unlock' style='color:red;' title='" . LANG["UNLOCK"] . "'></i></a>\n");
+                                print("<a href='" . Url("topic/action/$FORUM_ID/$row[id]/unlock") . "' title='Unlock'><i class='fa fa-unlock' style='color:red;' title='" . LANG["UNLOCK"] . "'></i></a>\n");
                             } else {
-                                print("<a href='" . Url("topic/action/$V_forumid/$row[id]/lock") . "' title='Lock'><i class='fa fa-lock' title='" . LANG["LOCK"] . "'></i></a>\n");
+                                print("<a href='" . Url("topic/action/$FORUM_ID/$row[id]/lock") . "' title='Lock'><i class='fa fa-lock' title='" . LANG["LOCK"] . "'></i></a>\n");
                             }
                             print("<a href='" . Url("topic/delete/$row[id]") . "' title='Delete'><i class='fa fa-trash' style='color:red;' title='" . LANG["DEL"] . "'></i></a>\n");
                             if ($row['sticky']) {
-                                print("<a href='" . Url("topic/action/$V_forumid/$row[id]/unsticky") . "' title='UnStick'><i class='fa fa-exclamation' style='color:red;' title='" . LANG["UNSTICKY"] . "'></i></a>\n");
+                                print("<a href='" . Url("topic/action/$FORUM_ID/$row[id]/unsticky") . "' title='UnStick'><i class='fa fa-exclamation' style='color:red;' title='" . LANG["UNSTICKY"] . "'></i></a>\n");
                             } else {
-                                print("<a href='" . Url("topic/action/$V_forumid/$row[id]/sticky") . "' title='Stick'><i class='fa fa-exclamation' title='" . LANG["STICKY"] . "'></i></a>\n");
+                                print("<a href='" . Url("topic/action/$FORUM_ID/$row[id]/sticky") . "' title='Stick'><i class='fa fa-exclamation' title='" . LANG["STICKY"] . "'></i></a>\n");
                             }
                             print("</td>");
                         }
@@ -57,7 +57,7 @@
     </div>
 </div><br>
 
-<?= $V_topics['pager'] ?>
+<?= $TOPICS['pager'] ?>
 
 <div class=" rounded p-1">
     <i class='fa fa-file-text' style='color:red;'></i>&nbsp;<?= LANG["NEW_POST"] ?>&nbsp;
@@ -66,8 +66,8 @@
     <i class='fa fa-exclamation'></i>&nbsp;<?= LANG["STICKY"] ?>
 </div>
 
-<!-- Post Modal -->
-<form name="form" action="<?= Url("topic/submit/$V_forumid") ?>" method="post" enctype='multipart/form-data'><br>
+<!-- 1st Post Modal -->
+<form name="form" action="<?= Url("topic/submit/$FORUM_ID") ?>" method="post" enctype='multipart/form-data'><br>
     <div class="modal fade" id="postModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-md" style="max-width:700px;">
             <div class="modal-content">

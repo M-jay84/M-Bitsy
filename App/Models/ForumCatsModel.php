@@ -9,12 +9,6 @@ use App\Libs\DB;
 */
 class ForumCatsModel
 {
-    // Delete Cat
-    public static function delete($id)
-    {
-        $stmt = DB::delete('forumcats', ['id'=>$id]);
-        return $stmt;
-    }
 
     // Insert Forum Cat
     public static function insert($updateset)

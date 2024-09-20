@@ -4,9 +4,8 @@ namespace App\Models;
 
 use App\Libs\DB;
 use App\Libs\Validate;
-use App\Models\UsersModel;
-use App\Models\MessagesModel;
 use App\Models\LogsModel;
+use App\Models\MessagesModel;
 
 /*
 * Warnings Table Data
@@ -82,37 +81,17 @@ class WarningsModel
     }
 
     // Get All Warnings
-    public static function getAll($current_user, $id = 0)
+    public static function getAll()
     {
-        // Check User
-        if ($current_user->view_users != "yes" && $current_user->id != $id) {
-            showMessage(URLROOT, LANG["NO_USER_VIEW"]);
-        }
-        if (($current_user->enabled == "no" || ($current_user->status == "pending")) && !$current_user->edit_users == 'yes') {
-            showMessage('members', LANG["NO_ACCESS_ACCOUNT_DISABLED"]);
-        }
+        // Pagination
+        $count = DB::fetchColumn('users', 'count(id)', ['warned='], ['yes']);
+        list($pager, $limit) = pagination(25, $count, URLROOT . '/adminwarning?');
+        $stmt = DB::run("SELECT users.id,users.username,users.class,users.added,users.last_access 
+                        FROM users
+                        WHERE warned = ?
+                        ORDER BY `added` 
+                        DESC $limit", ['yes'])->fetchAll();
         
-        if ($id) {
-            $stmt = DB::fetchAll('warnings', '*', ['userid='], [$id], 'ORDER BY id DESC');
-            return $stmt;
-        } else {
-            // Pagination
-            $count = DB::fetchColumn('users', 'count(id)', ['enabled=', 'status=', 'warned='], ['yes', 'confirmed', 'yes']);
-            list($pager, $limit) = pagination(25, $count, URLROOT . '/adminwarning?');
-            $stmt = DB::run("SELECT users.id,users.username,users.class,users.added,users.last_access, 
-                           (
-                            SELECT COUNT(*)
-                            FROM warnings 
-                            WHERE warnings.userid = users.id 
-                            AND active = ?
-                            ) as num
-                            FROM users
-                            WHERE enabled = ?
-                            AND status = ? 
-                            AND warned = ?
-                            ORDER BY `added` 
-                            DESC $limit", ['yes', 'yes', 'confirmed', 'yes'])->fetchAll();
-        }
         $array = [
             'count' => $count,
             'stmt' => $stmt,
@@ -121,6 +100,7 @@ class WarningsModel
         return $array;
     }
 
+    // Admin Delete Warnings
     public static function deleteAllAdmin()
     {
         $ids = Validate::multiIds('ids');

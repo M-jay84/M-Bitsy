@@ -1,4 +1,4 @@
-<?php block_begin($page_title) ?>
+<?php block_begin($TITLE) ?>
 <p class='text-center'>
     To solve this problem you must to keep seeding these torrents for <?= CONFIG['HNR_SEEDTIME'] ?> hours or until ratio becomes 1:1<br>
     But if you want a fast way, you can trade to delete these recordings with Bonus or Upload
@@ -19,7 +19,7 @@
         </thead>
         <tbody>
             <?php
-            foreach ($V_snatched as $row) {
+            foreach ($SNATCHED as $row) {
                 $smallname = htmlspecialchars(CutName($row['name'], 40)); ?>
                 <tr>
                     <td><a href="<?php echo Url("torrent/$row[tid]") ?>"><b><?= $smallname ?></b></a></td>

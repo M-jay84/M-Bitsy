@@ -1,9 +1,3 @@
-<?php
-
-use App\Libs\Cache;
-
- $TTCache = new Cache(); ?>
-          
 <?php $GLOBALS['tstart'] = array_sum(explode(" ", microtime())); ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -67,41 +61,43 @@ use App\Libs\Cache;
                 <?php block_begin(); ?>
                 <p class="text-center">
                 <a href="<?= Url() ?>"><b><?= LANG["HOME"] ?></b></a><br>
+                <a href="<?= Url('admincp') ?>"><b><?= LANG["ADMIN"] ?></b></a><br>
                 <a href="<?= Url('adminban') ?>"><b><?= LANG["BANNED"] ?></b></a><br>
                 <a href="<?= Url('admincategorie') ?>"><b><?= LANG["CATEGORIES"] ?></b></a><br>
-                <a href="<?= Url('adminclient/peers') ?>"><b><?= LANG["CLIENT_BAN"] ?></b></a><br>
+                <a href="<?= Url('adminclient/peers') ?>"><b><?= LANG["CLIENTS"] ?></b></a><br>
                 <a href="<?= Url('admincomment') ?>"><b><?= LANG["COMMENT"] ?></b></a><br>
                 <a href="<?= Url('adminemail') ?>"><b><?= LANG["EMAIL"] ?></b></a><br>
                 <a href="<?= Url('adminforumcat') ?>"><b><?= LANG["FORUM"] ?></b></a><br>
                 <a href="<?= Url('admingroup') ?>"><b><?= LANG["GROUPS"] ?></b></a><br>
-                <a href="<?= Url('admininactive') ?>"><b><?= LANG["INACTIVE"] ?></b></a><br>
-                <a href="<?= Url('admininvite') ?>"><b><?= LANG["INVITES"] ?></b></a>/<a href="<?= Url('admininvite/pending') ?>"><b><?= LANG["PENDING"] ?></b></a><br>
-                <a href="<?= Url('adminlog') ?>"><b><?= LANG["LOG"]; ?></b></a><br>
+                <a href="<?= Url('admininactive/30') ?>"><b><?= LANG["INACTIVE"] ?></b></a><br>
+                <a href="<?= Url('admininvite') ?>"><b><?= LANG["INVITES"] ?></b></a><br>
+                <a href="<?= Url('admininvite/pending') ?>"><b><?= LANG["PENDING"] ?></b></a>
                 </p>
                 <?php block_end(); ?>
                 <?php require_once VIEW_PATH . "/inc/block/statistics_block.php"; ?>
             </div>
             <!-- Main Page Start -->
             <div class="col portalmain">
-                <?php block_begin(); ?>
+                <?php block_begin('STAFF'); ?>
                 <?php require_once VIEW_PATH . "/admin/admin-panel.php"; ?>
                 <?php block_end(); ?>
                 <?php require_once VIEW_PATH . "/admin/$file.php"; ?>
             </div>
             <!-- Right Column Start -->
             <div class="col  portal_sidebar">
-                <?php block_begin('STAFF'); ?>
+                <?php block_begin(); ?>
                 <p class="text-center">
+                <a href="<?= Url('adminlog') ?>"><b><?= LANG["LOGS"]; ?></b></a><br>
                 <a href="<?= Url('adminmessage') ?>"><b><?= LANG["MESSAGES"] ?></b></a><br>
                 <a href="<?= Url('adminnews') ?>"><b><?= LANG["NEWS"] ?></b></a><br>
                 <a href="<?= Url('adminpeer') ?>"><b><?= LANG["PEERS"] ?></b></a><br>
                 <a href="<?= Url('adminreport') ?>"><b><?= LANG["REPORT"] ?></b></a><br>
-                <a href="<?= Url('admintask/clear') ?>"><b><?= LANG["CLEAR_SHOUTBOX"] ?></b></a><br>
+                <a href="<?= Url('admintask/clearshoutbox') ?>"><b><?= LANG["SHOUTBOX_CLEAR"] ?></b></a><br>
                 <a href="<?= Url('adminsnatch') ?>"><b><?= LANG["SNATCH"] ?></b></a><br>
                 <a href="<?= Url('admintag') ?>"><b><?= LANG["TAGS"] ?></b></a><br>
                 <a href="<?= Url('admintorrent') ?>"><b><?= LANG["TORRENT"] ?></b></a><br>
                 <a href="<?= Url('adminusersearch') ?>"><b><?= LANG["USER_SEARCH"] ?></b></a><br>
-                <a href="<?= Url('adminwarning') ?>"><b><?= LANG["WARNINGS"] ?></b></a><br>
+                <a href="<?= Url('adminwarning') ?>"><b><?= LANG["WARNINGS"] ?></b></a>
                 </p>
                 <?php block_end(); ?>
                 <?php require_once VIEW_PATH . "/inc/block/usersonline_block.php"; ?>

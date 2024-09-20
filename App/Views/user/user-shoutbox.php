@@ -1,7 +1,7 @@
-<?php block_begin($page_title) ?>
+<?php block_begin($TITLE) ?>
 <div>
     <table class='table table-striped'>
-        <?php foreach ($V_shouts as $row) {
+        <?php foreach ($SHOUTS as $row) {
             $av = isset($row['avatar']) ? $row['avatar'] : URLROOT.'/assets/images/misc/default_avatar.webp'; ?>
             <tr>
             <td style="width:25%">

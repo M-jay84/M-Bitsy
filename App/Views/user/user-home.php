@@ -92,7 +92,7 @@ if (CONFIG['LATESTFORUMPOSTONINDEX']) {
 }
 
 if (CONFIG['FORUMONINDEX']) {
-    $forums_res = ForumsModel::getIndex();
+    $forums_res = DB::fetchAll('forum_cats', '*', '', 'ORDER BY sort');
     block_begin(LANG['FORUM']);
     if ($forums_res->rowCount() == 0) {
         echo LANG["NO fORUMS fOUND"];

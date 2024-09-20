@@ -6,7 +6,6 @@ use PDO;
 use App\Libs\DB;
 use App\Libs\TTMail;
 use App\Libs\Validate;
-use App\Models\UsersModel;
 use App\Models\GroupsModel;
 use App\Models\LogsModel;
 
@@ -15,42 +14,6 @@ use App\Models\LogsModel;
 */
 class MessagesModel
 {
-    // Count Messages
-    public static function countMsg($data = [])
-    {
-        $res = DB::run("SELECT COUNT(*), COUNT(`unread` = 'yes') FROM messages WHERE `receiver` = ".$data['current_user']->id." AND `location` IN ('in','both')");
-        $res = DB::run("SELECT COUNT(*) FROM messages WHERE receiver=" . $data['current_user']->id . " AND `location` IN ('in','both')");
-        $inbox = $res->fetchColumn();
-        $res = DB::run("SELECT COUNT(*) FROM messages WHERE `receiver` = " . $data['current_user']->id . " AND `location` IN ('in','both') AND `unread` = 'yes'");
-        $unread = $res->fetchColumn();
-        $res = DB::run("SELECT COUNT(*) FROM messages WHERE `sender` = " .$data['current_user']->id . " AND `location` IN ('out','both')");
-        $outbox = $res->fetchColumn();
-        $res = DB::run("SELECT COUNT(*) FROM messages WHERE `sender` = " . $data['current_user']->id . " AND `location` = 'draft'");
-        $draft = $res->fetchColumn();
-        $res = DB::run("SELECT COUNT(*) AS count FROM messages WHERE `sender` = " . $data['current_user']->id . " AND `location` = 'template'");
-        $template = $res->fetchColumn();
-
-        $arr = [
-            'inbox' => $inbox,
-            'unread' => $unread,
-            'outbox' => $outbox,
-            'draft' => $draft,
-            'template' => $template,
-        ];
-        return $arr;
-    }
-
-    // Templates Drop Down
-    public static function echoTemplates($id)
-    {
-        $templates = "<option value=\"0\">---- " . LANG["NOTHING_SELECTED"] . " ----</option>\n";
-        $stmt = DB::fetchAll('messages', '*', ['sender=', 'location='], [$id, 'template'], 'ORDER BY `subject`');
-        foreach ($stmt as $arr) {
-            $templates .= "<option value=\"$arr[id]\">$arr[subject]</option>\n";
-        }
-        return $templates;
-    }
-
     // Add Message
     public static function insert($data)
     {
@@ -60,7 +23,6 @@ class MessagesModel
         if (strpos($user['notifs'], '[pm]') !== false) {
             $url = URLROOT;
             $body = "You have received a PM\n\nYou can use the URL below to view the message (you may have to login).\n\n$url/message/mailbox\n\n".CONFIG['SITENAME']."";
-            $email = CONFIG['SITEEMAIL'];
             $TTMail = new TTMail();
             $TTMail->Send($user["email"], "You have received a PM", $body, "From: " . CONFIG['SITEEMAIL'] . "", "-f" . CONFIG['SITEEMAIL'] . "");
         }
@@ -143,36 +105,20 @@ class MessagesModel
     }
 
     // Delete Message
-    public static function delete($type, $id)
+    public static function delete($type, $current_user)
     {
         $ids = Validate::multiIds('del');
 
-        if ($_POST["read"]) {
-            DB::updateWhereIn('meesages', ['unread' => 'no'], $ids);
-        } else {
-            if ($type == 'inbox') {
-                DB::run("DELETE FROM messages WHERE `location` = 'in' AND `receiver` = ".$id." AND `id` IN ($ids)");
-                DB::run("UPDATE messages SET `location` = 'out' WHERE `location` = 'both' AND `receiver` = ".$id." AND `id` IN ($ids)");
-            } elseif ($type == 'outbox') {
-                DB::run("UPDATE messages SET `location` = 'in' WHERE `location` = 'both' AND `sender` = ".$id." AND `id` IN ($ids)");
-                DB::run("DELETE FROM messages WHERE `location` IN ('out', 'draft', 'template') AND `sender` = ".$id." AND `id` IN ($ids)");
-            } elseif ($type == 'templates') {
-                DB::deleteByIds(
-                    'messages', 
-                    ['sender =','location='], 
-                    $ids, 
-                    'id', 
-                    [$id, 'template']
-                );
-            } elseif ($type == 'draft') {
-                DB::deleteByIds(
-                    'messages', 
-                    ['sender =','location='], 
-                    $ids, 
-                    'id', 
-                    [$id, 'draft']
-                );
-            }
+        if ($type == 0 && $current_user->isStaff) {
+            die('todo');
+        } elseif ($_POST["read"]) {
+            DB::updateWhereIn('messages', ['unread' => 'no'], $ids);
+        } elseif ($type == 'inbox') {
+                DB::run("DELETE FROM messages WHERE `location` = ? AND `receiver` = ? AND `id` IN (?)", ['in', $current_user->id, $ids]);
+                DB::run("UPDATE messages SET `location` = ? WHERE `location` = ? AND `receiver` = ? AND `id` IN (?)", ['out', 'both', $current_user->id, $ids]);
+        } elseif ($type == 'outbox') {
+                DB::run("UPDATE messages SET `location` =  WHERE `location` = ? AND `sender` = ? AND `id` IN (?)", ['in', 'both', $current_user->id, $ids]);
+                DB::run("DELETE FROM messages WHERE `location` IN ('out', 'draft', 'template') AND `sender` = ? AND `id` IN (?)", [$current_user->id, $ids]);
         }
         showMessage(("message/mailbox/$type"), LANG["SUCCESS"]);
     }
@@ -246,6 +192,7 @@ class MessagesModel
             showMessage('adminmessage/masspm', LANG["MISSING_FORM_DATA"]);
         }
 
+        
         $updateset = array_map("intval", $_POST['classes']);
         $query = DB::run("SELECT id FROM users WHERE class IN (" . implode(",", $updateset) . ")");// AND enabled = 'yes' AND status = 'confirmed'
         while ($dat = $query->fetch(PDO::FETCH_ASSOC)) {

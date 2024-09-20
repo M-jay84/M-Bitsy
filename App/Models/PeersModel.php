@@ -17,7 +17,7 @@ class PeersModel
             showMessage(URLROOT, LANG["NO_USER_VIEW"]);
         }
 
-        $title = LANG["USER_DETAILS_FOR" . coloredname($id)];
+        $title = LANG["USER_DETAILS_FOR"] . coloredname($id);
 
         if ($type == 'torrent') {
             if ($current_user->torrents == "no" && $current_user->id != $id && $current_user->class < CONFIG['_UPLOADER']) {

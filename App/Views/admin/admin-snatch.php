@@ -1,6 +1,6 @@
-<?php block_begin($page_title) ?>
+<?php block_begin($TITLE) ?>
 <div class='text-center'>
-    <?php echo  sprintf(LANG['WE_HAVE_X_SNATCH'], $V_count); ?>
+    <?php echo  sprintf(LANG['WE_HAVE_X_SNATCH'], $COUNT); ?>
 </div>
 
 <form id="snatched" method="post" action="<?= Url('adminsnatch/submit') ?>">
@@ -20,7 +20,7 @@
             </thead>
             <tbody>
                 <tr>
-                <?php foreach ($V_snatched as $row) : ?>
+                <?php foreach ($SNATCHED as $row) : ?>
                     <td><a href="<?= Url("torrent/$row[tid]") ?>"><?= CutName($row['name'], 35) ?></td>
                     <?php
                     if ($row['username']) {
@@ -47,5 +47,5 @@
        <input type='submit' value='Delete' />
     </div>
 </form>
-<?= $V_pager ?>
+<?= $PAGER ?>
 <?php block_end() ?>

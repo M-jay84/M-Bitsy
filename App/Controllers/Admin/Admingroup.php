@@ -19,20 +19,23 @@ class Admingroup extends Controller
         $this->current_user = new Auth();
 
         if (!$this->current_user->isStaff) {
-            $this->showMessage(URLROOT, LANG["NO_PERMISSION"]);
+            showMessage(URLROOT, LANG["NO_PERMISSION"]);
         }
     }
 
-    // Groups Default Page
+    // Groups
     public function index()
     {
         if (!empty($_POST)) {
+            // Add/Edit Groups
             GroupsModel::insertOrUpdate();
         } else {
+            // Get All Groups
+            $groups = GroupsModel::getGroups();
             
             $data = [
-                'page_title' => LANG["GROUP"],
-                'V_groups' => GroupsModel::getGroups()
+                'TITLE' => LANG["GROUPS"],
+                'GROUPS' => $groups
             ];
         
             // Load View
@@ -40,7 +43,7 @@ class Admingroup extends Controller
         }
     }
 
-    // Delete Groups Submit
+    // Delete Groups
     public function delete($group_id)
     {
         GroupsModel::delete($group_id);

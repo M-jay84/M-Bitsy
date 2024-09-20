@@ -19,15 +19,15 @@ class Snatch extends Controller
         $this->current_user = new Auth();
 
         if (!$this->current_user->loggedin) {
-            $this->showMessage(URLROOT, LANG["NO_PERMISSION"]);
+            showMessage(URLROOT, LANG["NO_PERMISSION"]);
         }
     }
 
-    // Snatched Torrent Default Page // todo more test
+    // Snatched Torrents
     public function index($id, $type)
     {
         if ($this->current_user->view_torrents && $id != $this->current_user->id) {
-            $this->showMessage(URLROOT, LANG["NO_TORRENT_VIEW"]);
+            showMessage(URLROOT, LANG["NO_TORRENT_VIEW"]);
         }
         
         if ($type == 'complete') {
@@ -43,11 +43,11 @@ class Snatch extends Controller
 
         // Data For View
         $data = [
-            'page_title' => LANG["SNATCH_RESULT"],
-            'V_cols' => $cols,
-            'V_snatched' => $snatched['stmt'],
-            'V_count' => $snatched['count'],
-            'V_pager' => $snatched['pager']
+            'TITLE' => LANG["SNATCH_RESULT"],
+            'COLS' => $cols,
+            'SNATCHED' => $snatched['stmt'],
+            'COUNT' => $snatched['count'],
+            'PAGER' => $snatched['pager']
         ];
 
         // Load View
@@ -62,8 +62,8 @@ class Snatch extends Controller
         } else {
             // Data For View
             $data = [
-                'page_title' => LANG['TRADE'],
-                'V_snatched' => SnatchedModel::trade($this->current_user->id)
+                'TITLE' => LANG['TRADE'],
+                'SNATCHED' => SnatchedModel::trade($this->current_user->id)
             ];
 
             // Load View

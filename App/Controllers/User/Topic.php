@@ -19,13 +19,13 @@ class Topic extends Controller
         $this->current_user = new Auth();
     
         if (!CONFIG['FORUMS']) {
-            $this->showMessage(URLROOT, LANG["FORUM_AVAILABLE"]);
+            showMessage(URLROOT, LANG["FORUM_AVAILABLE"]);
         }
         if (!CONFIG['FORUMS_GUESTREAD'] && !$this->current_user->loggedind) {
-            $this->showMessage(URLROOT, LANG["NO_PERMISSION"]);
+            showMessage(URLROOT, LANG["NO_PERMISSION"]);
         }
         if ($this->current_user->view_forum != "yes" && !$this->current_user->isStaff) {
-            $this->showMessage(URLROOT, LANG["FORUM_BANNED"]);
+            showMessage(URLROOT, LANG["FORUM_BANNED"]);
         }
     }
 
@@ -37,11 +37,11 @@ class Topic extends Controller
 
         // Data For View
         $data = [
-            'page_title' => LANG["FORUM"],
-            'V_topics' => $topics,
-            'V_forumid' => $forumid,
-            'V_topic_name' => $topics['topic_name'],
-            'V_forum_name' => $topics['forum_name'],
+            'TITLE' => LANG["FORUM"],
+            'TOPICS' => $topics,
+            'FORUM_ID' => $forumid,
+            'TOPIC_NAME' => $topics['topic_name'],
+            'FORUM_NAME' => $topics['forum_name'],
             'current_user' => $this->current_user
         ];
 

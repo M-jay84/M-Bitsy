@@ -4,9 +4,8 @@ namespace App\Models;
 
 use App\Libs\DB;
 use App\Libs\Validate;
-use App\Models\SnatchedModel;
 use App\Models\LogsModel;
-use App\Models\UsersModel;
+use App\Models\SnatchedModel;
 
 /*
 * Bonus Table Data

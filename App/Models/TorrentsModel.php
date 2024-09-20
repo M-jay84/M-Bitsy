@@ -2,19 +2,19 @@
 
 namespace App\Models;
 
-use App\Libs\DB;
 use PDO;
-use App\Models\TmdbModel;
-use App\Models\LikesModel;
-use App\Models\TorrentTagModel;
-use App\Models\TagsModel;
+use App\Libs\DB;
 use App\Models\CatagoriesModel;
+use App\Models\LikesModel;
+use App\Models\LogsModel;
+use App\Models\MessagesModel;
 use App\Models\RatingsModel;
 use App\Models\ReportsModel;
-use App\Models\TorrentLangModel;
-use App\Models\LogsModel;
 use App\Models\SnatchedModel;
-use App\Models\MessagesModel;
+use App\Models\TagsModel;
+use App\Models\TmdbModel;
+use App\Models\TorrentTagModel;
+use App\Models\TorrentLangModel;
 
 // Torrent Search
 function search()
@@ -199,13 +199,6 @@ class TorrentsModel
 	}
 	
     // Fetch Torrent Details
-    public static function fetchAll($columns = '*', $where = '', $values = '', $other = '')
-    {
-        $stmt = DB::newSelect('torrents', $columns, $where, $values, $other);
-		return $stmt;
-	}
-		
-    // Fetch Torrent Details
     public static function fetchRow($columns = '*', $where = '', $values = '', $other = '')
     {
         $stmt = DB::fetchRow('torrents', $columns, $where, $values, $other);
@@ -263,7 +256,7 @@ class TorrentsModel
             $item_id = $stmt["tmdb"];
             $type = 'film';
         }
-        if ($type == 'tv' || 'film' || 'imdb') {
+        if ($type == 'tv' || $type == 'film' || $type == 'imdb') {
             $tmdb1 = TmdbModel::createMDB($stmt['id'], $item_id, $type);
             $image = "<img src='" . data_uri($tmdb1['link'], $stmt['tmdb'] . '.webp') . "' height='250' width='100%' />";
         }
@@ -527,19 +520,4 @@ class TorrentsModel
         return $array;
     }
 
-    // Get Cat
-    public static function getCatSortAll($where, $date_time, $orderby, $limit)
-    {
-        $row = DB::run("SELECT torrents.id, torrents.anon, torrents.category, torrents.sticky, torrents.tmdb, torrents.imdb, torrents.tube, torrents.tube, torrents.leechers, torrents.nfo, torrents.seeders, torrents.name, torrents.times_completed, torrents.size,
-                               torrents.added, torrents.comments, torrents.numfiles, torrents.filename, torrents.owner, torrents.external, torrents.freeleech, categories.name
-                        AS cat_name, categories.parent_cat
-                        AS cat_parent, categories.image
-                        AS cat_pic, users.username, users.privacy
-                        FROM torrents
-                        LEFT JOIN categories
-                        ON category = categories.id
-                        LEFT JOIN users
-                        ON torrents.owner = users.id $where AND torrents.added>='$date_time' $orderby $limit");
-        return $row;
-    }
 }

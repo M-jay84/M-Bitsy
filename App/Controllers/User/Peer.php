@@ -6,7 +6,6 @@ use App\Libs\Auth;
 use App\Libs\Controller;
 use App\Libs\DB;
 use App\Models\PeersModel;
-use App\Models\UsersModel;
 
 /*
 * Peers Controller
@@ -21,25 +20,25 @@ class Peer extends Controller
         $this->current_user = new Auth();
 
         if (!$this->current_user->loggedin) {
-            $this->showMessage(URLROOT, LANG["NO_PERMISSION"]);
+            showMessage(URLROOT, LANG["NO_PERMISSION"]);
         }
     }
 
-    // No Default Page // todo
+    // Peers
     public function index($type, $id)
     {
-        // Check User Input
+        // Get Peers & Users
         $user =  DB::fetchRow('users', 'id,username,privacy', ['id ='], [$id]);
         $peers = PeersModel::getPeers($type, $id, $this->current_user);
 
         // Data For View
         $data = [
-            'V_id' => $id,
-            'page_title' => $peers['title'],
-            'V_user' => $user,
-            'V_count' => $peers['count'],
-            'V_peers' => $peers['stmt'],
-            'V_pager' => $peers['pager'],
+            'ID' => $id,
+            'TITLE' => $peers['title'],
+            'USER' => $user,
+            'COUNT' => $peers['count'],
+            'PEERS' => $peers['stmt'],
+            'PAGER' => $peers['pager'],
             'current_user' => $this->current_user
         ];
 

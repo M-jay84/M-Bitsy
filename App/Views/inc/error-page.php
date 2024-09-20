@@ -8,8 +8,8 @@
   <meta name="author" content="M-jay">
   <meta name="description" content="M-BiTsy is a feature packed and highly customisable PHP/PDO/MVC Based BitTorrent tracker." />
   <meta name="keywords" content="https://github.com/M-jay84/M-BiTsy" />
-  <meta http-equiv="refresh" content="<?php echo $data['refresh'] ?>; url=<?php echo $data['V_url'] ?>">
-  <title><?= $data['page_title'] ?></title>
+  <meta http-equiv="refresh" content="<?php echo $REFRESH ?>; url=<?php echo $URL ?>">
+  <title><?= $TITLE ?></title>
   <!-- Bootstrap & Core CSS -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/css/bootstrap.min.css" rel="stylesheet">
   <script src="https://kit.fontawesome.com/2da665f0cd.js" crossorigin="anonymous"></script>
@@ -30,7 +30,6 @@
   <div class="container-fluid" style="margin-top:5px;">
     <div class="row">
 
-
       <div class="col  portal_sidebar">
       </div>
 
@@ -41,8 +40,8 @@
         </div>
         <div class="p-3">
         <div class='text-center'>
-            <b><?= $data['V_msg']; ?></b><br>
-            <b>Redirecting ...</b>&nbsp; <b>[ <a href='<?= $data['V_url']; ?>'>link</a> ]</b>&nbsp;
+            <b><?php echo $MESSAGE; ?></b><br>
+            <b>Redirecting ...</b>&nbsp; <b>[ <a href='<?= $URL; ?>'>link</a> ]</b>&nbsp;
         </div>
         </div>
     </div>

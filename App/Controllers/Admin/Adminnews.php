@@ -19,23 +19,24 @@ class Adminnews extends Controller
         $this->current_user = new Auth();
 
         if (!$this->current_user->isStaff) {
-            $this->showMessage(URLROOT, LANG["NO_PERMISSION"]);
+            showMessage(URLROOT, LANG["NO_PERMISSION"]);
         }
     }
 
-    // News Default Page
+    // News
     public function index()
     {
         if (!empty($_POST)) {
+            // Add/Edit News/Announcement
             NewsModel::insertOrUpdate();
         } else {
-            // Get News Data
+            // Show All News
             $news = NewsModel::fetchAll('*', '', 'ORDER BY added DESC');
 
             // Data For View
             $data = [
-                'page_title' => LANG["NEWS"],
-                'V_news' => $news
+                'TITLE' => LANG["NEWS"],
+                'NEWS' => $news
             ];
        
             // Load View
@@ -43,7 +44,7 @@ class Adminnews extends Controller
         }
     }
 
-    // Delete News Form Submit
+    // Delete News
     public function delete($id)
     {
         NewsModel::delete($id, $this->current_user->id);

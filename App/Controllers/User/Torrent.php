@@ -24,7 +24,7 @@ class Torrent extends Controller
         $this->current_user = new Auth();
 
         if (!$this->current_user->loggedin && CONFIG['MEMBERSONLY']) {
-            $this->showMessage(URLROOT, LANG["NO_PERMISSION"]);
+            showMessage(URLROOT, LANG["NO_PERMISSION"]);
         }
     }
 
@@ -34,7 +34,7 @@ class Torrent extends Controller
         $torrent = TorrentsModel::fetchIdDetails('torrents.id=?', [$id], $this->current_user);
 
         if ($this->current_user->view_torrents != "yes" && CONFIG['MEMBERSONLY'] && $torrent['owner'] != $id) {
-            $this->showMessage(URLROOT, LANG["NO_TORRENT_VIEW"]);
+            showMessage(URLROOT, LANG["NO_TORRENT_VIEW"]);
         }
 
         // Add Hit
@@ -50,7 +50,7 @@ class Torrent extends Controller
         // Add Bump
         if ($action == 'bump') {
             TorrentsModel::update(['added'], ['id='], [CONFIG['TT_DATE'], $id]);
-            $this->showMessage("torrent/$id", LANG["ACTION_COMPLETE"]);
+            showMessage("torrent/$id", LANG["ACTION_COMPLETE"]);
         }
 
         // Data For View
@@ -80,7 +80,7 @@ class Torrent extends Controller
         $row = TorrentsModel::fetchRow('owner,image2,image1', ['id ='], [$id]);
 
         if ($this->current_user->control_panel == "no" && $this->current_user->id != $id) {
-            $this->showMessage(URLROOT, LANG["NO_PERMISSION"]);
+            showMessage(URLROOT, LANG["NO_PERMISSION"]);
         }
 
         $updateset = array();
@@ -95,7 +95,7 @@ class Torrent extends Controller
                     die("No data " . var_dump($_FILES));
                 }
                 if ($nfofile['size'] > 65535) {
-                    $this->showMessage("torrent/$id", "NFO is too big! Max 65,535 bytes.");
+                    showMessage("torrent/$id", "NFO is too big! Max 65,535 bytes.");
                 }
                 $nfofilename = $nfofile['tmp_name'];
                 if (@is_uploaded_file($nfofilename) && @filesize($nfofilename) > 0) {
@@ -172,9 +172,9 @@ class Torrent extends Controller
             // Update
             TorrentsModel::updateset($updateset, $id);
             LogsModel::write("Torrent $id (" . htmlspecialchars($_POST["name"]) . ") was edited by " . $this->current_user->username . "");
-            $this->showMessage("torrent/$id", LANG['SUCCESS']);
+            showMessage("torrent/$id", LANG['SUCCESS']);
         } else {
-            $this->showMessage("torrent/$id", LANG['ACTION_FAILED']);
+            showMessage("torrent/$id", LANG['ACTION_FAILED']);
         }
     }
 
@@ -188,13 +188,13 @@ class Torrent extends Controller
 
         // Check Corrert Input
         if (!$this->current_user->delete_torrents == 'yes') {
-            $this->showMessage("torrent/$torrentid", LANG["NO__PERMISSION"]);
+            showMessage("torrent/$torrentid", LANG["NO__PERMISSION"]);
         }
         if (!intval($torrentid)) {
-            $this->showMessage("torrent/delete?id=$torrentid", LANG["MISSING_ID"]);
+            showMessage("torrent/delete?id=$torrentid", LANG["MISSING_ID"]);
         }
         if (!$delreason) {
-            $this->showMessage("torrent/delete?id=$torrentid", LANG["MISSING_FORM_DATA"]);
+            showMessage("torrent/delete?id=$torrentid", LANG["MISSING_FORM_DATA"]);
         }
 
         // Delete Torrent
@@ -208,6 +208,6 @@ class Torrent extends Controller
             MessagesModel::insert(['sender' => 0, 'receiver' => $owner['owner'], 'added' => CONFIG['TT_DATE'], 'subject' => 'Torrent Deleted', 'msg' => $msg_shout, 'unread' => 'yes', 'location' => 'in']);
         }
 
-        $this->showMessage("peer/seeding/$owner[owner]", htmlspecialchars($torrentname) . " " . LANG["DEL_ERROR"]);
+        showMessage("peer/seeding/$owner[owner]", htmlspecialchars($torrentname) . " " . LANG["DEL_ERROR"]);
     }
 }

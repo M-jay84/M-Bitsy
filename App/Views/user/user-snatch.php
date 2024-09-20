@@ -1,5 +1,5 @@
 <?php
-block_begin($page_title); ?>
+block_begin($TITLE); ?>
 
 <div class='table-responsive p-3'>
     <table class='table table-striped'>
@@ -11,20 +11,20 @@ block_begin($page_title); ?>
     <th><?= LANG["RATIO"] ?></th>
     <th><?= LANG["ADDED"] ?></th>
     <th><?= LANG["LAST_ACTION"] ?></th>
-    <th><?= LANG["SEED_TIMED"] ?></th>
+    <th><?= LANG["SEED_TIME"] ?></th>
     <th><?= LANG["COMPLETED"] ?></th>
     <th><?= LANG["SEEDING"] ?></th>
     <th><?= LANG["HNR"] ?></th>
     </tr>
     </thead>
     <tbody>
-     <?php foreach ($V_snatched as $row) {
+     <?php foreach ($SNATCHED as $row) {
         $userratio = $row['download'] > 0 ? number_format($row['upload'] / $row['download'], 1) : "---";
         $complete = $row['completed'] != 'yes' ? "<font color=#27B500><b>" . LANG["YES"] . "</b></font>" : "<font color=#FF1200><b>" . LANG["NO"] . "</b></font>";
         $seeding = $row['seeding'] != 'yes' ? "<font color=#27B500><b>" . LANG["YES"] . "</b></font>" : "<font color=#FF1200><b>" . LANG["NO"] . "</b></font>";
         $hnr = $row['hnr'] != 'yes' ? "<font color=#27B500><b>" . LANG["YES"] . "</b></font>" : "<font color=#FF1200><b>" . LANG["NO"] . "</b></font>";
         $seedtime = $row['last_time'] ? get_elapsed_time($row['last_time']) : '---';
-        $name = $col == 'torrent' ?  coloredname($row['id']) : htmlspecialchars(CutName($row['name'], 35));
+        $name = $COL == 'torrent' ?  coloredname($row['id']) : htmlspecialchars(CutName($row['name'], 35));
         ?>
         <tr>
         <td><b><?= $name ?></b></td>
@@ -43,4 +43,5 @@ block_begin($page_title); ?>
     </table>
     </div>
 <?php
+$PAGER;
 block_end();

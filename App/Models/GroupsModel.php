@@ -4,7 +4,6 @@ namespace App\Models;
 
 use App\Libs\DB;
 use App\Libs\Validate;
-use PDO;
 
 /*
 * Groups Table Data
@@ -24,56 +23,6 @@ class GroupsModel
         $stmt = DB::newSelect('groups', $columns, $where, $values, $other);
 		return $stmt;
 	}
-
-    // Get Staff
-    public static function getStaffTable($data = [])
-    {
-        $dt = date("Y-m-d H:i:s", CONFIG['TT_TIME'] - 180);
-
-        // Get Staff Data
-        $res = DB::run("SELECT `users`.`id`, `users`.`username`, `users`.`class`, `users`.`last_access`
-        FROM `users`
-        INNER JOIN `groups`
-        ON `users`.`class` = `groups`.`group_id`
-        WHERE `users`.`enabled` =? AND `users`.`status` =? AND `groups`.`staff_page` =?
-        ORDER BY `username`",
-        ['yes', 'confirmed', 'yes']);
-        $col = [];
-        $table = [];
-        while ($row = $res->fetch(PDO::FETCH_ASSOC)) {
-            $table[$row['class']] = ($table[$row['class']] ?? '') .
-            "<td><i class='fa fa-user' aria-hidden='true' title='Profile'></i>
-                 <a href='" . URLROOT . "/profile/$row[id]'>" . coloredname($row["id"]) . "</a>
-                 <a href='" . URLROOT . "/message/create/$row[id]'><i class='fa fa-comment' title='Send PM'></i></a></td>";
-            $col[$row['class']] = ($col[$row['class']] ?? 0) + 1;
-            if ($col[$row["class"]] <= 4) {
-                $table[$row["class"]] = $table[$row["class"]] . "<td></td>";
-            } else {
-                $table[$row["class"]] = $table[$row["class"]] . "</tr><tr>";
-                $col[$row["class"]] = 2;
-            }
-        }
-
-        $where = null;
-        if (!$data['current_user']->edit_users == 'yes') {
-            $where = "AND `staff_public` = 'yes'";
-        }
-
-        $res = DB::run("SELECT `group_id`, `level`, `staff_public`
-        FROM `groups`
-        WHERE `staff_page` = 'yes' $where
-        ORDER BY `staff_sort`");
-        if ($res->rowCount() == 0) {
-            showMessage(URLROOT, LANG["NO_STAFF_HERE"]);
-        }
-
-        $array = [
-            'res' => $res,
-            'table' => $table
-        ];
-
-        return $array;
-    }
 
     // Function That Returns The Group Name
     public static function GetUserClassName($i, $data = [])

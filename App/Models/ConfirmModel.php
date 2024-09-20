@@ -3,7 +3,6 @@
 namespace App\Models;
 
 use App\Libs\DB;
-use App\Models\UsersModel;
 
 /*
 * Account Data

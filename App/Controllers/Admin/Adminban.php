@@ -19,7 +19,7 @@ class Adminban extends Controller
         $this->current_user = new Auth();
 
         if (!$this->current_user->isStaff) {
-            $this->showMessage(URLROOT, LANG["NO_PERMISSION"]);
+            showMessage(URLROOT, LANG["NO_PERMISSION"]);
         }
     }
 
@@ -27,17 +27,18 @@ class Adminban extends Controller
     public function index($type = 'email')
     {
         if (!empty($_POST)) {
+            // Add New Ban
             BansModel::insert($this->current_user);
         } else {
+            // Show All Bans
             $bans = BansModel::getAll($type);
 
             // Data For View
             $data = [
-                'page_title' => LANG["BANNED"],
-                'V_type' => $type,
-                'V_bans' => $bans['bans'],
-                'V_pager' => $bans['pager'],
-                'current_user' => $this->current_user
+                'TITLE' => LANG["BANNED"],
+                'BANS' => $bans['bans'],
+                'PAGER' => $bans['pager'],
+                'USER' => $this->current_user
             ];
 
             // Load View
@@ -47,7 +48,11 @@ class Adminban extends Controller
 
     // Delete Bans
     public function delete()
-    {
-        BansModel::delete($this->current_user);
+    { 
+        if (!empty($_POST)) {
+            BansModel::delete($this->current_user);
+        } else {
+            showMessage(URLROOT, LANG["NOTHING_SELECTED"]);
+        }
     }
 }

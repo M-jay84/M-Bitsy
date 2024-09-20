@@ -19,35 +19,35 @@ class Adminsnatch extends Controller
         $this->current_user = new Auth();
 
         if (!$this->current_user->isStaff) {
-            $this->showMessage(URLROOT, LANG["NO_PERMISSION"]);
+            showMessage(URLROOT, LANG["NO_PERMISSION"]);
         }
     }
 
-    // Hit & Runs Default Page
+    // Snatch/H&R/Peer History
     public function index()
     {
-        if (!CONFIG['HNR_ON']) {
-            $this->showMessage(URLROOT, LANG["HNRS_BEEN_DISABLED"]);
-        }
-
-        // Pagination
+        // Show All Peer History
         $snatched = SnatchedModel::join('snatched.hnr = ?', 'yes');
 
         // Data For View
         $data = [
-            'page_title' => LANG["HNR"],
-            'V_count' => $snatched['count'],
-            'V_pager' => $snatched['pager'],
-            'V_snatched' => $snatched['stmt']
+            'TITLE' => LANG["HNR"],
+            'COUNT' => $snatched['count'],
+            'PAGER' => $snatched['pager'],
+            'SNATCHED' => $snatched['stmt']
         ];
 
         // Load View
         $this->view('admin-snatch', $data, 'admin');
     }
 
-    // Hit & Runs Default Page
+    // Delete Record Of Snatch/H&R/Peer History
     public function submit()
     {
-        SnatchedModel::deleteByIds();
+        if (!empty($_POST)) {
+            SnatchedModel::deleteByIds();
+        } else {
+            showMessage(URLROOT, LANG['NOTHING_SELECTED']);
+        }       
     }
 }

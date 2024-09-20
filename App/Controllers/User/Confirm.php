@@ -20,10 +20,7 @@ class Confirm extends Controller
     }
 
     // Email Reset Confirm
-    public function index()
-    {
-        die('no controller index');
-    }
+    public function index(){die('no access');}
 
     // Profile Email Reset Confirm
     public function confirmprofileemail($id, $secret, $email)

@@ -18,15 +18,16 @@ class Adminmessage extends Controller
     {
         $this->current_user = new Auth();
 
-        if (!$this->current_user->isStaff) {
-            $this->showMessage(URLROOT, LANG["NO_PERMISSION"]);
+        if (!$this->current_user->class > 6) {
+            showMessage(URLROOT, LANG["NO_PERMISSION"]);
         }
     }
 
-    // Message Default Page
+    // Messages
     public function index()
     {
         if (!empty($_POST)) {
+            // Send Multiple PMs
             MessagesModel::multiPM($this->current_user->id);
         } else {
             // Get Messages
@@ -34,11 +35,11 @@ class Adminmessage extends Controller
        
             // Data For View
             $data = [
-                'page_title' => LANG["MESSAGE"],
-                'V_messages' => $messages['res'],
-                'V_pager' => $messages['pager'],
-                'V_groups' => $messages['groups'],
-                'current_user' => $this->current_user
+                'TITLE' => LANG["MESSAGE"],
+                'MESSAGES' => $messages['res'],
+                'PAGER' => $messages['pager'],
+                'GROUPS' => $messages['groups'],
+                'USER' => $this->current_user
             ];
        
             // Load View

@@ -19,7 +19,7 @@ class Rating extends Controller
         $this->current_user = new Auth();
 
         if (!$this->current_user->loggedin) {
-            $this->showMessage(URLROOT, LANG["NO_PERMISSION"]);
+            showMessage(URLROOT, LANG["NO_PERMISSION"]);
         }
     }
 
@@ -29,7 +29,7 @@ class Rating extends Controller
         if (!empty($_POST)) {
             RatingsModel::addRating($id, $this->current_user->id);
         } else {
-            $this->showMessage(URLROOT, LANG["NOTHING_SELECTED"]);
+            showMessage(URLROOT, LANG["NOTHING_SELECTED"]);
         }
     }
 

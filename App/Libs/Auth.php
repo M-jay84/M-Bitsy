@@ -134,6 +134,7 @@ class Auth
         }
     }
 
+    // Log User Out
     public static function destroy_cookies()
     {
         setcookie('id', '', CONFIG['TT_TIME']-45);

@@ -19,18 +19,18 @@ class Bonus extends Controller
         $this->current_user = new Auth();
 
         if (!$this->current_user->loggedin) {
-            $this->showMessage(URLROOT, LANG["NO_PERMISSION"]);
+            showMessage(URLROOT, LANG["NO_PERMISSION"]);
         }
     }
 
-    // Bonus Page
+    // Bonus
     public function index()
     {
         $data = [
-            'page_title' => LANG['BONUS'],
-            'bonus_result' => BonusModel::getAll(),
-            'set_bonus_interval' => BonusModel::interval(),
-            'current_user' => $this->current_user
+            'TITLE' => LANG['BONUS'],
+            'BONUS' => BonusModel::getAll(),
+            'BONUS_INTERVAL' => BonusModel::interval(),
+            'USER' => $this->current_user
         ];
 
         $this->view('user-bonus', $data, 'user');
@@ -42,9 +42,9 @@ class Bonus extends Controller
         if (!empty($_POST)) {
             BonusModel::getById($this->current_user);
         } else {
-            $this->showMessage('bonus', LANG["NOTHING_FOUND"]);
+            showMessage('bonus', LANG["NOTHING_FOUND"]);
         }
-        $this->showMessage('bonus', LANG["SUCCESS"]);
+        showMessage('bonus', LANG["SUCCESS"]);
     }
     
     // Bonus Edit/Add Form Submit
@@ -54,12 +54,12 @@ class Bonus extends Controller
             if (!empty($_POST)) {
                 BonusModel::insertOrUpdate();
             } else {
-                $this->showMessage('bonus', LANG["NOTHING_FOUND"]);
+                showMessage('bonus', LANG["NOTHING_FOUND"]);
             }
         } else {
-            $this->showMessage(URLROOT, LANG["NO_PERMISSION"]);
+            showMessage(URLROOT, LANG["NO_PERMISSION"]);
         } 
-        $this->showMessage('bonus', LANG["SUCCESS"]);
+        showMessage('bonus', LANG["SUCCESS"]);
     }
 
     // Delete Bonus By Link $id
@@ -68,9 +68,9 @@ class Bonus extends Controller
         if ($this->current_user->isStaff) {
             BonusModel::delete($id);
         } else {
-            $this->showMessage(URLROOT, LANG["NO_PERMISSION"]);
+            showMessage(URLROOT, LANG["NO_PERMISSION"]);
         }
-        $this->showMessage('bonus', LANG["SUCCESS"]);
+        showMessage('bonus', LANG["SUCCESS"]);
     }
 
 }

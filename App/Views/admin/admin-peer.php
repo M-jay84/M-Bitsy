@@ -1,13 +1,13 @@
-<?php block_begin($page_title) ?>
+<?php block_begin($TITLE) ?>
 <p class="text-center">
-    <?php echo sprintf(LANG['MANY_PEERS'], $V_count); ?>
+    <?php echo sprintf(LANG['MANY_PEERS'], $COUNT); ?>
 </p>
-<?= $pager ?>
+<?= $PAGER ?>
 <div class='table  p-3'>
     <table class='table table-striped'>
         <thead>
             <tr>
-                <th><?= LANG['USER'] ?></th>
+                <th><?= LANG['USER_ID'] ?></th>
                 <th><?= LANG['NAME'] ?></th>
                 <th><?= LANG['IP'] ?></th>
                 <th><?= LANG['PORT'] ?></th>
@@ -21,7 +21,7 @@
             </tr>
         </thead>
         <tbody>
-            <?php foreach ($V_peers as $row) : ?>
+            <?php foreach ($PEERS as $row) : ?>
             <tr>
                 <?php
                 $username = $row['userid'] != 0 ? coloredname($row['userid']) : $row["ip"];
@@ -51,5 +51,5 @@
         </tbody>
     </table>
 </div>
-<?= $V_pager ?>
+<?= $PAGER ?>
 <?php block_end() ?>

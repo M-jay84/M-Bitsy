@@ -17,33 +17,26 @@ class CatagoriesModel
         $stmt = DB::newSelect('categories', $columns, $where, $values, $other);
 		return $stmt;
 	}
-		
-    // Fetch Catagorie Row
-    public static function fetchRow($columns = '*', $where = '', $values = '', $other = '')
-    {
-        $stmt = DB::fetchRow('categories', $columns, $where, $values, $other);
-		return $stmt;
-	}
 
     // Admin Delete Catagorie
     public static function deleteAndUpdateTorrent($id, $sure = 0)
     {
-        // Form Submit OR View
-        if ($sure == 'sure') {
-            // Delete Categorie
+        if ($sure) {
+            // Move Any Torrents to Other Cat & Delete Cat
             $newcatid = Validate::Input('newcat', 'int');
             TorrentsModel::update(['category'], ['category='], [$newcatid, $id]); //move torrents to a new cat
             DB::delete('categories', ['id' => $id]);
             showMessage('admincategorie', LANG["DEL_COMPLETE"]);
         } else {
-                    showMessage('admincategorie', 
-                        "<form method='post' action='".URLROOT."/admincategorie/delete/$id/sure'>                                 <div class='tt_blockcenter rounded'>
-                            <b>Category ID to move all Torrent To: </b>
-                            <input type='text' name='newcat' /> (Cat ID)<br><br>
-                            <div class='text-center'>
-                                <input type='submit' class='btn btn-sm ttbtn' value='".LANG["SUBMIT"]."' />
-                            </div>
-                        </form>");
+            // Select Cat 2 Move Kept Torrent Too
+            showMessage('admincategorie', 
+                "<form method='post' action='" .  URLROOT . "/admincategorie/delete/$id/sure'>                                 <div class='tt_blockcenter rounded'>
+                <b>Category ID to move all Torrent To: </b>
+                <input type='text' name='newcat' /> (Cat ID)<br><br>
+                <p class='text-center'>
+                    <input type='submit' class='btn btn-sm ttbtn' value='".LANG["SUBMIT"]."' />
+                </div>
+                </p>", 30);
         }
 
     }

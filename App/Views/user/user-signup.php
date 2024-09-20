@@ -1,11 +1,11 @@
 <div class="tt_blockcenter rounded">
     <div class="tt_blockhead text-center">
-        <?= $page_title ?>
+        <?= $TITLE ?>
     </div>
     <div class="p-3">
         <form method="post" class="form-horizontal" action="<?= Url('signup') ?>">
             <input type="hidden" name="csrf_token" value="<?= csrf_token() ?>" />
-            <?php if ($V_invite != 0) : ?>
+            <?php if ($CHECK_INVITE != 0) : ?>
                 <input type="hidden" name="invite" value="<?= $_GET["invite"] ?>" />
                 <input type="hidden" name="secret" value="<?= htmlspecialchars($_GET["secret"]) ?>" />
             <?php endif; ?>
@@ -13,12 +13,12 @@
             <input id="wantusername" type="text" class="form-control fullwidth" name="wantusername" minlength="3" maxlength="25" placeholder="<?= LANG['USERNAME'] ?>" required><br>
             <input id="wantpassword" type="password" class="form-control fullwidth" name="wantpassword" minlength="6" maxlength="25" placeholder="<?= LANG["PASSWORD"] ?>" requireds><br>
             <input id="passagain" type="password" class="form-control fullwidth" name="passagain" minlength="6" maxlength="25" placeholder="<?= LANG["CONFIRM"] ?>" required autofocus><br>
-            <?php if ($V_invite == 0) : ?>
+            <?php if ($CHECK_INVITE == 0) : ?>
                 <input id="email" type="email" class="form-control fullwidth" name="email" minlength="3" maxlength="100" placeholder="<?= LANG["EMAIL"] ?>" required autofocus><br>
             <?php endif; ?>
             <input id=" age" type="text" class="form-control fullwidth" name="age" minlength="2" placeholder="<?= LANG["AGE"] ?>" required autofocus><br>
             <select name="country" class='form-control fullwidth'>
-                <?php echo $V_country ?>
+                <?php echo $COUNTRY ?>
             </select><br>
             <select name="gender" class='form-control fullwidth'>
                 <option value="0"><?= LANG["GENDER"] ?></option>

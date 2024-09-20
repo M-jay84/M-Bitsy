@@ -34,7 +34,7 @@ class TagsModel
       showMessage('admintag', LANG['SUCCESS']);
     } else {
       $stmt = DB::update('tags', ['name', 'colour'], ['id='], [$name,$colour,$id]);
-      return $stmt;
+      showMessage('admintag', LANG['SUCCESS']);
     }
     
     showMessage('admintag', LANG["ACTION_COMPLETE"]);
@@ -75,7 +75,7 @@ class TagsModel
 
     $stmt = DB::run(
       "SELECT torrents.anon, torrents.seeders, torrents.tube, 
-                    torrents.banned, torrents.leechers, torrents.info_hash, 
+                    torrents.banned, torrents.poster, torrents.comments, torrents.leechers, torrents.info_hash, 
                     torrents.filename, torrents.nfo, torrents.last_action, 
                     torrents.numratings, torrents.name, torrents.tmdb, 
                     torrents.imdb, torrents.owner, torrents.save_as, torrents.descr, 

@@ -1,8 +1,3 @@
-<?php
-
-use App\Libs\Cache;
-
-?>
 <?php $GLOBALS['tstart'] = array_sum(explode(" ", microtime())); ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -34,7 +29,6 @@ use App\Libs\Cache;
         <div class="col  portal_sidebar">
         <?php
         if (!in_array($_GET['url'], CONFIG['ISURL'])) {
-          $TTCache = new Cache();
           include VIEW_PATH . "/inc/block/login_block.php";
           include VIEW_PATH . "/inc/block/maincats_block.php";
           include VIEW_PATH . "/inc/block/popular_block.php";

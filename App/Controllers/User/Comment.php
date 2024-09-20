@@ -19,25 +19,25 @@ class Comment extends Controller
         $this->current_user = new Auth();
 
         if (!$this->current_user->loggedin) {
-            $this->showMessage(URLROOT, LANG["NO_PERMISSION"]);
+            showMessage(URLROOT, LANG["NO_PERMISSION"]);
         }
     }
 
-    // Comments Default Page
+    // Comments
     public function index($id, $type)
     {
-        // Get Data
+        // Get Comments
         $comments =  CommentsModel::getInfo($id, $type);
 
         // Data For View
         $data = [
-            'page_title' => $comments['title'],
-            'V_row' => $comments['row'],
-            'V_comments' => $comments['res'],
-            'V_pager' => $comments['pager'],
-            'V_count' => $comments['count'],
-            'V_type' => $type,
-            'V_targetid' => $id
+            'TITLE' => $comments['title'],
+            'ROW' => $comments['row'],
+            'COMMENT' => $comments['res'],
+            'PAGER' => $comments['pager'],
+            'COUNT' => $comments['count'],
+            'TYPE' => $type,
+            'TARGET_ID' => $id
         ];
 
         // Load View
@@ -50,7 +50,7 @@ class Comment extends Controller
         if (!empty($_POST)) {
             CommentsModel::action($targetid, $this->current_user->id, $type);
         } else {
-            $this->showMessage('bonus', LANG["NOTHING_FOUND"]);
+            showMessage('bonus', LANG["NOTHING_FOUND"]);
         }
     }
 
@@ -58,7 +58,7 @@ class Comment extends Controller
     public function delete($id, $type = 0)
     {
         if (!$this->current_user->isStaff) {
-            $this->showMessage(URLROOT, LANG["NO_PERMISSION"]);
+            showMessage(URLROOT, LANG["NO_PERMISSION"]);
         } else {
             CommentsModel::delete($id, $this->current_user->id, $type);
         }

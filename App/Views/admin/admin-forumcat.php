@@ -1,4 +1,4 @@
-<?php block_begin($page_title) ?>
+<?php block_begin($TITLE) ?>
  <div class="rounded">
      <div class="text-center">
         <b><?= LANG["FORUM_CATAGORY"] ?></b><br>
@@ -17,7 +17,7 @@
                      </tr>
                  </thead>
                  <tbody>
-                     <?php foreach ($V_category as $row) : ?>
+                     <?php foreach ($CATEGORY as $row) : ?>
                          <tr>
                              <td><?= $row['id'] ?></td>
                              <td><a href='<?= Url("adminforum/$row[id]") ?>'><?= $row['name'] ?></a></td>

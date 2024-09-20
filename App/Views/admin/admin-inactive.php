@@ -1,14 +1,14 @@
-<?php block_begin($page_title) ?>
+<?php block_begin($TITLE) ?>
 <div class="tt_blockcenter rounded p-2 text-center">
-    <form action='<?= Url('admininactive') ?>' method='post'>
+    <form action='<?= Url("admininactive") ?>' method='post'>
         <?= LANG["DAYS"] ?>
-        <input type='text' name='cday' size='10' value='<?= ($V_cday > 30 ? $V_cday : 30) ?>' maxlength='3' />
+        <input type='text' name='cday' size='10' value='<?= $DAYS ?>' maxlength='3' />
         <input type='hidden' name='action' value='cday' />
         <input type='submit' class='btn btn-sm ttbtn' value='<?= LANG['SUBMIT'] ?>' />
     </form>
 </div>
 
-<h5 class='text-center'><?= $V_count ?> <?= LANG["INACTIVE_FOR"] ?> <?= $V_cday ?> <?= LANG["DAYS"] ?></h5>
+<h5 class='text-center'><?= $COUNT ?> <?= LANG["INACTIVE_FOR"] ?> <?= $DAYS ?> <?= LANG["DAYS"] ?></h5>
 <form id="inactive" action='<?= Url('admininactive/submit') ?>' method='post'>
     <div class='table-responsive  p-3'>
         <table class='table table-striped'>
@@ -25,7 +25,7 @@
                 </tr>
             </thead>
             <tbody> <?php
-                foreach ($V_users as $row) {
+                foreach ($USERS as $row) {
                     $userratio = $row["downloaded"] > 0 ? number_format($row["uploaded"] / $row["downloaded"], 1) : "---";
                     $last_seen = (($row["last_access"] == null) ? "never" : "" . get_elapsed_time(strtotime($row["last_access"])) . "&nbsp;ago");
                     ?>

@@ -1,6 +1,6 @@
-<?php block_begin($page_title) ?>
+<?php block_begin($TITLE) ?>
 <div class='rounded p-3'> <?php
-    foreach ($V_comments as $row) {
+    foreach ($COMMENTS as $row) {
         $title = ($row['title']) ? $row['title'] : $row['name'];
         $comentario = stripslashes(format_comment($row['text']));
         $type = 'Other';
@@ -29,5 +29,5 @@
         </div> <?php
     } ?>
 </div>
-<?= $V_pager ?>
+<?= $PAGER ?>
 <?php block_end() ?>

@@ -1,9 +1,9 @@
-<?php block_begin($page_title) ?>
+<?php block_begin($TITLE) ?>
 <div class='text-center'>
-    <a href="<?= Url('adminclient/peers') ?>"><?= LANG["Current_Clients"] ?></a>
-    <a href="<?= Url('adminclient/client') ?>"><?= LANG["Banned Clients"] ?></a>&nbsp;
+    <a href="<?= Url('adminclient/peers') ?>"><?= LANG["CURRENT"] ?></a>&nbsp;-&nbsp;
+    <a href="<?= Url('adminclient/client') ?>"><?= LANG["BANNED"] ?></a>&nbsp;
 </div>
-<?php if ($V_type == 'clients') : ?>
+<?php if ($TYPE == 'clients') : ?>
    <div class="text-center">
       <a type="button" class="model_form ttbtn btn-sm" data-bs-toggle="modal" data-bs-target="#clientModal"><?= LANG['ADD'] ?></a><br />
    </div>
@@ -20,7 +20,7 @@
          </tr>
       </thead>
       <tbody>
-         <?php foreach ($V_client as $row) : ?>
+         <?php foreach ($CLIENTS as $row) : ?>
          <?php
          $peer = hex2bin($row['peer_id']);
          $code = substr($peer, 0, 8);

@@ -1,4 +1,4 @@
-<?php block_begin($page_title) ?>
+<?php block_begin($TITLE) ?>
 <div class="rounded">
     <div class="text-center">
         <a type="button" class="model_form ttbtn btn-sm" href="<?= URLROOT ?>/adminforumcat"><?= LANG["BACK"] ?></a>
@@ -15,8 +15,8 @@
                     <th></th>
                 </tr>
             </thead>
-            <?php foreach ($V_query as $row) :
-                foreach ($V_forumcat as $cat) {
+            <?php foreach ($STMT as $row) :
+                foreach ($CATS as $cat) {
                     if ($cat['id'] == $row['category']) {
                         $category = $cat['name'];
                     }
@@ -73,7 +73,6 @@
     <div class="modal fade" id="forumModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-md" style="max-width:700px;">
             <div class="modal-content">
-                <div class="modal-body">
                 <div class="form-floating mb-4">
                     <input type='hidden' name='id' id='id' />
                     <?= LANG["NAME"] ?>
@@ -84,20 +83,20 @@
                     <textarea name='description' id='description' class="form-control"></textarea>
                     <?= LANG["CAT"] ?>
                     <select name='new_forum_cat' class='form-select'>
-                        <?php foreach ($V_forumcat as $row) : ?>
+                        <?php foreach ($CATS as $row) : ?>
                             <option value='<?= $row['id'] ?>'><?= $row['name'] ?></option>
                         <?php endforeach ?>
                     </select>
                     <?= LANG["SUB_FORUM_HELP"] ?>
                     <select name='sub' id='sub' class='form-select'>
                         <option value=0><?= LANG["NONE"] ?></option>
-                        <?php foreach ($V_forumforum as $row) { ?>
+                        <?php foreach ($FORUM as $row) { ?>
                             <option value='<?= $row['id'] ?>'><?= $row['name'] ?></option>
                         <?php } ?>
                     </select>
                     <?= LANG["MIN_CLASS_READ"] ?>
                     <select name='minclassread' id='minclassread' class='form-select'>
-                        <?php foreach ($V_groups as $group) { ?>
+                        <?php foreach ($GROUPS as $group) { ?>
                             <option value='<?= $group['group_id'] ?>'><?= $group['level'] ?></option>
                         <?php } ?>
                     </select>

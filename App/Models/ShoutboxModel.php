@@ -43,7 +43,7 @@ class ShoutboxModel
             ShoutboxModel::insert(['userid'=>0, 'date'=>CONFIG['TT_DATE'], 'user'=>'System', 'message'=>$msg_shout]);
             showMessage('admincp', "<b><font color='#ff0000'>Shoutbox Cleared....</font></b>");
         } else {
-            showMessage('admincp', "<b>Are You Sure <a href='".URLROOT."/adminshoutbox/clear/sure'>Clear Shoutbox</a></b>");
+            showMessage('admincp', "<b>Are You Sure <a href='".URLROOT."/admintasks/clearshoutbox/sure'>delete all shouts</a></b>");
         }
     }
 
@@ -69,7 +69,7 @@ class ShoutboxModel
     public static function delete($id, $current_user, $sure = 0)
     {
         if ($sure == 0) {
-            showMessage(URLROOT, "Sanity check: Click <a href='".URLROOT."/shoutbox/delete/$id'>here</a> if you are sure.");
+            showMessage(URLROOT, "Sanity check: Click <a href='".URLROOT."/shoutbox/delete/$id/1'>here</a> if you are sure.");
         }
 
         $row = DB::fetchColumn('shoutbox', 'user', ['msgid ='], [$id]);

@@ -1,4 +1,4 @@
-<?php block_begin($page_title) ?>
+<?php block_begin($TITLE) ?>
 <p class="text-center">
     <a type="button" class="model_form ttbtn btn-sm" data-bs-toggle="modal" data-bs-target="#tagModal"><?= LANG['ADD'] ?></a>
 <p>
@@ -14,7 +14,7 @@
                 </tr>
             </thead>
             <tbody>
-            <?php foreach ($V_tags as $row) : ?>
+            <?php foreach ($TAGS as $row) : ?>
                 <tr>
                     <td>
                         <a href="javascript:;" class="tagAttr" data-bs-toggle="modal" data-bs-target="#tagModal" 

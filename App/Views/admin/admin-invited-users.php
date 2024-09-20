@@ -1,6 +1,6 @@
-<?php block_begin($page_title) ?>
+<?php block_begin($TITLE) ?>
 <p class='text-center'>
-    <?php echo sprintf(LANG['INVITED_USER'], number_format($V_count)); ?>
+    <?php echo sprintf(LANG['INVITED_USER'], number_format($COUNT)); ?>
 </p>
 <div class=''>
     <form id="invited" method="post" action="<?= Url('admininvite/sumbit') ?>">
@@ -19,7 +19,7 @@
                 </thead>
                 <tbody>
                     <?php
-                    foreach ($V_users as $row) : ?>
+                    foreach ($INVITES as $row) : ?>
                         <tr>
                             <td><?= coloredname($row["id"]); ?></td>
                             <td><?= $row["email"]; ?></td>
@@ -38,5 +38,5 @@
         </div>
     </form>
 </div>
-<?= $V_pager ?>
+<?= $PAGER ?>
 <?php block_end() ?>

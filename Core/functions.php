@@ -6,11 +6,15 @@ use App\Libs\DB;
 // Redidect Page
 function showMessage($url, $message1,$refresh = 3)
 {
+    if ($url != URLROOT) {
+        $url = URLROOT . '/' . $url;
+    }
+
     $data = [
-        'page_title' => 'Message',
-        'V_msg' => $message1,
-        'V_url' => $url,
-        'refresh'  => $refresh
+        'TITLE' => 'Message',
+        'MESSAGE' => $message1,
+        'URL' => $url,
+        'REFRESH'  => $refresh
     ];
     extract($data);
     require_once VIEW_PATH . "/inc/error-page.php";
@@ -114,10 +118,7 @@ $emoji = array(
     "💡" => "idea",
 );
 
-// $form = Form Name
-// $name = Name of Text Area (Textarea)
-// $content = Content Textarea (Only to edit Pages, etc ...)
- 
+// $form = Form Name / $name = Name of Text Area (Textarea) / $content = Content Textarea (Only to edit Pages, etc ...)
 // Function To Display Input Box With BBCodes And Smilies
 function textbbcode($form, $name, $content = "")
 {
@@ -387,26 +388,12 @@ $tzs["720"] = array("(GMT + 12:00 hours) Auckland, Wellington, Fiji, Marshall Is
 // Get Date By User Timezone 
 function user_timezone_date($timestamp, $return_int = false)
 {
-    global $tzs;
-
-    /*
-    $date = new DateTime($timestamp, new DateTimeZone("UTC"));
-    $ZONE = $tzs[$_SESSION['tzoffset']][1] ?? "Europe/London";
-    $date->setTimezone(new DateTimeZone($ZONE));
-        
-    if (is_numeric($timestamp)) {
-        $time = strtotime($date->format('Y-m-d H:i:s'));
-        return $time;
-    } else {
-        return $date->format('Y-m-d H:i:s');
-    }
-    */
-
 	if (!is_numeric($timestamp)) {
 	    $timestamp = strtotime($timestamp); // date to time
 	}
 
 	$timestamp = $timestamp + ($_SESSION['tzoffset']*60); // do time adjust
+
 	if (date("I")) {
 	    $timestamp += 3600; // DST Fix
 	}
@@ -418,7 +405,6 @@ function user_timezone_date($timestamp, $return_int = false)
 	return date("Y-m-d H:i:s", $timestamp);
 
 }
-
 
 // Drop Down for Time Zones
 function timeZoneDropDown($tzoffset)
@@ -639,7 +625,7 @@ function torrenttable($res, $columns = CONFIG['TORRENTTABLE_COLUMNS'])
                 echo "<th>" . LANG["YOUTUBE"] . "</th>";
                 break;
             case 'tmdb':
-                echo "<th>" . LANG["MDB"] . "</th>";
+                echo "<th>" . LANG["TMDB"] . "</th>";
                 break;
             case 'comments':
                 echo "<th>" . LANG["COMM"] . "</th>";
@@ -1124,7 +1110,7 @@ function forumheader($location = '')
 {
     echo "<div class='rounded p-2'>
     <i class='fa fa-search' title='Search'></i>&nbsp;<a href='" . URLROOT . "/forum/search'>" . LANG["SEARCH"] . "</a>&nbsp; &nbsp;
-    <b>" . LANG["FORUM_CONTROL"] . "</b>
+     <b>" . LANG["FORUM_CONTROL"] . "</b>
     &middot; <a href='" . URLROOT . "/forum/viewunread'>" . LANG["FORUM_NEW_POSTS"] . "</a>
     &middot; <a href='" . URLROOT . "/forum/viewunread/true'>" . LANG["FORUM_MARK_READ"] . "</a>
     </div><br />";
@@ -1317,8 +1303,6 @@ function posterdetails($userid)
         $userdownloaded = "0";
         $useruploaded = "0";
         $avatar = "";
-        $nposts = "-";
-        $tposts = "-";
     } else {
         $avatar = htmlspecialchars($arr2["avatar"]);
         $userdownloaded = mksize($arr2["downloaded"]);
@@ -1339,8 +1323,6 @@ function posterdetails($userid)
             $useruploaded = "---";
             $userdownloaded = "---";
             $userratio = "---";
-            $nposts = "-";
-            $tposts = "-";
         }
     }
     if (!$avatar) {
@@ -1355,8 +1337,6 @@ function posterdetails($userid)
         'userdownloaded' => $userdownloaded,
         'useruploaded' => $useruploaded,
         'avatar' => $avatar,
-        'nposts' => $nposts,
-        'tposts' => $tposts,
         'forumposts' => $forumposts,
         'userratio' => $userratio,
         'usercountry' => $usercountry,
@@ -1430,20 +1410,6 @@ function torrentmenu($id, $external = 'no')
     <?php
 }
 
-// Torrent Navbar
-function messagemenu()
-{
-    ?>
-    <center>
-        <a href="<?= URLROOT ?>/message/mailbox/inbox"><button type="button" class="<?= activelink('inbox', 'inbox') ?>"><?= LANG["INBOX"] ?></button></a>&nbsp;
-        <a href="<?= URLROOT ?>/message/mailbox/outbox"><button type="button" class="<?= activelink('outbox', 'outbox') ?>"><?= LANG["OUTBOX"] ?></button></a>&nbsp;
-        <a href="<?= URLROOT ?>/message/mailbox/draft"><button type="button" class="<?= activelink('draft', 'draft') ?>"><?= LANG["DRAFT"] ?></button></a>&nbsp;
-        <a href="<?= URLROOT ?>/message/mailbox/templates"><button type="button" class="<?= activelink('templates', 'templates') ?>"><?= LANG["TEMPLATES"] ?></button></a>&nbsp;
-        <a href="<?= URLROOT ?>/message/create"><button type="button" class="<?= activelink('messages/create') ?>"><?= LANG["COMPOSE"] ?></button></a>
-    </center><br>
-    <?php
-}
-
 // Sort Message Array By Type
 function msgdetails($type, $arr = [])
 {
@@ -1497,6 +1463,7 @@ function userpostdetails($row, $type = null)
         $usersignature = "";
         $userdownloaded = "";
         $useruploaded = "";
+        $privacylevel = 'strong';
     } else {
         $privacylevel = $row["privacy"];
         $avatar = htmlspecialchars($row["avatar"]);

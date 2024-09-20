@@ -1,4 +1,4 @@
-<?php block_begin($page_title) ?>
+<?php block_begin($TITLE) ?>
 <form method="post" action="<?= Url('invite/submit') ?>">
 	<div class="tt_blockcenter rounded p-3">
 	    <div class="form-floating mb-4">

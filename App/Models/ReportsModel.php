@@ -105,7 +105,7 @@ class ReportsModel
     {
         // Check User Input
         $id = Validate::Input('id', 'int');
-        $type = Validate::Input('type', 'int');
+        $type = Validate::Input('type');
         $reason = Validate::Input('reason');
         $postid = Validate::Input('postid', 'int');
 
@@ -120,7 +120,7 @@ class ReportsModel
 
         if (!empty($_POST)) {
             if (empty($reason) || empty($id) &&  empty($postid)) {
-                showMessage(($_SERVER['HTTP_REFERER']), LANG["YOU_MUST_ENTER_A_REASON"]);
+                showMessage(URLROOT, LANG["YOU_MUST_ENTER_A_REASON"]);
             }
 
             $res = DB::fetchColumn('reports', 'count(id)', ['addedby=', 'votedfor=', 'type='], [$current_user->id, $id, $type]);
@@ -132,9 +132,9 @@ class ReportsModel
                 } else {
                     DB::insert('reports', ['addedby' => $current_user->id, 'votedfor' => $id, 'votedfor_xtra' => 0, 'type' => $type, 'reason' => $reason]);
                 }
-                    showMessage(($_SERVER['HTTP_REFERER']), "$type: $id, $postid Reason: " . htmlspecialchars($reason) . "<p>Successfully Reported</p>");
+                    showMessage(URLROOT, "$type: $id, $postid Reason: " . htmlspecialchars($reason) . "<p>Successfully Reported</p>");
             } else {
-                showMessage(($_SERVER['HTTP_REFERER']), LANG["YOU_HAVE_ALREADY_REPORTED"]);
+                showMessage(URLROOT, LANG["YOU_HAVE_ALREADY_REPORTED"]);
             }
         }
     }

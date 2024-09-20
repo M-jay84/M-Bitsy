@@ -1,4 +1,4 @@
-<?php block_begin($page_title) ?>
+<?php block_begin($TITLE) ?>
 <div class='table-responsive  p-2'>
     <table class='table table-striped'>
         <thead>
@@ -14,8 +14,8 @@
             </tr>
         </thead>
         <tbody> <?php
-        for ($i = 1; $i <= $V_num; $i++) {
-            $arr = $V_res->fetch(PDO::FETCH_ASSOC);
+        for ($i = 1; $i <= $COUNT; $i++) {
+            $arr = $INVITES->fetch(PDO::FETCH_ASSOC);
             if ($arr['added'] == '0000-00-00 00:00:00') {
                 $arr['added'] = '---';
             }

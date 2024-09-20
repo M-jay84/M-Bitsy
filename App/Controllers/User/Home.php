@@ -18,7 +18,7 @@ class Home extends Controller
         $this->current_user = new Auth(true);
 
         if (!$this->current_user->loggedin && CONFIG['MEMBERSONLY']) {
-            $this->showMessage('login', LANG['MEMBERS_ONLY']); 
+            showMessage('login', LANG['MEMBERS_ONLY']); 
         }
     }
 
@@ -27,7 +27,7 @@ class Home extends Controller
     {
         // Data For View
         $data = [
-            'page_title' => LANG["HOME"],
+            'TITLE' => LANG["HOME"],
             'current_user' => $this->current_user,
         ];
 

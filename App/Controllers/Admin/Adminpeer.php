@@ -19,22 +19,22 @@ class Adminpeer extends Controller
         $this->current_user = new Auth();
 
         if (!$this->current_user->isStaff) {
-            $this->showMessage(URLROOT, LANG["NO_PERMISSION"]);
+            showMessage(URLROOT, LANG["NO_PERMISSION"]);
         }
     }
 
-    // Peers Default Page
+    // Peers 
     public function index()
     {
-        // Get Data
+        // Show Peers
         $peers = PeersModel::getPeers('admin', 0, $this->current_user, 'adminpeer?');
 
         // Data For View
         $data = [
-            'page_title' => LANG["_PEERS"],
-            'V_count' => $peers['count'],
-            'V_pager' => $peers['pager'],
-            'V_peers' => $peers['stmt']
+            'TITLE' => LANG["_PEERS"],
+            'COUNT' => $peers['count'],
+            'PAGER' => $peers['pager'],
+            'PEERS' => $peers['stmt']
         ];
         
         // Load View

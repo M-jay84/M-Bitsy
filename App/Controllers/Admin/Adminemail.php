@@ -3,13 +3,9 @@
 namespace App\Controllers\Admin;
 
 use App\Libs\Auth;
-use App\Models\GroupsModel;
-use App\Models\LogsModel;
-use PDO;
-use App\Libs\TTMail;
 use App\Libs\Controller;
 use App\Models\EmailModel;
-use App\Models\UsersModel;
+use App\Models\GroupsModel;
 
 /*
 * Mass Email Controller
@@ -24,32 +20,35 @@ class Adminemail extends Controller
         $this->current_user = new Auth();
 
         if (!$this->current_user->isStaff) {
-            $this->showMessage(URLROOT, LANG["NO_PERMISSION"]);
+            showMessage(URLROOT, LANG["NO_PERMISSION"]);
         }
     }
 
-    // Mass Email Default Page
+    // Mass Email
     public function index()
     {
+        // Get All Groups
+        $groups = GroupsModel::getGroups();
+        
         // Data For View
         $data = [
-            'page_title' => LANG["MASS_EMAIL"],
-            'V_groups' => GroupsModel::getGroups()
+            'TITLE' => LANG["MASS_EMAIL"],
+            'GROUPS' => $groups
         ];
 
         // Load View
         $this->view('admin-email', $data, 'admin');
     }
 
-    // Mass Email Form Submit
+    // Mass Email Submit
     public function sendemail()
     {
         // Check User Input
         if (!empty($_POST)) {
             EmailModel::emailAll($this->current_user);
-            $this->showMessage('adminemail', "<b><font color='#ff0000'>Mass mail sent....</font></b>");
+            showMessage('adminemail', "<b><font color='#ff0000'>Mass mail sent....</font></b>");
         } else {
-            $this->showMessage(URLROOT, LANG['NOTHING_FOUND']);
+            showMessage(URLROOT, LANG['NOTHING_FOUND']);
         }
 
     }

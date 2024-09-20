@@ -1,7 +1,7 @@
-<?php block_begin($page_title) ?>
+<?php block_begin($TITLE) ?>
 <form action="<?= Url('rss/submit') ?>" method="post">
 	<?= LANG["CATS_LEAVE_BLANK_ALL"] ?><br />
-	<?php foreach ($V_cats as $row) : ?>
+	<?php foreach ($CATAGORYS as $row) : ?>
 		<input type="checkbox" name="cats[]" value="<?= $row['id'] ?>" /> <?= htmlspecialchars("$row[parent_cat] - $row[name]") ?><br />
 	<?php endforeach; ?><br>
 	<input type="number" name="user" /> <?= LANG["USER_id"] ?><br><br>

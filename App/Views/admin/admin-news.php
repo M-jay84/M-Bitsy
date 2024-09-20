@@ -1,9 +1,9 @@
-<?php block_begin($page_title) ?>
+<?php block_begin($TITLE) ?>
 <p class="text-center">
    <a href="javascript:;" class="newsAttr" data-bs-toggle="modal" data-bs-target="#newsModal"><?= LANG['ADD'] ?></a>
 </p> <?php
-if ($V_news->rowCount() > 0) {
-   foreach ($V_news as $row) {
+if ($NEWS->rowCount() > 0) {
+   foreach ($NEWS as $row) {
       $body = format_comment($row["body"]);
       $added = $row["added"] . " GMT (" . (get_elapsed_time(strtotime($row["added"]))) . " ago)";
       ?>

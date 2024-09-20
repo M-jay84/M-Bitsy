@@ -6,7 +6,7 @@ use App\Libs\DB;
 <div class="table-responsive" style='height:250px;'>
     <table class='table table-striped p-2'>
         <tr>
-            <?php foreach ($data['V_shouts'] as $row) : ?>
+            <?php foreach ($SHOUTS as $row) : ?>
                 <?php
                 $ol3 = DB::fetchColumn('users', 'avatar', ['id='], [$row["userid"]]);
                 if (!empty($ol3)) {

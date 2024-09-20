@@ -4,11 +4,11 @@ namespace App\Models;
 
 use App\Libs\DB;
 use App\Libs\Validate;
-use App\Models\ForumsModel;
-use App\Models\ForumCatsModel;
-use App\Models\ReadModel;
-use App\Models\PostsModel;
 use App\Models\AttachmentsModel;
+use App\Models\ForumCatsModel;
+use App\Models\ForumsModel;
+use App\Models\PostsModel;
+use App\Models\ReadModel;
 use App\Models\ShoutboxModel;
 
 /*
@@ -132,17 +132,16 @@ class TopicsModel
         // Update topic last post
         DB::update('forum_topics', ['lastpost'], ['id='], [$postid, $topicid]);
 
-        // attachments
-        
         $data['topicid'] = $topicid;
         $data['postid'] = $postid;
+
+        // attachments
         AttachmentsModel::set_attachment($data);
         // Insert Shout
         $msg_shout = "New Forum Topic: [url=" . URLROOT . "/post/" . $topicid . "]" . $subject . "[/url] posted by [color=".$current_user->Color."]".$current_user->username."[/color].";
         ShoutboxModel::insert(['userid'=>0, 'date'=>CONFIG['TT_DATE'], 'user'=>'System', 'message'=>$msg_shout]);
-        
-        
-        Url(URLROOT."/post/$topicid", true); // die; todo
+
+        Url("post/$topicid", true); // die; todo
     }
 
     // Delete Topic

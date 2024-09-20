@@ -1,6 +1,6 @@
-<?php block_begin($page_title) ?>
+<?php block_begin($TITLE) ?>
 <div class="text-center">
     <a href='<?= Url('browse') ?>'><?= LANG["BROWSE_TORRENTS"] ?></a>
 </div>
-<?php torrenttable($V_tags);
+<?php torrenttable($TAGS);
 block_end();

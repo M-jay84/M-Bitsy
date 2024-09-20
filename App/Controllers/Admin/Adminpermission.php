@@ -19,23 +19,23 @@ class Adminpermission extends Controller
         $this->current_user = new Auth();
 
         if (!$this->current_user->isStaff) {
-            $this->showMessage(URLROOT, LANG["NO_PERMISSION"]);
+            showMessage(URLROOT, LANG["NO_PERMISSION"]);
         }
     }
 
-    // Permissions Default Page
+    // Permissions
     public function index()
     {
         if (!empty($_POST)) {
             PermissionsModel::insertOrUpdate();
         } else {
-            // Get Permissions Data
+            // Get Permissions
             $permissions = PermissionsModel::fetchAll('*', '', 'ORDER BY permission_id'); 
 		
             // Data For View
             $data = [
-                'page_title' => LANG["GROUP"],
-                'V_permissions' => $permissions
+                'TITLE' => LANG["GROUPS"],
+                'PERMISSIONS' => $permissions
             ];
        
             // Load View
@@ -44,7 +44,7 @@ class Adminpermission extends Controller
         
     }
 
-    // Delete Permissions Submit
+    // Delete Permissions
     public function delete($id)
     {
         PermissionsModel::delete($id);

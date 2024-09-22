@@ -4,7 +4,7 @@ namespace App\Controllers\User;
 
 use App\Libs\Auth;
 use App\Libs\Controller;
-use App\Models\ConfirmModel;
+use App\Models\ConfirmLogic;
 
 /*
 * Ban Controller
@@ -25,13 +25,13 @@ class Confirm extends Controller
     // Profile Email Reset Confirm
     public function confirmprofileemail($id, $secret, $email)
     {
-        ConfirmModel::confirmprofileemail($id, $secret, $email);
+        ConfirmLogic::confirmprofileemail($id, $secret, $email);
     }
 
     // Signup Email Confirm
     public function confirmemail($id, $secret)
     {
-        ConfirmModel::confirmemail($id, $secret);
+        ConfirmLogic::confirmemail($id, $secret);
     }
 
 }

@@ -6,7 +6,7 @@ use App\Libs\Auth;
 use App\Libs\Controller;
 use App\Libs\Torrents\Parse;
 use App\Libs\Torrents\Scraper;
-use App\Models\TorrentsModel;
+use App\Models\TorrentsLogic;
 
 /*
 * Scrape Controller
@@ -57,7 +57,7 @@ class Scrape extends Controller
         }
 
         $hashes = join(",", $infohash);
-        $query = TorrentsModel::scrapeInfo($hashes);
+        $query = TorrentsLogic::scrapeInfo($hashes);
         $result = "d5:filesd";
 
             $result .= "20:" . hex2bin($$query['info_hash']) . "d";
@@ -78,7 +78,7 @@ class Scrape extends Controller
     {
         $id = (isset($_GET['id'])) ? (int) $_GET['id'] : 0;
 
-        $resu = TorrentsModel::fetchRow('id, info_hash, announce, announcelist', ['external =','id ='], ['yes',$id]);
+        $resu = TorrentsLogic::fetchRow('id, info_hash, announce, announcelist', ['external =','id ='], ['yes',$id]);
         
         while ($rowu = $resu) {
             // No need parsing but lets update any old torrents first
@@ -117,12 +117,12 @@ class Scrape extends Controller
 
             if ($seeders !== 0) {
                 // Update the Torrent
-                TorrentsModel::update(['leechers','seeders','times_completed','last_action','visible','announcelist'], ['id ='],
+                TorrentsLogic::update(['leechers','seeders','times_completed','last_action','visible','announcelist'], ['id ='],
                 [$leechers, $seeders, $completed, CONFIG['TT_DATE'], 'yes', $newannouncelist, $rowu['id']]);
 
             } else {
                 // Its Dead :(
-                TorrentsModel::update(['last_action'], ['id='], [CONFIG['TT_DATE'], $rowu['id']]);
+                TorrentsLogic::update(['last_action'], ['id='], [CONFIG['TT_DATE'], $rowu['id']]);
             }
 
             // Redirect with message

@@ -5,8 +5,8 @@ namespace App\Controllers\User;
 use App\Libs\Auth;
 use App\Libs\Controller;
 use App\Libs\DB;
-use App\Models\CatagoriesModel;
-use App\Models\TorrentsModel;
+use App\Models\CatagoriesLogic;
+use App\Models\TorrentsLogic;
 
 /*
 * Rss Controller
@@ -65,7 +65,7 @@ class Rss extends Controller
         $limit = "LIMIT 50";
 
         // Get Data
-        $res = TorrentsModel::rssInfo($where, $limit);
+        $res = TorrentsLogic::rssInfo($where, $limit);
 
         // start the RSS feed output
         header( "Content-type: text/xml; charset=".CONFIG['CHARSET']."");
@@ -102,11 +102,11 @@ class Rss extends Controller
         // Data For View
         $data = [
             'TITLE' => LANG["MAKE_RSS_FEED"],
-            'CATAGORYS' => CatagoriesModel::genreList()
+            'CATAGORYS' => CatagoriesLogic::genreList()
         ];
 
         // Load View
-        $this->view('user-rss', $data, 'user');
+        $this->template('user-rss', $data, 'user');
     }
 
     // RSS Form Submit

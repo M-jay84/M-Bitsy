@@ -32,7 +32,7 @@ class Admincp extends Controller
         ];
 
         // Load View
-        $this->view('admin-home', $data, 'admin');
+        $this->template('admin-home', $data, 'admin');
     }
     
 }

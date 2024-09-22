@@ -4,7 +4,7 @@ namespace App\Controllers\Admin;
 
 use App\Libs\Auth;
 use App\Libs\Controller;
-use App\Models\CatagoriesModel;
+use App\Models\CatagoriesLogic;
 
 /*
 * Catagorys Controller
@@ -28,10 +28,10 @@ class Admincategorie extends Controller
     {
         if (!empty($_POST)) {
             // Add/Edit Catagories
-            CatagoriesModel::insertOrUpdate();
+            CatagoriesLogic::insertOrUpdate();
         } else {
             // Show All Catagories
-            $cats = CatagoriesModel::fetchAll('*', '', 'ORDER BY parent_cat ASC, sort_index ASC');
+            $cats = CatagoriesLogic::fetchAll('*', '', 'ORDER BY parent_cat ASC, sort_index ASC');
         
             // Data For View
             $data = [
@@ -40,7 +40,7 @@ class Admincategorie extends Controller
             ];
         
             // Load View
-            $this->view('admin-categorie', $data, 'admin');
+            $this->template('admin-categorie', $data, 'admin');
         }
     }
 
@@ -48,7 +48,7 @@ class Admincategorie extends Controller
     public function delete($id, $sure = 0)
     {
         // Delete Catagorie
-        CatagoriesModel::deleteAndUpdateTorrent($id, $sure);
+        CatagoriesLogic::deleteAndUpdateTorrent($id, $sure);
     }
 
 }

@@ -4,7 +4,7 @@ namespace App\Controllers\Admin;
 
 use App\Libs\Auth;
 use App\Libs\Controller;
-use App\Models\UsersModel;
+use App\Models\UsersLogic;
 
 /*
 * Inactive User Controller
@@ -27,7 +27,7 @@ class Admininactive extends Controller
     public function index()
     {
         // Inactivite Users
-        $users = UsersModel::inactiveUsers();
+        $users = UsersLogic::inactiveUsers();
 
         // Data For View
         $data = [
@@ -38,14 +38,14 @@ class Admininactive extends Controller
         ];
         
         // Load View
-        $this->view('admin-inactive', $data, 'admin');
+        $this->template('admin-inactive', $data, 'admin');
     }
 
     // Inactive Users Submit
     public function submit()
     {
         if (!empty($_POST)) {
-            UsersModel::inactiveUsersSubmit($this->current_user->username);
+            UsersLogic::inactiveUsersSubmit($this->current_user->username);
         } else {
             showMessage(URLROOT, LANG["NOTHING_SELECTED"]);
         }

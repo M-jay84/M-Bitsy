@@ -4,7 +4,7 @@ namespace App\Controllers\User;
 
 use App\Libs\Auth;
 use App\Libs\Controller;
-use App\Models\SnatchedModel;
+use App\Models\SnatchedLogic;
 
 /*
 * Snatch Controller
@@ -31,13 +31,13 @@ class Snatch extends Controller
         }
         
         if ($type == 'complete') {
-            $snatched = SnatchedModel::join('snatched.tid = ? AND snatched.completed != 0', $id);
+            $snatched = SnatchedLogic::join('snatched.tid = ? AND snatched.completed != 0', $id);
             $cols = 'torrent';
         } elseif ($type == 'torrent') {
-            $snatched = SnatchedModel::join('snatched.tid = ?', $id);
+            $snatched = SnatchedLogic::join('snatched.tid = ?', $id);
             $cols = 'torrent';
         } elseif ($type == 'user') {
-            $snatched = SnatchedModel::join('snatched.uid = ?', $id);
+            $snatched = SnatchedLogic::join('snatched.uid = ?', $id);
             $cols = 'user';
         }
 
@@ -51,23 +51,23 @@ class Snatch extends Controller
         ];
 
         // Load View
-        $this->view('user-snatch', $data, 'user');
+        $this->template('user-snatch', $data, 'user');
     }
 
     // Trade Snatched Default Page
     public function trade()
     {
         if (!empty($_POST)) {
-            SnatchedModel::submitTrade($this->current_user);
+            SnatchedLogic::submitTrade($this->current_user);
         } else {
             // Data For View
             $data = [
                 'TITLE' => LANG['TRADE'],
-                'SNATCHED' => SnatchedModel::trade($this->current_user->id)
+                'SNATCHED' => SnatchedLogic::trade($this->current_user->id)
             ];
 
             // Load View
-            $this->view('user-snatch-trade', $data, 'user');
+            $this->template('user-snatch-trade', $data, 'user');
         }
     }
 

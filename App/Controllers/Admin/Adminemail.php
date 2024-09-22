@@ -4,8 +4,8 @@ namespace App\Controllers\Admin;
 
 use App\Libs\Auth;
 use App\Libs\Controller;
-use App\Models\EmailModel;
-use App\Models\GroupsModel;
+use App\Models\EmailLogic;
+use App\Models\GroupsLogic;
 
 /*
 * Mass Email Controller
@@ -28,7 +28,7 @@ class Adminemail extends Controller
     public function index()
     {
         // Get All Groups
-        $groups = GroupsModel::getGroups();
+        $groups = GroupsLogic::getGroups();
         
         // Data For View
         $data = [
@@ -37,7 +37,7 @@ class Adminemail extends Controller
         ];
 
         // Load View
-        $this->view('admin-email', $data, 'admin');
+        $this->template('admin-email', $data, 'admin');
     }
 
     // Mass Email Submit
@@ -45,7 +45,7 @@ class Adminemail extends Controller
     {
         // Check User Input
         if (!empty($_POST)) {
-            EmailModel::emailAll($this->current_user);
+            EmailLogic::emailAll($this->current_user);
             showMessage('adminemail', "<b><font color='#ff0000'>Mass mail sent....</font></b>");
         } else {
             showMessage(URLROOT, LANG['NOTHING_FOUND']);

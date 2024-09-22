@@ -4,7 +4,7 @@ namespace App\Controllers\User;
 
 use App\Libs\Auth;
 use App\Libs\Controller;
-use App\Models\RecoverModel;
+use App\Models\RecoverLogic;
 
 /*
 * Recover Controller
@@ -28,12 +28,12 @@ class Recover extends Controller
     {
         if (!empty($_POST)) {
             // Get New Password
-            RecoverModel::recoverPassword();
+            RecoverLogic::recoverPassword();
         } else {
             $data = [
                 'TITLE' => LANG['RECOVER']
             ];
-            $this->view('user-recover', $data, 'user');
+            $this->template('user-recover', $data, 'user');
         }
     }
 
@@ -46,14 +46,14 @@ class Recover extends Controller
 
         if (!empty($_POST)) {
             // Confirm New Password
-            RecoverModel::changePassword($id, $secret);
+            RecoverLogic::changePassword($id, $secret);
         } else {
             $data = [
                 'TITLE' => LANG['RECOVER'],
                 'ID' => $id,
                 'SECRET' => $secret
             ];
-            $this->view('user-recover-confirm', $data, 'user');
+            $this->template('user-recover-confirm', $data, 'user');
         }
     }
 }

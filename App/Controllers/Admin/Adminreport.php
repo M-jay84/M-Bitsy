@@ -4,7 +4,7 @@ namespace App\Controllers\Admin;
 
 use App\Libs\Auth;
 use App\Libs\Controller;
-use App\Models\ReportsModel;
+use App\Models\ReportsLogic;
 
 /*
 * Report Controller
@@ -27,7 +27,7 @@ class Adminreport extends Controller
     public function index()
     {
         // Get Reports
-        $reports = ReportsModel::pagination();
+        $reports = ReportsLogic::pagination();
 
         // Data For View
         $data = [
@@ -37,18 +37,18 @@ class Adminreport extends Controller
         ];
 
         // Load View
-        $this->view('admin-report', $data, 'admin');
+        $this->template('admin-report', $data, 'admin');
     }
 
     // Reports Form Submit
     public function submit()
     {
         if ($_POST["mark"]) {
-            ReportsModel::update($this->current_user->id);
+            ReportsLogic::update($this->current_user->id);
         }
         
         if ($_POST["delete"]) {
-            ReportsModel::deleteByIds();
+            ReportsLogic::deleteByIds();
         }
 
         showMessage('adminreport', LANG["ACTION_FAILED"]);

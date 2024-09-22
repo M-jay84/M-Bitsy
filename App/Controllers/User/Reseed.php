@@ -4,7 +4,7 @@ namespace App\Controllers\User;
 
 use App\Libs\Auth;
 use App\Libs\Controller;
-use App\Models\TorrentsModel;
+use App\Models\TorrentsLogic;
 
 /*
 * Reseed Controller
@@ -29,7 +29,7 @@ class Reseed extends Controller
         if ($this->current_user->view_torrents != "yes" && CONFIG['MEMBERSONLY']) {
             showMessage(URLROOT, LANG["NO_TORRENT_VIEW"]);
         }
-        TorrentsModel::reseed($id, $this->current_user);
+        TorrentsLogic::reseed($id, $this->current_user);
     }
 
 }

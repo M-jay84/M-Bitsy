@@ -4,7 +4,7 @@ namespace App\Controllers\Admin;
 
 use App\Libs\Auth;
 use App\Libs\Controller;
-use App\Models\TagsModel;
+use App\Models\TagsLogic;
 
 /*
 * Tags Controller
@@ -28,11 +28,11 @@ class Admintag extends Controller
   {
     if (!empty($_POST)) {
       // Add/Edit Tags
-      TagsModel::insertOrUpdate();
+      TagsLogic::insertOrUpdate();
     }
 
     // Get All Tags
-    $tags = TagsModel::getAll();
+    $tags = TagsLogic::getAll();
 
     // Data For View
     $data = [
@@ -41,12 +41,12 @@ class Admintag extends Controller
     ];
 
       // Load View
-    $this->view('admin-tag', $data, 'admin');
+    $this->template('admin-tag', $data, 'admin');
   }
 
   // Delete Tags
   public function delete()
   {
-    TagsModel::delete();
+    TagsLogic::delete();
   }
 }

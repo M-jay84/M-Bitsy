@@ -6,10 +6,10 @@ use App\Libs\Auth;
 use App\Libs\Controller;
 use App\Libs\SimpleThumbnail;
 use App\Libs\Validate;
-use App\Models\LogsModel;
-use App\Models\MessagesModel;
-use App\Models\TorrentsModel;
-use App\Models\TorrentTagModel;
+use App\Models\LogsLogic;
+use App\Models\MessagesLogic;
+use App\Models\TorrentsLogic;
+use App\Models\TorrentTagLogic;
 
 /*
 * Torrent Controller
@@ -31,7 +31,7 @@ class Torrent extends Controller
     // Torrent Default Page // TODO
     public function index($id, $action = '')
     {
-        $torrent = TorrentsModel::fetchIdDetails('torrents.id=?', [$id], $this->current_user);
+        $torrent = TorrentsLogic::fetchIdDetails('torrents.id=?', [$id], $this->current_user);
 
         if ($this->current_user->view_torrents != "yes" && CONFIG['MEMBERSONLY'] && $torrent['owner'] != $id) {
             showMessage(URLROOT, LANG["NO_TORRENT_VIEW"]);
@@ -43,13 +43,13 @@ class Torrent extends Controller
             $pvkey_var = "t_" . $id;
             $views = $_SESSION[$pvkey_var] == 1 ? $torrent["views"] + 0 : $torrent["views"] + 1;
             $_SESSION[$pvkey_var] = 1;
-            TorrentsModel::update(['views'], ['id='], [$views, $id]);
+            TorrentsLogic::update(['views'], ['id='], [$views, $id]);
             $this->redirect("torrent/$id");
         }
 
         // Add Bump
         if ($action == 'bump') {
-            TorrentsModel::update(['added'], ['id='], [CONFIG['TT_DATE'], $id]);
+            TorrentsLogic::update(['added'], ['id='], [CONFIG['TT_DATE'], $id]);
             showMessage("torrent/$id", LANG["ACTION_COMPLETE"]);
         }
 
@@ -69,7 +69,7 @@ class Torrent extends Controller
         ];
 
         // Load View
-        $this->view('user-torrent', $data, 'user');
+        $this->template('user-torrent', $data, 'user');
     }
 
     // Edit Torrent Form Submit // todo 
@@ -77,7 +77,7 @@ class Torrent extends Controller
     {
     
         // Get Torrent Data
-        $row = TorrentsModel::fetchRow('owner,image2,image1', ['id ='], [$id]);
+        $row = TorrentsLogic::fetchRow('owner,image2,image1', ['id ='], [$id]);
 
         if ($this->current_user->control_panel == "no" && $this->current_user->id != $id) {
             showMessage(URLROOT, LANG["NO_PERMISSION"]);
@@ -141,7 +141,7 @@ class Torrent extends Controller
 
             $tags = $_POST['tags'];
             if ($tags) {
-                TorrentTagModel::insert(['torrentid' => $id, 'type1' => $tags[0], 'type2' => $tags[1], 'type3' => $tags[2]]);
+                TorrentTagLogic::insert(['torrentid' => $id, 'type1' => $tags[0], 'type2' => $tags[1], 'type3' => $tags[2]]);
             }
 
             // Images
@@ -170,8 +170,8 @@ class Torrent extends Controller
             }
 
             // Update
-            TorrentsModel::updateset($updateset, $id);
-            LogsModel::write("Torrent $id (" . htmlspecialchars($_POST["name"]) . ") was edited by " . $this->current_user->username . "");
+            TorrentsLogic::updateset($updateset, $id);
+            LogsLogic::write("Torrent $id (" . htmlspecialchars($_POST["name"]) . ") was edited by " . $this->current_user->username . "");
             showMessage("torrent/$id", LANG['SUCCESS']);
         } else {
             showMessage("torrent/$id", LANG['ACTION_FAILED']);
@@ -198,14 +198,14 @@ class Torrent extends Controller
         }
 
         // Delete Torrent
-        $owner = TorrentsModel::fetchRow('name, owner', ['id ='], $torrentid);
-        TorrentsModel::deleteTorrent($torrentid, $this->current_user->id);
-        LogsModel::write($this->current_user->username . " has deleted torrent: ID:$torrentid - " . htmlspecialchars($torrentname) . " - Reason: " . htmlspecialchars($delreason));
+        $owner = TorrentsLogic::fetchRow('name, owner', ['id ='], $torrentid);
+        TorrentsLogic::deleteTorrent($torrentid, $this->current_user->id);
+        LogsLogic::write($this->current_user->username . " has deleted torrent: ID:$torrentid - " . htmlspecialchars($torrentname) . " - Reason: " . htmlspecialchars($delreason));
         unlink(UPLOAD_PATH . "/torrents/$torrentid.torrent");
 
         if ($this->current_user->id=== $owner['owner']) {
             $msg_shout = "Your torrent " . $torrentname . " has been deleted by " . $this->current_user->username . "/nReason: " . $_POST["delreason"] . "";
-            MessagesModel::insert(['sender' => 0, 'receiver' => $owner['owner'], 'added' => CONFIG['TT_DATE'], 'subject' => 'Torrent Deleted', 'msg' => $msg_shout, 'unread' => 'yes', 'location' => 'in']);
+            MessagesLogic::insert(['sender' => 0, 'receiver' => $owner['owner'], 'added' => CONFIG['TT_DATE'], 'subject' => 'Torrent Deleted', 'msg' => $msg_shout, 'unread' => 'yes', 'location' => 'in']);
         }
 
         showMessage("peer/seeding/$owner[owner]", htmlspecialchars($torrentname) . " " . LANG["DEL_ERROR"]);

@@ -1,12 +1,12 @@
 <?php
 
 use App\Libs\DB;
-use App\Models\ForumsModel;
-use App\Models\PostsModel;
-use App\Models\TmdbModel;
-use App\Models\ShoutboxModel;
-use App\Models\TorrentsModel;
-$shouts = ShoutboxModel::shouts(20);
+use App\Models\ForumsLogic;
+use App\Models\PostsLogic;
+use App\Models\TmdbLogic;
+use App\Models\ShoutboxLogic;
+use App\Models\TorrentsLogic;
+$shouts = ShoutboxLogic::shouts(20);
 
 if (CONFIG['HNR_ON']) {
     $count = DB::fetchColumn('snatched', 'count(hnr)', ['uid=', 'hnr='], [$current_user->id, 'yes']);
@@ -92,7 +92,7 @@ if (CONFIG['LATESTFORUMPOSTONINDEX']) {
 }
 
 if (CONFIG['FORUMONINDEX']) {
-    $forums_res = DB::fetchAll('forum_cats', '*', '', 'ORDER BY sort');
+    $forums_res = DB::run("SELECT * FROM forumcats WHERE id IN (1,2,3) ORDER BY sort ");
     block_begin(LANG['FORUM']);
     if ($forums_res->rowCount() == 0) {
         echo LANG["NO fORUMS fOUND"];
@@ -116,7 +116,9 @@ if (CONFIG['FORUMONINDEX']) {
                             foreach ($stmt as $row) {
                                 $lastpostid = get_forum_last_post($row['id']);
                                 $detail = lastpostdetails($lastpostid);
-                                $postcount = PostsModel::postcount($row['id']);
+                                $postcount =  DB::run("SELECT count(id) as count FROM forum_posts 
+                                                       WHERE topicid IN (SELECT id FROM forum_topics 
+                                                       WHERE forumid=?)", [$row['id']])->fetchColumn();
                                 $topiccount = DB::fetchColumn('forum_topics', 'count(id)', ['forumid='], [$row['id']]); ?>
                                 <tr>
                                     <td><?php
@@ -147,7 +149,7 @@ if (CONFIG['FORUMONINDEX']) {
 }
 
 if ($current_user->view_torrents != "yes" && CONFIG['MEMBERSONLY']) {
-    $stmt = TorrentsModel::getAll("WHERE visible = ? AND banned = ?", ['yes', 'no']);
+    $stmt = TorrentsLogic::getAll("WHERE visible = ? AND banned = ?", ['yes', 'no']);
     block_begin(LANG['CAROUSEL']); ?>
     <div id="recipeCarousel" class="carousel slide" data-bs-ride="carousel">
         <div class="carousel-inner" role="listbox"> <?php
@@ -161,7 +163,7 @@ if ($current_user->view_torrents != "yes" && CONFIG['MEMBERSONLY']) {
                 <div class='carousel-item <?= $set_; ?>'>
                     <div class="col-md-1">
                         <div class='scaleA'>
-                            <a href='<?= Url("torrent/$row[id]") ?>'><img src="<?php echo TmdbModel::getImage($row); ?>" width="100" height="250" title="<?= $row['name'] ?>"></a>
+                            <a href='<?= Url("torrent/$row[id]") ?>'><img src="<?php echo TmdbLogic::getImage($row); ?>" width="100" height="250" title="<?= $row['name'] ?>"></a>
                             <div class='text-center'>
                                 <font color="#00cc00"><b>S</b></font> <?= $row['seeders'] ?><font color="#FF0000"><b> L </b></font><?= $row['leechers'] ?>
                             </div>
@@ -182,7 +184,7 @@ if ($current_user->view_torrents != "yes" && CONFIG['MEMBERSONLY']) {
 }
 
 if ($current_user->view_torrents != "yes" && CONFIG['MEMBERSONLY']) {
-    $stmt = TorrentsModel::getAll("WHERE visible = ? AND banned = ?", ['yes', 'no']);
+    $stmt = TorrentsLogic::getAll("WHERE visible = ? AND banned = ?", ['yes', 'no']);
     block_begin(LANG['GRID']);
     ?>
     <div class="row"> <?php
@@ -190,7 +192,7 @@ if ($current_user->view_torrents != "yes" && CONFIG['MEMBERSONLY']) {
             <div class="col-2">
                 <a href='<?= Url("torrent/$row[id]") ?>'>
 
-                    <img src="<?= TmdbModel::getImage($row) ?>" width="100" height="250">
+                    <img src="<?= TmdbLogic::getImage($row) ?>" width="100" height="250">
                 </a><br>
                 <p class="text-center"> <?php
                     echo CutName($row['name'], 20); ?><br>
@@ -207,7 +209,7 @@ block_begin(LANG['TORRENT']);
 if (CONFIG['MEMBERSONLY'] && !$current_user->id) {
     echo LANG['MEMBERS_ONLY'];  
 } else {
-    $res = TorrentsModel::getAll("WHERE visible = ? AND banned = ?", ['yes', 'no']); 
+    $res = TorrentsLogic::getAll("WHERE visible = ? AND banned = ?", ['yes', 'no']); 
     if ($res['count'] > 0) {
         ?>
         <div class="text-center">

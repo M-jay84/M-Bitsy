@@ -4,7 +4,7 @@ namespace App\Controllers\User;
 
 use App\Libs\Auth;
 use App\Libs\Controller;
-use App\Models\BonusModel;
+use App\Models\BonusLogic;
 
 /*
 * Bonus Controller
@@ -28,19 +28,19 @@ class Bonus extends Controller
     {
         $data = [
             'TITLE' => LANG['BONUS'],
-            'BONUS' => BonusModel::getAll(),
-            'BONUS_INTERVAL' => BonusModel::interval(),
+            'BONUS' => BonusLogic::getAll(),
+            'BONUS_INTERVAL' => BonusLogic::interval(),
             'USER' => $this->current_user
         ];
 
-        $this->view('user-bonus', $data, 'user');
+        $this->template('user-bonus', $data, 'user');
     }
 
     // Bonus Form Submit
     public function submit()
     {
         if (!empty($_POST)) {
-            BonusModel::getById($this->current_user);
+            BonusLogic::getById($this->current_user);
         } else {
             showMessage('bonus', LANG["NOTHING_FOUND"]);
         }
@@ -52,7 +52,7 @@ class Bonus extends Controller
     {
         if ($this->current_user->isStaff) {
             if (!empty($_POST)) {
-                BonusModel::insertOrUpdate();
+                BonusLogic::insertOrUpdate();
             } else {
                 showMessage('bonus', LANG["NOTHING_FOUND"]);
             }
@@ -66,7 +66,7 @@ class Bonus extends Controller
     public function delete($id)
     {
         if ($this->current_user->isStaff) {
-            BonusModel::delete($id);
+            BonusLogic::delete($id);
         } else {
             showMessage(URLROOT, LANG["NO_PERMISSION"]);
         }

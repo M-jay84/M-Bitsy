@@ -4,7 +4,7 @@ namespace App\Controllers\Admin;
 
 use App\Libs\Auth;
 use App\Libs\Controller;
-use App\Models\BansModel;
+use App\Models\BansLogic;
 
 /*
 * Ban Controller
@@ -28,10 +28,10 @@ class Adminban extends Controller
     {
         if (!empty($_POST)) {
             // Add New Ban
-            BansModel::insert($this->current_user);
+            BansLogic::insert($this->current_user);
         } else {
             // Show All Bans
-            $bans = BansModel::getAll($type);
+            $bans = BansLogic::getAll($type);
 
             // Data For View
             $data = [
@@ -42,7 +42,7 @@ class Adminban extends Controller
             ];
 
             // Load View
-            $this->view('admin-ban', $data, 'admin');
+            $this->template('admin-ban', $data, 'admin');
         }
     }
 
@@ -50,7 +50,7 @@ class Adminban extends Controller
     public function delete()
     { 
         if (!empty($_POST)) {
-            BansModel::delete($this->current_user);
+            BansLogic::delete($this->current_user);
         } else {
             showMessage(URLROOT, LANG["NOTHING_SELECTED"]);
         }

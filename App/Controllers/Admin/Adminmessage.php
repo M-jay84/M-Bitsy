@@ -4,7 +4,7 @@ namespace App\Controllers\Admin;
 
 use App\Libs\Auth;
 use App\Libs\Controller;
-use App\Models\MessagesModel;
+use App\Models\MessagesLogic;
 
 /*
 * Message Controller
@@ -28,10 +28,10 @@ class Adminmessage extends Controller
     {
         if (!empty($_POST)) {
             // Send Multiple PMs
-            MessagesModel::multiPM($this->current_user->id);
+            MessagesLogic::multiPM($this->current_user->id);
         } else {
             // Get Messages
-            $messages = MessagesModel::getAll();
+            $messages = MessagesLogic::getAll();
        
             // Data For View
             $data = [
@@ -43,14 +43,14 @@ class Adminmessage extends Controller
             ];
        
             // Load View
-            $this->view('admin-message', $data, 'admin');
+            $this->template('admin-message', $data, 'admin');
         }
     }
 
     // Message Form Submit
     public function delete()
     {
-        MessagesModel::deleteByIds();
+        MessagesLogic::deleteByIds();
     }
 
 }

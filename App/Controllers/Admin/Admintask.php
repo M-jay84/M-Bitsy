@@ -5,8 +5,8 @@ namespace App\Controllers\Admin;
 use App\Libs\Auth;
 use App\Libs\Cache;
 use App\Libs\Controller;
-use App\Models\ShoutboxModel;
-use App\Models\TasksModel;
+use App\Models\ShoutboxLogic;
+use App\Models\TasksLogic;
 
 /*
 * Task Controller
@@ -30,7 +30,7 @@ class Admintask extends Controller
     // Cleanup
     public function cleanup()
     {
-        TasksModel::update(['last_time'], ['task='], [CONFIG['TT_TIME'],'cleanup']);
+        TasksLogic::update(['last_time'], ['task='], [CONFIG['TT_TIME'],'cleanup']);
         Cleanup::run();
         $this->showMessage('admincp', LANG["FORCE_CLEAN_COMPLETED"]);
     }
@@ -49,7 +49,7 @@ class Admintask extends Controller
     // Clear Shoutbox
     public static function clearshoutbox($sure = '')
     {
-        ShoutboxModel::truncate($sure);
+        ShoutboxLogic::truncate($sure);
 	}
 	
 }

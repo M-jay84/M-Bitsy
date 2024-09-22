@@ -4,7 +4,7 @@ namespace App\Controllers\User;
 
 use App\Libs\Auth;
 use App\Libs\Controller;
-use App\Models\CommentsModel;
+use App\Models\CommentsLogic;
 
 /*
 * Comments Controller
@@ -27,7 +27,7 @@ class Comment extends Controller
     public function index($id, $type)
     {
         // Get Comments
-        $comments =  CommentsModel::getInfo($id, $type);
+        $comments =  CommentsLogic::getInfo($id, $type);
 
         // Data For View
         $data = [
@@ -41,14 +41,14 @@ class Comment extends Controller
         ];
 
         // Load View
-        $this->view('user-comment', $data, 'user');
+        $this->template('user-comment', $data, 'user');
     }
 
     // Add/Edit Comment
     public function submit($targetid, $type)
     {
         if (!empty($_POST)) {
-            CommentsModel::action($targetid, $this->current_user->id, $type);
+            CommentsLogic::action($targetid, $this->current_user->id, $type);
         } else {
             showMessage('bonus', LANG["NOTHING_FOUND"]);
         }
@@ -60,7 +60,7 @@ class Comment extends Controller
         if (!$this->current_user->isStaff) {
             showMessage(URLROOT, LANG["NO_PERMISSION"]);
         } else {
-            CommentsModel::delete($id, $this->current_user->id, $type);
+            CommentsLogic::delete($id, $this->current_user->id, $type);
         }
     }
 

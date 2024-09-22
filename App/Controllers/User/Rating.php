@@ -4,7 +4,7 @@ namespace App\Controllers\User;
 
 use App\Libs\Auth;
 use App\Libs\Controller;
-use App\Models\RatingsModel;
+use App\Models\RatingsLogic;
 
 /*
 * Rating Controller
@@ -27,7 +27,7 @@ class Rating extends Controller
     public function index($id)
     {
         if (!empty($_POST)) {
-            RatingsModel::addRating($id, $this->current_user->id);
+            RatingsLogic::addRating($id, $this->current_user->id);
         } else {
             showMessage(URLROOT, LANG["NOTHING_SELECTED"]);
         }

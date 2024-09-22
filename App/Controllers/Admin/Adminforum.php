@@ -4,7 +4,7 @@ namespace App\Controllers\Admin;
 
 use App\Libs\Auth;
 use App\Libs\Controller;
-use App\Models\ForumsModel;
+use App\Models\ForumsLogic;
 
 /*
 * Forum Controller
@@ -28,11 +28,11 @@ class Adminforum extends Controller
     {
         if ($move) {
             // Sort/mMove Order
-            ForumsModel::reorderForum($id, $forumid, $move);
+            ForumsLogic::reorderForum($id, $forumid, $move);
         }
 
         // Get Forum Data
-        $forum = ForumsModel::getForums($id);
+        $forum = ForumsLogic::getForums($id);
 
         // Data For View
         $data = [
@@ -45,19 +45,19 @@ class Adminforum extends Controller
         ];
         
         // Load View
-        $this->view('admin-forum', $data, 'admin');
+        $this->template('admin-forum', $data, 'admin');
     }
 
     // Add/Edit Forum
     public function submit()
     {
-        ForumsModel::insertOrUpdateForum();
+        ForumsLogic::insertOrUpdateForum();
     }
 
     // Delete Forum
     public function delete($id, $sure = '')
     {
-        ForumsModel::delete($id, $sure);
+        ForumsLogic::delete($id, $sure);
     }
 
 }

@@ -4,7 +4,7 @@ namespace App\Controllers\User;
 
 use App\Libs\Auth;
 use App\Libs\Controller;
-use App\Models\TagsModel;
+use App\Models\TagsLogic;
 
 /*
 * Tags Controller
@@ -30,7 +30,7 @@ class Tag extends Controller
             showMessage(URLROOT, LANG["NO_TORRENT_VIEW"]);
         }
         // Get Tag Data
-        $tags = TagsModel::search($name);
+        $tags = TagsLogic::search($name);
 
         // Data For View
         $data = [
@@ -39,7 +39,7 @@ class Tag extends Controller
         ];
 
         // Load View
-        $this->view('user-tag', $data, 'user');
+        $this->template('user-tag', $data, 'user');
     }
 
 }

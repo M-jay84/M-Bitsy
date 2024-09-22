@@ -4,7 +4,7 @@ namespace App\Controllers\User;
 
 use App\Libs\Auth;
 use App\Libs\Controller;
-use App\Models\AttachmentsModel;
+use App\Models\AttachmentsLogic;
 
 /*
 * Attachment Controller
@@ -27,7 +27,7 @@ class Attachment extends Controller
     public function index($id, $hash)
     {
         $file = UPLOAD_PATH . "/attachment/$hash.data";
-        $attachment = AttachmentsModel::fetchRow('*', ['id ='], [$id]);
+        $attachment = AttachmentsLogic::fetchRow('*', ['id ='], [$id]);
         $extension = substr($attachment['filename'], -3);
         
         // Download

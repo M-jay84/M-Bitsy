@@ -4,8 +4,8 @@ namespace App\Controllers\User;
 
 use App\Libs\Auth;
 use App\Libs\Controller;
-use App\Models\ForumsModel;
-use App\Models\PostsModel;
+use App\Models\ForumsLogic;
+use App\Models\PostsLogic;
 
 /*
 * Post Controller
@@ -34,7 +34,7 @@ class Post extends Controller
     public function index($topicid)
     {
         // Get Posts
-        $post = PostsModel::getTopicPages($topicid, $this->current_user);
+        $post = PostsLogic::getTopicPages($topicid, $this->current_user);
 
         // Data For View
         $data = [
@@ -47,14 +47,14 @@ class Post extends Controller
         ];
 
         // Load View
-        $this->view('user-post', $data, 'user');
+        $this->template('user-post', $data, 'user');
     }
 
     // Add Post
     public function submit($topicid) // todo
     {
         if (!empty($_POST)) {
-            PostsModel::addPost($topicid, $this->current_user);
+            PostsLogic::addPost($topicid, $this->current_user);
         } else {
             showMessage(URLROOT, LANG["NOTHING_FOUND"]);
         }
@@ -64,7 +64,7 @@ class Post extends Controller
     public function edit()
     {
         if (!empty($_POST)) {
-            PostsModel::edit($this->current_user);
+            PostsLogic::edit($this->current_user);
         } else {
             showMessage(URLROOT, LANG["NOTHING_SELECTED"]);
         }
@@ -73,14 +73,14 @@ class Post extends Controller
     // Post Delete Submit
     public function delete($postid, $sure = 0)
     {
-        PostsModel::deletePost($postid, $this->current_user, $sure);
+        PostsLogic::deletePost($postid, $this->current_user, $sure);
     }
 
     // Users Posts Default Page
     public function user($id)
     {
         // Get Users Posts
-        $posts = ForumsModel::getUsersPost($id, $this->current_user);
+        $posts = ForumsLogic::getUsersPost($id, $this->current_user);
 
         // Data For View To View
         $data = [
@@ -92,7 +92,7 @@ class Post extends Controller
         ];
 
         // Load View
-        $this->view('user-post-user', $data, 'user');
+        $this->template('user-post-user', $data, 'user');
     }
     
 }

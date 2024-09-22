@@ -4,7 +4,7 @@ namespace App\Controllers\Admin;
 
 use App\Libs\Auth;
 use App\Libs\Controller;
-use App\Models\PeersModel;
+use App\Models\PeersLogic;
 
 /*
 * Peers Controller
@@ -27,7 +27,7 @@ class Adminpeer extends Controller
     public function index()
     {
         // Show Peers
-        $peers = PeersModel::getPeers('admin', 0, $this->current_user, 'adminpeer?');
+        $peers = PeersLogic::getPeers('admin', 0, $this->current_user, 'adminpeer?');
 
         // Data For View
         $data = [
@@ -38,7 +38,7 @@ class Adminpeer extends Controller
         ];
         
         // Load View
-        $this->view('admin-peer', $data, 'admin');
+        $this->template('admin-peer', $data, 'admin');
    }
 
 }

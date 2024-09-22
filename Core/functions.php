@@ -1,6 +1,6 @@
 <?php
 
-use App\Models\TmdbModel;
+use App\Models\TmdbLogic;
 use App\Libs\DB;
 
 // Redidect Page
@@ -393,11 +393,11 @@ function user_timezone_date($timestamp, $return_int = false)
 	}
 
 	$timestamp = $timestamp + ($_SESSION['tzoffset']*60); // do time adjust
-
+    /*
 	if (date("I")) {
 	    $timestamp += 3600; // DST Fix
 	}
-	
+    */
 	if ($return_int) {
 	    return $timestamp;
 	}
@@ -722,7 +722,7 @@ function torrenttable($res, $columns = CONFIG['TORRENTTABLE_COLUMNS'])
                     }
                     //print("<td class='ttable_col$x' nowrap='nowrap'><a href=\"" . URLROOT . "/torrent/$id/hit\">$dispname</a></td>");
                     // BALLOON TOOLTIP MOD
-                    print("<td nowrap='nowrap'><a href=\"" . URLROOT . "/torrent/$id/hit\" onMouseover=\"return overlib('<table class=ballooncolor border=1 width=300px align=center><tr><td class=balloonheadercolor colspan=2 align=center>$smallname</td></tr><tr valign=top><td class=ballooncolor align=center><img border=0 height=200 width=120 src=".TmdbModel::getImage($row)."></td><td width=80%  class=ballooncolor><div align=left><b>" . LANG["UPLOADED"] . ": </b>" . user_timezone_date($row["added"]) . "<br /><b>" . LANG["SIZE"] . ": </b>". mksize($row["size"]) . "<br /><b>" . LANG["COMPLETED"] . ": </b>" . $row["times_completed"] . "<br /></div><div align=left><b>Views: </b>" . $row["views"] . "<br /><b>" . LANG["HITS"] . ": </b>" . $row["hits"] . "<br /><b>" . LANG["SEEDERS"] . ": </b><font color=green>" . $row["seeders"] . "</font><br /><b>" . LANG["LEECHERS"] . ": </b><font color=red>" . $row["leechers"] . "</font><br /><b>" . LANG["BY"] . ": </b>" . $row['username'] . "</div></td></tr><tr><td class=balloonheadercolor colspan=2 align=center>".LANG["DESCRIPTION"]."</td></tr><tr><td  class=ballooncolor colspan=2>" . $row['descr'] . "</td></tr></table>', CENTER, HEIGHT, 200, WIDTH, 300)\"; onMouseout=\"return nd()\">".$dispname."</a>".$type."");
+                    print("<td nowrap='nowrap'><a href=\"" . URLROOT . "/torrent/$id/hit\" onMouseover=\"return overlib('<table class=ballooncolor border=1 width=300px align=center><tr><td class=balloonheadercolor colspan=2 align=center>$smallname</td></tr><tr valign=top><td class=ballooncolor align=center><img border=0 height=200 width=120 src=".TmdbLogic::getImage($row)."></td><td width=80%  class=ballooncolor><div align=left><b>" . LANG["UPLOADED"] . ": </b>" . user_timezone_date($row["added"]) . "<br /><b>" . LANG["SIZE"] . ": </b>". mksize($row["size"]) . "<br /><b>" . LANG["COMPLETED"] . ": </b>" . $row["times_completed"] . "<br /></div><div align=left><b>Views: </b>" . $row["views"] . "<br /><b>" . LANG["HITS"] . ": </b>" . $row["hits"] . "<br /><b>" . LANG["SEEDERS"] . ": </b><font color=green>" . $row["seeders"] . "</font><br /><b>" . LANG["LEECHERS"] . ": </b><font color=red>" . $row["leechers"] . "</font><br /><b>" . LANG["BY"] . ": </b>" . $row['username'] . "</div></td></tr><tr><td class=balloonheadercolor colspan=2 align=center>".LANG["DESCRIPTION"]."</td></tr><tr><td  class=ballooncolor colspan=2>" . $row['descr'] . "</td></tr></table>', CENTER, HEIGHT, 200, WIDTH, 300)\"; onMouseout=\"return nd()\">".$dispname."</a>".$type."");
 
                     $tags = get_tags($id);
                     print($tags."</td>");

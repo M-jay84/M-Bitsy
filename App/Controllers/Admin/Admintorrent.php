@@ -4,7 +4,7 @@ namespace App\Controllers\Admin;
 
 use App\Libs\Auth;
 use App\Libs\Controller;
-use App\Models\TorrentsModel;
+use App\Models\TorrentsLogic;
 
 /*
 * Torrent Controller
@@ -32,13 +32,13 @@ class Admintorrent extends Controller
         $where = ($search == "") ? "" : "AND torrents.name LIKE $pattern";
 
         if ($type == 'dead') {
-            $torrents = TorrentsModel::getAll("WHERE banned = ? AND seeders < 1 ORDER BY torrents.added DESC", array('no'), 'admintorrent/dead');
+            $torrents = TorrentsLogic::getAll("WHERE banned = ? AND seeders < 1 ORDER BY torrents.added DESC", array('no'), 'admintorrent/dead');
         } elseif ($type == 'free') {
-            $torrents = TorrentsModel::getAll("WHERE freeleech=? $where ORDER BY name", array(1), 'admintorrent/free');
+            $torrents = TorrentsLogic::getAll("WHERE freeleech=? $where ORDER BY name", array(1), 'admintorrent/free');
         } elseif ($type == 'banned') {
-            $torrents = TorrentsModel::getAll("WHERE banned=? $where ORDER BY name", array('yes'), 'admintorrent/banned');
+            $torrents = TorrentsLogic::getAll("WHERE banned=? $where ORDER BY name", array('yes'), 'admintorrent/banned');
         } else {
-            $torrents = TorrentsModel::getAll("WHERE torrents.id > ? $where ORDER BY name", array(0), 'admintorrent?');
+            $torrents = TorrentsLogic::getAll("WHERE torrents.id > ? $where ORDER BY name", array(0), 'admintorrent?');
         }
 
         // Data For View
@@ -52,7 +52,7 @@ class Admintorrent extends Controller
         ];
 
         // Load View
-        $this->view('admin-torrent', $data, 'admin');
+        $this->template('admin-torrent', $data, 'admin');
     }
 
     // Torrents Delete
@@ -62,7 +62,7 @@ class Admintorrent extends Controller
             showMessage('admintorrent', LANG["NOTHING_SELECTED"]);
         }
         foreach ($_POST["ids"] as $id) {
-            TorrentsModel::deleteTorrent(intval($id), $this->current_user->id);
+            TorrentsLogic::deleteTorrent(intval($id), $this->current_user->id);
         }
         showMessage('admintorrent', LANG["DEL_COMPLETE"]);
     }

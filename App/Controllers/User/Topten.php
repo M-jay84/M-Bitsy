@@ -5,7 +5,7 @@ namespace App\Controllers\User;
 use App\Libs\Auth;
 use App\Libs\Controller;
 use App\Libs\DB;
-use App\Models\UsersModel;
+use App\Models\UsersLogic;
 
 /*
 * Top Ten Controller
@@ -60,7 +60,7 @@ class Topten extends Controller
         ];
         
         // Load View
-        $this->view('user-topten', $data, 'user');
+        $this->template('user-topten', $data, 'user');
     }
 
 }

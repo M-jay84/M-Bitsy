@@ -1,5 +1,5 @@
 <?php
-use App\Models\CatagoriesModel;
+use App\Models\CatagoriesLogic;
 if ($_SESSION['id']) {
     block_begin(LANG["SEARCH"]);
 	$search = $_GET['search'] ?? '';
@@ -8,7 +8,7 @@ if ($_SESSION['id']) {
 		<input type="text" name="search" style="width: 95%" class="form-control" value="<?= htmlspecialchars($search) ?>" placeholder="<?= LANG["SEARCH"] ?>"/><br />
 		    <select name="cat"  style="width: 95%" class='form-select'>
 			<option value="0">(<?= LANG["ALL"] ?>)</option>
-			    <?php echo CatagoriesModel::dropdown($_GET["cat"]); ?>
+			    <?php echo CatagoriesLogic::dropdown($_GET["cat"]); ?>
 		    </select><br />
 		    <select name="incldead" style="width: 95%"  class='form-select'>
 			<option value="0"><?= LANG["ACTIVE"] ?></option>

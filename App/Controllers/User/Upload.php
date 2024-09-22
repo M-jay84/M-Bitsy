@@ -4,10 +4,10 @@ namespace App\Controllers\User;
 
 use App\Libs\Auth;
 use App\Libs\Controller;
-use App\Models\CatagoriesModel;
-use App\Models\TagsModel;
-use App\Models\TorrentLangModel;
-use App\Models\UploadModel;
+use App\Models\CatagoriesLogic;
+use App\Models\TagsLogic;
+use App\Models\TorrentLangLogic;
+use App\Models\UploadLogic;
 
 /*
 * Upload Controller
@@ -42,14 +42,14 @@ class Upload extends Controller
         $data = [
             'TITLE' => LANG["UPLOAD"],
             'ANNOUNCES' => $announce_urls,
-            'CATAGORYS' => CatagoriesModel::genreList(),
-            'TAGS' => TagsModel::getAll(),
-            'LANGUAGES' => TorrentLangModel::langList(),
+            'CATAGORYS' => CatagoriesLogic::genreList(),
+            'TAGS' => TagsLogic::getAll(),
+            'LANGUAGES' => TorrentLangLogic::langList(),
             'current_user' => $this->current_user
         ];
         
         // Load View
-        $this->view('user-upload', $data, 'user');
+        $this->template('user-upload', $data, 'user');
     }
 
     // Upload Form Submit
@@ -57,7 +57,7 @@ class Upload extends Controller
     {
         if (!empty($_POST)) {
             // Upload Torrent
-            UploadModel::torrent($this->current_user);
+            UploadLogic::torrent($this->current_user);
         } else {
             showMessage(URLROOT, LANG["ACTION_FAILED"]);
         }

@@ -4,7 +4,7 @@ namespace App\Controllers\Admin;
 
 use App\Libs\Auth;
 use App\Libs\Controller;
-use App\Models\InvitesModel;
+use App\Models\InvitesLogic;
 
 /*
 * Invited Users Controller
@@ -26,7 +26,7 @@ class Admininvite extends Controller
     public function index()
     {
         // Show Invites
-        $invite = InvitesModel::inviteA();
+        $invite = InvitesLogic::inviteA();
 
         // Data For View
         $data = [
@@ -37,14 +37,14 @@ class Admininvite extends Controller
         ];
  
         // Load View
-        $this->view('admin-invited-users', $data, 'admin');
+        $this->template('admin-invited-users', $data, 'admin');
     }
 
     // Invite Form Submit
     public function submit()
     {
         if (!empty($_POST)) {
-            InvitesModel::submitInvite();
+            InvitesLogic::submitInvite();
         } else {
             showMessage(URLROOT, LANG['NOTHING_SELECTED']);
         }
@@ -54,7 +54,7 @@ class Admininvite extends Controller
     public function pending()
     {
         // Show Pending Invites
-        $invite = InvitesModel::pendingA();
+        $invite = InvitesLogic::pendingA();
 
         // Data For View
         $data = [
@@ -65,7 +65,7 @@ class Admininvite extends Controller
         ];
 
         // Load View
-        $this->view('admin-invites-pending', $data, 'admin');
+        $this->template('admin-invites-pending', $data, 'admin');
     }
 
 }

@@ -5,7 +5,7 @@ namespace App\Controllers\User;
 use App\Libs\Auth;
 use App\Libs\Controller;
 use App\Libs\DB;
-use App\Models\InvitesModel;
+use App\Models\InvitesLogic;
 
 /*
 * Invite Controller
@@ -49,14 +49,14 @@ class Invite extends Controller // todo
         ];
         
         // Load View
-        $this->view('user-invite', $data, 'user');
+        $this->template('user-invite', $data, 'user');
     }
 
     // Invite Form Submit
     public function submit()
     {
         if (!empty($_POST)) {
-            InvitesModel::sendInvite($this->current_user);
+            InvitesLogic::sendInvite($this->current_user);
         } else {
             showMessage(URLROOT, LANG["NOTHING_FOUND"]);
         }
@@ -67,7 +67,7 @@ class Invite extends Controller // todo
     public function invitetree($id)
     {
         // Get Users Invitees
-        $invites = InvitesModel::InviteTree($id);
+        $invites = InvitesLogic::InviteTree($id);
 
         // Data For View
         $data = [
@@ -77,7 +77,7 @@ class Invite extends Controller // todo
         ];
         
         // Load View
-        $this->view('user-invite_tree', $data, 'user');
+        $this->template('user-invite_tree', $data, 'user');
     }
     
 }

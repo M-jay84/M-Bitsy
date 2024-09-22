@@ -1,8 +1,8 @@
 <?php
-use App\Models\TmdbModel;
-use App\Models\TorrentsModel;
+use App\Models\TmdbLogic;
+use App\Models\TorrentsLogic;
 if (!CONFIG['MEMBERSONLY'] || $_SESSION['id']) {
-    $res = TorrentsModel::getAll("WHERE visible = ? AND banned = ?", ['yes', 'no']);
+    $res = TorrentsLogic::getAll("WHERE visible = ? AND banned = ?", ['yes', 'no']);
     if ($res['count'] > 0) {
         block_begin(LANG["LATEST_POSTERS"]);
         print '<table>';
@@ -11,10 +11,10 @@ if (!CONFIG['MEMBERSONLY'] || $_SESSION['id']) {
         {
         print (($i && $i % 2) ? '
         <td><a href="'.Url("torrent/$r[id]").'">
-        <img src="' . TmdbModel::getImage($r) . '" height="100" width="100" border="0" /></a></td>
+        <img src="' . TmdbLogic::getImage($r) . '" height="100" width="100" border="0" /></a></td>
         </tr>' : '
         <tr><td><a href="'.Url("torrent/$r[id]").'">
-        <img src="' . TmdbModel::getImage($r) . '" height="100" width="80" border="0" /></a></td>');
+        <img src="' . TmdbLogic::getImage($r) . '" height="100" width="80" border="0" /></a></td>');
         $i++;
         if ($i > 7) break;
         } 

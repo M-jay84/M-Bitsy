@@ -3,7 +3,7 @@
 namespace App\Libs;
 
 use App\Libs\DB;
-use App\Models\MessagesModel;
+use App\Models\MessagesLogic;
 
 /*
 * Clean Old Data (10 mins)
@@ -96,7 +96,7 @@ class Cleanup
     {
         $rowv1 = DB::fetchAll('users', 'id, oldclass', ['vipuntil <', 'oldclass !='], [CONFIG['TT_DATE'], 0]);
         foreach ($rowv1 as $rowv) {
-            MessagesModel::insert(['sender'=>0, 'receiver'=>$rowv['id'], 'added'=>CONFIG['TT_DATE'], 'subject'=> 'Your VIP class stay has just expired', 'msg'=>'Your VIP class stay has just expired']);
+            MessagesLogic::insert(['sender'=>0, 'receiver'=>$rowv['id'], 'added'=>CONFIG['TT_DATE'], 'subject'=> 'Your VIP class stay has just expired', 'msg'=>'Your VIP class stay has just expired']);
             DB::update('users', ['class','oldclass','vipuntil'], 'vipuntil <', [$rowv['oldclass'], 0, null, CONFIG['TT_DATE']]);
         }
     }
@@ -249,7 +249,7 @@ class Cleanup
                     if ($rov["enabled"] == "yes"):
                         DB::update('users', ['warned'], ['id='], ['yes', $user]);
                         DB::delete('warnings', ['userid'=>$user, 'reason'=>$reason, 'added'=>CONFIG['TT_DATE'],'expiry'=>$expiretime,'warnedby'=>0,'type'=>'HnR']);
-                        MessagesModel::insert(['sender'=>0, 'receiver'=>$user, 'added'=>CONFIG['TT_DATE'],'msg'=>$msg,'subject'=>$subject]);
+                        MessagesLogic::insert(['sender'=>0, 'receiver'=>$user, 'added'=>CONFIG['TT_DATE'],'msg'=>$msg,'subject'=>$subject]);
                     endif;
                 endif;
                 // Unwarn
@@ -258,7 +258,7 @@ class Cleanup
                     $msg = "" . LANG["CLEANUP_YOU_NOW_HAVE_LESS_THAN"] . " " . CONFIG['HNR_WARN'] . " H&R.\n" . LANG["CLEANUP_YOUR_WARNING_FOR_H&R_HAS_REMOVED"] . "";
                     DB::update('users', ['warned'], ['id='], ['no', $user]);
                     DB::delete('warnings', ['userid' =>$user, 'type' => 'HnR']);
-                    MessagesModel::insert(['sender'=>0, 'receiver'=>$user, 'added'=>CONFIG['TT_DATE'],'msg'=>$msg,'subject'=>$subject]);
+                    MessagesLogic::insert(['sender'=>0, 'receiver'=>$user, 'added'=>CONFIG['TT_DATE'],'msg'=>$msg,'subject'=>$subject]);
                 endif;
                 // Ban
                 if ($count >= CONFIG['HNR_BAN']):
@@ -278,7 +278,7 @@ class Cleanup
                 // Download Ban
                 if ($count >= CONFIG['HNR_STOP_DL']){
                     DB::update(' users', ['downloadbanned'], ['id=', 'downloadbanned='], ['yes', $user, 'no']);
-                    MessagesModel::insert(['sender'=>0, 'receiver'=>$user, 'added'=>CONFIG['TT_DATE'],'msg'=>'Too many Hit & Runs. You are Download Banned','subject'=>'Download Banned']);
+                    MessagesLogic::insert(['sender'=>0, 'receiver'=>$user, 'added'=>CONFIG['TT_DATE'],'msg'=>'Too many Hit & Runs. You are Download Banned','subject'=>'Download Banned']);
                 }
             endforeach;
         endif;
@@ -301,7 +301,7 @@ class Cleanup
             $username = $arr['username'];
             DB::update('users', ['class'], ['id='], [CONFIG['_POWERUSER'], $arr['id']]);
             $msgg = '[b]Congratulations[/b], you were automatically promoted to [b]Member[/b] class. Please note that if your ratio drops below [b]" . $minratio . "[/b] at any time,  you will be demoted to [b]Leecher[/b]';
-            MessagesModel::insert(['sender'=>0, 'receiver'=>$arr['id'], 'added'=>CONFIG['TT_DATE'],'msg'=>$msgg,'subject'=>"You have been promoted as " . $new_classname . ""]);
+            MessagesLogic::insert(['sender'=>0, 'receiver'=>$arr['id'], 'added'=>CONFIG['TT_DATE'],'msg'=>$msgg,'subject'=>"You have been promoted as " . $new_classname . ""]);
             unset($res, $arr, $res_classname, $arr_classname,$new_classname);
         }
 
@@ -315,7 +315,7 @@ class Cleanup
             $modcom = $modcomment;
             DB::run("UPDATE users SET class = 1, modcomment = CONCAT($modcom,modcomment) WHERE id = $arr[id]");
             $msgg = 'You were automatically demoted to [b]Leecher[/b]. That happened because your ratio dropped below [b]" . $minratio . "[/b]';
-            MessagesModel::insert(['sender'=>0, 'receiver'=>$arr['id'], 'added'=>CONFIG['TT_DATE'],'msg'=>$msgg,'subject'=> 'You have been demoted to Leecher']);
+            MessagesLogic::insert(['sender'=>0, 'receiver'=>$arr['id'], 'added'=>CONFIG['TT_DATE'],'msg'=>$msgg,'subject'=> 'You have been demoted to Leecher']);
             DB::insert('log', ['added'=>CONFIG['TT_DATE'], 'txt'=>"<a href=/account-details.php?id=$arr[id]><b>$username</b></a> has been demoted by System to <b>Leecher</b> class"]);
         }
         
@@ -330,7 +330,7 @@ class Cleanup
             $username = $arr['username'];
             DB::update(' users', ['class'], ['id='], [3, $arr['id']]);
             $msgg = '[b]Congratulations[/b], you were automatically promoted to [b]Power User[/b] class. Please note that if your ratio drops below [b]" . $minratio . "[/b] at any time,  you will be demoted to [b]Leecher[/b]';
-            MessagesModel::insert(['sender'=>0, 'receiver'=>$arr['owner'], 'added'=>CONFIG['TT_DATE'],'msg'=>$msgg,'subject'=> '[b]Congratulations[/b]']);
+            MessagesLogic::insert(['sender'=>0, 'receiver'=>$arr['owner'], 'added'=>CONFIG['TT_DATE'],'msg'=>$msgg,'subject'=> '[b]Congratulations[/b]']);
             unset($res, $arr, $res_classname, $arr_classname,$new_classname);
         }
 
@@ -345,7 +345,7 @@ class Cleanup
                 DB::update(' users', ['class'], ['id='], [CONFIG['_POWERUSER'], $UP['owner']]);
                 $subject = 'Automatic Promotion To Uploader Status';
                 $msg = 'Hello you did 1 upload, you are promoted to Uploader, Bravo !!! ';
-                MessagesModel::insert(['sender'=>0, 'receiver'=>$UP['owner'], 'added'=>CONFIG['TT_DATE'], 'subject'=> $subject,'msg'=>$msg, 'unread'=>'yes', 'location'=>'in']);
+                MessagesLogic::insert(['sender'=>0, 'receiver'=>$UP['owner'], 'added'=>CONFIG['TT_DATE'], 'subject'=> $subject,'msg'=>$msg, 'unread'=>'yes', 'location'=>'in']);
             }
         }
 
@@ -364,7 +364,7 @@ class Cleanup
             DB::update(' users', ['class'], ['id='], [2, $up['id']]);
             $subject = 'Automatic Downgrading to Member Status';
             $msg = 'You have not uploaded in the last fortnight so you have been demoted from uploader.';
-            MessagesModel::insert(['sender'=>0, 'receiver'=>$up['id'], 'added'=>CONFIG['TT_DATE'], 'subject'=> $subject,'msg'=>$msg, 'unread'=>'yes', 'location'=>'in']);
+            MessagesLogic::insert(['sender'=>0, 'receiver'=>$up['id'], 'added'=>CONFIG['TT_DATE'], 'subject'=> $subject,'msg'=>$msg, 'unread'=>'yes', 'location'=>'in']);
         }
     }
 

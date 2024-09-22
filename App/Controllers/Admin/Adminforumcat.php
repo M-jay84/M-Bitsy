@@ -4,7 +4,7 @@ namespace App\Controllers\Admin;
 
 use App\Libs\Auth;
 use App\Libs\Controller;
-use App\Models\ForumsModel;
+use App\Models\ForumsLogic;
 
 /*
 * forum Cats Controller
@@ -28,11 +28,11 @@ class AdminforumCat extends Controller
     {
         if ($move) {
             // Sort/mMove Order
-            ForumsModel::reorder($id, $move);
+            ForumsLogic::reorder($id, $move);
         }
 
         // Get Forum Cat Data
-        $forumcat = ForumsModel::getCats();
+        $forumcat = ForumsLogic::getCats();
 
         // Data For View
         $data = [
@@ -41,19 +41,19 @@ class AdminforumCat extends Controller
         ];
 
         // Load View
-        $this->view('admin-forumcat', $data, 'admin');
+        $this->template('admin-forumcat', $data, 'admin');
     }
 
     // Add/Edit Cat
     public function submit()
     {
-        ForumsModel::insertOrUpdate();
+        ForumsLogic::insertOrUpdate();
     }
 
     // Delete Forum Cat Submit
     public function delete($id, $action = 0)
     {
-        ForumsModel::deleteCats($id, $action);
+        ForumsLogic::deleteCats($id, $action);
     }
 
 }

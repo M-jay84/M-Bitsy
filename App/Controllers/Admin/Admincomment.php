@@ -4,7 +4,7 @@ namespace App\Controllers\Admin;
 
 use App\Libs\Auth;
 use App\Libs\Controller;
-use App\Models\CommentsModel;
+use App\Models\CommentsLogic;
 
 /*
 * Comment Controller
@@ -27,7 +27,7 @@ class Admincomment extends Controller
     public function index()
     {
         // Get All Comments
-        $comments = CommentsModel::grabAll();
+        $comments = CommentsLogic::grabAll();
         
         // Data For View
         $data = [
@@ -37,7 +37,7 @@ class Admincomment extends Controller
         ];
 
         // Load View
-        $this->view('admin-comment', $data, 'admin');
+        $this->template('admin-comment', $data, 'admin');
     }
 
 }

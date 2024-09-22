@@ -4,7 +4,7 @@ namespace App\Controllers\Admin;
 
 use App\Libs\Auth;
 use App\Libs\Controller;
-use App\Models\ClientsModel;
+use App\Models\ClientsLogic;
 
 /*
 * Client Controller
@@ -27,7 +27,7 @@ class Adminclient extends Controller
     public function index($type = 'peers')
     {
         // Get Client Data
-        $client = ClientsModel::select($type);
+        $client = ClientsLogic::select($type);
 
         // Data For View
         $data = [
@@ -37,19 +37,19 @@ class Adminclient extends Controller
         ];
         
         // Load View
-        $this->view('admin-client', $data, 'admin');
+        $this->template('admin-client', $data, 'admin');
     }
 
     // Add Client Record
     public function submit()
     {
-        ClientsModel::insert();
+        ClientsLogic::insert();
     }
 
     // Delete Client Record
     public function delete($id)
     {
-        ClientsModel::delete($id);
+        ClientsLogic::delete($id);
     }
 
 }

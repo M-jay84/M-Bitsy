@@ -4,7 +4,7 @@ namespace App\Controllers\Admin;
 
 use App\Libs\Auth;
 use App\Libs\Controller;
-use App\Models\LogsModel;
+use App\Models\LogsLogic;
 
 /*
 * Log Controller
@@ -27,7 +27,7 @@ class Adminlog extends Controller
     public function index()
     {
         // Show All Logs
-        $logs = LogsModel::getAll();
+        $logs = LogsLogic::getAll();
 
         // Data For View
         $data = [
@@ -37,13 +37,13 @@ class Adminlog extends Controller
         ];
 
         // Load View
-        $this->view('admin-log', $data, 'admin');
+        $this->template('admin-log', $data, 'admin');
     }
 
     // Delete Form
     public function delete()
     {
-        LogsModel::delete();
+        LogsLogic::delete();
     }
 
 }

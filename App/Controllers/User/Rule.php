@@ -4,7 +4,7 @@ namespace App\Controllers\User;
 
 use App\Libs\Auth;
 use App\Libs\Controller;
-use App\Models\RulesModel;
+use App\Models\RulesLogic;
 
 /*
 * Rules Controller
@@ -29,12 +29,12 @@ class Rule extends Controller
         // Data For View
         $data = [
             'TITLE' => LANG['RULE'],
-            'RULES' => RulesModel::gettAll(),
+            'RULES' => RulesLogic::gettAll(),
             'current_user' => $this->current_user
         ];
 
         // Load View
-        $this->view('user-rule', $data, 'user');
+        $this->template('user-rule', $data, 'user');
     }
 
     // Edit/Add Rule
@@ -44,7 +44,7 @@ class Rule extends Controller
             showMessage('rule', LANG["NO_PERMISSION"]);
         } else {
             if (!empty($_POST)) {
-                RulesModel::insertOrUpdate($this->current_user->username);
+                RulesLogic::insertOrUpdate($this->current_user->username);
             } else {
                 showMessage('rule', LANG["NOTHING_SELECTED"]);
             }
@@ -57,7 +57,7 @@ class Rule extends Controller
         if (!$this->current_user->isStaff) {
             showMessage(URLROOT, LANG["NO_PERMISSION"]);
         } else {
-            RulesModel::delete($id, $this->current_user->username);
+            RulesLogic::delete($id, $this->current_user->username);
         }
     }
 }

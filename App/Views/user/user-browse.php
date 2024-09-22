@@ -1,7 +1,7 @@
 <?php
 
 use App\Libs\DB;
-use App\Models\TorrentLangModel;
+use App\Models\TorrentLangLogic;
 
 block_begin($TITLE) ?>
 <div class="tt_blockcenter rounded">
@@ -124,7 +124,7 @@ block_begin($TITLE) ?>
                         </select>
                     <?php } ?>
                     <span></span>
-                    <?= TorrentLangModel::langList($_GET['language']); ?><br><br>
+                    <?= TorrentLangLogic::langList($_GET['language']); ?><br><br>
                 </div>
                 <div class="text-center">
                     <button type='submit' class='btn btn-sm ttbtn'><?= LANG["SEARCH"] ?></button>

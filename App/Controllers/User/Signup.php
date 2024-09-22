@@ -5,8 +5,8 @@ namespace App\Controllers\User;
 use App\Libs\Auth;
 use App\Libs\Controller;
 use App\Libs\Ip;
-use App\Models\AccountsModel;
-use App\Models\CountriesModel;
+use App\Models\AccountsLogic;
+use App\Models\CountriesLogic;
 
 /*
 * Signup Controller
@@ -35,14 +35,14 @@ class Signup extends Controller
 
         if (!empty($_POST)) {
             // Sign Account Up
-            AccountsModel::signupUser();
+            AccountsLogic::signupUser();
         } else {
             $data = [
                 'TITLE' => LANG["SIGNUP"],
-                'CHECK_INVITE' => AccountsModel::checkinvite(),
-                'COUNTRY' => CountriesModel::dropdown()
+                'CHECK_INVITE' => AccountsLogic::checkinvite(),
+                'COUNTRY' => CountriesLogic::dropdown()
             ];
-            $this->view('user-signup', $data, 'user');
+            $this->template('user-signup', $data, 'user');
         }
     }
 

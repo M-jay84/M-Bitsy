@@ -4,7 +4,7 @@ namespace App\Controllers\Admin;
 
 use App\Libs\Auth;
 use App\Libs\Controller;
-use App\Models\UsersearchModel;
+use App\Models\UsersearchLogic;
 
 /*
 * Search User Controller
@@ -32,7 +32,7 @@ class Adminusersearch extends Controller
         }
 
         // Results From Post
-        $results = UsersearchModel::searchUsers();
+        $results = UsersearchLogic::searchUsers();
 
         // Data For View
         $data = [
@@ -44,14 +44,14 @@ class Adminusersearch extends Controller
         ];
 
         // Load View
-        $this->view('admin-user-search', $data, 'admin');
+        $this->template('admin-user-search', $data, 'admin');
     }
 
     // Submit Warn/Disable Form
     private function submit() // todo tidy up
     {
         if (!empty($_POST["ids"])) {
-            UsersearchModel::submitUser($this->current_user);
+            UsersearchLogic::submitUser($this->current_user);
         } else {
             showMessage('adminusersearch', LANG["MISSING_ID"]);
         }

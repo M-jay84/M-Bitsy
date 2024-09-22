@@ -5,7 +5,7 @@ namespace App\Controllers\User;
 use App\Libs\Auth;
 use App\Libs\Controller;
 use App\Libs\Validate;
-use App\Models\WarningsModel;
+use App\Models\WarningsLogic;
 
 /*
 * Warning Controller
@@ -36,12 +36,12 @@ class Warning extends Controller
         $data = array(
             'TITLE' => LANG["USER_DETAILS_FOR"] . coloredname($user_id),
             'USER_ID' => $user_id,
-            'WARNINGS' => WarningsModel::getByUserId($user_id),
+            'WARNINGS' => WarningsLogic::getByUserId($user_id),
             'current_user' => $this->current_user
         );
 
         // Load View
-        $this->view('user-warning', $data, 'user');
+        $this->template('user-warning', $data, 'user');
     }
 
     // Warnings Form Submit
@@ -53,7 +53,7 @@ class Warning extends Controller
         }
 
         // Add New Warning
-        WarningsModel::newwarn($userid);
+        WarningsLogic::newwarn($userid);
     }
 
     // Delete User Warning
@@ -72,6 +72,6 @@ class Warning extends Controller
         ];
 
         // Delete Warning/s
-        WarningsModel::deleteAll($data);
+        WarningsLogic::deleteAll($data);
     }
 }

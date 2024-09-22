@@ -4,7 +4,7 @@ namespace App\Controllers\User;
 
 use App\Libs\Auth;
 use App\Libs\Controller;
-use App\Models\AccountsModel;
+use App\Models\AccountsLogic;
 
 /*
 * Login Controller
@@ -28,7 +28,7 @@ class Login extends Controller
     {
         if (!empty($_POST)) {
             // Log User In
-            AccountsModel::login();
+            AccountsLogic::login();
         }
     
         // Data For View
@@ -37,6 +37,6 @@ class Login extends Controller
         ];
 
         // Load View
-        $this->view('user-login', $data, 'user');
+        $this->template('user-login', $data, 'user');
     }
 }

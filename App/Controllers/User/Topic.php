@@ -4,7 +4,7 @@ namespace App\Controllers\User;
 
 use App\Libs\Auth;
 use App\Libs\Controller;
-use App\Models\TopicsModel;
+use App\Models\TopicsLogic;
 
 /*
 * Topic Controller
@@ -33,7 +33,7 @@ class Topic extends Controller
     public function index($forumid)
     {
         // Get Topics Data
-        $topics = TopicsModel::getForumTopics($forumid, $this->current_user);
+        $topics = TopicsLogic::getForumTopics($forumid, $this->current_user);
 
         // Data For View
         $data = [
@@ -46,37 +46,37 @@ class Topic extends Controller
         ];
 
         // Load View
-        $this->view('user-topic', $data, 'user');
+        $this->template('user-topic', $data, 'user');
     }
 
     // Post Topic
     public function submit($forumid)
     {
-        TopicsModel::insertTopic($forumid, $this->current_user);
+        TopicsLogic::insertTopic($forumid, $this->current_user);
     }
 
     // Delete a Topic Submit
     public function delete($topicid, $sure = 0)
     {
-        TopicsModel::delTopic($topicid, $sure);
+        TopicsLogic::delTopic($topicid, $sure);
     }
 
     // Rename a Topic Submit
     public function rename($topicid)
     {
-        TopicsModel::rename($topicid, $this->current_user);
+        TopicsLogic::rename($topicid, $this->current_user);
     }
 
     // Move a Topic Submit
     public function move($topicid)
     {
-        TopicsModel::move($topicid, $this->current_user);
+        TopicsLogic::move($topicid, $this->current_user);
     }
 
     // Lock a Topic Submit
     public function action($forumid, $topicid, $type)
     {
-        TopicsModel::action($forumid, $topicid, $type, $this->current_user);
+        TopicsLogic::action($forumid, $topicid, $type, $this->current_user);
     }
 
 }

@@ -5,7 +5,7 @@ namespace App\Controllers\User;
 use App\Libs\Auth;
 use App\Libs\Controller;
 use App\Libs\DB;
-use App\Models\PeersModel;
+use App\Models\PeersLogic;
 
 /*
 * Peers Controller
@@ -29,7 +29,7 @@ class Peer extends Controller
     {
         // Get Peers & Users
         $user =  DB::fetchRow('users', 'id,username,privacy', ['id ='], [$id]);
-        $peers = PeersModel::getPeers($type, $id, $this->current_user);
+        $peers = PeersLogic::getPeers($type, $id, $this->current_user);
 
         // Data For View
         $data = [
@@ -43,6 +43,6 @@ class Peer extends Controller
         ];
 
         // Load View
-        $this->view('user-peer', $data, 'user');
+        $this->template('user-peer', $data, 'user');
     }
 }

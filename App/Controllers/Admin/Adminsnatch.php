@@ -4,7 +4,7 @@ namespace App\Controllers\Admin;
 
 use App\Libs\Auth;
 use App\Libs\Controller;
-use App\Models\SnatchedModel;
+use App\Models\SnatchedLogic;
 
 /*
 * Snatched Controller
@@ -27,7 +27,7 @@ class Adminsnatch extends Controller
     public function index()
     {
         // Show All Peer History
-        $snatched = SnatchedModel::join('snatched.hnr = ?', 'yes');
+        $snatched = SnatchedLogic::join('snatched.hnr = ?', 'yes');
 
         // Data For View
         $data = [
@@ -38,14 +38,14 @@ class Adminsnatch extends Controller
         ];
 
         // Load View
-        $this->view('admin-snatch', $data, 'admin');
+        $this->template('admin-snatch', $data, 'admin');
     }
 
     // Delete Record Of Snatch/H&R/Peer History
     public function submit()
     {
         if (!empty($_POST)) {
-            SnatchedModel::deleteByIds();
+            SnatchedLogic::deleteByIds();
         } else {
             showMessage(URLROOT, LANG['NOTHING_SELECTED']);
         }       

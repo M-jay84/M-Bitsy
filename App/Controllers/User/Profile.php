@@ -4,7 +4,7 @@ namespace App\Controllers\User;
 
 use App\Libs\Auth;
 use App\Libs\Controller;
-use App\Models\ProfileModel;
+use App\Models\ProfileLogic;
 
 /*
 * Profile Controller
@@ -31,7 +31,7 @@ class Profile extends Controller
         }
 
         // Get User Profile
-        $user = ProfileModel::getProfile($id, $this->current_user);
+        $user = ProfileLogic::getProfile($id, $this->current_user);
 
         if ($user['user']["privacy"] != "strong" || ($this->current_user->isStaff) || ($this->current_user->id == $id)) {
 
@@ -47,7 +47,7 @@ class Profile extends Controller
             ];
 
             // Load View
-            $this->view('user-profile', $data, 'user');
+            $this->template('user-profile', $data, 'user');
         } else {
             showMessage(URLROOT, LANG["USER_PRIVATE"]);
         }
@@ -61,7 +61,7 @@ class Profile extends Controller
             showMessage(URLROOT, LANG["NO_PERMISSION"]);
         }
         if (!empty($_POST)) {
-            ProfileModel::submit($id, $this->current_user);
+            ProfileLogic::submit($id, $this->current_user);
         } else {
             showMessage(URLROOT, LANG["NOTHING_SELECTED"]);
         }
@@ -74,7 +74,7 @@ class Profile extends Controller
             showMessage(URLROOT, LANG["NO_PERMISSION"]);
         }
         if (!empty($_POST)) {
-            ProfileModel::adminSubmited($id, $this->current_user);
+            ProfileLogic::adminSubmited($id, $this->current_user);
         } else {
             showMessage(URLROOT, LANG["NOTHING_SELECTED"]);
         }
@@ -87,7 +87,7 @@ class Profile extends Controller
             showMessage(URLROOT, LANG["NO_PERMISSION"]);
         }
         if (!empty($id)) {
-            ProfileModel::deleteprofile($id, $this->current_user);
+            ProfileLogic::deleteprofile($id, $this->current_user);
         } else {
             showMessage(URLROOT, LANG["NOTHING_SELECTED"]);
         }

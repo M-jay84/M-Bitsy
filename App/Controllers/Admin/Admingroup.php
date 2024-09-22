@@ -4,7 +4,7 @@ namespace App\Controllers\Admin;
 
 use App\Libs\Auth;
 use App\Libs\Controller;
-use App\Models\GroupsModel;
+use App\Models\GroupsLogic;
 
 /*
 * Group Controller
@@ -28,10 +28,10 @@ class Admingroup extends Controller
     {
         if (!empty($_POST)) {
             // Add/Edit Groups
-            GroupsModel::insertOrUpdate();
+            GroupsLogic::insertOrUpdate();
         } else {
             // Get All Groups
-            $groups = GroupsModel::getGroups();
+            $groups = GroupsLogic::getGroups();
             
             $data = [
                 'TITLE' => LANG["GROUPS"],
@@ -39,14 +39,14 @@ class Admingroup extends Controller
             ];
         
             // Load View
-            $this->view('admin-group', $data, 'admin');
+            $this->template('admin-group', $data, 'admin');
         }
     }
 
     // Delete Groups
     public function delete($group_id)
     {
-        GroupsModel::delete($group_id);
+        GroupsLogic::delete($group_id);
     }
 
 }

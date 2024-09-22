@@ -5,7 +5,7 @@ namespace App\Controllers\User;
 use App\Libs\Auth;
 use App\Libs\Controller;
 use App\Libs\Torrents\Bencode;
-use App\Models\DownloadModel;
+use App\Models\DownloadLogic;
 
 /*
 * Download Controller
@@ -27,7 +27,7 @@ class Download extends Controller
         $passkey = $key == "" ?  $this->current_user->passkey : $key;
         
         // Get File/Name/External
-        $data = DownloadModel::torrent($torrent_id, $passkey);
+        $data = DownloadLogic::torrent($torrent_id, $passkey);
 
         // Local Torrent To Add Passkey
         if ($data["external"] != 'yes') {

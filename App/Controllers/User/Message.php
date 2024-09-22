@@ -4,8 +4,8 @@ namespace App\Controllers\User;
 
 use App\Libs\Auth;
 use App\Libs\Controller;
-use App\Models\MessagesModel;
-use App\Models\UsersModel;
+use App\Models\MessagesLogic;
+use App\Models\UsersLogic;
 
 /*
 * Messages Controller
@@ -28,7 +28,7 @@ class Message extends Controller
     public function index($id, $type = 'inbox')
     {
         // Get Message
-        $messages = MessagesModel::getById($id, $this->current_user->id);
+        $messages = MessagesLogic::getById($id, $this->current_user->id);
 
         // Init Dta
         $data = [
@@ -39,14 +39,14 @@ class Message extends Controller
         ];
 
         // Load View
-        $this->view('user-message', $data, 'user');
+        $this->template('user-message', $data, 'user');
     }
 
     // Mailbox
     public function mailbox($type = 'inbox')
     {
         // Get All Messages
-        $messages = MessagesModel::msgPagination($type, $this->current_user->id);
+        $messages = MessagesLogic::msgPagination($type, $this->current_user->id);
         
         // Init Dta
         $data = [
@@ -57,14 +57,14 @@ class Message extends Controller
         ];
 
         // Load View
-        $this->view('user-message-mailbox', $data, 'user');
+        $this->template('user-message-mailbox', $data, 'user');
     }
 
     // Ajax User search
 	function findUser()
     {
         if(!empty($_POST)) {
-            $result = UsersModel::getUserName();
+            $result = UsersLogic::getUserName();
             if(!empty($result)) {
                 ?>
                 <ul id="country-list">
@@ -88,25 +88,25 @@ class Message extends Controller
         ];
 
         // Load View
-        $this->view('user-message-create', $data, 'user');
+        $this->template('user-message-create', $data, 'user');
     }
 
     // Create/Reply Message Form Submit
     public function submit()
     {
-        MessagesModel::insertByType($this->current_user->id);
+        MessagesLogic::insertByType($this->current_user->id);
     }
 
     // Message Edit
     public function update($id)
     {
-        MessagesModel::update($id, $this->current_user->id);
+        MessagesLogic::update($id, $this->current_user->id);
     }
 
     // Delete/MarkRead Message Submit
     public function delete($type = 0)
     {
-        MessagesModel::delete($type, $this->current_user->id);
+        MessagesLogic::delete($type, $this->current_user->id);
     }
 
 }

@@ -1,6 +1,6 @@
 <?php
 
-use App\Models\WarningsModel;
+use App\Models\WarningsLogic;
 
  block_begin($TITLE) ?>
 <p class="text-center">
@@ -26,7 +26,7 @@ use App\Models\WarningsModel;
                         <td><?= get_user_class_name($row["class"]) ?></td>
                         <td><?= user_timezone_date($row["added"]) ?></td>
                         <td><?= user_timezone_date($row["last_access"]) ?></td>
-                        <?php $count_user_warn = WarningsModel::fetchColumn('count(id)', ['userid=', 'active='], [$row['id'],'yes']); ?>
+                        <?php $count_user_warn = WarningsLogic::fetchColumn('count(id)', ['userid=', 'active='], [$row['id'],'yes']); ?>
                         <td><a href="<?= Url("warning/$row[id]") ?>"><?= number_format($count_user_warn); ?></a></td>
                         <td><input type="checkbox" name="ids[]" value="<?= $row["id"] ?>" /></td>
                     </tr>

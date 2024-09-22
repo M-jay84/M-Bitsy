@@ -366,7 +366,7 @@
 
 <?php
 /* Simil torrent
-$res = TorrentsModel::getAll("WHERE visible = ? AND banned = ? AND torrents.category = ? ORDER BY sticky, added DESC, id DESC", ['yes', 'no', $category]);
+$res = TorrentsLogic::getAll("WHERE visible = ? AND banned = ? AND torrents.category = ? ORDER BY sticky, added DESC, id DESC", ['yes', 'no', $category]);
 if ($re['count'] > 0) {
     echo '<br><center><b>Similar Torrents</b></center>';
     torrenttable($res['stmt']);

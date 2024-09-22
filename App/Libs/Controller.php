@@ -8,7 +8,7 @@ namespace App\Libs;
 class Controller
 {
     // Display View Template
-    public function view($file, $data = [], $page = false)
+    public function template($file, $data = [], $page = false)
     {
         //$session_id = isset($data['current_user']->id) ? $data['current_user']->id : 0;
         //if (!$session_id) {

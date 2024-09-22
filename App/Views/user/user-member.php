@@ -1,5 +1,5 @@
 <?php
-use App\Models\CountriesModel;
+use App\Models\CountriesLogic;
 block_begin($TITLE);
  ?>
 <div class="row tt_blockcenter rounded">
@@ -48,7 +48,7 @@ block_begin($TITLE);
         </thead>
         <tbody>
             <?php foreach ($USERS as $row) : ?>
-                <?php $country = CountriesModel::fetchRow($row['country'], 1); ?>
+                <?php $country = CountriesLogic::fetchRow($row['country'], 1); ?>
                 <tr>
                     <td><b><?= coloredname($row['id']) ?></b><?php echo ($row["donated"] > 0 ? "<i class='fa fa-star' aria-hidden='true' style='color:orange' title='Donated'></i>" : "") ?></td>
                     <td><?= user_timezone_date($row["added"]); ?></td>

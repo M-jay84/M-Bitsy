@@ -4,7 +4,7 @@ namespace App\Controllers\Admin;
 
 use App\Libs\Auth;
 use App\Libs\Controller;
-use App\Models\PermissionsModel;
+use App\Models\PermissionsLogic;
 
 /*
 * Permission Controller
@@ -27,10 +27,10 @@ class Adminpermission extends Controller
     public function index()
     {
         if (!empty($_POST)) {
-            PermissionsModel::insertOrUpdate();
+            PermissionsLogic::insertOrUpdate();
         } else {
             // Get Permissions
-            $permissions = PermissionsModel::fetchAll('*', '', 'ORDER BY permission_id'); 
+            $permissions = PermissionsLogic::fetchAll('*', '', 'ORDER BY permission_id'); 
 		
             // Data For View
             $data = [
@@ -39,7 +39,7 @@ class Adminpermission extends Controller
             ];
        
             // Load View
-            $this->view('admin-permission', $data, 'admin');
+            $this->template('admin-permission', $data, 'admin');
         }
         
     }
@@ -47,7 +47,7 @@ class Adminpermission extends Controller
     // Delete Permissions
     public function delete($id)
     {
-        PermissionsModel::delete($id);
+        PermissionsLogic::delete($id);
     }
 
 }

@@ -32,6 +32,6 @@ class Home extends Controller
         ];
 
         // Load View
-        $this->view('user-home', $data, 'user');
+        $this->template('user-home', $data, 'user');
     }
 }

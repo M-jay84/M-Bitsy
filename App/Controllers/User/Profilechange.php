@@ -4,7 +4,7 @@ namespace App\Controllers\User;
 
 use App\Libs\Auth;
 use App\Libs\Controller;
-use App\Models\ProfilechangeModel;
+use App\Models\ProfilechangeLogic;
 
 /*
 * Accout Controller
@@ -34,7 +34,7 @@ class Profilechange extends Controller
         }
 
         if (!empty($_FILES['file'])) {
-            ProfilechangeModel::addavatar($user_id);
+            ProfilechangeLogic::addavatar($user_id);
         } else {
             showMessage("profile/$user_id", LANG["ACTION_FAILED"]);
         }
@@ -48,7 +48,7 @@ class Profilechange extends Controller
         }
 
         if (!empty($_POST)) {
-            ProfilechangeModel::submitPassword($user_id);
+            ProfilechangeLogic::submitPassword($user_id);
         } else {
             showMessage("profile/$user_id", LANG["MISSING_FORM_DATA"]);
         }
@@ -63,7 +63,7 @@ class Profilechange extends Controller
         }
 
         if (!empty($_POST)) {
-            ProfilechangeModel::changeemail($user_id);
+            ProfilechangeLogic::changeemail($user_id);
         } else {
             showMessage("profile/$user_id", LANG["MISSING_FORM_DATA"]);
         }

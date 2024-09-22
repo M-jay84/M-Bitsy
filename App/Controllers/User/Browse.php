@@ -4,7 +4,7 @@ namespace App\Controllers\User;
 
 use App\Libs\Auth;
 use App\Libs\Controller;
-use App\Models\TorrentsModel;
+use App\Models\TorrentsLogic;
 
 /*
 * Broswe Controller
@@ -29,7 +29,7 @@ class Browse extends Controller
         if ($this->current_user->view_torrents != "yes" && CONFIG['MEMBERSONLY']) {
             showMessage(URLROOT, LANG["NO_TORRENT_VIEW"]);
         } else {
-            $browse =TorrentsModel::countBrowse();
+            $browse =TorrentsLogic::countBrowse();
 
             // Data For View
             $data = [
@@ -48,7 +48,7 @@ class Browse extends Controller
             ];
 
             // Load View
-            $this->view('user-browse', $data, 'user');
+            $this->template('user-browse', $data, 'user');
         }
     }
 

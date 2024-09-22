@@ -4,7 +4,7 @@ namespace App\Controllers\User;
 
 use App\Libs\Auth;
 use App\Libs\Controller;
-use App\Models\UsersModel;
+use App\Models\UsersLogic;
 
 /*
 * Members Controller
@@ -32,7 +32,7 @@ class Members extends Controller
         }
 
         // Search Users
-        $users = UsersModel::getMembers();
+        $users = UsersLogic::getMembers();
 
         // Data For View
         $data = [
@@ -43,7 +43,7 @@ class Members extends Controller
         ];
 
         // Load View
-        $this->view('user-member', $data, 'user');
+        $this->template('user-member', $data, 'user');
     }
 
 }

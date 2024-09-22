@@ -4,7 +4,7 @@ namespace App\Controllers\User;
 
 use App\Libs\Auth;
 use App\Libs\Controller;
-use App\Models\ReportsModel;
+use App\Models\ReportsLogic;
 
 /*
 * Report Controller
@@ -27,7 +27,7 @@ class Report extends Controller
     public function index()
     {
         if (!empty($_POST)) {
-            ReportsModel::reportItem($this->current_user);
+            ReportsLogic::reportItem($this->current_user);
         } else {
             showMessage(URLROOT, LANG["NOTHING_SELECTED"]);
         }

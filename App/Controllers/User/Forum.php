@@ -4,7 +4,7 @@ namespace App\Controllers\User;
 
 use App\Libs\Auth;
 use App\Libs\Controller;
-use App\Models\ForumsModel;
+use App\Models\ForumsLogic;
 
 /*
 * Forum Controller
@@ -35,22 +35,22 @@ class Forum extends Controller
         // Data For View
         $data = [
             'TITLE' => LANG["FORUM"],
-            'FORUMS' => ForumsModel::getCatForums()
+            'FORUMS' => ForumsLogic::getCatForums()
         ];
 
         // Load View
-        $this->view('user-forum', $data, 'user');
+        $this->template('user-forum', $data, 'user');
     }
 
     // Search Forum
     public function search()
     {
         // Search Forum
-        $data = ForumsModel::search();
+        $data = ForumsLogic::search();
 		$data['USER'] = $this->current_user;
 
         // Load View
-        $this->view('user-forum-search', $data, 'user');
+        $this->template('user-forum-search', $data, 'user');
     }
 
     // View Unread Topics Page
@@ -61,7 +61,7 @@ class Forum extends Controller
         }
         
         // Get Data
-        $forums = ForumsModel::unread($this->current_user);
+        $forums = ForumsLogic::unread($this->current_user);
         
 		// Data For View
         $data = [
@@ -71,6 +71,6 @@ class Forum extends Controller
         ];
 
         // Load View
-        $this->view('user-forum-unread', $data, 'user');
+        $this->template('user-forum-unread', $data, 'user');
     }
 }

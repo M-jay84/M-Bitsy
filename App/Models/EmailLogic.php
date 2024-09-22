@@ -1,0 +1,52 @@
+<?php
+
+namespace App\Models;
+
+use App\Libs\DB;
+use App\Libs\TTMail;
+use App\Libs\Validate;
+use PDO;
+
+/*
+* Download Logic
+*/
+class EmailLogic
+{
+    // Country Flag //todo view
+    public static function emailAll($current_user)
+    {
+        // Check User Input
+        $msg_log = "Sent to classes: ";
+        set_time_limit(0);
+        $subject = Validate::Input('subject');
+        $body = format_comment($_POST["body"]);
+
+        // Check Correct Input
+        if (!$subject || !$body) {
+           showMessage('adminemail', LANG["MISSING_ID"]);
+        }
+
+        if (!@count($_POST["groups"])) {
+            showMessage('adminemail', LANG["NOTHING_SELECTED"]);
+        }
+
+        // Get Group Data
+        $ids = array_map("intval", $_POST["groups"]);
+        $ids = implode(", ", $ids);
+        $res_log = GroupsLogic::fetchlevel($ids);
+        foreach ($res_log as $row_log) {
+            $msg_log .= $row_log["level"] . ", ";
+        }
+        
+        // Send Email
+        $res = DB::run("SELECT u.email FROM users u LEFT JOIN `groups` g ON u.class = g.group_id WHERE u.enabled = 'yes' AND u.status = 'confirmed' AND u.class IN ($ids)");
+        $siteemail = CONFIG['SITEEMAIL'];
+        while ($row = $res->fetch(PDO::FETCH_ASSOC)) {
+            $TTMail = new TTMail();
+            $TTMail->Send($row["email"], $subject, $body, "Content-type: text/html; charset=utf-8", "-f$siteemail");
+        }
+
+        LogsLogic::write("<b><font color='Magenta'>A Mass E-Mail</font> was sent by (<font color='Navy'>".$current_user->username."</font>) $msg_log<b>");
+    }
+
+}

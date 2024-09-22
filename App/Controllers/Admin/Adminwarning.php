@@ -4,7 +4,7 @@ namespace App\Controllers\Admin;
 
 use App\Libs\Auth;
 use App\Libs\Controller;
-use App\Models\WarningsModel;
+use App\Models\WarningsLogic;
 
 /*
 * Warnings Controller
@@ -27,7 +27,7 @@ class Adminwarning extends Controller
     public function index()
     {
         // Get Warnings
-        $warnings = WarningsModel::getAll();
+        $warnings = WarningsLogic::getAll();
 
         // Data For View
         $data = [
@@ -38,14 +38,14 @@ class Adminwarning extends Controller
         ];
 
         // Load View
-        $this->view('admin-warning', $data, 'admin');
+        $this->template('admin-warning', $data, 'admin');
     }
 
     // Warning Form Submit
     public function submit()
     {
         if (!empty($_POST)) {
-            WarningsModel::deleteAllAdmin();
+            WarningsLogic::deleteAllAdmin();
         } else {
             showMessage(URLROOT, LANG['NOTHING_SELECTED']);
         }  

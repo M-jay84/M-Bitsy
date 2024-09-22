@@ -4,7 +4,7 @@ namespace App\Controllers\User;
 
 use App\Libs\Auth;
 use App\Libs\Controller;
-use App\Models\LikesModel;
+use App\Models\LikesLogic;
 
 /*
 * Like Controller
@@ -27,7 +27,7 @@ class Like extends Controller
     public function index($id, $type)
     {
         // id of item / type of item 
-        LikesModel::switch($id, $type, $this->current_user);
+        LikesLogic::switch($id, $type, $this->current_user);
     }
 
 }

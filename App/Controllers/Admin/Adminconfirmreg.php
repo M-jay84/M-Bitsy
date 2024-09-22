@@ -4,7 +4,7 @@ namespace App\Controllers\Admin;
 
 use App\Libs\Auth;
 use App\Libs\Controller;
-use App\Models\UsersModel;
+use App\Models\UsersLogic;
 
 /*
 * Confirm Registration Controller
@@ -27,7 +27,7 @@ class Adminconfirmreg extends Controller
     public function index()
     {
         // Show Users
-        $users = UsersModel::usersToConfirm();
+        $users = UsersLogic::usersToConfirm();
 
         // Data For View
         $data = [
@@ -38,13 +38,13 @@ class Adminconfirmreg extends Controller
         ];
 
         // Load View
-        $this->view('admin-confirmreg', $data, 'admin');
+        $this->template('admin-confirmreg', $data, 'admin');
     }
 
     // Confirm Users Submit
     public function submit()
     {
-        UsersModel::confirmReg();
+        UsersLogic::confirmReg();
     }
     
 }

@@ -1,6 +1,6 @@
 <?php
-use App\Models\ReadModel;
-use App\Models\AttachmentsModel;
+use App\Models\ReadLogic;
+use App\Models\AttachmentsLogic;
 ?>
 <div class="tt_block rounded">
     <div class="tt_blockhead text-center">
@@ -29,7 +29,7 @@ use App\Models\AttachmentsModel;
             if ($pn == $pc) {
                 print("<a name='last'></a>\n");
                 if ($row['id'] > $INFO['lpr'] && $USER->id == true) {
-                    ReadModel::update(['lastpostread'], ['userid=', 'topicid='], [$row['id'],$USER->id,$TOPICID]);
+                    ReadLogic::update(['lastpostread'], ['userid=', 'topicid='], [$row['id'],$USER->id,$TOPICID]);
                 }
             }
             // Details
@@ -62,7 +62,7 @@ use App\Models\AttachmentsModel;
                             </div>
                             <div class="col-md-10"><br>
                                 <?= $body ?>
-                                <?php AttachmentsModel::get_attachment($row['id']); ?>
+                                <?php AttachmentsLogic::get_attachment($row['id']); ?>
                                 <?php if (!$posterdetails['usersignature']) : ?>
                                     <br>
                                 <?php else : ?>

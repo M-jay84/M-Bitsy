@@ -94,7 +94,8 @@ function search()
     // browse
     $wherecatina = array();
     $wherecatin = "";
-    $res = DB::fetchAll('categories', 'id', '');
+    $categories_query = "SELECT id FROM `categories`";
+    $res = DB::run($categories_query);
     foreach ($res as $row) {
         if (isset($_GET["c$row[id]"])) {
             $wherecatina[] = $row["id"];
@@ -178,38 +179,10 @@ class TorrentsLogic
 	}
 
     // Fetch Torrent Details
-    public static function insert($updateset)
-    {
-        $stmt = DB::insert('torrents', $updateset);
-        return $stmt;
-	}
-	
-    // Fetch Torrent Details
-    public static function update($cols, $where, $vals, $other = '')
-    {
-        $stmt = DB::update('torrents', $cols, $where, $vals, $other);
-        return $stmt;
-	}
-	
-    // Fetch Torrent Details
-    public static function fetchColumn($columns = '*', $where = '', $values = '', $other = '')
-    {
-        $stmt = DB::newSelect('torrents', $columns, $where, $values, $other)->fetchColumn();
-		return $stmt;
-	}
-	
-    // Fetch Torrent Details
-    public static function fetchRow($columns = '*', $where = '', $values = '', $other = '')
-    {
-        $stmt = DB::fetchRow('torrents', $columns, $where, $values, $other);
-		return $stmt;
-	}
-	
-    // Fetch Torrent Details
     public static function fetchIdDetails($where, $value, $data)
     {
         $stmt = array();
-        $stmt = DB::run(
+        $torrents_query = 
             "SELECT torrents.anon, torrents.seeders, torrents.tube, 
                     torrents.banned, torrents.leechers, torrents.info_hash, 
                     torrents.filename, torrents.nfo, torrents.last_action, 
@@ -232,7 +205,8 @@ class TorrentsLogic
             LEFT JOIN categories ON torrents.category = categories.id 
             LEFT JOIN torrentlang ON torrents.torrentlang = torrentlang.id 
             LEFT JOIN users ON torrents.owner = users.id 
-            WHERE $where",
+            WHERE $where";
+        $stmt = DB::run($torrents_query,
             $value)->fetch();
         if (!$stmt || ($stmt["banned"] == "yes")) {
             showMessage(URLROOT, LANG["TORRENT_NOT_FOUND"]);
@@ -277,7 +251,8 @@ class TorrentsLogic
         $thanks = LikesLogic::showThanks($stmt['id']);
         $likes = LikesLogic::showLikes($stmt);
         // Tags
-        $tag = TorrentTagLogic::fetchRow('type1, type2, type3', ['torrentid='], [$value]);
+        $$torrents_quertag_query = "SELECT type1, type2, type3 FROM `torrenttag` WHERE torrentid=?";
+        $tag = DB::run($torrenttag_query, [$value])->fetch(PDO::FETCH_ASSOC);
         if ($tag) {
             $tags = get_tags($value);
         } else {
@@ -297,7 +272,8 @@ class TorrentsLogic
         $html['freeleech1'] = $stmt["freeleech"] == 1 ? "<font color=green><b>Yes</b></font>" : "<font color=red><b>No</b></font>";
         // Calculate local torrent speed test
         if ($stmt["leechers"] >= 1 && $stmt["seeders"] >= 1 && $stmt["external"] != 'yes') {
-            $speedQ = DB::run("SELECT (SUM(p.downloaded)) / (UNIX_TIMESTAMP('" . CONFIG['TT_DATE'] . "') - UNIX_TIMESTAMP(added)) AS totalspeed FROM torrents AS t LEFT JOIN peers AS p ON t.id = p.torrent WHERE p.seeder = 'no' AND p.torrent = '$stmt[id]' GROUP BY t.id ORDER BY added ASC LIMIT 15");
+            $torrents_query = "SELECT (SUM(p.downloaded)) / (UNIX_TIMESTAMP('" . CONFIG['TT_DATE'] . "') - UNIX_TIMESTAMP(added)) AS totalspeed FROM torrents AS t LEFT JOIN peers AS p ON t.id = p.torrent WHERE p.seeder = 'no' AND p.torrent = '$stmt[id]' GROUP BY t.id ORDER BY added ASC LIMIT 15";
+            $speedQ = DB::run($torrents_query);
             $a = $speedQ->fetch(PDO::FETCH_ASSOC);
             $html['totalspeed'] = mksize($a["totalspeed"]) . "/s";
         } else {
@@ -333,21 +309,26 @@ class TorrentsLogic
     public static function updateComments($id, $var)
     {
         if ($var == 'sub') {
-            $row = DB::fetchRow('torrents', 'comments', ['id='], [$id]);
-            DB::run("UPDATE torrents SET comments = $row[comments] - 1 WHERE id = $id");
+            $$torrents_query = "SELECT comments FROM `torrents` WHERE id=? ";
+            $row = DB::run($torrents_query, [$id])->fetch(PDO::FETCH_ASSOC);
+            $torrents_query = "UPDATE torrents SET comments = $row[comments] - 1 WHERE id = $id";
+            DB::run($torrents_query);
         } elseif ($var == 'add') {
-            DB::run("UPDATE torrents SET comments = comments + 1 WHERE id = $id");
+            $torrents_query = "UPDATE torrents SET comments = comments + 1 WHERE id = $id";
+            DB::run($torrents_query);
         }
     }
 
     // Function To Delete A Torrent
     public static function deleteTorrent($id, $current_userid)
     {
-        $row = DB::fetchRow('torrents', 'image1,image2', ['id'], [$id]);
+        $torrents_query = "SELECT image1,image2 FROM `torrents` WHERE id=? ";
+        $row = DB::run($torrents_query, [$id])->fetch(PDO::FETCH_ASSOC);
         foreach (explode(".", "peers.comments.ratings.files") as $x) {
-            DB::delete($x, ['torrent' => $id]);
+            $torrents_query = "DELETE FROM $x WHERE torrent' = ?";
+            DB::run($torrents_query, [$id]);
         }
-        DB::delete('completed', ['torrentid' => $id]);
+
         if (file_exists(UPLOAD_PATH . "/torrents/$id.torrent")) {
             unlink(UPLOAD_PATH . "/torrents/$id.torrent");
         }
@@ -358,11 +339,14 @@ class TorrentsLogic
             unlink(UPLOAD_PATH . "/images/" . $row["image2"]);
         }
         @unlink(UPLOAD_PATH . "/nfos/$id.nfo");
-        DB::delete('torrents', ['id' => $id]);
-        DB::delete('files', ['torrent' => $id]);
-        ReportsLogic::delete(['votedfor' => $id, 'type' => 'torrent']);
-        DB::delete('snatched', ['tid' => $id]);
-        DB::delete('likes', ['liked' => $id, 'type' => 'torrent']);
+        $torrents_query = "DELETE FROM torrents WHERE id = ?";
+        DB::run($torrents_query, [$id]);
+        $reports_query = "DELETE FROM `reports` WHERE votedfor = ? AND type=?";
+        DB::run($reports_query, [$id, 'torrent']);
+        $snatched_query = "DELETE FROM snatched WHERE tid = ?";
+        DB::run($snatched_query, [$id]);
+        $likes_query = "DELETE FROM likes WHERE liked' = ? AND type=?";
+        DB::run($likes_query, [$id, 'torrent']);
         
         LogsLogic::write("Torrent ID $id was deleted by ".$current_userid."");
     }
@@ -374,10 +358,11 @@ class TorrentsLogic
         $search = search();
 
         $catsquery = CatagoriesLogic::getCatByParent();
-        $count = DB::run("SELECT COUNT(*) FROM torrents LEFT JOIN categories ON category = categories.id $search[where]", $search['params'])->fetchColumn();
+        $torrents_query = "SELECT COUNT(*) FROM torrents LEFT JOIN categories ON category = categories.id $search[where]";
+        $count = DB::run($torrents_query, $search['params'])->fetchColumn();
         list($pagerbuttons, $limit) = pagination(25, $count, URLROOT . "/browse" . $search['url'] . $search['pagerlink']);
 
-        $res = DB::run(
+        $torrents_query = 
                     "SELECT torrents.id, torrents.anon, torrents.announce, torrents.category, torrents.sticky, 
                     torrents.leechers, torrents.nfo, torrents.seeders, torrents.name, torrents.times_completed, 
                     torrents.tube, torrents.tmdb, torrents.imdb, torrents.size, torrents.added, torrents.comments, torrents.numfiles, 
@@ -394,13 +379,15 @@ class TorrentsLogic
                     ON torrents.owner = users.id 
                     $search[where] 
                     $search[orderby] 
-                    $limit",
+                    $limit";
+                    $res = DB::run($torrents_query,
                     $search['params']
                 );
 
         $cats = CatagoriesLogic::genreList();
         $lang = TorrentLangLogic::langList();
-        $cats = CatagoriesLogic::fetchAll('*', '', 'ORDER BY parent_cat, name');
+        $categories_query = "SELECT * FROM `categories` ORDER BY parent_cat, name";
+        $cats = DB::run($categories_query);
 
         $title = $search['keyword'] == '' ? LANG["SEARCH"] :LANG["SEARCH_RESULTS_FOR"] . " \"" . htmlspecialchars($search['keyword']) . "\"";
                 
@@ -411,14 +398,15 @@ class TorrentsLogic
     // Scrape Info
     public static function scrapeInfo($hashes)
     {
-        $cres = DB::run("SELECT info_hash, seeders, leechers, times_completed, filename FROM `torrents` WHERE `info_hash` IN (?)", [$hashes])->fetch(PDO::FETCH_ASSOC);
+        $torrents_query = "SELECT info_hash, seeders, leechers, times_completed, filename FROM `torrents` WHERE `info_hash` IN (?)";
+        $cres = DB::run($torrents_query, [$hashes])->fetch(PDO::FETCH_ASSOC);
         return $cres;
     }
 
     // RSS Info
     public static function rssInfo($where, $limit)
     {
-        $cres = DB::run("SELECT torrents.id,
+        $torrents_query= "SELECT torrents.id,
                                torrents.name,
                                torrents.size,
                                torrents.category,
@@ -429,7 +417,8 @@ class TorrentsLogic
                         LEFT JOIN categories ON category = categories.id 
                         $where 
                         ORDER BY added 
-                        DESC $limit")->fetchAll();
+                        DESC $limit";
+                        $cres = DB::run($torrents_query)->fetchAll();
         return $cres;
     }
 
@@ -440,7 +429,8 @@ class TorrentsLogic
         }
 
         // Check Torrent
-        $row = TorrentsLogic::fetchRow('owner,banned,external', ['id ='], [$id]);
+        $torrents_query = "SELECT owner,banned,external FROM `torrents` WHERE id=?";
+        $row = DB::run($torrents_query, [$id])->fetch(PDO::FETCH_ASSOC);
         if (!$row || $row["banned"] == "yes") {
             showMessage(URLROOT, LANG["TORRENT_NOT_FOUND"]);
         } elseif ($row["external"] == "yes") {
@@ -451,10 +441,10 @@ class TorrentsLogic
         $res2 = SnatchedLogic::completed($id);
         $message = sprintf(LANG['RESEED_MESSAGE'], $current_user->username, URLROOT, $id);
         foreach ($res2 as $row2) {
-            MessagesLogic::insert(['subject' => LANG["NEW_RESEED"], 'sender' => $current_user->id, 'receiver' => $row2['id'], 'added' => CONFIG['TT_DATE'], 'msg' => $message]);
+            MessagesLogic::newinsert(['subject' => LANG["NEW_RESEED"], 'sender' => $current_user->id, 'receiver' => $row2['id'], 'added' => CONFIG['TT_DATE'], 'msg' => $message]);
         }
         if ($row["owner"] && $row["owner"] != $current_user->id) {
-            MessagesLogic::insert(['subject' => 'Torrent Reseed Request', 'sender' => $current_user->id, 'receiver' => $row['owner'], 'added' => CONFIG['TT_DATE'], 'msg' => $message]);
+            MessagesLogic::newinsert(['subject' => 'Torrent Reseed Request', 'sender' => $current_user->id, 'receiver' => $row['owner'], 'added' => CONFIG['TT_DATE'], 'msg' => $message]);
         }
 
         setcookie("reseed$id", $id, CONFIG['TT_TIME']+60*60*24*30);
@@ -464,8 +454,9 @@ class TorrentsLogic
     // Search Torrent  todo blocks&views below
     public static function popular($tcat)
     {
-        $row = DB::run("SELECT torrents.id, torrents.name, torrents.image1, torrents.image2, torrents.poster, torrents.tmdb, torrents.imdb, categories.name as cat_name, categories.parent_cat as cat_parent FROM torrents LEFT JOIN categories ON torrents.category=categories.id 
-		WHERE banned = 'no' AND visible = 'yes' AND category IN ($tcat) ORDER BY torrents.seeders + torrents.leechers DESC LIMIT 10")->fetchAll();
+        $torrents_query = "SELECT torrents.id, torrents.name, torrents.image1, torrents.image2, torrents.poster, torrents.tmdb, torrents.imdb, categories.name as cat_name, categories.parent_cat as cat_parent FROM torrents LEFT JOIN categories ON torrents.category=categories.id 
+		WHERE banned = 'no' AND visible = 'yes' AND category IN ($tcat) ORDER BY torrents.seeders + torrents.leechers DESC LIMIT 10";
+        $row = DB::run($torrents_query)->fetchAll();
         return $row;
     }
 
@@ -477,14 +468,15 @@ class TorrentsLogic
             $values = array('yes');
         }
 
-        $count = DB::run("SELECT COUNT(*) FROM torrents $where", $values)->fetchColumn();
+        $torrents_query = "SELECT COUNT(*) FROM torrents $where";
+        $count = DB::run($torrents_query, $values)->fetchColumn();
         if ($pagination) {
             list($pager, $limit) = pagination(25, $count, URLROOT . "/$pagination&amp;");
         } else {
             $limit = 'LIMIT 20';
             $pager = '';
         }
-        $stmt = DB::run(
+        $torrents_query = 
             "SELECT torrents.anon, torrents.seeders, torrents.tube, 
                     torrents.banned, torrents.leechers, torrents.info_hash, 
                     torrents.filename, torrents.nfo, torrents.last_action, 
@@ -507,7 +499,9 @@ class TorrentsLogic
             LEFT JOIN categories ON torrents.category = categories.id 
             LEFT JOIN torrentlang ON torrents.torrentlang = torrentlang.id 
             LEFT JOIN users ON torrents.owner = users.id
-             $where $limit",
+             $where $limit";
+             
+            $stmt = DB::run($torrents_query,
             $values
         )->fetchAll(PDO::FETCH_ASSOC);
 

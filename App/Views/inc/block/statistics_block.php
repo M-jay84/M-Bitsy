@@ -2,23 +2,36 @@
 use App\Libs\DB;
 
 $date_time = date("Y-m-d H:i:s", CONFIG['TT_TIME'] - (3600 * 24)); // the 24hrs is the hours you want listed
-$registered = DB::fetchColumn('users', 'count(id)', '');
-$ncomments = DB::fetchColumn('comments', 'count(id)', '');
-$nmessages = DB::fetchColumn('messages', 'count(id)', '');
-$ntor = DB::fetchColumn('torrents', 'count(id)', '');
-$totaltoday = DB::fetchColumn('users', 'count(id)', ['last_access >='], [$date_time]);
-$regtoday = DB::fetchColumn('users', 'count(id)', ['added >='], [$date_time]);
-$todaytor = DB::fetchColumn('torrents', 'count(id)', ['added >='], [$date_time]);
+$users_query = "SELECT count(id) FROM `users`";
+$registered = DB::run($users_query)->fetchColumn();
+$comments_query = "SELECT count(id) FROM `comments`";
+$ncomments = DB::run($comments_query)->fetchColumn();
+$messages_query = "SELECT count(id) FROM `messages`";
+$nmessages = DB::run($messages_query)->fetchColumn();
+$torrents_query = "SELECT count(id) FROM `torrents`";
+$ntor = DB::run($torrents_query)->fetchColumn();
+$users_query = "SELECT count(id) FROM `users` WHERE last_access >=?";
+$totaltoday = DB::run($users_query, [$date_time])->fetchColumn();
+$users_query = "SELECT count(id) FROM `users` WHERE added >=?";
+$regtoday =DB::run($users_query, [$date_time])->fetchColumn();
+$torrents_query = "SELECT count(id) FROM `torrents` WHERE added >=? ";
+$todaytor = DB::run($torrents_query, [$date_time])->fetchColumn();
 $past = (CONFIG['TT_TIME'] - 2400);
-$stmt =  DB::run("DELETE FROM `guests` WHERE `time` < ?", [$past]);
-$guests = DB::fetchColumn('guests', 'count(ip)', '');
-$seeders = DB::fetchColumn('peers', 'count(id)', ['seeder='], ['yes']);
-$leechers = DB::fetchColumn('peers', 'count(id)', ['seeder='], ['no']);
-$members = DB::fetchColumn('users', 'count(id)', ['UNIX_TIMESTAMP(?) - UNIX_TIMESTAMP(users.last_access) <'], [CONFIG['TT_DATE'], 900]);
+$guest_query = "DELETE FROM `guests` WHERE `time` < ?";
+$stmt =  DB::run($guest_query, [$past]);
+$guest_query = "SELECT count(ip) FROM `guests`";
+$guests = DB::run($guest_query)->fetchColumn();
+$peers_query = "SELECT count(id) FROM `peers` WHERE seeder = ?";
+$seeders = DB::run($peers_query, ['yes'])->fetchColumn();
+$peers_query = "SELECT count(id) FROM `peers` WHERE seeder = ?";
+$leechers = DB::run($peers_query, ['no'])->fetchColumn();
+$users_query = "SELECT count(id) FROM `users` WHERE UNIX_TIMESTAMP(?) - UNIX_TIMESTAMP(users.last_access) < ?";
+$members = DB::run($users_query, [CONFIG['TT_DATE'], 900])->fetchColumn();
 $totalonline = $members + $guests;
-
-$totaldownloaded = DB::fetchColumn('users', 'SUM(downloaded) AS totaldl', '');
-$totaluploaded = DB::fetchColumn('users', 'SUM(uploaded) AS totalul', '');
+$users_query = "SELECT SUM(downloaded) AS totaldl FROM `users`";
+$totaldownloaded = DB::run($users_query)->fetchColumn();
+$users_query = "SELECT SUM(uploaded) AS totalul FROM `users`";
+$totaluploaded = DB::run($users_query)->fetchColumn();
 
 $localpeers = $leechers + $seeders;
 if ($_SESSION['id'] && $_SESSION['edit_users'] == 'yes') {

@@ -4,6 +4,7 @@ namespace App\Libs;
 
 use App\Libs\Ip;
 use App\Libs\DB;
+use PDO;
 
 /*
 * Check Visitor
@@ -35,22 +36,24 @@ class Auth
                 // Lets Build User Array
                 $data = array();
                 // Get User & Group
-                $user = DB::run(
+                $user_query =
                     "SELECT * 
                     FROM `users` 
                     LEFT OUTER JOIN `groups` 
                     ON users.class=groups.group_id 
                     WHERE id = $cookie_id 
                     AND users.enabled='yes'
-                    AND users.status ='confirmed'"
-                )->fetch();
+                    AND users.status ='confirmed'";
+                
+                $user = DB::run($user_query)->fetch();
                 foreach ($user as $key => $value) {
                     $data[$key] = $value;
                 }
                 // User Role Or Group Role
                 $role = $user['role_id'] == 1 ? $user['group_role_id'] : $user['role_id'];
                 // Now Get Permission
-                $permission = DB::fetchRow('permissions', '*', ['permission_id ='], [$role]);
+                $permission_query = "SELECT * FROM `permissions` WHERE permission_id = ?";
+                $permission = DB::run($permission_query, [$role])->fetch(PDO::FETCH_ASSOC);
                 foreach ($permission as $key => $value) {
                     $data[$key] = $value;
                 }
@@ -75,9 +78,11 @@ class Auth
                 if ($data['passkey'] == '') {
                     $rand = array_sum(explode(" ", microtime()));
                     $passkey = md5($data['username'] . $rand . $data['secret'] . ($rand * mt_rand()));
-                    DB::update('users', ['passkey','last_access','ip','page'], ['id='], [$passkey, CONFIG['TT_DATE'], Ip::getIP(), $_SERVER['REQUEST_URI'], $data["id"]]);
+                    $user_query = "UPDATE `users` SET passkey = ? AND last_access=? AND ip=? AND page=? WHERE id=?";
+                    DB::run($user_query, [$passkey, CONFIG['TT_DATE'], Ip::getIP(), $_SERVER['REQUEST_URI'], $data["id"]]);
                 } else {
-                    DB::update('users', ['last_access','ip','page'], ['id='], [CONFIG['TT_DATE'], Ip::getIP(), $_SERVER['REQUEST_URI'], $data["id"]]);
+                    $user_query = "UPDATE `users` SET last_access=? AND ip=? AND page=? WHERE id=?";
+                    DB::run($user_query, [CONFIG['TT_DATE'], Ip::getIP(), $_SERVER['REQUEST_URI'], $data["id"]]);
                 }
                 $_SESSION = $data;
                 $_SESSION['loggedin'] = true;

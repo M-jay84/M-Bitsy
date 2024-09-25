@@ -47,7 +47,8 @@ use App\Libs\DB;
         $invitees = array_reverse(explode(" ", $USER["invitees"]));
         $rows = array();
         foreach ($invitees as $invitee) {
-            $row = DB::fetchRow('users', 'id, username', ['id=', 'status='], [$invitee,'confirmed']);
+            $users_query = "SELECT id, username FROM users WHERE id= ? AND status=?";
+            $row =  DB::run($users_query, [$invitee,'confirmed'])->fetch(PDO::FETCH_ASSOC);
             if ($row) {
                 $rows[] = coloredname($row['id']) ;
             }

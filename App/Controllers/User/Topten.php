@@ -26,27 +26,64 @@ class Topten extends Controller
 
     private function sql($limit = 10)
     {
-        $info['active'] = DB::run("SELECT t.*, (t.size * t.times_completed + SUM(p.downloaded)) AS data FROM torrents AS t LEFT JOIN peers AS p ON t.id = p.torrent WHERE p.seeder = 'no' GROUP BY t.id ORDER BY seeders + leechers DESC, seeders DESC, added ASC LIMIT $limit")->fetchAll(); 
+        $_query = "SELECT t.*, (t.size * t.times_completed + SUM(p.downloaded)) AS data 
+                  FROM torrents AS t 
+                  LEFT JOIN peers AS p ON t.id = p.torrent 
+                  WHERE p.seeder = 'no' 
+                  GROUP BY t.id ORDER BY seeders + leechers DESC, seeders DESC, added ASC LIMIT $limit";
+        $info['active'] = DB::run($_query)->fetchAll(); 
         $info['title1'] = "Top Most Active Torrents";
-        $info['snatch'] = DB::run("SELECT t.*, (t.size * t.times_completed + SUM(p.downloaded)) AS data FROM torrents AS t LEFT JOIN peers AS p ON t.id = p.torrent WHERE p.seeder = 'no' GROUP BY t.id ORDER BY times_completed DESC LIMIT $limit")->fetchAll();
+        
+        $_query =  "SELECT t.*, (t.size * t.times_completed + SUM(p.downloaded)) AS data 
+                    FROM torrents AS t 
+                    LEFT JOIN peers AS p ON t.id = p.torrent 
+                    WHERE p.seeder = 'no' 
+                    GROUP BY t.id ORDER BY times_completed DESC LIMIT $limit";
+        $info['snatch'] = DB::run($_query)->fetchAll();
         $info['title2'] = "Top Most Snatched Torrents";
-        $info['country'] = DB::run("SELECT name, flagpic, COUNT(users.country) as num 
-		FROM countries LEFT JOIN users ON users.country = countries.id GROUP BY name ORDER BY num DESC LIMIT $limit")->fetchAll();
+
+        $_query = "SELECT name, flagpic, COUNT(users.country) as num 
+                   FROM countries 
+                   LEFT JOIN users ON users.country = countries.id 
+                   GROUP BY name ORDER BY num DESC LIMIT $limit";
+        $info['country'] = DB::run($_query)->fetchAll();
         $info['title3'] = "Top Countries";
-        $info['uploaders']= DB::newSelect('users', 'id as userid, username, added, uploaded, downloaded, uploaded / (UNIX_TIMESTAMP(NOW()) - UNIX_TIMESTAMP(added)) AS upspeed, downloaded / (UNIX_TIMESTAMP(NOW()) - UNIX_TIMESTAMP(added)) AS downspeed',
-                    ['enabled ='], ['yes'], "ORDER BY uploaded DESC LIMIT $limit");
+
+        $_query = "SELECT id as userid, username, added, uploaded, downloaded, uploaded / (UNIX_TIMESTAMP(NOW()) - UNIX_TIMESTAMP(added)) AS upspeed, downloaded / (UNIX_TIMESTAMP(NOW()) - UNIX_TIMESTAMP(added)) AS downspeed 
+                  FROM users
+                  WHERE enabled = ?
+                  ORDER BY uploaded DESC LIMIT $limit";
+        $info['uploaders']= DB::run($_query, ['yes'])->fetchAll();
         $info['title4'] = "Top  Uploaders";
-        $info['downloaders'] = DB::newSelect('users', 'id as userid, username, added, uploaded, downloaded, uploaded / (UNIX_TIMESTAMP(NOW()) - UNIX_TIMESTAMP(added)) AS upspeed, downloaded / (UNIX_TIMESTAMP(NOW()) - UNIX_TIMESTAMP(added)) AS downspeed',
-                   ['enabled ='], ['yes'], "ORDER BY downloaded DESC LIMIT $limit");
+
+        $_query = "SELECT id as userid, username, added, uploaded, downloaded, uploaded / (UNIX_TIMESTAMP(NOW()) - UNIX_TIMESTAMP(added)) AS upspeed, downloaded / (UNIX_TIMESTAMP(NOW()) - UNIX_TIMESTAMP(added)) AS downspeed
+                  FROM users 
+                  WHERE enabled = ?
+                  ORDER BY downloaded DESC LIMIT $limit";
+        $info['downloaders'] = DB::run($_query, ['yes'])->fetchAll();
         $info['title5'] = "Top Downloaders";
-        $info['fastest'] = DB::newSelect('users', 'id as userid, username, added, uploaded, downloaded, uploaded / (UNIX_TIMESTAMP(NOW()) - UNIX_TIMESTAMP(added)) AS upspeed, downloaded / (UNIX_TIMESTAMP(NOW()) - UNIX_TIMESTAMP(added)) AS downspeed',
-                   ['enabled ='], ['yes'], "ORDER BY downspeed DESC LIMIT $limit");
+
+        $_query = "SELECT id as userid, username, added, uploaded, downloaded, uploaded / (UNIX_TIMESTAMP(NOW()) - UNIX_TIMESTAMP(added)) AS upspeed, downloaded / (UNIX_TIMESTAMP(NOW()) - UNIX_TIMESTAMP(added)) AS downspeed
+                  FROM users 
+                  WHERE enabled = ?
+                  ORDER BY downspeed DESC LIMIT $limit";
+        $info['fastest'] = DB::run($_query, ['yes'])->fetchAll();
         $info['title6'] = "Top Fastest Downloaders";
-        $info['bestsharer'] = DB::newSelect('users', 'id as userid, username, added, uploaded, downloaded, uploaded / (UNIX_TIMESTAMP(NOW()) - UNIX_TIMESTAMP(added)) AS upspeed, downloaded / (UNIX_TIMESTAMP(NOW()) - UNIX_TIMESTAMP(added)) AS downspeed',
-                   ['enabled ='], ['yes'], " AND downloaded > 1073741824 ORDER BY uploaded / downloaded DESC LIMIT $limit");
+        
+
+
+        $_query = "SELECT id as userid, username, added, uploaded, downloaded, uploaded / (UNIX_TIMESTAMP(NOW()) - UNIX_TIMESTAMP(added)) AS upspeed, downloaded / (UNIX_TIMESTAMP(NOW()) - UNIX_TIMESTAMP(added)) AS downspeed 
+                   FROM users 
+                  WHERE enabled = ?
+                  AND downloaded > 1073741824 ORDER BY uploaded / downloaded DESC LIMIT $limit";
+        $info['bestsharer'] = DB::run($_query);
         $info['title7'] = "Top  Best Sharers";
-        $info['worstshare'] = DB::newSelect('users', 'id as userid, username, added, uploaded, downloaded, uploaded / (UNIX_TIMESTAMP(NOW()) - UNIX_TIMESTAMP(added)) AS upspeed, downloaded / (UNIX_TIMESTAMP(NOW()) - UNIX_TIMESTAMP(added)) AS downspeed',
-                   ['enabled ='], ['yes'], " AND downloaded > 1073741824 ORDER BY uploaded / downloaded ASC, downloaded DESC LIMIT $limit");
+
+        $_query = "SELECT id as userid, username, added, uploaded, downloaded, uploaded / (UNIX_TIMESTAMP(NOW()) - UNIX_TIMESTAMP(added)) AS upspeed, downloaded / (UNIX_TIMESTAMP(NOW()) - UNIX_TIMESTAMP(added)) AS downspeed 
+                  FROM users 
+                  WHERE enabled = ?
+                  AND downloaded > 1073741824 ORDER BY uploaded / downloaded ASC, downloaded DESC LIMIT $limit";
+        $info['worstshare'] = DB::run($_query)->fetchAll();
         $info['title8'] = "Top Worst Sharers";
         return $info;
     }

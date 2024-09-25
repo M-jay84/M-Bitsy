@@ -6,32 +6,45 @@ use App\Libs\DB;
 use App\Libs\SimpleThumbnail;
 
 /*
-* Attachments Table Data
+* Attachments Logic
 */
 class AttachmentsLogic
 {
-    // Get Attachment
-    public static function fetchRow($columns = '*', $where = '', $values = '', $other = '')
+    // Download Attachment
+    public static function downloadAttachment($id, $hash)
     {
-        $stmt = DB::fetchRow('attachments', $columns, $where, $values, $other);
-        return $stmt;
+        $file = UPLOAD_PATH . "/attachment/$hash.data";
+        $attachments_query = "SELECT filename FROM attachments WHERE id = ?";
+        $attachment =  DB::run($attachments_query, [$id])->fetch();
+        $extension = substr($attachment['filename'], -3);
+        $array = [
+            'id' => $id,
+            'extension' => $extension,
+            'file' => $file,
+        ];
+        return $array;
     }
 
     // Delete Attachment
     public static function deleteAll($id, $post = false)
     {
         if ($post) {
-            $sql = DB::fetchAll('attachments', '*', ['content_id ='], [$id]);
+            $attachments_query = "SELECT filename,file_hash,id FROM attachments WHERE content_id = ?";
+            $sql = DB::run($attachments_query, $id);
         } else {
-            $sql = DB::fetchAll('attachments', '*', ['topicid='], [$id]);
+            $attachments_query = "SELECT filename,file_hash,id FROM attachments WHERE topicid = ?";
+            $sql = DB::run($attachments_query, $id);
         }
+
         if ($sql->rowCount() != 0) {
             foreach ($sql as $row7) {
-                //print("<br>&nbsp;<b>$row7[filename]</b><br>");
+                
                 $daimage = UPLOAD_PATH . "/attachment/$row7[file_hash].data";
                 if (file_exists($daimage)) {
                     if (unlink($daimage)) {
-                        DB::delete('attachments', ['content_id' => $row7['id']]);
+                        $attachments_query = "DELETE FROM attachments WHERE content_id = ?";
+                        DB::run($attachments_query, [$row7['id']]);
+                        
                     }
                 }
                 $extension = substr($row7['filename'], -3);
@@ -48,7 +61,8 @@ class AttachmentsLogic
     // Get Attachment //todo in view
     public static function get_attachment($id)
     {
-        $sql = DB::fetchAll('attachments', '*', ['content_id ='], [$id]);
+        $attachments_query = "SELECT * FROM `attachments` WHERE content_id =?";
+        $sql = DB::run($attachments_query, [$id]);
         if ($sql->rowCount() != 0) {
             foreach ($sql as $row7) {
                 print("<br><br>&nbsp;<b>$row7[filename]</b><br>");
@@ -99,17 +113,16 @@ class AttachmentsLogic
 
                 if ($extension == 'zip' || $extension == 'rar' || $extension == 'php') {
                     move_uploaded_file($sourcePath, $targetPath); // Moving Uploaded file
-                    DB::insert('attachments', [
-                        'content_id' => $data['postid'], 'user_id' => $_SESSION['id'], 'upload_date' => CONFIG['TT_TIME'], 'filename' => $fileName,
-                        'file_size' => $fileSize, 'file_hash' => $hash, 'topicid' => $data['topicid']
-                    ]);
+                    $attachments_query = "INSERT INTO `attachments` (content_id,user_id,upload_date,filename,file_size,file_hash,topicid) VALUES (?,?,?,?,?,?,?)";
+                    DB::run($attachments_query,
+                    [$data['postid'], $_SESSION['id'], CONFIG['TT_TIME'], $fileName, $fileSize, $hash, $data['topicid']]);
                 } else {
                     if (move_uploaded_file($sourcePath, $targetPath)) { // Moving Uploaded file
                         SimpleThumbnail::create()->image($targetPath)->thumbnail(100)->to($thumbPath);
-                        DB::insert('attachments', [
-                            'content_id' => $data['postid'], 'user_id' => $_SESSION['id'], 'upload_date' => CONFIG['TT_TIME'], 'filename' => $fileName,
-                            'file_size' => $fileSize, 'file_hash' => $hash, 'topicid' => $data['topicid']
-                        ]);
+                        $attachments_query = "INSERT INTO attachments (content_id, user_id, upload_date, filename,file_size,
+                        file_hash,topicid) VALUES (?, ?, ?, ?,?,?,?)";
+                        DB::run($attachments_query, [$data['postid'], $_SESSION['id'], CONFIG['TT_TIME'], $fileName,
+                            $fileSize, $hash, $data['topicid']]);
                     }
                 }
             endforeach;

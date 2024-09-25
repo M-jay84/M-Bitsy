@@ -14,14 +14,16 @@ class RulesLogic
     // Get Rules
     public static function gettAll()
     {
-        $stmt = DB::fetchAll('rules', '*', '', 'ORDER BY `id`');
+        $rules_query = "SELECT * FROM `rules` ORDER BY id";
+        $stmt = DB::run($rules_query);
         return $stmt;
     }
 
     // Admin Delete Rule
     public static function delete($id, $current_user_username)
     {
-        DB::delete('rules', ['id' => $id]);
+        $rules_query = "DELETE FROM rules WHERE id' = ?";
+        DB::run($rules_query, [$id]);
         LogsLogic::write("Rules have been deleted by ".$current_user_username."");
         showMessage('rule', LANG["SUCCESS"]);
     }
@@ -36,9 +38,11 @@ class RulesLogic
             $public = Validate::Input('public');
             $class = Validate::Input('classs');
             if ($id == 0) {
-                DB::insert('rules', ['title'=>$title, 'text'=>$text, 'public'=>$public, 'class'=>$class]);
+                $rules_query = "INSERT INTO `rules` (title, text, public, class) VALUES (?,?,?,?)";
+                DB::run($rules_query, [$title, $text, $public, $class]);
             } else {
-                DB::update('rules', ['title','text','public', 'class'], ['id='], [$title, $text, $public, $class, $id]);
+                $rules_query = "UPDATE rules SET title = ? AND text = ? AND public = ? AND class = ? WHERE id=?";
+                DB::run($rules_query, [$title, $text, $public, $class, $id]);
             }
             LogsLogic::write("Rules have been changed by ".$current_user_username."");
             showMessage('rule', LANG["SUCCESS"]);

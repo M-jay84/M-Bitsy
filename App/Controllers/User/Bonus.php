@@ -4,6 +4,7 @@ namespace App\Controllers\User;
 
 use App\Libs\Auth;
 use App\Libs\Controller;
+use App\Libs\DB;
 use App\Models\BonusLogic;
 
 /*
@@ -66,7 +67,8 @@ class Bonus extends Controller
     public function delete($id)
     {
         if ($this->current_user->isStaff) {
-            BonusLogic::delete($id);
+            $bonus_query = "DELETE FROM `bonus` WHERE id' = ?";
+            DB::run($bonus_query, [$id]);
         } else {
             showMessage(URLROOT, LANG["NO_PERMISSION"]);
         }

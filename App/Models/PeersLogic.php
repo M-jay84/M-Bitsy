@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Libs\DB;
 use App\Models\TorrentsLogic;
+use PDO;
 
 /*
 * Peers Table Data
@@ -25,7 +26,8 @@ class PeersLogic
             }
             $where = 'peers.torrent = ?';
             $values = [$id];
-            $name = TorrentsLogic::fetchRow('name', ['id ='], [$id]);
+            $torrents_query = "SELECT name FROM `torrents` WHERE id =?";
+            $name = DB::run($torrents_query, [$id])->fetch(PDO::FETCH_ASSOC);
             $title = LANG["TORRENT_DETAILS_FOR"] . $name;
         } elseif ($type == 'admin') {
             $where = 'torrents.id > ?';
@@ -38,17 +40,17 @@ class PeersLogic
             $values = [$id, 'no'];
         }
 
-        $count = DB::run(
+        $peers_query =
             "SELECT COUNT(*) FROM peers 
              LEFT JOIN torrents ON peers.torrent = torrents.id 
              LEFT JOIN categories ON torrents.category = categories.id 
-             WHERE $where", $values
+             WHERE $where";
+             $count = DB::run($peers_query, $values
         )->fetchColumn();
 
         list($pager, $limit) = pagination(25, $count, URLROOT . "/$pagination&");
 
-        $stmt = DB::run(
-            "SELECT peers.id as pid, peers.torrent, peers.peer_id, peers.ip, peers.port, peers.uploaded, peers.downloaded,
+        $peers_query = "SELECT peers.id as pid, peers.torrent, peers.peer_id, peers.ip, peers.port, peers.uploaded, peers.downloaded,
                    peers.to_go, peers.seeder, peers.started, peers.last_action, peers.connectable, peers.client, peers.userid, peers.passkey,
                    torrents.info_hash, torrents.name, torrents.size, torrents.visible,  torrents.owner, torrents.freeleech, torrents.vip, 
                    torrents.seeders, torrents.leechers, torrents.category,
@@ -56,7 +58,9 @@ class PeersLogic
             FROM peers 
             LEFT JOIN torrents ON peers.torrent = torrents.id 
             LEFT JOIN categories ON torrents.category = categories.id 
-            WHERE $where $limit", $values
+            WHERE $where $limit";
+        $stmt = DB::run($peers_query
+            , $values
         )->fetchAll();
 
         $array = [

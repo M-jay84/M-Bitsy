@@ -4,7 +4,9 @@ namespace App\Controllers\Admin;
 
 use App\Libs\Auth;
 use App\Libs\Cache;
+use App\Libs\Cleanup;
 use App\Libs\Controller;
+use App\Libs\DB;
 use App\Models\ShoutboxLogic;
 use App\Models\TasksLogic;
 
@@ -30,9 +32,10 @@ class Admintask extends Controller
     // Cleanup
     public function cleanup()
     {
-        TasksLogic::update(['last_time'], ['task='], [CONFIG['TT_TIME'],'cleanup']);
+        $task_query = "UPDATE tasks SET last_time = ? WHERE task=?";
+        DB::run($task_query, [CONFIG['TT_TIME'],'cleanup']);
         Cleanup::run();
-        $this->showMessage('admincp', LANG["FORCE_CLEAN_COMPLETED"]);
+        showMessage('admincp', LANG["FORCE_CLEAN_COMPLETED"]);
     }
 
     // Prune Cache

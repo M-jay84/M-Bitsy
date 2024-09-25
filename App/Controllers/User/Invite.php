@@ -38,7 +38,8 @@ class Invite extends Controller // todo
         }
 
         // Check Max Users
-        $users = DB::fetchColumn('users', 'count(id)', ['enabled='], ['yes']);
+        $invite_query = "SELECT count(id) FROM `users` WHERE enabled = ?";
+        $users = DB::run($invite_query, ['yes'])->fetchColumn();
         if ($users >= CONFIG['MAXUSERSINVITE']) {
             showMessage(URLROOT, "Sorry, The current user account limit (" . number_format(CONFIG['MAXUSERSINVITE']) . ") has been reached. Inactive accounts are pruned all the time, please check back again later...");
         }

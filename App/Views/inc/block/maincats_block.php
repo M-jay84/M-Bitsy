@@ -4,7 +4,8 @@ use App\Libs\DB;
 
 if ($_SESSION['id'] || !CONFIG['MEMBERSONLY']) {
 	block_begin(LANG["BROWSE_TORRENTS"]);
-    $catsquery = DB::fetchAll('categories', 'distinct parent_cat, id, image', '', 'ORDER BY parent_cat');
+	$categories_query = "SELECT distinct parent_cat, id, image FROM `categories` ORDER BY parent_cat";
+    $catsquery = DB::run($categories_query);
 	?>
 	<div class="list-group">
 		<a href="<?= Url('browse') ?>" class="list-group-item"><i class="fa <?= $catsrow["image"]; ?> tticon"></i> <?= LANG["SHOW_ALL"] ?></a>

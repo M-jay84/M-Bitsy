@@ -12,7 +12,8 @@ class Controller
     {
         //$session_id = isset($data['current_user']->id) ? $data['current_user']->id : 0;
         //if (!$session_id) {
-        //    DB::run("INSERT INTO `guests` (`ip`, `time`) VALUES (?, ?) ON DUPLICATE KEY UPDATE `time` = ?", [Ip::getIP(), CONFIG['TT_TIME'], CONFIG['TT_TIME']]);
+        //$guests_query = "INSERT INTO `guests` (`ip`, `time`) VALUES (?, ?) ON DUPLICATE KEY UPDATE `time` = ?";
+        //    DB::run($guests_query, [Ip::getIP(), CONFIG['TT_TIME'], CONFIG['TT_TIME']]);
         //}
 
         extract($data);

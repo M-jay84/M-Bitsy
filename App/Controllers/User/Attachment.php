@@ -26,18 +26,16 @@ class Attachment extends Controller
     // Download Attachment
     public function index($id, $hash)
     {
-        $file = UPLOAD_PATH . "/attachment/$hash.data";
-        $attachment = AttachmentsLogic::fetchRow('*', ['id ='], [$id]);
-        $extension = substr($attachment['filename'], -3);
+        $attachment = AttachmentsLogic::downloadAttachment($id, $hash);
         
         // Download
-        if (!file_exists($file)) {
+        if (!file_exists($attachment['file'])) {
             showMessage(URLROOT, "The file $hash does not exists");
         } else {
             header('Content-Disposition: attachment; filename="' . $attachment['filename'] . '"');
-            header('Content-Length: ' . filesize($file));
-            header("Content-Type: application/$extension");
-            readfile($file);
+            header('Content-Length: ' . filesize($attachment['file']));
+            header("Content-Type: application/$attachment[extension]");
+            readfile($attachment['file']);
         }
     }
 

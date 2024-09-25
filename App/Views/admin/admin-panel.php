@@ -3,15 +3,18 @@
 use App\Libs\DB;
 
 //Get Last Cleanup
-$row = DB::fetchColumn('tasks', 'last_time', ['task='], ['cleanup']);
+$task_query = "SELECT last_time FROM `tasks` WHERE task=? ";
+$row = DB::run($task_query, ['cleanup'])->fetchColumn();
 if (!$row) {
     $lastclean = "never done...";
 } else {
     $lastclean = get_elapsed_time($row);
 }
-$row = DB::run("SELECT VERSION() AS version")->fetch();
+$_query = "SELECT VERSION() AS version";
+$row = DB::run($_query)->fetch();
 $mysqlver = $row['version'];
-$pending = DB::fetchColumn('users', 'count(id)', ['status=', 'invited_by='], ['pending',0])
+$peer_query = "SELECT count(id) FROM `users` WHERE status = ? AND invited_by =?";
+$pending = DB::run($peer_query, ['pending',0])->fetchColumn();
 
 ?>
 <div class="text-center">

@@ -9,7 +9,8 @@ use App\Models\TorrentsLogic;
 $shouts = ShoutboxLogic::shouts(20);
 
 if (CONFIG['HNR_ON']) {
-    $count = DB::fetchColumn('snatched', 'count(hnr)', ['uid=', 'hnr='], [$current_user->id, 'yes']);
+    $snatched_query = "SELECT count(hnr) FROM `snatched` WHERE uid=? AND hnr=?";
+    $count = DB::run($snatched_query, [$current_user->id, 'yes'])->fetchColumn();
     $msg = sprintf(LANG['HIT&RUNNOTICE'], coloredname($current_user->id), $count, $current_user->id);
     if ($count > 0) {
         block_begin(LANG['HIT&RUN']);
@@ -24,12 +25,13 @@ if (CONFIG['HNR_ON']) {
 
 if ($current_user->loggedin && !CONFIG['MEMBERSONLY']) {
     block_begin(LANG['NEWS']);
-    $res = DB::run("SELECT news.id, news.title, news.added, news.body, users.username 
+    $news_query = "SELECT news.id, news.title, news.added, news.body, users.username 
     FROM news 
     LEFT JOIN users 
     ON news.userid = users.id 
     ORDER BY added 
-    DESC LIMIT 10");
+    DESC LIMIT 10";
+    $res = DB::run($news_query);
     if ($res->rowCount() > 0) {
         print("<div class='text-center'>");
         $news_flag = 0;
@@ -37,8 +39,10 @@ if ($current_user->loggedin && !CONFIG['MEMBERSONLY']) {
             if (!$array["username"]) {
                 $array["username"] = LANG['UNKNOWN_USER'];
             }
-            $userid = DB::fetchRow('users', 'id', ['username='], [$array["username"]]);
-            $numcomm = DB::fetchColumn('comments', 'count(id)', ['news='], [$array['id']]);
+            $users_query = "SELECT id FROM users WHERE username=?";
+            $userid = DB::run($users_query, [$array["username"]])->fetch(PDO::FETCH_ASSOC);
+            $comments_query = "SELECT count(*) FROM `comments` WHERE news = ?";
+            $numcomm = DB::run($comments_query, [$array['id']])->fetchColumn();
             // Show first 2 items expanded
             if ($news_flag < 2) {
                 $disp = "block";
@@ -92,7 +96,8 @@ if (CONFIG['LATESTFORUMPOSTONINDEX']) {
 }
 
 if (CONFIG['FORUMONINDEX']) {
-    $forums_res = DB::run("SELECT * FROM forumcats WHERE id IN (1,2,3) ORDER BY sort ");
+    $forumcats_query = "SELECT * FROM forumcats WHERE id IN (1,2,3) ORDER BY sort ";
+    $forums_res = DB::run($forumcats_query);
     block_begin(LANG['FORUM']);
     if ($forums_res->rowCount() == 0) {
         echo LANG["NO fORUMS fOUND"];
@@ -112,14 +117,17 @@ if (CONFIG['FORUMONINDEX']) {
                         </thead>
                         <tbody>
                             <?php
-                            $stmt = DB::fetchAll('forum_forums', '*', ['category='], [$cat['id']], 'ORDER BY sort, name');
+                            $forums_query = "SELECT * FROM `forum_forums` WHERE category=? ORDER BY sort,name";
+                            $stmt = DB::run($forums_query, [$cat['id']]);
                             foreach ($stmt as $row) {
                                 $lastpostid = get_forum_last_post($row['id']);
                                 $detail = lastpostdetails($lastpostid);
-                                $postcount =  DB::run("SELECT count(id) as count FROM forum_posts 
+                                $posts_query = "SELECT count(id) as count FROM forum_posts 
                                                        WHERE topicid IN (SELECT id FROM forum_topics 
-                                                       WHERE forumid=?)", [$row['id']])->fetchColumn();
-                                $topiccount = DB::fetchColumn('forum_topics', 'count(id)', ['forumid='], [$row['id']]); ?>
+                                                       WHERE forumid=?)";
+                                $postcount =  DB::run($posts_query, [$row['id']])->fetchColumn();
+                                $topics_query = "SELECT count(id) FROM `forum_topics` WHERE forumid = ?";
+                                $topiccount = DB::run($topics_query, [$row['id']])->fetchColumn(); ?>
                                 <tr>
                                     <td><?php
                                         echo $detail['img']; ?>&nbsp;
@@ -221,15 +229,15 @@ if (CONFIG['MEMBERSONLY'] && !$current_user->id) {
         echo LANG['NO_TORRENT_FOUND'];
     }
     if ($current_user->id) {
-        DB::update('users', ['last_browse'], ['id='], [CONFIG['TT_TIME'],$current_user->id]);
+        $users_query = "UPDATE users SET last_browse = ? WHERE id=?";
+        DB::run($users_query, [CONFIG['TT_TIME'],$current_user->id]);
     }
 }
 block_end();
 
-$stmt = DB::fetchAll('users', 
-    'id,username,class,donated,warned,avatar', 
-    ['enabled =', 'status =', 'privacy !=', "UNIX_TIMESTAMP(?) - UNIX_TIMESTAMP(users.last_access) <="],
-    ['yes', 'confirmed', 'strong', CONFIG['TT_DATE'], 86400]
+$users_query = "SELECT id,username,class,donated,warned,avatar FROM `users` 
+WHERE enabled =? AND status =? AND privacy=? AND UNIX_TIMESTAMP(?) - UNIX_TIMESTAMP(users.last_access) <=?";
+$stmt = DB::run($users_query,  ['yes', 'confirmed', 'strong', CONFIG['TT_DATE'], 86400]
 );
 
 block_begin(LANG['VISITED_USERS']);

@@ -12,6 +12,7 @@ use App\Models\MessagesLogic;
 use App\Models\PostsLogic;
 use App\Models\SnatchedLogic;
 use App\Models\TorrentsLogic;
+use PDO;
 
 /*
 * Users Table Data
@@ -21,7 +22,8 @@ class ProfileLogic
     // Get User Profile
     public static function getProfile($id, $current_user)
     {
-        $user = DB::fetchRow('users', '*', ['id='], [$id]);
+        $users_query = "SELECT * FROM `users` WHERE id = ?";
+        $user = DB::run($users_query, [$id])->fetch(PDO::FETCH_ASSOC);
 
         if (!$user) {
             showMessage(URLROOT, LANG["NO_USER"] . " $id.");
@@ -36,10 +38,14 @@ class ProfileLogic
         $dropdown['gender'] = "<option value='Male'" . ($user['gender'] == "Male" ? " selected='selected'" : "") . ">" . LANG["MALE"] . "</option>\n"
             . "<option value='Female'" . ($user['gender'] == "Female" ? " selected='selected'" : "") . ">" . LANG["FEMALE"] . "</option>\n";
 
-        $count['numtorrents'] = TorrentsLogic::fetchColumn('count(id)', ['owner='], [$id]);
-        $count['numcomments'] = CommentsLogic::fetchColumn('count(id)', ['user='], [$id]);
-        $count['numforumposts'] = PostsLogic::fetchColumn('count(id)', ['userid='], [$id]);
-        $count['numhnr'] = SnatchedLogic::fetchColumn('COUNT(`hnr`)', ['uid='], [$id]);
+        $torrents_query = "SELECT COUNT(`id`) FROM `torrents` WHERE owner=?";
+        $count['numtorrents'] = DB::run($torrents_query, [$id])->fetchColumn();
+        $comments_query = "SELECT COUNT(`id`) FROM `comments` WHERE user=?";
+        $count['numcomments'] = DB::run($comments_query, [$id])->fetchColumn();
+        $posts_query = "SELECT COUNT(`id`) FROM `forum_posts` WHERE userid=?";
+        $count['numforumposts'] = DB::run($posts_query, [$id])->fetchColumn();
+        $snatched_query = "SELECT COUNT(`hnr`) FROM `snatched` WHERE uid=?";
+        $count['numhnr'] = DB::run($snatched_query, [$id])->fetchColumn();
 
         $html['userratio'] = $user["downloaded"] > 0 ? number_format($user["uploaded"] / $user["downloaded"], 1) : "---";
         $html['avatar'] = htmlspecialchars($user["avatar"]) ? htmlspecialchars($user["avatar"]) : URLROOT . "/assets/images/misc/default_avatar.webp";
@@ -120,7 +126,8 @@ class ProfileLogic
         // Change User Class
         if ($data['class'] != 0 && $data['class'] != $current_user->class) {
             // change user class
-            $arr = DB::fetchRow('users', 'class', ['id ='], [$id]);
+            $users_query = "SELECT class FROM `users` WHERE id = ?";
+            $arr = DB::run($users_query, [$id])->fetch(PDO::FETCH_ASSOC);
             $uc = $arr['class'];
             // skip if class is same as current
             if ($uc != $data['class'] && $uc > $current_user->class) {
@@ -128,11 +135,12 @@ class ProfileLogic
             } elseif ($uc == $current_user->class) {
                 showMessage(URLROOT, LANG["YOU_CANT_DEMOTE_SOMEONE_SAME_LVL"]);
             } else {
-                DB::update('users', ['class'], ['id='], [$data['class'], $id]);
+                $users_query = "UPDATE users SET class = ? WHERE id=?";
+                DB::run($users_query, [$data['class'], $id]);
                 // Notify user
                 $prodemoted = ($data['class'] > $uc ? "promoted" : "demoted");
                 $msg = "You have been $prodemoted to " . GroupsLogic::GetUserClassName($data['class'], $current_user) . " by " . $current_user->username . "";
-                MessagesLogic::insert(['sender' => 0, 'receiver' => $id, 'added' => CONFIG['TT_DATE'], 'subject' => 'Group Change', 'msg' => $msg]);
+                MessagesLogic::newinsert(['sender' => 0, 'receiver' => $id, 'added' => CONFIG['TT_DATE'], 'subject' => 'Group Change', 'msg' => $msg]);
             }
         }
 
@@ -146,7 +154,8 @@ class ProfileLogic
         // Change Password
         $chgpasswd = Validate::Input('chgpasswd') == 'yes' ? true : false;
         if ($chgpasswd) {
-            $passres = DB::fetchRow('users', 'password', ['id ='], [$id]);
+            $users_query = "SELECT password FROM `users` WHERE id = ?";
+            $passres = DB::run($users_query, [$id])->fetch(PDO::FETCH_ASSOC);
             if ($data['password'] != $passres['password']) {
                 $password = password_hash($data['password'], PASSWORD_BCRYPT);
                 $data = ['password' => $password];

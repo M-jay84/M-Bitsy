@@ -23,7 +23,8 @@ block_begin($TITLE) ?>
             if ($PARENT_CAT) {
                 $URL .= "parent_cat=" . urlencode($PARENT_CAT) . "&amp;";
                 echo "<br /><br /><b>" . LANG["YOU_ARE_IN"] . ":</b> <a href='" . Url("browse?parent_cat=" . urlencode($PARENT_CAT) . "") . "'>" . htmlspecialchars($PARENT_CAT) . "</a><br /><b>" . LANG["SUB_CATS"] . ":</b> ";
-                $subcatsquery = DB::fetchAll('categories', 'id, name, parent_cat', ['parent_cat='], [$PARENT_CAT], 'ORDER BY name');
+                $categories_query = "SELECT id, name, parent_cat FROM `categories` WHERE parent_cat=? ORDER BY name";
+                $subcatsquery = DB::run($categories_query, [$PARENT_CAT]);
                 foreach ($subcatsquery as $subcatsrow) {
                     $name = $subcatsrow['name'];
                     echo " - <a href=" . Url("browse?cat=$subcatsrow[id]") . ">$name</a>";

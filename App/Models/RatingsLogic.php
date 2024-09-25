@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Libs\DB;
 use App\Libs\Validate;
+use PDO;
 
 /*
 * Ratings Table Data
@@ -27,7 +28,8 @@ class RatingsLogic
                 2 => LANG["PRETTY_BAD"],
                 1 => LANG["SUCKS"],
             ];
-            $res = DB::fetchRow('ratings', 'rating, added', ['torrent=', 'user='], [$id, $userid]);
+            $torrents_query = "SELECT rating, added FROM `torrents` WHERE torrent=? AND user=?";
+            $res = DB::run($torrents_query, [$id, $userid])->fetch(PDO::FETCH_ASSOC);
             $row = $res;
             if ($row) {
                 $rating .= "<i>(" . LANG["YOU_RATED"] . " \"" . $row["rating"] . " - " . $ratings[$row["rating"]] . "\")</i>";
@@ -57,7 +59,8 @@ class RatingsLogic
             showMessage(("torrent/$id"), LANG["INVAILD_RATING"]);
         }
         
-        $res = DB::insert('ratings', ['torrent'=>$id, 'user'=>$userid , 'rating'=>$rating, 'added'=>CONFIG['TT_DATE']]);
+        $ratings_query = "INSERT INTO `ratings` (torrentd, user, rating, added) VALUES (?,?,?,?)";
+        $res = DB::run($ratings_query, [$id, $userid , $rating, CONFIG['TT_DATE']]);
         if ($res) {
             if ($res->errorCode() == 1062) {
                 showMessage(("torrent/$id"), LANG["YOU_ALREADY_RATED_TORRENT"]);
@@ -66,7 +69,8 @@ class RatingsLogic
             }
         }
         
-        DB::run("UPDATE torrents SET numratings = numratings + 1, ratingsum = ratingsum + $rating WHERE id = $id");
+        $torrents_query = "UPDATE torrents SET numratings = numratings + 1, ratingsum = ratingsum + $rating WHERE id = $id";
+        DB::run($torrents_query);
         showMessage(("torrent/$id"), LANG["RATING_THANK"]);
     }
     

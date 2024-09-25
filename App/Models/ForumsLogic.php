@@ -9,23 +9,18 @@ use App\Models\GroupsLogic;
 use App\Models\PostsLogic;
 use App\Models\ReadLogic;
 use App\Models\TopicsLogic;
+use PDO;
 
 /*
 * Forums Table Data
 */
 class ForumsLogic
 {
-    // Fetch Forums Row
-    public static function fetchRow($columns = '*', $where = '', $values = '', $other = '')
-    {
-        $stmt = DB::fetchRow('forum_forums', $columns, $where, $values, $other);
-		return $stmt;
-	}
-	
     // Returns the minimum read/write class levels of a forum
     public static function getForumAccessLevels($forumid)
     {
-        $arr = DB::fetchRow('forum_forums', 'minclassread, minclasswrite', ['id='], [$forumid]);
+        $forums_query = "SELECT minclassread, minclasswrite FROM `forum_forums` WHERE id=? ";
+        $arr = DB::run($forums_query, [$forumid])->fetch(PDO::FETCH_ASSOC);
         if (!$arr) {
             return false;
         }
@@ -36,8 +31,8 @@ class ForumsLogic
     public static function getCatForums()
     {
         $list = [];
-        $forum_cats = ForumCatsLogic::fetchAll('*', '', 'ORDER BY sort');
-
+        $forumcats_query = "SELECT * FROM `forumcats` ORDER BY sort";
+        $forum_cats =DB::run($forumcats_query);
         foreach ($forum_cats as $cat) {
 
             $country_id = $cat['id'];
@@ -49,14 +44,18 @@ class ForumsLogic
                 'c_forums' => []
             ];
 
-            $cat_forums = DB::fetchAll('forum_forums', '*', ['category='], [$country_id], 'ORDER BY sort, name');
+            $forums_query = "SELECT * FROM `forum_forums` WHERE category=? ORDER BY sort,name";
+            $cat_forums = DB::run($forums_query, [$country_id]);
 
             foreach ($cat_forums as $forum) {
 
                 $f_id = $forum['id'];
-                $count_topic = TopicsLogic::fetchColumn('count(id)', ['forumid='], [$f_id]);
-                $topic_id = TopicsLogic::fetchColumn('count(id)', ['forumid='], [$f_id]);
-                $count_post = PostsLogic::fetchColumn('count(id)', ['topicid='], [$topic_id]);
+                $topics_query = "SELECT count(id) FROM `forum_topics` WHERE forumid =?";
+                $count_topic = DB::run($topics_query, [$f_id])->fetchColumn();
+                $topics_query = "SELECT count(id) FROM `forum_topics` WHERE forumid =?";
+                $topic_id = DB::run($topics_query, [$f_id])->fetchColumn();
+                $posts_query = "SELECT count(id) FROM `forum_posts` WHERE topicid =?";
+                $count_post = DB::run($posts_query, [$topic_id])->fetchColumn();
                 $country_info['c_forums'][$f_id] = [
                     'f_id' => $f_id,
                     'f_name' => $forum['name'],
@@ -109,43 +108,47 @@ class ForumsLogic
         $wherec = $wherecsearch;
         $whered = $wheredsearch;
         if ($type == 'deep') {
-            $res2 = DB::run("SELECT *, ( $wherea + $whereb ) as count_words
+            $posts_query = "SELECT *, ( $wherea + $whereb ) as count_words
                              FROM forum_posts
                              JOIN forum_topics
                              ON forum_posts.topicid=forum_topics.id
                              JOIN forum_forums
                              ON forum_forums.id=forum_topics.forumid
                              WHERE ($whered)
-                             ORDER BY count_words,added DESC");
+                             ORDER BY count_words,added DESC";
+            $res2 = DB::run($posts_query);
             $count = $res2->rowCount();
             list($pager, $limit) = pagination(30, $count, URLROOT . "/forum/search?keywords=$keywords&type=deep&");
-            $res = DB::run("SELECT *, ( $wherea + $whereb ) as count_words
+            $posts_query = "SELECT *, ( $wherea + $whereb ) as count_words
                             FROM forum_posts
                             JOIN forum_topics
                             ON forum_posts.topicid=forum_topics.id
                             JOIN forum_forums
                             ON forum_forums.id=forum_topics.forumid
                             WHERE ($whered)
-                            ORDER BY count_words,added DESC $limit")->fetchAll();
+                            ORDER BY count_words,added DESC $limit";
+            $res = DB::run($posts_query)->fetchAll();
         } else {
-            $res2 = DB::run("SELECT topicid, subject, forumid, forum_posts.added, forum_posts.userid, forum_forums.name, forum_forums.minclassread, forum_forums.guest_read, ( $wherea ) as count_words
+            $forums_query = "SELECT topicid, subject, forumid, forum_posts.added, forum_posts.userid, forum_forums.name, forum_forums.minclassread, forum_forums.guest_read, ( $wherea ) as count_words
                              FROM forum_topics
                              JOIN forum_posts
                              ON forum_posts.topicid=forum_topics.id
                              JOIN forum_forums
                              ON forum_forums.id=forum_topics.forumid
-                             WHERE ($wherec)");
+                             WHERE ($wherec)";
+            $res2 = DB::run($forums_query);
             $count = $res2->rowCount();
             list($pager, $limit) = pagination(30, $count, URLROOT . "/forum/search?keywords=$keywords&");
 
-            $res = DB::run("SELECT distinct topicid, subject, forumid, forum_posts.added, forum_posts.userid, forum_forums.name, forum_forums.minclassread, forum_forums.guest_read, ( $wherea ) as count_words
+            $forums_query = "SELECT distinct topicid, subject, forumid, forum_posts.added, forum_posts.userid, forum_forums.name, forum_forums.minclassread, forum_forums.guest_read, ( $wherea ) as count_words
                             FROM forum_topics
                             JOIN forum_posts
                             ON forum_posts.topicid=forum_topics.id
                             JOIN forum_forums
                             ON forum_forums.id=forum_topics.forumid
                             WHERE ($wherec)
-                            ORDER BY count_words,added DESC $limit")->fetchAll();
+                            ORDER BY count_words,added DESC $limit";
+            $res = DB::run($forums_query)->fetchAll();
         }
 
         $forums = ['res' => $res, 'pager' => $pager, 'count' => $count];
@@ -164,7 +167,7 @@ class ForumsLogic
     // Unread Topics
     public static function unread($data)
     {
-        $stmt = DB::run("SELECT forum_readposts.lastpostread, forum_readposts.topicid,
+        $readposts_query = "SELECT forum_readposts.lastpostread, forum_readposts.topicid,
                                 forum_topics.id, forum_topics.forumid, forum_topics.subject, forum_topics.lastpost,
                                 forum_forums.name, forum_forums.minclassread, forum_forums.guest_read
                         FROM forum_readposts 
@@ -174,7 +177,8 @@ class ForumsLogic
                         ON forum_forums.id=forum_topics.id
                         WHERE forum_readposts.userid=? 
                         ORDER BY forum_topics.lastpost DESC
-                        LIMIT 5", [$data->id])->fetchAll();
+                        LIMIT 5";
+        $stmt = DB::run($readposts_query, [$data->id])->fetchAll();
         return $stmt;
     }
 
@@ -185,22 +189,28 @@ class ForumsLogic
             showMessage('adminforumcat', "Are You Sure <a href='".URLROOT."/adminforumcat/delete/$id/1'>Remove Cat $id</a>");
         }
 
-
-        $v = ForumCatsLogic::fetchRow('*', ['id='], [$id]);
+        $forumcats_query = "SELECT * FROM `forumcats` WHERE id=?";
+        $v = DB::run($forumcats_query, [$id])->fetch(PDO::FETCH_ASSOC);
         if (!$v) {
             showMessage('adminforumcat', LANG["FORUM_INVALID_CAT"]);
         }
-
-        DB::delete('forumcats', ['id'=>$id]);
-        $res = DB::fetchAll('forum_forums', 'id', ['category='], [$id]);
+        $forumcats_query = "DELETE FROM `forumcats` WHERE id' = ?";
+        DB::run($forumcats_query, [$id]);
+        $forums_query = "SELECT id FROM `forum_forums` WHERE category=?";
+        $res = DB::run($forums_query, [$id]);
         foreach ($res as $row) {
-            $res2 = TopicsLogic::fetchAll('id', ['forumid='], [$row['id']]);
+            $topics_query = "SELECT * FROM `forum_topics` WHERE forumid=?";
+            $res2 = DB::run($topics_query, [$row['id']]);
             foreach ($res2 as $arr) {
-                PostsLogic::delete(['topicid' => $arr['id']]);
-                ReadLogic::delete(['topicid' => $arr['id']]);
+                $posts_query = "DELETE FROM `forum_posts` WHERE topicid' = ?";
+                DB::run($posts_query, [$arr['id']]);
+                $readposts_query = "DELETE FROM `forum_readposts` WHERE topicid' = ?";
+                DB::run($readposts_query, [$arr['id']]);
             }
-            TopicsLogic::delete(['forumid' => $row['id']]);
-            DB::delete('forum_forums', ['id' => $row['id']]);
+            $topics_query = "DELETE FROM `forum_topics` WHERE forumid' = ?";
+            DB::run($topics_query, [$row['id']]);
+            $forums_query = "DELETE FROM `forum_forums` WHERE id = ?";
+            DB::run($forums_query, [$row['id']]);
         }
         
         showMessage('adminforumcat', LANG["DEL_COMPLETE"]);
@@ -209,7 +219,8 @@ class ForumsLogic
     // Admin Get Cats
     public static function getCats()
     {
-        $forumcat = ForumCatsLogic::fetchAll('id, name, sort', '', 'ORDER BY sort, name');
+        $forumcats_query = "SELECT id, name, sort FROM `forumcats` ORDER BY sort, name";
+        $forumcat = DB::run($forumcats_query);
         return $forumcat;
     }
 
@@ -217,13 +228,17 @@ class ForumsLogic
     public static function reorder($id, $move)
     {
         if ($move == 'up') {
-            ForumCatsLogic::update(['sort'], ['sort =', 'category =', 'id !='], [$_GET["sort"], $_GET["sort"] - 1, $id]);
-            ForumCatsLogic::update(['sort'], ['id ='], [($_GET["sort"] - 1), $id]);
+            $forumcats_query = "UPDATE forumcats SET sort =? WHERE sort=? AND category=? AND id!=?";
+            DB::run($forumcats_query, [$_GET["sort"], $_GET["sort"] - 1, $id]);
+            $forumcats_query = "UPDATE forumcats SET sort =? WHERE  id=?  ";
+            DB::run($forumcats_query, [($_GET["sort"] - 1), $id]);
         }
 
         if ($move == 'down') {
-            ForumCatsLogic::update(['sort'], ['id ='], [$_GET["sort"] + 1, $id]);
-            ForumCatsLogic::update(['sort'], ['sort =', 'category =', 'id !='], [$_GET["sort"], $_GET["sort"] + 1, $id]);
+            $forumcats_query = "UPDATE forumcats SET sort =? WHERE id=?  ";
+            DB::run($forumcats_query, [($_GET["sort"] + 1), $id]);
+            $forumcats_query = "UPDATE forumcats SET sort =? WHERE sort=? AND category=? AND id!=?";
+            DB::run($forumcats_query, [$_GET["sort"], $_GET["sort"] + 1, $id]);
         }
         showMessage('adminforumcat', LANG["MOVED"]);
     }
@@ -232,13 +247,17 @@ class ForumsLogic
     public static function reorderForum($id, $forumid, $move)
     {
         if ($move == 'up') {
-            DB::update('forum_forums', ['sort'], ['sort =', 'category =', 'id !='], [$_GET["sort"], $_GET["sort"] - 1, $id, $forumid]);
-            DB::update('forum_forums', ['sort'], ['id ='], [($_GET["sort"] - 1), $id]);
+            $forums_query = "UPDATE forum_forums SET sort =? WHERE sort=? AND category=? AND id!=?";
+            DB::run($forums_query, [$_GET["sort"], $_GET["sort"] - 1, $id, $forumid]);
+            $forums_query = "UPDATE forum_forums SET sort =? WHERE id=?  ";
+            DB::run($forums_query, [($_GET["sort"] - 1), $id]);
         }
 
         if ($move == 'down') {
-            DB::update('forum_forums', ['sort'], ['id ='], [$_GET["sort"] + 1, $id]);
-            DB::update('forum_forums', ['sort'], ['sort =', 'category =', 'id !='], [$_GET["sort"], $_GET["sort"] + 1, $id, $forumid]);
+            $forums_query = "UPDATE forum_forums SET sort =? WHERE id=?";
+            DB::run($forums_query, [($_GET["sort"] + 1), $id]);
+            $forums_query = "UPDATE forum_forums SET sort =? WHERE sort=? AND category=? AND id!=?  ";
+            DB::run($forums_query, [$_GET["sort"], $_GET["sort"] + 1, $id, $forumid]);
         }
         showMessage(("adminforum/$id"), LANG["MOVED"]);
     }
@@ -256,14 +275,16 @@ class ForumsLogic
         
         // Admin Insert Forum Cat
         if (!$id) {
-            $res = ForumCatsLogic::insert(['name' => $name, 'sort' => intval($sort)]);
+            $forumcats_query = "INSERT INTO `forumcats` (name,sort) VALUES (?,?)";
+            $res =  DB::run($forumcats_query, [$name, intval($sort)]);
             if (!empty($res)) {
                 showMessage('adminforumcat', LANG["SUCCESS"]);
             } else {
                 showMessage('adminforumcat', LANG["ACTION_FAILED"]);
             }
         } else {
-            ForumCatsLogic::update(['sort','name'], ['id='], [$sort, $name, $id]);
+            $forumcats_query = "UPDATE forumcats SET sort = ? AND name = ? WHERE id=?";
+            DB::run($forumcats_query, [$sort, $name, $id]);
             showMessage('adminforumcat', "<center><b>" . LANG["UPDATE_COMPLETE"] . "</b></center>");
         }
     }
@@ -276,9 +297,10 @@ class ForumsLogic
         }
 
         // Pagination
-        $count = PostsLogic::fetchColumn('count(id) as count', ['userid ='], [$id]);
+        $posts_query = "SELECT count(id) as count FROM `forum_posts` WHERE userid=?";
+        $count = DB::run($posts_query, [$id])->fetchColumn();
         list($pager, $limit) = pagination(20, $count, Url("post/user/$id&"));
-        $row = DB::run("SELECT
+        $posts_query = "SELECT
                         forum_posts.id, 
                         forum_posts.topicid, 
                         forum_posts.userid, 
@@ -314,7 +336,9 @@ class ForumsLogic
                         
                         WHERE forum_posts.userid = $id 
                         ORDER BY forum_posts.added 
-                        DESC $limit")->fetchAll();
+                        DESC $limit";
+
+        $row = DB::run($posts_query)->fetchAll();
         //echo '<pre>'.print_r($stmt, true).'</pre>';
         return array('row' => $row, 'pager' => $pager);
     }
@@ -322,21 +346,26 @@ class ForumsLogic
     // Admin Get Forums
     public static function getForums($id)
     {
-        $name = ForumCatsLogic::fetchColumn('name', ['id='], [$id], 'ORDER BY sort, name');
-        $query = ForumCatsLogic::fetchAll('*', '', 'ORDER BY sort, name');
+        $forumcats_query = "SELECT * FROM `forumcats` WHERE id=? ORDER BY sort,name";
+        $name = DB::run($forumcats_query, [$id])->fetchColumn();
+        $forumcats_query = "SELECT * FROM `forumcats` ORDER BY sort, name";
+        $query = DB::run($forumcats_query);
         $forumcat = array();
         foreach ($query as $row) {
             $forumcat[] = $row;
         }
 
-        $query1 = DB::fetchAll('forum_forums', '*', ['sub=', 'category='], [0, $id], 'ORDER BY sort, name');
+        $forums_query = "SELECT * FROM `forum_forums` WHERE category=? ORDER BY sort,name";
+        $query1 = DB::run($forums_query, [$id]);
         $forumforum = array();
         foreach ($query1 as $row) {
             $forumforum[] = $row;
         }
 
-        $query = DB::fetchAll('forum_forums', '*', ['category='], [$id], 'ORDER BY category, sub, sort');
-        $groups = GroupsLogic::fetchAll('*', '');
+        $forums_query = "SELECT * FROM `forum_forums` WHERE category=? ORDER BY sort,category";
+        $query = DB::run($forums_query, [$id]);
+        $groups_query = "SELECT * FROM `groups`";
+        $groups = DB::run($groups_query);
         $array = [
             'forumcat' => $forumcat,
             'forumforum' => $forumforum,
@@ -361,7 +390,9 @@ class ForumsLogic
         $id = Validate::Input('id');
 
         if (!$id) {
-            $res = DB::insert('forum_forums', ['name' => $name, 'description' => $description, 'sort' => $sort, 'category' => $new_forum_cat, 'minclassread' => $minclassread, 'minclasswrite' => $minclasswrite, 'guest_read' => $guest_read, 'sub' => $sub]);
+            $forums_query = "INSERT INTO `forum_forums` (name,description,sort,category,minclassread,minclasswrite,guest_read) VALUES (?,?,?,?,?,?,?)";
+            $res = DB::run($forums_query,
+            [$name, $description, $sort, $new_forum_cat, $minclassread, $minclasswrite, $guest_read]);
             $id = DB::lastInsertId();
             if ($res) {
                 showMessage(("adminforum/$new_forum_cat"), LANG["SUCCESS"]);
@@ -369,7 +400,9 @@ class ForumsLogic
                 showMessage(("adminforum/$new_forum_cat"), LANG["ACTION_FAILED"]);
             }
         } else {
-            DB::update('forum_forums', ['sort','name','description','category','minclassread','minclasswrite','guest_read','sub'], ['id='], [$sort, $name, $description, $new_forum_cat, $minclassread, $minclasswrite, $guest_read, $sub, $id]);
+            $forums_query = "UPDATE forum_forums SET sort=? AND name=? AND description=? AND category=? AND minclassread=? AND added=? AND minclasswrite=?
+             AND guest_read=? WHERE id=?";
+            DB::run($forums_query, [$sort, $name, $description, $new_forum_cat, $minclassread, $minclasswrite, $guest_read, $id]);
             showMessage(("adminforum/$new_forum_cat"), "<center><b>" . LANG["UPDATE_COMPLETE"] . "</b></center>");
         }
     }
@@ -381,15 +414,19 @@ class ForumsLogic
             showMessage('adminforum', "Are You Sure <a href='".URLROOT."/adminforum/delete/$id/sure'>Remove Forum $id</a>");
         }
 
-        $v = DB::fetchRow('forum_forums', '*', ['id='], [$id]);
+        $forums_query = "SELECT * FROM `forum_forums` WHERE id=? ";
+        $v =  DB::run($forums_query, [$id])->fetch(PDO::FETCH_ASSOC);
         if (!$v) {
             showMessage('adminforum', LANG["FORUM_INVALID"]);
         }
-
-        DB::delete('forum_forums', ['id' => $id]);
-        TopicsLogic::delete(['forumid' => $id]);
-        PostsLogic::delete(['topicid' => $id]);
-        ReadLogic::delete(['topicid' => $id]);
+        $forums_query = "DELETE FROM `forum_forums` WHERE id' = ?";
+        DB::run($forums_query, [$id]);
+        $topics_query = "DELETE FROM `forum_topics` WHERE forumid' = ?";
+        DB::run($topics_query, [$id]);
+        $readposts_query = "DELETE FROM `forum_readposts` WHERE topicid' = ?";
+        DB::run($readposts_query, [$id]);
+        $posts_query = "DELETE FROM `forum_posts` WHERE topicid' = ?";
+        DB::run($posts_query, [$id]);
         showMessage('adminforumcat', LANG["DEL_COMPLETE"]);
     }
 }

@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Libs\DB;
+use PDO;
 
 /*
 * Likes Table Data
@@ -15,22 +16,26 @@ class LikesLogic
         switch ($type) {
             
             case 'liketorrent':
-                DB::insert('likes', ['user'=>$current_user->id, 'liked'=>$id, 'added'=>CONFIG['TT_DATE'], 'type'=>'torrent', 'reaction'=>'like']);
+                $likes_query = "INSERT INTO `likes` (user, liked, added, type, reaction) VALUES (?,?,?,?,?)";
+                DB::run($likes_query, [$current_user->id, $id, CONFIG['TT_DATE'], 'torrent', 'like']);
                 showMessage(("torrent/$id"), LANG["ITEM_LIKED"]);
                 break;
 
             case 'unliketorrent':
-                DB::delete('likes', ['user' =>$current_user->id, 'liked' => $id, 'type'=>'torrent']);
+                $likes_query = "DELETE FROM `likes` WHERE user = ? AND  liked = ? AND type=?";
+                DB::run($likes_query, [$current_user->id, $id, 'torrent']);
                 showMessage(("torrent/$id"), LANG["ITEM_UNLIKED"]);
                 break;
 
             case 'torrent':
-                DB::insert('likes', ['user' => $current_user->id, 'liked' => $id, 'added' => CONFIG['TT_DATE'], 'type' => 'torrent']);
+                $likes_query = "INSERT INTO `likes` (user, liked, added, type) VALUES (?,?,?,?)";
+                DB::run($likes_query, [$current_user->id, $id, CONFIG['TT_DATE'], 'forum']);
                 showMessage(("torrent/$id"), LANG["GIVE_APPRECIATE"]);
                 break;
     
             case 'thanksforum':
-                DB::insert('likes', ['user' => $current_user->id, 'liked' => $id, 'added' => CONFIG['TT_DATE'], 'type' => 'forum']);
+                $likes_query = "INSERT INTO `likes` (user, liked, added, type) VALUES (?,?,?,?)";
+                DB::run($likes_query, [$current_user->id, $id, CONFIG['TT_DATE'], 'torrent']);
                 showMessage(("post/$post"), LANG["GIVE_APPRECIATE"]);
                 break;
     
@@ -44,7 +49,8 @@ class LikesLogic
     public static function showLikes($data)
     {
         if (CONFIG['ALLOWLIKES']) {
-            $data1 = DB::fetchRow('likes', 'user', ['liked=', 'type=', 'user=', 'reaction='], [$data['id'],'torrent',$data['current_user']->id,'like']);
+            $likes_query = "SELECT user FROM `likes` WHERE liked =? AND type =? AND user =? AND reaction=?";
+            $data1 = DB::run($likes_query, [$data['id'],'torrent',$data['current_user']->id,'like'])->fetch(PDO::FETCH_ASSOC);
             $likes = $data1;
             if ($likes) {
                 $show['like'] = "&nbsp;<a href='". URLROOT ."/like/$data[id]/unliketorrent'><i class='fa fa-thumbs-down' title='UnLike'></i></a><br>";
@@ -53,7 +59,8 @@ class LikesLogic
             }
         }
         if (CONFIG['ALLOWLIKES']) {
-            $data3 = DB::fetchAll('likes', 'user', ['liked=', 'type='], [$data['id'], 'torrent']);
+            $likes_query = "SELECT user FROM `likes` WHERE liked=? AND type=?";
+            $data3 = DB::run($likes_query, [$data['id'], 'torrent']);
             foreach ($data3 as $stmt) :
                 $show['liked'] .= "<a href='" . URLROOT . "/profile/$stmt[user]'>" . coloredname($stmt['user']) . "</a>&nbsp;";
             endforeach;
@@ -64,7 +71,8 @@ class LikesLogic
     // Show Who Thanked
     public static function showThanks($target)
     {
-        $data3 = DB::run("SELECT * FROM `users` AS u LEFT JOIN `likes` AS l ON(u.id = l.user) WHERE liked=? AND type=?", [$target, 'torrent']);
+        $users_query = "SELECT * FROM `users` AS u LEFT JOIN `likes` AS l ON(u.id = l.user) WHERE liked=? AND type=?";
+        $data3 = DB::run($users_query, [$target, 'torrent']);
         $count = $data3->rowCount();
         if ($count > 0) {
             $thanks = 'Thanks by<br>';

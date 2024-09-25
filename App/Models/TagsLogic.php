@@ -14,7 +14,8 @@ class TagsLogic
   // Get Tag Names
   public static function getAll()
   {
-    $stmt = DB::fetchAll('tags', 'id, name, colour', '', 'GROUP BY `name`');
+    $tags_query = "SELECT id, name, colour FROM `tags` GROUP BY `name`";
+    $stmt = DB::run($tags_query);
     return $stmt;
   }
 
@@ -30,10 +31,12 @@ class TagsLogic
     }
 
     if (!$id) {
-      DB::insert('tags', ['name' => $name, 'colour' => $colour]);
+      $tags_query = "INSERT INTO tags (name,colour) VALUES (?,?)";
+      DB::run($tags_query, [$name, $colour]);
       showMessage('admintag', LANG['SUCCESS']);
     } else {
-      $stmt = DB::update('tags', ['name', 'colour'], ['id='], [$name,$colour,$id]);
+      $torrents_query = "UPDATE torrents SET name = ? AND colour = ? WHERE id=?";
+      DB::run($torrents_query, [$name,$colour,$id]);
       showMessage('admintag', LANG['SUCCESS']);
     }
     
@@ -45,7 +48,8 @@ class TagsLogic
   {
     // Check User Input
     $ids = Validate::multiIds('ids');
-    DB::deleteByIds('tags', 'id', $ids);
+    $tags_query = "DELETE FROM `tags` WHERE `id` IN (?)";
+    DB::run($tags_query, [$ids]);
     showMessage('admintag', LANG["DEL_COMPLETE"]);
   }
 
@@ -53,7 +57,8 @@ class TagsLogic
   public static function search($name)
   {
     // Get Tag Data
-    $stmt = DB::run("SELECT torrentid FROM tagtorrent WHERE type1 = ? OR type2 = ? OR type3 = ?", [$name, $name, $name])->fetchAll();
+    $tagtorrent_query = "SELECT torrentid FROM tagtorrent WHERE type1 = ? OR type2 = ? OR type3 = ?";
+    $stmt = DB::run($tagtorrent_query, [$name, $name, $name])->fetchAll();
     if (count($stmt) == 0) {
       showMessage(URLROOT, LANG["NOTHING_FOUND"]);
     }
@@ -70,10 +75,11 @@ class TagsLogic
     }
 
     // Get Torrent Data
-    $count = DB::run("SELECT COUNT(*) FROM torrents WHERE torrents.id IN ($ids)")->fetchColumn();
+    $torrents_query = "SELECT COUNT(*) FROM torrents WHERE torrents.id IN ($ids)";
+    $count = DB::run($torrents_query)->fetchColumn();
     list($pager, $limit) = pagination(25, $count, URLROOT . "/tag/$name&amp;");
 
-    $stmt = DB::run(
+    $torrents_query = 
       "SELECT torrents.anon, torrents.seeders, torrents.tube, 
                     torrents.banned, torrents.poster, torrents.comments, torrents.leechers, torrents.info_hash, 
                     torrents.filename, torrents.nfo, torrents.last_action, 
@@ -95,8 +101,8 @@ class TagsLogic
             LEFT JOIN categories ON torrents.category = categories.id 
             LEFT JOIN torrentlang ON torrents.torrentlang = torrentlang.id 
             LEFT JOIN users ON torrents.owner = users.id
-            WHERE torrents.id IN ($ids) $limit"
-    )->fetchAll(PDO::FETCH_ASSOC);
+            WHERE torrents.id IN ($ids) $limit";
+    $stmt = DB::run($torrents_query)->fetchAll(PDO::FETCH_ASSOC);
     if (count($stmt) == 0) {
       showMessage(URLROOT, LANG["NO_TORRENT_FOUND"]);
     }

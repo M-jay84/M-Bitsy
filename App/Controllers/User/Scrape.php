@@ -4,9 +4,11 @@ namespace App\Controllers\User;
 
 use App\Libs\Auth;
 use App\Libs\Controller;
+use App\Libs\DB;
 use App\Libs\Torrents\Parse;
 use App\Libs\Torrents\Scraper;
 use App\Models\TorrentsLogic;
+use PDO;
 
 /*
 * Scrape Controller
@@ -77,8 +79,8 @@ class Scrape extends Controller
     public function external()
     {
         $id = (isset($_GET['id'])) ? (int) $_GET['id'] : 0;
-
-        $resu = TorrentsLogic::fetchRow('id, info_hash, announce, announcelist', ['external =','id ='], ['yes',$id]);
+        $torrent_query = "SELECT id, info_hash, announce, announcelist FROM `torrents` WHERE external =? AND id =?";
+        $resu = DB::run($torrent_query, ['yes',$id])->fetch(PDO::FETCH_ASSOC);
         
         while ($rowu = $resu) {
             // No need parsing but lets update any old torrents first
@@ -117,12 +119,14 @@ class Scrape extends Controller
 
             if ($seeders !== 0) {
                 // Update the Torrent
-                TorrentsLogic::update(['leechers','seeders','times_completed','last_action','visible','announcelist'], ['id ='],
-                [$leechers, $seeders, $completed, CONFIG['TT_DATE'], 'yes', $newannouncelist, $rowu['id']]);
+                $torrent_query = "UPDATE `torrents` SET leechers=? AND seeders=? AND times_completed=? AND last_action=? AND visible=?
+                                 AND announcelist =? WHERE id=?";
+                DB::run($torrent_query, [$leechers, $seeders, $completed, CONFIG['TT_DATE'], 'yes', $newannouncelist, $rowu['id']]);
 
             } else {
                 // Its Dead :(
-                TorrentsLogic::update(['last_action'], ['id='], [CONFIG['TT_DATE'], $rowu['id']]);
+                $torrent_query = "UPDATE `torrents` SET last_action = ? WHERE id=?";
+                DB::run($torrent_query, [CONFIG['TT_DATE'], $rowu['id']]);
             }
 
             // Redirect with message

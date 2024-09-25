@@ -150,7 +150,8 @@ class UploadLogic
             if (!array_key_exists($im['mime'], $allowed_types)) {
                 showMessage('upload', LANG["INVALID_FILETYPE_IMAGE"]);
             }
-            $row = DB::run("SHOW TABLE STATUS LIKE 'torrents'")->fetch();
+            $_query = "SHOW TABLE STATUS LIKE 'torrents'";
+            $row = DB::run($_query)->fetch();
             $next_id = $row['Auto_increment'];
             $ifilename = $next_id . $x . $allowed_types[$im['mime']];
             SimpleThumbnail::create()->copyImage($ifile, $uploaddir . $ifilename);
@@ -160,12 +161,17 @@ class UploadLogic
 
     // Insert Torrent
     try {
-        TorrentsLogic::insert([
-            'filename'=>$fname, 'owner'=>$current_user->id, 'name'=>$name, 'vip'=>$vip, 'descr'=>$descr, 'image1'=>$inames[0], 'image2'=>$inames[1], 'category'=>$catid, 
-            'tube'=>$tube, 'added'=>CONFIG['TT_DATE'], 'info_hash'=>$tor['hash'], 'size'=>$tor['length'], 'numfiles'=>(int) $tor['ttfilecount'], 'save_as'=>$fname,
-            'announce'=>$tor['announce'], 'external'=>$external, 'nfo'=>$nfo, 'torrentlang'=>$langid, 'anon'=>$anon, 'last_action'=>CONFIG['TT_DATE'], 'freeleech'=>$free,
-            'tmdb'=>$tmdb, 'imdb'=>$imdb, 'announcelist'=>$announcelist, 'filelist'=>$tor['files'], 'info_hash2'=>$tor['hash2']
-        ]);
+        $torrents_query = "INSERT INTO `torrents`
+            (filename, owner, name, vip, descr, image1, image2, category, 
+            tube, added, info_hash, size, numfiles, save_as,
+            announceannounce, external, nfo, torrentlang, anon, last_action, freeleech,
+            tmdb, imdb, announcelist, filelist, info_hash2)
+            VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+        DB::run($torrents_query,
+            [$fname, $current_user->id, $name, $vip, $descr, $inames[0], $inames[1], $catid, 
+            $tube,CONFIG['TT_DATE'], $tor['hash'], $tor['length'], (int) $tor['ttfilecount'], $fname,
+            $tor['announce'], $external, $nfo,$langid, $anon, CONFIG['TT_DATE'], $free,
+            $tmdb, $imdb, $announcelist, $tor['files'], $tor['hash2']]);
     } catch (\PDOException $e) {
         TorrentsLogic::deleteTorrent(DB::lastInsertId(), $current_user->id);
         rename("$torrent_dir/$fname", "$torrent_dir/duplicate.torrent"); // todo
@@ -180,7 +186,8 @@ class UploadLogic
     // Tags Mod
     $tags = $_POST['tags'];
     if ($tags) {
-        TorrentTagLogic::insert(['torrentid' => $id, 'type1' => $tags[0], 'type2' => $tags[1], 'type3' => $tags[2]]);
+        $$torrenttag_query = "INSERT INTO `torrenttag` (torrentid, type1, type2, type3) VALUES (?,?,?,?)";
+        DB::run($torrenttag_query, [$id, $tags[0], $tags[1], $tags[2]]);
     }
 
     // Move NFO
@@ -193,7 +200,8 @@ class UploadLogic
     
     // Shout Torrent
     $msg_shout = "New Torrent: [url=" . URLROOT . "/torrent/" . $id . "]" . $name . "[/url] has been uploaded " . ($anon == 'no' ? "by [color=".$current_user->Color."]" . $current_user->username . "[/color]" : "") . "";
-    ShoutboxLogic::insert(['userid'=>0, 'date'=>CONFIG['TT_DATE'], 'user'=>'System', 'message'=>$msg_shout]);
+    $shoutbox_query = "INSERT INTO `shoutbox` (userid, date,user, message) VALUES (?,?,?,?)";
+    DB::run($shoutbox_query, [0, CONFIG['TT_DATE'], 'System', $msg_shout]);
 
     //Uploaded ok message
     if ($external == 'no') {

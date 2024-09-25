@@ -27,7 +27,8 @@ class ProfilechangeLogic
         if (in_array($ext, $allowedfiles)) {
             move_uploaded_file($_FILES['file']['tmp_name'], "uploaded/avatars/$user_id.$ext");
             $avatar = URLROOT . "/uploaded/avatars/$user_id.$ext";
-            DB::update('users', ['avatar'], ['id='], [$avatar, $user_id]);
+            $users_query = "UPDATE users SET avatar=? WHERE id=?";
+            DB::run($users_query, [$avatar, $user_id]);
             showMessage(("profile/$user_id"), LANG["UP_AVATAR"] . " OK");
         }
     }
@@ -46,7 +47,9 @@ class ProfilechangeLogic
         }
         $chpassword = password_hash($chpassword, PASSWORD_BCRYPT);
         $secret = mksecret();
-        $in = DB::update('users', ['password', 'secret'], ['id='], [$chpassword,$secret,$id]);
+        
+        $users_query = "UPDATE users SET password = ? AND secret=? WHERE id=?";
+        $in = DB::run($users_query, [$chpassword,$secret,$id]);
         if ($in > 0) {
             showMessage('logout', LANG["PASSWORD_CHANGED_OK"]);
         } else {
@@ -77,7 +80,8 @@ class ProfilechangeLogic
         $TTMail->Send($email, "".CONFIG['SITENAME']." profile update confirmation", $body, "From: " . CONFIG['SITEEMAIL'] . "", "-f" . CONFIG['SITEEMAIL'] . "");
 
         // Update User Secret
-        DB::update('users', ['editsecret'], ['id='], [$sec, $id]);
+        $users_query = "UPDATE users SET editsecret = ? WHERE id=?";
+        DB::run($users_query, [$sec, $id]);
         showMessage(("profile/$id"), LANG["EMAIL_CHANGE_SEND"]);
     }
 

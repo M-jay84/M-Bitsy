@@ -82,15 +82,14 @@ class UsersearchLogic
         }
 
         // Pagination
-        $count = DB::run("SELECT COUNT(`id`) FROM `users` $where")->fetchcolumn();
+        $users_query = "SELECT COUNT(`id`) FROM `users` $where";
+        $count = DB::run($users_query)->fetchcolumn();
         list($pager, $limit) = pagination(25, $count, URLROOT . "/adminusersearch&");
-        $sql = DB::run("SELECT * FROM `users` $where $limit")->fetchAll();
-        $results = [
-            'results' => $sql,
-            'pager' => $pager,
-            'inputs' => $data
-        ];
-        $groups = GroupsLogic::fetchAll('group_id,groups.level', '');
+        $users_query = "SELECT * FROM `users` $where $limit";
+        $sql = DB::run($users_query)->fetchAll();
+
+        $groups_query = "SELECT group_id,groups.level FROM `groups`";
+        $groups = DB::run($groups_query);
 
         $array = [
             'results' => $sql,
@@ -113,20 +112,24 @@ class UsersearchLogic
         $ids = Validate::multiIds('ids');
 
         if ($disable != '') {
-            DB::updateWhereIn('users', ['enabled' => 'no'], $ids);
+            $users_query = "UPDATE users SET enabled = ? WHERE id IN (?)";
+            DB::run($users_query, ['no', $ids]);
         }
 
         if ($enable != '') {
-            DB::updateWhereIn('users', ['enabled' => 'yes'], $ids);
+            $users_query = "UPDATE users SET enabled = ? WHERE id IN (?)";
+            DB::run($users_query, ['yes', $ids]);
         }
 
         if ($unwarn != '') {
             foreach ($_POST["ids"] as $user_id) {
-                MessagesLogic::insert(['poster' => 0, 'sender' => 0, 'subject' => 'Warning Removed', 'receiver' => $user_id, 'added' => CONFIG['TT_DATE'], 'msg' => "Your Warning Has Been Removed"]);
+                MessagesLogic::newinsert(['poster' => 0, 'sender' => 0, 'subject' => 'Warning Removed', 'receiver' => $user_id, 'added' => CONFIG['TT_DATE'], 'msg' => "Your Warning Has Been Removed"]);
             }
             $modcomment = date("Y-m-d") . " - Warning Removed By " . $current_user->username;
-            DB::updateWhereIn('users', ['modcomment' => $modcomment], $ids);
-            DB::updateWhereIn('users', ['warned' => 'no'], $ids);
+            $users_query = "UPDATE users SET modcomment = ? WHERE id IN (?)";
+            DB::run($users_query, [$modcomment, $ids]);
+            $users_query = "UPDATE users SET warned => ? WHERE id IN (?)";
+            DB::run($users_query, ['no', $ids]);
         }
 
         if ($warn != '') {
@@ -134,11 +137,13 @@ class UsersearchLogic
                 showMessage('adminusersearch', LANG["MISSING_FORM_DATA"], 1);
             }
             foreach ($_POST["ids"] as $user_id) {
-                MessagesLogic::insert(['poster' => 0, 'sender' => 0, 'subject' => 'New Warning', 'receiver' => $user_id, 'added' => CONFIG['TT_DATE'], 'msg' => "You have received a warning, Reason: $add_comment"]);
+                MessagesLogic::newinsert(['poster' => 0, 'sender' => 0, 'subject' => 'New Warning', 'receiver' => $user_id, 'added' => CONFIG['TT_DATE'], 'msg' => "You have received a warning, Reason: $add_comment"]);
             }
             $modcomment = date("Y-m-d") . " - Warned by " . $current_user->username . ".\nReason: $add_comment";
-            DB::updateWhereIn('users', ['modcomment' => $modcomment], $ids);
-            DB::updateWhereIn('users', ['warned' => 'yes'], $ids);
+            $users_query = "UPDATE users SET modcomment = ? WHERE id IN (?)";
+            DB::run($users_query, [$modcomment, $ids]);
+            $users_query = "UPDATE users SET warned = ? WHERE id IN (?)";
+            DB::run($users_query, ['yes', $ids]);
         }
 
     }

@@ -8,7 +8,8 @@ use App\Libs\DB;
         <tr>
             <?php foreach ($SHOUTS as $row) : ?>
                 <?php
-                $ol3 = DB::fetchColumn('users', 'avatar', ['id='], [$row["userid"]]);
+                $users_query = "SELECT avatar FROM `users` WHERE id=?";
+                $ol3 = DB::run($users_query, [$row["userid"]])->fetchColumn();
                 if (!empty($ol3)) {
                     $av = "<img src='" . $ol3 . "' alt='my_avatar' width='20' height='20'>";
                 } else {

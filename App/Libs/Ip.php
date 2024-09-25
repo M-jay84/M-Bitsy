@@ -15,7 +15,8 @@ class Ip
 	    } else {
             $nip = ip2long($ip);
         }
-        $res = DB::fetchAll('bans', '*', ['type ='], ['ip']);
+        $bans_query = "SELECT * FROM `bans` WHERE type =?";
+        $res = DB::run($bans_query, ['ip']);
         foreach ($res as $row) {
             $banned = false;
             if (self::isIpV6($row["first"]) && self::isIpV6($row["last"]) && self::isIpV6($ip)) {
@@ -39,7 +40,9 @@ class Ip
     public static function checkIP()
     {
         $ip = Ip::getIP();
-        $ipq = DB::fetchColumn('users', 'count(id)', ['ip ='], [$ip]);
+        $user_query = "SELECT count(id) FROM `users` WHERE ip=?";
+        $ipq = DB::run($user_query, [$ip])->fetchColumn();
+
         if ($ipq >= CONFIG['ACCOUNTMAX']) {
             showMessage('login', LANG["IP_USED"]);
         }

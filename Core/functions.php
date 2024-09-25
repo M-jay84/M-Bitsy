@@ -736,7 +736,8 @@ function torrenttable($res, $columns = CONFIG['TORRENTTABLE_COLUMNS'])
                     if (!CONFIG['FORCETHANKS'] && $row['external'] == 'yes') {
                         print("<td><a href=\"magnet:?xt=urn:btih:" . $row["info_hash"] . "&dn=" . rawurlencode($row['name']) . "&tr=udp://tracker.openbittorrent.com&tr=udp://tracker.publicbt.com\"><i class='fa fa-magnet fa-2x' style='font-size:23px;color:green' title='" . LANG["DOWNLOADED"] . "'></i></a></td>");
                     } elseif (CONFIG['FORCETHANKS']) {
-                        $like = DB::fetchRow('likes', 'user', ['liked =', 'type =', 'user ='], [$id, 'torrent', $_SESSION['id']]);
+                        $likes_query = "SELECT user FROM `likes` WHERE liked =? AND type =? AND user =?";
+                        $like = DB::run($likes_query, [$id, 'torrent', $_SESSION['id']])->fetch(PDO::FETCH_ASSOC);
                         if ($like) {
                             if ($_SESSION['can_download'] == 'yes' && $row['external'] == 'yes') {
                                 print("<td><a href=\"magnet:?xt=urn:btih:" . $row["info_hash"] . "&dn=" . rawurlencode($row['name']) . "&tr=udp://tracker.openbittorrent.com&tr=udp://tracker.publicbt.com\"><i class='fa fa-magnet fa-2x' style='font-size:23px;color:green' title='" . LANG["DOWNLOADED"] . "'></i></a></td>");
@@ -819,8 +820,9 @@ function torrenttable($res, $columns = CONFIG['TORRENTTABLE_COLUMNS'])
                     break;
                 case 'speed':
                     if ($row["external"] != "yes" && $row["leechers"] >= 1) {
-                        $speedQ = DB::fetchColumn('peers', "(SUM(downloaded)) / (UNIX_TIMESTAMP('" . CONFIG['TT_DATE'] . "') - UNIX_TIMESTAMP(started)) AS totalspeed",
-                        ['seeder =', 'torrent ='], ['no',$id], "ORDER BY started ASC");
+                        $peers_query = "SELECT (SUM(downloaded)) / (UNIX_TIMESTAMP(?) - UNIX_TIMESTAMP(started)) AS totalspeed FROM `peers` 
+                        WHERE seeder =? AND torrent=? ORDER BY started ASC";
+                        $speedQ =DB::run($peers_query, [CONFIG['TT_DATE'], 'no',$id])->fetchColumn();
                         $totalspeed = mksize($speedQ) . "/s";
                     } else {
                         $totalspeed = "--";
@@ -1124,16 +1126,21 @@ function catch_up()
         return;
     }
     $userid = $_SESSION['id'];
-    $res = DB::fetchAll('forum_topics', 'id, lastpost', '');
+    $topics_query = "SELECT id, lastpost FROM `forum_topics`";
+    $res = DB::run($topics_query);
     foreach ($res as $arr) {
         $topicid = $arr["id"];
         $postid = $arr["lastpost"];
-        $r = DB::fetchRow('forum_readposts', 'id,lastpostread', ['userid =', 'topicid ='], [$userid,$topicid]);
+        $readposts_query = "SELECT id,lastpostread FROM `forum_readposts` WHERE userid=? AND topicid=?";
+        $r = DB::run($readposts_query, [$userid,$topicid])->fetch(PDO::FETCH_ASSOC);
+
         if ($r) {
-            DB::insert('forum_readposts', ['userid' => $userid, 'topicid' => $topicid, 'lastpostread' => $postid]);
+            $readposts_query = "INSERT INTO forum_readposts (userid, topicid, lastpostread) VALUES (?,?,?)";
+            DB::run($readposts_query, [$userid, $topicid, $postid]);
         } else {
             if ($r["lastpostread"] < $postid) {
-                DB::update('forum_readposts', ['lastpostread'], ['id='], [$postid, $r["id"]]);
+                $readposts_query = "UPDATE forum_readposts SET lastpostread=? WHERE id=?";
+                DB::run($readposts_query, [$postid, $r["id"]]);
             }
         }
     }
@@ -1142,7 +1149,8 @@ function catch_up()
 // Returns The ID Of A Last Post In A Forum Or Otherwise 0
 function get_forum_last_post($forumid)
 {
-    $res = DB::fetchColumn('forum_topics', 'lastpost', ['forumid ='], [$forumid], 'ORDER BY lastpost DESC LIMIT 1');
+    $topics_query = "SELECT lastpost FROM `forum_topics` WHERE forumid = ? ORDER BY lastpost DESC LIMIT 1";
+    $res = DB::run($topics_query, [$forumid])->fetchColumn();
     if ($res) {
         return $res;
     } else {
@@ -1168,18 +1176,21 @@ function latestforumposts($sub_id = 0)
             <tbody>
                 <?php
                 // HERE GOES THE QUERY TO RETRIEVE DATA FROM THE DATABASE AND WE START LOOPING ///
-                $for = DB::fetchAll('forum_topics', '*', '', 'ORDER BY lastpost DESC LIMIT 8');
+                $topics_query= "SELECT * FROM `forum_topics` ORDER BY lastpost DESC LIMIT 8";
+                $for = DB::run($topics_query);
                 if ($for->rowCount() == 0) {
                     print("<b>No Latest Topics</b>");
                 }
                 foreach ($for as $topicarr) {
                     // Set minclass
-                    $forum = DB::fetchRow('forum_forums', 'name,minclassread,guest_read', ['id ='], [$topicarr['forumid']]);
+                    $forums_query = "SELECT name,minclassread,guest_read FROM `forum_forums` WHERE id=? ";
+                    $forum = DB::run($forums_query, [$topicarr['forumid']])->fetch(PDO::FETCH_ASSOC);
                     if ($forum && $_SESSION['class'] >= $forum["minclassread"] || $forum["guest_read"] == "yes") {
-                        
-                        $posts = DB::fetchColumn('forum_posts', 'count(id)', ['topicid ='], [$topicarr["id"]]);
-                        $replies = max(0, $posts - 1);                    
-                        $arr = DB::fetchRow('forum_posts', 'added,userid', ['topicid ='], [$topicarr["id"]], 'ORDER BY id DESC LIMIT 1');
+                        $posts_query = "SELECT count(id) FROM `forum_posts` WHERE topicid = ?";
+                        $posts = DB::run($posts_query, [$topicarr["id"]])->fetchColumn();
+                        $replies = max(0, $posts - 1);
+                        $posts_query = "SELECT added,userid FROM `forum_posts` WHERE topicid=? ORDER BY id DESC LIMIT 1";
+                        $arr = DB::run($posts_query, [$topicarr["id"]])->fetch(PDO::FETCH_ASSOC);
                         ?>
                         
                         <tr>
@@ -1214,20 +1225,23 @@ function latestforumposts($sub_id = 0)
 // Get last post info in a array return img & lastpost
 function lastpostdetails($lastpostid)
 {
-    $post_res = DB::fetchRow('forum_posts', 'added,topicid,userid', ['id ='], [$lastpostid]);
+    $posts_query = "SELECT added,topicid,userid FROM `forum_posts` WHERE id=?";
+    $post_res = DB::run($posts_query, [$lastpostid])->fetch(PDO::FETCH_ASSOC);
     if ($post_res) {
         $post_arr = $post_res or showMessage('forum', "Bad forum last_post");
         $lastposterid = $post_arr["userid"];
         $lastpostdate = user_timezone_date($post_arr["added"]);
         $lasttopicid = $post_arr["topicid"];
         $lastposter = coloredname($lastposterid);
-        $topic_arr = DB::fetchRow('forum_topics', 'subject', ['id ='], [$lasttopicid]);
+        $topics_query = "SELECT subject FROM `forum_topics` WHERE id=?";
+        $topic_arr = DB::run($topics_query, [$lasttopicid])->fetch(PDO::FETCH_ASSOC);
         $lasttopic = stripslashes(htmlspecialchars($topic_arr['subject']));
         //cut last topic
         $latestleng = 10;
         $lastpost = "<small><a href='" . URLROOT . "/post/$lasttopicid/last/#last'><b>" . CutName($lasttopic, $latestleng) . "</b></a> by <a href='" . URLROOT . "/profile/$lastposterid'><b>$lastposter</b></a><br />$lastpostdate</small>";
         if ($_SESSION['id']) {
-            $a = DB::fetchColumn('forum_readposts', 'lastpostread', ['userid =', 'topicid ='], [$_SESSION['id'],$lasttopicid]);
+            $readposts_query = "SELECT count(id) FROM `forum_readposts` WHERE userid = ? AND topicid=?";
+            $a = DB::run($readposts_query, [$_SESSION['id'],$lasttopicid])->fetchColumn();
         }
         //define the images for new posts or not on index
         if ($a && $a == $lastpostid) {
@@ -1260,13 +1274,16 @@ function modoptions($topicid, $subject, $forumid, $locked, $sticky)
         </form><br>
         <form method='post' action='<?= URLROOT ?>/topic/move/<?= $topicid ?>'>
            <p class='text-center'><?= LANG["MOVE"] ?></p>
-            <select name='forumid' class='form-select'>
-                <?php $res = DB::fetchAll('forum_forums', 'id,name,minclasswrite', '', 'ORDER BY name'); ?>
-                <?php foreach ($res as $arr) : ?>
+            <select name='forumid' class='form-select'><?php
+
+$forums_query = "SELECT id,name,minclasswrite FROM `forum_forums` ORDER BY name";
+$res = DB::run($forums_query);
+
+                foreach ($res as $arr) { ?>
                     <?php if ($arr["id"] != $forumid && $_SESSION['class'] >= $arr["minclasswrite"]) : ?>
                        <option value='<?= $arr["id"] ?>'><?= $arr["name"] ?></option>
                     <?php endif; ?>
-               <?php endforeach; ?>
+               <?php } ?>
             </select>
             <p class='text-center'><input type='submit'class='btn btn-sm ttbtn' value='<?= LANG["SUBMIT"] ?>' /></p>
         </form>
@@ -1291,8 +1308,10 @@ function modoptions($topicid, $subject, $forumid, $locked, $sticky)
 // Get Poster Details
 function posterdetails($userid)
 {
-    $forumposts = DB::fetchColumn('forum_posts', 'COUNT(id)', ['userid ='], [$userid]);
-    $arr2 = DB::fetchRow('users', '*', ['id ='], [$userid]);
+    $posts_query = "SELECT count(id) FROM `forum_posts` WHERE userid = ?";
+    $forumposts = DB::run($posts_query, [$userid])->fetchColumn();
+    $users_query = "SELECT * FROM `users` WHERE id = ?";
+    $arr2 = DB::run($users_query, [$userid])->fetch(PDO::FETCH_ASSOC);
     $postername = coloredname($userid);
     $quotename = $arr2["username"];
     if ($postername == "") {
@@ -1313,7 +1332,8 @@ function posterdetails($userid)
         if (!$arr2["country"]) {
             $usercountry = "unknown";
         } else {
-            $usercountry = DB::fetchRow('countries', $arr2['country']);
+            $countries_query = "SELECT * FROM `countries` WHERE id=? LIMIT 1";
+            $usercountry =DB::run($countries_query, [$arr2['country']])->fetch(PDO::FETCH_ASSOC);
         }
         $title = format_comment($arr2["title"]);
         $donated = $arr2['donated'];
@@ -1349,8 +1369,8 @@ function posterdetails($userid)
 // Get Group Name
 function get_user_class_name($i)
 {
-    $res = DB::fetchRow('groups', 'level', ['group_id ='], [$i]);
-    $row = $res;
+    $groups_query = "SELECT level FROM `groups` WHERE group_id=?";
+    $row = DB::run($groups_query, [$i])->fetch(PDO::FETCH_ASSOC);
     if ($i == $_SESSION['class']) {
         return  $row['level'];
     }
@@ -1525,14 +1545,15 @@ function userpostdetails($row, $type = null)
 // Display Username
 function coloredname($id)
 {
-    $classy = DB::run(
+    $users_query =
         "SELECT u.id, u.username, u.donated, u.warned, u.enabled, 
         g.Color
         FROM `users` `u` 
         INNER JOIN `groups` `g` 
         ON g.group_id=u.class 
         WHERE id ='" . $id . "'"
-    )->fetch();
+    ;
+    $classy = DB::run($users_query)->fetch();
 
     if ($classy) {
         $gcolor = $classy['Color'];
@@ -1690,8 +1711,8 @@ function health($leechers, $seeders)
 // Return Tags
 function get_tags($id) 
 {
-    $tag =  DB::fetchRow('tagtorrent', 'type1, type2, type3', ['torrentid ='], [$id]);
-
+    $tagtorrent_query = "SELECT type1, type2, type3 FROM `tagtorrent` WHERE torrentid=?";
+    $tag =  DB::run($tagtorrent_query, [$id])->fetch(PDO::FETCH_ASSOC);
     $tags = '';
     if (!empty($tag['type1'])) {
         $tags .= "&nbsp;<a href=".URLROOT."/tag/$tag[type1]><span class='badge border ttbtn'>$tag[type1]</span></a>&nbsp;";
@@ -1745,7 +1766,8 @@ function magnetlink($data)
     if (!CONFIG['FORCETHANKS'] && $data["external"] == 'yes' || $data["external"] == 'yes' && $data["vip"] == 'yes' && $_SESSION['class'] >= CONFIG['_VIP']) {
         print("&nbsp;<a href=\"magnet:?xt=urn:btih:" . $data["info_hash"] . "&dn=" . $data["filename"] . "&tr=udp://tracker.openbittorrent.com&tr=udp://tracker.publicbt.com\"><i class='fa fa-magnet fa-1x' style='color:green' title='" . LANG["DOWNLOADED"] . "'></i></a>&nbsp;");
     } else {
-        $like = DB::fetchRow('likes', ['liked =', 'type =', 'user ='], [$data['id'], 'torrent', $_SESSION['id']]);
+        $likes_query = "SELECT liked, type, user FROM `likes` WHERE topicid=? ORDER BY id DESC LIMIT 1";
+        $like = DB::run($likes_query, [$data['id'], 'torrent', $_SESSION['id']])->fetch(PDO::FETCH_ASSOC);
         if ($like) {
             if ($data["external"] == 'yes') {
                 if ($_SESSION['can_download'] == 'yes') {

@@ -29,12 +29,13 @@
             <?php if ($_SESSION['id']) : ?>
                 <?php
                 // Querys
-                $arr = DB::run("SELECT messages.*, users.avatar, users.username, users.class, `groups`.Color
+                $message_query = "SELECT messages.*, users.avatar, users.username, users.class, `groups`.Color
                 FROM messages 
                 LEFT JOIN users ON users.id=messages.sender 
                 LEFT JOIN `groups` ON groups.group_id=users.class
                 WHERE receiver=" . $_SESSION['id'] . " and unread='yes' AND location IN ('in','both')"
-                )->fetchAll();
+                ;
+                $arr = DB::run($message_query)->fetchAll();
                 $unreadmail = count($arr);
                 ?>
 

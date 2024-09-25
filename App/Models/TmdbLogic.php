@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Libs\DB;
 use App\Libs\Cache;
 use App\Libs\SimpleThumbnail;
+use PDO;
 
 /*
 * TMDB Table Data
@@ -77,16 +78,17 @@ class TmdbLogic
 
     public static function createMDB($torrent_id, $item_id, $type = 'imdb')
     {
-        $total = DB::fetchColumn('tmdb', 'count(id)', ['torrentid ='], [$torrent_id]);
+        $tmdb_query = "SELECT count(id) FROM `tmdb` WHERE torrentid=? ";
+        $total = DB::run($tmdb_query, [$torrent_id])->fetchColumn();
         if ($total == 0) {
             $data = self::api_link($item_id, $type);
-
-            DB::insert('tmdb', [
-                'id_tmdb'=>$item_id, 'title'=>$data['Title'], 'duration'=>$data['Runtime'],
-                'genre'=>$data['genre'], 'plot'=>$data['Plot'], 'actor'=>$data['Actors'],
-                'trailer'=>$data['trailer'], 'date'=> $data['Released'],
-                'image'=>$data['Poster'], 'type'=>$type, 'torrentid'=>$torrent_id
-            ]);
+            $tmdb_query = "INSERT INTO `tmdb` (id_tmdb,title,duration,genre,plot,actor,trailer,date,
+                image,type,torrentid) VALUES (?,?,?,?,?,?,?,?,?,?,?)";
+            DB::run($tmdb_query,
+            [$item_id, $data['Title'], $data['Runtime'],
+            $data['genre'], $data['Plot'], $data['Actors'],
+            $data['trailer'], $data['Released'],
+            $data['Poster'], $type, $torrent_id]);
 
             if ($type == 'tv') {
                 $link = "https://image.tmdb.org/t/p/w200" . $data['Poster'] . "";
@@ -100,7 +102,8 @@ class TmdbLogic
             }
 
             SimpleThumbnail::create()->copyImage($link, $destination);
-            DB::update('torrents', ['poster'], ['id='], [$link, $torrent_id]);
+            $torrents_query = "UPDATE torrents SET poster = ? WHERE id=?";
+            DB::run($torrents_query, [$link, $torrent_id]);
         }
 
         if ($type == 'tv') {
@@ -115,7 +118,8 @@ class TmdbLogic
         $expires = 1728000; // Cache time in seconds
         if (($_data = $TTCache->Get($path, $expires)) === false) {
             // Get Data From DB
-            $_data = DB::fetchRow('tmdb', '*', ['id_tmdb ='], [$item_id]);
+            $tmdb_query = "SELECT * FROM tmdb WHERE id_tmdb = ?";
+            $_data = DB::run($tmdb_query, [$item_id])->fetch(PDO::FETCH_ASSOC);
             $rows = array();
             foreach ($_data as $row) {
                 $rows[] = $row;

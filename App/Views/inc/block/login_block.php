@@ -7,7 +7,8 @@ if ($_SESSION['id']) {
     if (!$avatar) {
         $avatar = Url('assets/images/misc/default_avatar.webp');
     }
-    $maxslotdownload = DB::fetchColumn('peers', 'distinct torrent as count',  ['userid=','seeder='], [$_SESSION['id'],'yes']);
+    $peers_query = "SELECT distinct torrent as count FROM `peers` WHERE userid =? AND seeder=? ";
+    $maxslotdownload =DB::run($peers_query, [$_SESSION['id'],'yes'])->fetchColumn();
     $slots = number_format($_SESSION['maxslots']) . "/" . number_format($maxslotdownload);
     $userratio = $_SESSION['downloaded'] > 0 ? number_format($_SESSION['uploaded'] / $_SESSION['downloaded'], 1) : "---";
 

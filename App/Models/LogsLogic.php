@@ -13,7 +13,8 @@ class LogsLogic
     // Add Log
     public static function write($text)
     {
-        $stmt = DB::insert('log', ['added'=>CONFIG['TT_DATE'], 'txt'=>$text]);
+        $log_query = "INSERT INTO log (added, txt) VALUES (?,?)";
+        $stmt = DB::run($log_query, [CONFIG['TT_DATE'], $text]);
         return $stmt;
     }
 
@@ -25,9 +26,11 @@ class LogsLogic
 
         // Pagination
         $where = $search != '' ? "WHERE txt LIKE '$search%'" : '';
-        $count = DB::run("SELECT COUNT(*) FROM log $where")->fetchColumn();
+        $log_query = "SELECT COUNT(*) FROM log $where";
+        $count = DB::run($log_query)->fetchColumn();
         list($pager, $limit) = pagination(25, $count, Url('adminlog?'));
-        $logs = DB::run("SELECT id, added, txt FROM log $where ORDER BY id DESC $limit")->fetchAll();
+        $log_query = "SELECT id, added, txt FROM log $where ORDER BY id DESC $limit";
+        $logs = DB::run($log_query)->fetchAll();
         return array('logs' => $logs, 'pager' => $pager);
     }
 
@@ -35,7 +38,8 @@ class LogsLogic
     public static function delete()
     {
         $ids = Validate::multiIds('ids');
-        DB::deleteByIds('log', 'id', $ids);
+        $log_query = "DELETE FROM `log` WHERE `id` IN (?)";
+        DB::run($log_query, [$ids]);
         showMessage('adminlog', LANG["DEL_COMPLETE"]);
     }
 

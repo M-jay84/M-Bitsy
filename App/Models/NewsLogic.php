@@ -11,20 +11,6 @@ use App\Models\CommentsLogic;
 */
 class NewsLogic
 {
-    // Fetch All News
-    public static function fetchAll($columns = '*', $where = '', $values = '', $other = '')
-    {
-        $stmt = DB::newSelect('news', $columns, $where, $values, $other);
-		return $stmt;
-	}
-	
-    // Fetch News Row
-    public static function fetchRow($columns = '*', $where = '', $values = '', $other = '')
-    {
-        $stmt = DB::fetchRow('news', $columns, $where, $values, $other);
-		return $stmt;
-	}
-
     // Admin Add/Edit News
     public static function insertOrUpdate()
     {
@@ -44,9 +30,11 @@ class NewsLogic
         }
 
         if (!$id) {
-            DB::insert('news', ['userid'=>$id, 'added'=>CONFIG['TT_DATE'], 'body'=>$body, 'title'=>$title]);
+            $news_query = "INSERT INTO news (userid,added,body,title) VALUES (?,?,?,?)";
+            DB::run($news_query, [$id, CONFIG['TT_DATE'], $body, $title]);
         } else {
-            DB::update('news', ['body', 'title'], ['id='], [$body, $title, $id]);
+            $news_query = "UPDATE news SET body = ? AND title = ? WHERE id=?";
+            DB::run($news_query, [$body, $title, $id]);
         }
         showMessage('adminnews', LANG["ACTION_COMPLETE"]);
     }
@@ -54,7 +42,8 @@ class NewsLogic
     // Admin Delete News
     public static function delete($id, $userid)
     {
-        DB::delete('news', ['id'=>$id]);
+        $news_query = "DELETE FROM `news` WHERE id' = ?";
+        DB::run($news_query, [$id]);
         CommentsLogic::delete($id, $userid, 'news');
         showMessage('adminnews', LANG["DEL_COMPLETE"]);
     }

@@ -15,11 +15,13 @@ use App\Models\LogsLogic;
 class MessagesLogic
 {
     // Add Message
-    public static function insert($data)
+    public static function newinsert($data)
     {
         DB::insert('messages', $data);
         // email notif
-        $user = DB::fetchRow('users', 'id, username, acceptpms, notifs, email', ['id='], [$data['receiver']]);
+        $users_query = "SELECT id, username, acceptpms, notifs, email FROM `users`  WHERE id = ?";
+        $user = DB::run($users_query, [$data['receiver']])->fetch(PDO::FETCH_ASSOC);
+
         if (strpos($user['notifs'], '[pm]') !== false) {
             $url = URLROOT;
             $body = "You have received a PM\n\nYou can use the URL below to view the message (you may have to login).\n\n$url/message/mailbox\n\n".CONFIG['SITENAME']."";
@@ -34,26 +36,19 @@ class MessagesLogic
         switch ($type) {
             case 'inbox':
                 $where = "`receiver` = ".$id." AND `location` IN ('in','both') ORDER BY added DESC";
-                $count = DB::run("SELECT COUNT(*) FROM messages WHERE $where")->fetchColumn();
+                $messages_query = "SELECT COUNT(*) FROM messages WHERE $where";
+                $count = DB::run($messages_query)->fetchColumn();
                 list($pagerbuttons, $limit) = pagination(25, $count, URLROOT."/message/mailbox/inbox&");
                 break;
             case 'outbox':
                 $where = "`sender` = ".$id." AND `location` IN ('out','both') ORDER BY added DESC";
-                $count= DB::run("SELECT COUNT(*) FROM messages WHERE $where")->fetchColumn();
+                $messages_query = "SELECT COUNT(*) FROM messages WHERE $where";
+                $count= DB::run($messages_query)->fetchColumn();
                 list($pagerbuttons, $limit) = pagination(25, $count, URLROOT."/message/mailbox/outbox&");
                 break;
-            case 'templates':
-                $where = "`sender` = ".$id." AND `location` = 'template' ORDER BY added DESC";
-                $count= DB::run("SELECT COUNT(*) FROM messages WHERE $where")->fetchColumn();
-                list($pagerbuttons, $limit) = pagination(25, $count, URLROOT."/message/mailbox/templates&");
-                break;
-            case 'draft':
-                $where = "`sender` = ".$id." AND `location` = 'draft' ORDER BY added DESC";
-                $count = DB::run("SELECT COUNT(*) FROM messages WHERE $where")->fetchColumn();
-                list($pagerbuttons, $limit) = pagination(25, $count, URLROOT."/message/mailbox/draft&");
-                break;
-            }
-        $messages = DB::run("SELECT * FROM messages WHERE $where $limit")->fetchAll();
+        }
+        $messages_query = "SELECT * FROM messages WHERE $where $limit";
+        $messages = DB::run($messages_query)->fetchAll();
 
         $arr = ['pager' => $pagerbuttons, 'messages' => $messages];
 
@@ -76,7 +71,8 @@ class MessagesLogic
 
         // Get User Id
         if (!is_numeric($receiver)) {
-            $receiver = DB::fetchColumn('users', 'id', ['username ='], [$receiver]);
+            $users_query = "SELECT id FROM `users` WHERE username=?";
+            $receiver = DB::run($users_query, [$receiver])->fetchColumn();
         }
         
         if ($receiver == 0 && $_REQUEST['Update'] == 'create') {
@@ -87,18 +83,18 @@ class MessagesLogic
         switch ($_REQUEST['Update']) {
             case 'create':
                 if (isset($_POST['save'])) {
-                    MessagesLogic::insert(['sender'=>$id, 'receiver'=>$receiver, 'added'=>CONFIG['TT_DATE'], 'subject'=>$subject, 'msg'=>$body, 'unread'=>'yes', 'location'=>'both', 'history' => $history]);
+                    MessagesLogic::newinsert(['sender'=>$id, 'receiver'=>$receiver, 'added'=>CONFIG['TT_DATE'], 'subject'=>$subject, 'msg'=>$body, 'unread'=>'yes', 'location'=>'both', 'history' => $history]);
                 } else {
-                    MessagesLogic::insert(['sender'=>$id, 'receiver'=>$receiver, 'added'=>CONFIG['TT_DATE'], 'subject'=>$subject, 'msg'=>$body, 'unread'=>'yes', 'location'=>'in', 'history' => $history]);
+                    MessagesLogic::newinsert(['sender'=>$id, 'receiver'=>$receiver, 'added'=>CONFIG['TT_DATE'], 'subject'=>$subject, 'msg'=>$body, 'unread'=>'yes', 'location'=>'in', 'history' => $history]);
                 }
                 showMessage('message/mailbox/outbox', LANG['MESSAGES_SENT']);
                 break;
             case 'draft':
-                MessagesLogic::insert(['sender'=>$id, 'receiver'=>$receiver, 'added'=>CONFIG['TT_DATE'], 'subject'=>$subject, 'msg'=>$body, 'unread'=>'no', 'location'=>'draft']);
+                MessagesLogic::newinsert(['sender'=>$id, 'receiver'=>$receiver, 'added'=>CONFIG['TT_DATE'], 'subject'=>$subject, 'msg'=>$body, 'unread'=>'no', 'location'=>'draft']);
                 showMessage('message/mailbox/draft', LANG['SAVED_DRAFT']);
                 break;
             case 'template':
-                MessagesLogic::insert(['sender'=>$id, 'receiver'=>$receiver, 'added'=>CONFIG['TT_DATE'], 'subject'=>$subject, 'msg'=>$body, 'unread'=>'no', 'location'=>'template']);
+                MessagesLogic::newinsert(['sender'=>$id, 'receiver'=>$receiver, 'added'=>CONFIG['TT_DATE'], 'subject'=>$subject, 'msg'=>$body, 'unread'=>'no', 'location'=>'template']);
                 showMessage('message/mailbox/templates', LANG['SAVED_TEMPLATE']);
                 break;
         }
@@ -112,13 +108,18 @@ class MessagesLogic
         if ($type == 0 && $current_user->isStaff) {
             die('todo');
         } elseif ($_POST["read"]) {
-            DB::updateWhereIn('messages', ['unread' => 'no'], $ids);
+            $messages_query = "UPDATE messages SET unread' => ? WHERE id IN (?)";
+            DB::run($messages_query, ['no', $ids]);
         } elseif ($type == 'inbox') {
-                DB::run("DELETE FROM messages WHERE `location` = ? AND `receiver` = ? AND `id` IN (?)", ['in', $current_user->id, $ids]);
-                DB::run("UPDATE messages SET `location` = ? WHERE `location` = ? AND `receiver` = ? AND `id` IN (?)", ['out', 'both', $current_user->id, $ids]);
+            $messages_query = "DELETE FROM messages WHERE `location` = ? AND `receiver` = ? AND `id` IN (?)";
+            DB::run($messages_query, ['in', $current_user->id, $ids]);
+            $messages_query = "UPDATE messages SET `location` = ? WHERE `location` = ? AND `receiver` = ? AND `id` IN (?)";
+            DB::run($messages_query, ['out', 'both', $current_user->id, $ids]);
         } elseif ($type == 'outbox') {
-                DB::run("UPDATE messages SET `location` =  WHERE `location` = ? AND `sender` = ? AND `id` IN (?)", ['in', 'both', $current_user->id, $ids]);
-                DB::run("DELETE FROM messages WHERE `location` IN ('out', 'draft', 'template') AND `sender` = ? AND `id` IN (?)", [$current_user->id, $ids]);
+            $messages_query = "UPDATE messages SET `location` =  WHERE `location` = ? AND `sender` = ? AND `id` IN (?)";
+            DB::run($messages_query, ['in', 'both', $current_user->id, $ids]);
+            $messages_query = "DELETE FROM messages WHERE `location` IN ('out', 'draft', 'template') AND `sender` = ? AND `id` IN (?)";
+            DB::run($messages_query, [$current_user->id, $ids]);
         }
         showMessage(("message/mailbox/$type"), LANG["SUCCESS"]);
     }
@@ -126,10 +127,12 @@ class MessagesLogic
     // Get Message Id
     public static function getById($id, $userid)
     {
-        $arr = DB::fetchRow('messages', '*', ['id='], [$id]);
+        $messages_query = "SELECT * FROM `messages` WHERE id = ?";
+        $arr = DB::run($messages_query, [$id])->fetch(PDO::FETCH_ASSOC);
         
         if ($arr["history"] != 0) {
-            $history = DB::fetchAll('messages', '*', ['history='], [$arr["history"]])->fetchAll();
+            $messages_query= "SELECT * FROM `messages` WHERE history=?";
+            $history = DB::run($messages_query, [$arr["history"]])->fetchAll();
         }
 
         // Check User
@@ -139,7 +142,8 @@ class MessagesLogic
         
         // Mark Read
         if ($arr["unread"] == "yes" && $arr["receiver"] == $userid) {
-            DB::update('messages', ['unread'], ['id=', 'receiver='], ['no', $id, $userid]);
+            $messages_query = "UPDATE messages SET unread = ? WHERE id=? AND receiver = ? ";
+            DB::run($messages_query, ['no', $id, $userid]);
         }
 
 		$arr["replyto"] = (($userid == $arr["receiver"])) ? $arr["sender"] : $arr["receiver"];
@@ -152,7 +156,8 @@ class MessagesLogic
     public static function update($id, $userid)
     {
         // Get Message
-        $row = DB::fetchRow('messages', '*', ['id='], [$id]);
+        $messages_query = "SELECT * FROM `messages` WHERE id = ?";
+        $row = DB::run($messages_query, [$id])->fetch(PDO::FETCH_ASSOC);
         
         if ($row["sender"] != $userid && $row["receiver"] != $userid) {
             showMessage(URLROOT, LANG['NO_PERMISSION']);
@@ -165,7 +170,8 @@ class MessagesLogic
         if (!empty($_POST)) {
             $msg = isset($_POST['msg']) ? $_POST['msg'] : '';
             // Update Message
-            DB::update('messages', ['msg'], ['id='], [$msg,$id]);
+            $messages_query = "UPDATE messages SET msg = ? WHERE id=?";
+            DB::run($messages_query, [$msg,$id]);
             showMessage('message/mailbox/inbox', LANG["UPDATE_COMPLETE"]);
         }
         showMessage('message/mailbox/inbox', LANG["EDIT_FAILED"]);
@@ -175,7 +181,8 @@ class MessagesLogic
     public static function deleteByIds()
     {
         $ids = Validate::multiIds('ids');
-        DB::deleteByIds('messages', 'id', $ids);
+        $messages_query = "DELETE FROM `messages` WHERE `id` IN (?)";
+        DB::run($messages_query, [$ids]);
         showMessage('adminmessage', LANG["DEL_COMPLETE"]);
     }
 
@@ -194,9 +201,12 @@ class MessagesLogic
 
         
         $updateset = array_map("intval", $_POST['classes']);
-        $query = DB::run("SELECT id FROM users WHERE class IN (" . implode(",", $updateset) . ")");// AND enabled = 'yes' AND status = 'confirmed'
+        $users_query = "SELECT id FROM users WHERE class IN (" . implode(",", $updateset) . ")";
+        $query = DB::run($users_query);// AND enabled = 'yes' AND status = 'confirmed'
         while ($dat = $query->fetch(PDO::FETCH_ASSOC)) {
-            DB::insert('messages', ['sender' => $sender_id, 'receiver' => $dat['id'], 'added' => CONFIG['TT_DATE'], 'msg' => $msg, 'subject' => $subject]);
+            $messages_query = "INSERT INTO `messages` (sender,receiver,added,msg,subject) VALUES (?,?,?,?,?)";
+            DB::run($messages_query,
+            [$sender_id, $dat['id'], CONFIG['TT_DATE'], $msg, $subject]);
         }
         
         LogsLogic::write("A Mass PM was sent by " . $userid . "");
@@ -207,12 +217,15 @@ class MessagesLogic
     public static function getAll()
     {
         // Pagination
-        $count = DB::run("SELECT COUNT(*) FROM messages WHERE location in ('in', 'both')")->fetchColumn();
+        $messages_query = "SELECT COUNT(*) FROM messages WHERE location in ('in', 'both')";
+        $count = DB::run($messages_query)->fetchColumn();
         list($pager, $limit) = pagination(40, $count, '/adminmessage&');
-        $stmt = DB::run("SELECT * FROM messages WHERE location in ('in', 'both') ORDER BY id DESC $limit")->fetchAll();
+        $messages_query = "SELECT * FROM messages WHERE location in ('in', 'both') ORDER BY id DESC $limit";
+        $stmt = DB::run($messages_query)->fetchAll();
 
         // Get Groups
-        $groups = GroupsLogic::fetchAll('group_id, level', '');
+        $groups_query = "SELECT group_id,level FROM `groups`";
+        $groups =DB::run($groups_query);
         $array = [
             'res' => $stmt,
             'pager' => $pager,

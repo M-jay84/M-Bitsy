@@ -15,7 +15,8 @@ class WarningsLogic
     // Get All Users Warnings
     public static function getByUserId($userid)
     {
-        $stmt = DB::fetchAll('warnings', '*', ['userid='], [$userid], 'ORDER BY id DESC');
+        $warnings_query = "SELECT * FROM `warnings` WHERE userid=? ORDER BY id DESC";
+        $stmt = DB::run($warnings_query, [$userid]);
         return $stmt;
     }
 
@@ -45,10 +46,13 @@ class WarningsLogic
     public static function deleteAll($data)
     {
         if ($data['current_user']->control_panel == "yes") {
-            $count = DB::fetchColumn('warnings', 'count(id)', ['userid='], [$data['userid']]);
-            $deleted = DB::deleteByIds('warnings', 'id', $data['post_id']);
+            $warnings_query = "SELECT count(id) FROM `warnings` WHERE userid=? ";
+            $count = DB::run($warnings_query, [$data['userid']])->fetchColumn();
+            $warnings_query = "DELETE FROM `warnings` WHERE `id` IN (?)";
+            $deleted = DB::run($warnings_query, [$data['post_id']]);
             if ($count == $deleted || $count <= $deleted) {
-                DB::update('users', ['warned'], ['id='], ['no', $data['userid']]);
+                $users_query = "UPDATE users SET warned = ? WHERE id=?";
+                DB::run($users_query, ['no', $data['userid']]);
             }
             showMessage("warning/$data[userid]", LANG["DEL_COMPLETE"]);
         }  
@@ -58,9 +62,10 @@ class WarningsLogic
     // Add Warning
     public static function insert($data)
     {
-        DB::insert('warnings', ['userid' => $data['userid'], 'reason' => $data['reason'], 'added' => CONFIG['TT_DATE'], 'expiry' => $data['expiry'], 'warnedby' => $data['warnedby'], 'type' => $data['type']]);
-        DB::update('users', ['warned'], ['id='], ['yes', $data['id']]);
-        MessagesLogic::insert(['sender' => 0, 'receiver' => $data['userid'], 'added' => CONFIG['TT_DATE'], 'subject' => LANG['NEW_WARNING'], 'msg' => $data['reason'], 'unread' => 'yes', 'location' => 'in']);
+        $warnings_query = "INSERT INTO `warnings` (userid, reason, added,expiry,warnedby,type) VALUES (?,?,?,?,?,?)";
+        DB::run($warnings_query, 
+        [$data['userid'], $data['reason'], CONFIG['TT_DATE'], $data['expiry'], $data['warnedby'], $data['type']]);
+        MessagesLogic::newinsert(['sender' => 0, 'receiver' => $data['userid'], 'added' => CONFIG['TT_DATE'], 'subject' => LANG['NEW_WARNING'], 'msg' => $data['reason'], 'unread' => 'yes', 'location' => 'in']);
         LogsLogic::write($data['reason']);
     }
 
@@ -68,29 +73,25 @@ class WarningsLogic
     public static function update($data)
     {
         LogsLogic::write($data['reason']);
-        DB::update('users', ['warned'], ['id='], [$data['warned'], $data['id']]);
+        $users_query = "UPDATE users SET warned = ? WHERE id=?";
+        DB::run($users_query, [$data['warned'], $data['id']]);
         WarningsLogic::update(['expiry', 'active'], ['userid='], [CONFIG['TT_DATE'], $data['warned'], $data['id']]);
-        MessagesLogic::insert(['sender' => 0, 'receiver' => $data['id'], 'added' => CONFIG['TT_DATE'], 'msg' => $data['reason']]);
-    }
-
-    // Fetch Warning Column
-    public static function fetchColumn($columns = '*', $where = '', $values = '', $other = '')
-    {
-        $stmt = DB::newSelect('warnings', $columns, $where, $values, $other)->fetchColumn();
-        return $stmt;
+        MessagesLogic::newinsert(['sender' => 0, 'receiver' => $data['id'], 'added' => CONFIG['TT_DATE'], 'msg' => $data['reason']]);
     }
 
     // Get All Warnings
     public static function getAll()
     {
         // Pagination
-        $count = DB::fetchColumn('users', 'count(id)', ['warned='], ['yes']);
+        $users_query = "SELECT id FROM `users` WHERE warned=?";
+        $count = DB::run($users_query, ['yes'])->fetchColumn();
         list($pager, $limit) = pagination(25, $count, URLROOT . '/adminwarning?');
-        $stmt = DB::run("SELECT users.id,users.username,users.class,users.added,users.last_access 
+        $users_query = "SELECT users.id,users.username,users.class,users.added,users.last_access 
                         FROM users
                         WHERE warned = ?
                         ORDER BY `added` 
-                        DESC $limit", ['yes'])->fetchAll();
+                        DESC $limit";
+        $stmt = DB::run($users_query, ['yes'])->fetchAll();
         
         $array = [
             'count' => $count,
@@ -104,14 +105,11 @@ class WarningsLogic
     public static function deleteAllAdmin()
     {
         $ids = Validate::multiIds('ids');
-        DB::deleteByIds('warnings', ['active ='], $ids, 'userid', ['yes']);
-        DB::updateWhereIn('users', ['warned' => 'no'], $ids);
+        $warnings_query = "DELETE FROM `warnings` WHERE `active` = ? AND `userid` IN (?)";
+        DB::run($warnings_query, ['yes', $ids]);
+        $users_query = "UPDATE `users` SET `warned` = ? WHERE `id` IN (?)";
+        DB::run($users_query, ['no', $ids]);
         showMessage('adminwarning', LANG["SUCCESS"]);
     }
 
-    // Delete Warnings
-    public static function delete($data)
-    {
-        DB::delete('warnings', $data);
-    }
 }

@@ -9,6 +9,7 @@ use App\Libs\Validate;
 use App\Models\BansLogic;
 use App\Models\MessagesLogic;
 use App\Models\ShoutboxLogic;
+use PDO;
 
 /*
 * Account Data
@@ -28,8 +29,8 @@ class AccountsLogic
         }
 
         // Find User
-        $sql = DB::fetchRow('users', 'id, password, secret, status, enabled', ['username ='], [$username]);
-
+        $users_query = "SELECT id, password, secret, status, enabled FROM `users` WHERE username=?"; 
+        $sql = DB::run($users_query, [$username])->fetch(PDO::FETCH_ASSOC);
         // Run Some Checks
         if (!$sql || !password_verify($password, $sql['password'])) {
             showMessage('logout', LANG["LOGIN_INCORRECT"]);
@@ -42,19 +43,14 @@ class AccountsLogic
         // Set Cookies
         setcookie('id', $sql['id'], CONFIG['TT_TIME']+60*60*24*30 );
         setcookie('password', $sql['password'], CONFIG['TT_TIME']+60*60*24*30 );
-        // Update User
-        //DB::update('users', ['last_login'], ['id='], [CONFIG['TT_DATE'], $sql['id']]);
-        $vars =[
-            'last_login' => CONFIG['TT_DATE'],
-            'id' => $_SESSION['id']
-        ];
-        DB::run("UPDATE users SET last_login=:last_login WHERE id=:id", $vars);
-
+        $users_query = "UPDATE users SET last_login=? WHERE id=?";
+        DB::run($users_query, [CONFIG['TT_DATE'], $_SESSION['id']]);
         showMessage(URLROOT, LANG["SUCCESS"]);
     }
 
     // Check invite Signup
-    public static function checkinvite() {
+    public static function checkinvite()
+    {
         // Check Invite
         $invite = (isset($_GET['invite'])) ? $_GET['invite'] : 0;
         $secret = (isset($_GET['secret'])) ? $_GET['invite'] : 0;
@@ -65,7 +61,9 @@ class AccountsLogic
                 showMessage(URLROOT, "<center>" . LANG["INVITE_ONLY_MSG"] . "<br></center>");
             }
         } else {
-            $invite_row = DB::fetchRow('users', 'id', ['id =', 'secret ='], [$invite,$secret]);
+            $invite_query = "SELECT id FROM `users` WHERE id = ? AND secret=?";
+            $invite_row = DB::run($invite_query, [$invite,$secret])->fetch(PDO::FETCH_ASSOC);
+
             if (!$invite_row) {
                 showMessage(URLROOT, LANG["INVITE_ONLY_NOT_FOUND"] . "" . (CONFIG['SIGNUPTIMEOUT'] / 86400) . "days.");
             }
@@ -93,7 +91,8 @@ class AccountsLogic
         
         // Check User Invite
         if (strlen($data['secret']) == 20 || !is_numeric($data['invite'])) {
-            $invite_row1 = DB::fetchRow('users', 'id', ['id =', 'secret ='], [$data['invite'],$data['secret']]);
+            $users_query = "SELECT id FROM `users` WHERE id = ? AND secret=?";
+            $invite_row1 = DB::run($users_query, [$data['invite'],$data['secret']])->fetch(PDO::FETCH_ASSOC);
             $invite_row = (int) $invite_row1['id'] ?? 0;
         }
 
@@ -122,7 +121,8 @@ class AccountsLogic
             // If NOT Invite Check
             if (!$invite_row) {
                 // Check Max Users
-                $numsitemembers = DB::fetchColumn('users', 'count(id)', '');
+                $users_query = "SELECT count(id) FROM `users`";
+                $numsitemembers = DB::run($users_query)->fetchColumn();
                 if ($numsitemembers >= CONFIG['MAXUSERS']) {
                     $msg = LANG["SITE_FULL_LIMIT_MSG"] . number_format(CONFIG['MAXUSERS']) . " " . LANG["SITE_FULL_LIMIT_REACHED_MSG"] . " " . number_format($numsitemembers) . " members";
                     showMessage(URLROOT, $msg);
@@ -133,7 +133,8 @@ class AccountsLogic
             }
 
             // Check Username NOT In Use
-            $count = DB::fetchColumn('users', 'COUNT(id)', ['username ='], [$data['username']]);
+            $users_query = "SELECT id FROM `users` WHERE username=?";
+            $count =DB::run($users_query, [$data['username']])->fetchColumn();
             if ($count != 0) {
                 $message = sprintf(LANG["USERNAME_INUSE_S"], $data['username']);
             }
@@ -159,15 +160,18 @@ class AccountsLogic
         if ($message == "") {
             // Invited User
             if ($invite_row) {
-                DB::update('users', ['username', 'password', 'class', 'secret', 'status', 'added', 'passkey'], ['id='],
-                    [$data['username'], $data['password'], 1, $data['secret'], 'confirmed', CONFIG['TT_DATE'], $data['passkey'], $invite_row]
+                $users_query = "UPDATE users SET username=? AND password=? AND class=? AND secret=? AND status=? AND added=? AND passkey=?
+                 WHERE id=?";
+                DB::run($users_query, [$data['username'], $data['password'], 1, $data['secret'], 'confirmed', CONFIG['TT_DATE'], $data['passkey'], $invite_row]
                 );
 
                 // Welcome PM
-                MessagesLogic::insert(['sender' => 0, 'receiver' => $invite_row, 'added' => CONFIG['TT_DATE'], 'subject' => 'Welcome', 'msg' => CONFIG['WELCOMEPM_MSG'], 'unread' => 'yes', 'location' => 'in']);
+                MessagesLogic::newinsert(['sender' => 0, 'receiver' => $invite_row, 'added' => CONFIG['TT_DATE'], 'subject' => 'Welcome', 'msg' => CONFIG['WELCOMEPM_MSG'], 'unread' => 'yes', 'location' => 'in']);
 
                 // Post Shout
-                ShoutboxLogic::insert(['userid' => 0, 'date' => CONFIG['TT_DATE'], 'user' => 'System', 'message' => "new user: " . $data['username'] . " has joined."]);
+                $shoutbox_query = "INSERT INTO shoutbox (userid, date, user, message) VALUES (?, ?, ?, ?)";
+                DB::run($shoutbox_query, [0, CONFIG['TT_DATE'], 'System', "new user: " . $data['username'] . " has joined."]);
+
                 // Invite Activated
                 showMessage('login', LANG["ACCOUNT_ACTIVATED"]);
             }
@@ -194,21 +198,21 @@ class AccountsLogic
             $data['language'] = CONFIG['DEFAULTLANG'];
             $data['ip'] = Ip::getIP();
 
-            // Insert User 
-            DB::insert('users', 
-                ['username'=>$data['username'], 'password'=>$data['password'], 'secret'=>$data['secret'], 'email'=>$data['email'], 
-                'status'=>$data['status'], 'added'=>CONFIG['TT_DATE'], 'last_login'=>CONFIG['TT_DATE'], 'last_access'=>CONFIG['TT_DATE'],
-                 'age'=>$data['age'], 'country'=>$data['country'], 'gender'=>$data['gender'], 'client'=>$data['client'], 
-                 'stylesheet'=>CONFIG['DEFAULTTHEME'], 'language'=>CONFIG['DEFAULTLANG'], 'class'=>$data['class'], 'ip'=>Ip::getIP(), 'passkey'=>$data['passkey']]
-            );
+            // Insert User
+            $users_query = "INSERT INTO users (username,password,secret,email,status,added,last_login,last_access,age,country,gender,client, 
+                 stylesheet,language,class,ip,passkey) VALUES (?, ?, ?, ?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+            DB::run($users_query, [$data['username'], $data['password'], $data['secret'], $data['email'], 
+                $data['status'], CONFIG['TT_DATE'], CONFIG['TT_DATE'], CONFIG['TT_DATE'],
+                 $data['age'], $data['country'], $data['gender'], $data['client'], 
+                 CONFIG['DEFAULTTHEME'], CONFIG['DEFAULTLANG'], $data['class'], Ip::getIP(), $data['passkey']]);
 
             $id = DB::lastInsertId();
 
             // Post Shout
-            ShoutboxLogic::insert(['userid' => 0, 'date' => CONFIG['TT_DATE'], 'user' => 'System', 'message' => "new user: " . $data['username'] . " has joined."]);
-
+            $shoutbox_query = "INSERT INTO shoutbox (userid, date, user, message) VALUES (?, ?, ?, ?)";
+            DB::run($shoutbox_query, [0, CONFIG['TT_DATE'], 'System', "new user: " . $data['username'] . " has joined."]);
             // Welcome PM
-            MessagesLogic::insert(['sender' => 0, 'receiver' => $id, 'added' => CONFIG['TT_DATE'], 'subject' => 'Welcome', 'msg' => CONFIG['WELCOMEPM_MSG'], 'unread' => 'yes', 'location' => 'in']);
+            MessagesLogic::newinsert(['sender' => 0, 'receiver' => $id, 'added' => CONFIG['TT_DATE'], 'subject' => 'Welcome', 'msg' => CONFIG['WELCOMEPM_MSG'], 'unread' => 'yes', 'location' => 'in']);
 
             // Admin Confirm
             if (CONFIG['ACONFIRM']) {

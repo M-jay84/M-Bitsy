@@ -4,6 +4,7 @@ namespace App\Controllers\Admin;
 
 use App\Libs\Auth;
 use App\Libs\Controller;
+use App\Libs\DB;
 use App\Models\CatagoriesLogic;
 
 /*
@@ -31,7 +32,8 @@ class Admincategorie extends Controller
             CatagoriesLogic::insertOrUpdate();
         } else {
             // Show All Catagories
-            $cats = CatagoriesLogic::fetchAll('*', '', 'ORDER BY parent_cat ASC, sort_index ASC');
+            $categories_query = "SELECT * FROM `categories` ORDER BY parent_cat ASC, sort_index ASC";
+            $cats = DB::run($categories_query);
         
             // Data For View
             $data = [

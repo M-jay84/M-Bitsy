@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Libs\DB;
+use PDO;
 
 /*
 * Download Logic
@@ -13,21 +14,24 @@ class DownloadLogic
     public static function torrent($id, $passkey)
     {
         // Get User
-        $member = DB::fetchColumn('users', 'count(id)', ['passkey ='], [$passkey]);
+        $users_query = "SELECT count(id) FROM `users` WHERE passkey=?";
+        $member = DB::run($users_query, [$passkey])->fetchColumn();
         
         if ($member == 1) {
             $user = array();
-            $visitor = DB::run("SELECT users.id, users.class, users.downloadbanned, users.role_id FROM `users` 
+            $users_query = "SELECT users.id, users.class, users.downloadbanned, users.role_id FROM `users` 
             LEFT OUTER JOIN `groups` 
             ON users.class=groups.group_id 
-            WHERE passkey = ?",
+            WHERE passkey = ?";
+            $visitor = DB::run($users_query,
             [$passkey]
             )->fetch(\PDO::FETCH_ASSOC);;
             foreach ($visitor as $key => $value) {
                 $user[$key] = $value;
             }
             $role = $user['role_id'] == 1 ? $user['group_role_id'] : $user['role_id'];
-            $permission = PermissionsLogic::fetchRow('can_download, view_torrents', ['permission_id ='], [$role]);
+            $permissions_query = "SELECT can_download, view_torrents FROM `permissions` WHERE permission_id=?";
+            $permission = DB::run($permissions_query, [$role])->fetch(PDO::FETCH_ASSOC);
             foreach ($permission as $key => $value) {
                 $user[$key] = $value;
             }
@@ -49,7 +53,9 @@ class DownloadLogic
         }
             
         // Get Torrent
-        $torrent = TorrentsLogic::fetchRow('filename, banned, external, announce, owner, vip', ['id ='], [$id]);
+        $torrents_query = "SELECT filename, banned, external, announce, owner, vip FROM `torrents` WHERE id=?";
+        $torrent = DB::run($torrents_query, [$id])->fetch(PDO::FETCH_ASSOC);
+
         if (!$torrent) {
             showMessage(URLROOT, LANG["TORRENT_NOT_FOUND"]);
         } elseif ($torrent["banned"] == "yes") {
@@ -63,7 +69,8 @@ class DownloadLogic
         // Thanks
         if (CONFIG['FORCETHANKS'] && CONFIG['MEMBERSONLY']) {
             if ($user["id"] != $torrent["owner"]) {
-                $like = DB::fetchRow('likes', ['liked =', 'type =', 'user ='], [$id, 'torrent', $user['id']]);
+                $likes_query = "SELECT user FROM `likes` WHERE liked =? AND type =? AND user =?";
+                $like = DB::run($likes_query, [$id, 'torrent', $user['id']])->fetch(PDO::FETCH_ASSOC);
                 if (!$like) {
                     showMessage(URLROOT, LANG["PLEASE_THANK"]);
                 }
@@ -90,7 +97,8 @@ class DownloadLogic
         $pvkey_var = "d_" . $id;
         $views = $_SESSION[$pvkey_var] == 1 ? $torrent["hits"] + 0 : $torrent["hits"] + 1;
         $_SESSION[$pvkey_var] = 1;
-        TorrentsLogic::update(['hits'], ['id='], [$views,$id]);
+        $torrents_query = "UPDATE torrents SET hits =? WHERE id=?";
+        DB::run($torrents_query, [$views,$id]);
 
         $data = [
             'file' => $fn,

@@ -14,7 +14,8 @@ class TorrentLangLogic
     {
         $langdropdown = "<select name=\"language\" class='form-select'>\n";
         $lang = array();
-        $stmt = DB::fetchAll('torrentlang', 'id, name, image', '', 'ORDER BY sort_index, id');
+        $torrentlang_query = "SELECT id, name, image FROM `torrentlang` ORDER BY sort_index, id";
+        $stmt = DB::run($torrentlang_query);
         foreach ($stmt as $row) {
             $lang[] = $row;
         }

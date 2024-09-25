@@ -26,12 +26,13 @@ class InvitesLogic
         // Set Invite
         $secret = mksecret();
         $username = "invite_" . mksecret(20);
-        $id = DB::insert('users', [
-            'username'=>$username, 'secret'=>$secret, 'email'=>$email, 'status'=>'pending',
-            'invited_by'=>$current_user->id, 'added'=>CONFIG['TT_DATE'], 'stylesheet'=>CONFIG['DEFAULTTHEME'], 'language'=>CONFIG['DEFAULTLANG']
-        ]);
+        $users_query = "INSERT INTO `users` (username,secret,email,status,invited_by,added,stylesheet,language) VALUES (?,?,?,?,?,?,?,?)";
+        DB::run($users_query, 
+        [$username, $secret, $email, 'pending',$current_user->id, CONFIG['TT_DATE'], CONFIG['DEFAULTTHEME'], CONFIG['DEFAULTLANG']]);
+
         $invitees = "$id ".$current_user->invitees."";
-        DB::run("UPDATE users SET invites = invites - 1, invitees=? WHERE id = ?", [$invitees,$current_user->id]);
+        $users_query = "UPDATE users SET invites = invites - 1, invitees=? WHERE id = ?";
+        DB::run($users_query, [$invitees,$current_user->id]);
         // Send Email
         $mess = strip_tags($_POST["mess"]);
         $names = CONFIG['SITENAME'];
@@ -56,9 +57,11 @@ class InvitesLogic
     public static function InviteTree($user_id)
     {
         // Get Invitees Data
-        $res = DB::newSelect('users', '*', ['status =','invited_by ='], ['confirmed',$user_id], 'ORDER BY username');
+        $users_query = "SELECT * FROM `users` WHERE status=? AND invited_by=? ORDER BY username";
+        $res = DB::run($users_query, ['confirmed',$user_id]);
         $num = $res->rowCount();
-        $invitees = DB::fetchColumn('users', 'count(id)', ['status =','invited_by ='], ['confirmed',$user_id], 'ORDER BY username');
+        $users_query ="SELECT count(id) FROM `users` WHERE status =? AND invited_by=?ORDER BY username";
+        $invitees = DB::run($users_query, ['confirmed',$user_id])->fetchColumn();
         if ($invitees == 0) {
             showMessage("profile/$user_id", LANG["USER_NOT_INVITED"]);
         }
@@ -80,12 +83,14 @@ class InvitesLogic
         $url = Validate::Input('pending') == 0 ? '/admininvite' : '/admininvite/pending';
         $ids = Validate::multiIds('users');
         
-        $res = DB::run("SELECT u.id, u.invited_by, i.invitees FROM users u LEFT JOIN users i ON u.invited_by = i.id WHERE u.status = 'pending' AND u.invited_by != '0' AND u.id IN ($ids)");
+        $users_query = "SELECT u.id, u.invited_by, i.invitees FROM users u LEFT JOIN users i ON u.invited_by = i.id WHERE u.status = 'pending' AND u.invited_by != '0' AND u.id IN ($ids)";
+        $res = DB::run($users_query);
         foreach ($res as $row) {
             # We remove the invitee from the inviter and give them back there invite.
             $invitees = str_replace("$row[id] ", "", $row["invitees"]);
             $views = $row["invites"] + 1;
-            DB::update('users', ['invites','invitees'], ['id='], [$views,$invitees,$row['invited_by']]);
+            $users_query = "UPDATE users SET invites=? AND invitees=? WHERE id=?";
+            DB::run($users_query, [$views,$invitees,$row['invited_by']]);
             UsersLogic::deleteUser($row['id']);
         }
 
@@ -96,9 +101,11 @@ class InvitesLogic
     public static function pendingA()
     {
         // Pagination
-        $count = DB::fetchColumn('users', 'COUNT(id)', ['status =', 'invited_by !='], ['pending',0]);
+        $users_query = "SELECT count(id) FROM `users` WHERE status = ? AND invited_by !=";
+        $count = DB::run($users_query, ['pending',0])->fetchColumn();
         list($pager, $limit) = pagination(25, $count, URLROOT.'/admininvite/pending?');
-        $stmt = DB::run("SELECT u.id, u.username, u.email, u.added, u.invited_by, i.username as inviter FROM users u LEFT JOIN users i ON u.invited_by = i.id WHERE u.status = 'pending' AND u.invited_by != '0' ORDER BY u.added DESC $limit");
+        $users_query = "SELECT u.id, u.username, u.email, u.added, u.invited_by, i.username as inviter FROM users u LEFT JOIN users i ON u.invited_by = i.id WHERE u.status = 'pending' AND u.invited_by != '0' ORDER BY u.added DESC $limit";
+        $stmt = DB::run($users_query);
         $array = ['invites'=>$stmt,'count'=>$count,'pager'=>$pager];
         
         return $array;
@@ -108,11 +115,13 @@ class InvitesLogic
     public static function inviteA()
     {
         // Pagination
-        $count = DB::fetchColumn('users', 'COUNT(id)', ['status =', 'invited_by !='], ['confirmed',0]);
+        $users_query = "SELECT count(id) FROM `users` WHERE status=? AND invited_by !=?";
+        $count = DB::run($users_query, ['confirmed',0])->fetchColumn();
         list($pager, $limit) = pagination(25, $count, URLROOT.'/admininvite?');
-        $users = DB::run("SELECT u.id, u.username, u.email, u.added, u.last_access, u.class, u.invited_by, i.username as inviter FROM users u 
+        $users_query = "SELECT u.id, u.username, u.email, u.added, u.last_access, u.class, u.invited_by, i.username as inviter FROM users u 
 		LEFT JOIN users i ON u.invited_by = i.id 
-		WHERE u.status = 'confirmed' AND u.invited_by != '0' ORDER BY u.added DESC $limit")->fetchAll();
+		WHERE u.status = 'confirmed' AND u.invited_by != '0' ORDER BY u.added DESC $limit";
+        $users = DB::run($users_query)->fetchAll();
         $array = ['invites'=>$users,'count'=>$count,'pager'=>$pager];
         return $array;
     }

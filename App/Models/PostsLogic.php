@@ -9,53 +9,30 @@ use App\Models\ForumCatsLogic;
 use App\Models\ForumsLogic;
 use App\Models\ReadLogic;
 use App\Models\TopicsLogic;
+use PDO;
 
 /*
 * Post Table Data
 */
 class PostsLogic
 {
-    // Delete Post
-    public static function delete($data)
-    {
-        $stmt =  DB::delete('forum_posts', $data);
-        return $stmt;
-    }
-
-    // Fetch Torrent Details
-    public static function fetchColumn($columns = '*', $where = '', $values = '', $other = '')
-    {
-        $stmt = DB::newSelect('forum_posts', $columns, $where, $values, $other)->fetchColumn();
-		return $stmt;
-	}
-
-    // Fetch Torrent Details
-    public static function fetchRow($columns = '*', $where = '', $values = '', $other = '')
-    {
-        $stmt = DB::fetchRow('forum_posts', $columns, $where, $values, $other);
-		return $stmt;
-	}
-
-    // Fetch Torrent Details
-    public static function insert($updateset)
-    {
-        $stmt = DB::insert('forum_posts', $updateset);
-        return $stmt;
-	}
 
     // Returns the ID of the last post of a forum
     public static function updateTopicLastPost($topicid)
     {
-        $res = DB::fetchRow('forum_posts', 'id', ['topicid='], [$topicid], 'ORDER BY id DESC LIMIT 1');
+        $posts_query = "SELECT * FROM forum_posts WHERE topicid = ? ORDER BY id DESC LIMIT 1";
+        $res = DB::run($posts_query, [$topicid])->fetch(PDO::FETCH_ASSOC);
         $arr = $res or showMessage('forum', 'No post found');
         $postid = $arr[0];
-        TopicsLogic::update(['lastpost'], ['id='], [$topicid, $postid]);
+        $topics_query = "UPDATE forum_topics SET lastpost = ? WHERE id=?";
+        DB::run($topics_query, [$topicid, $postid]);
     }
 
     // Returns the forum ID of a topic, or false on error
     public static function getTopicForum($topicid)
     {
-        $res = TopicsLogic::fetchRow('forumid', ['id='], [$topicid]);
+        $topics_query = "SELECT 'forumid' FROM `forum_topics` WHERE id = ?";
+        $res = DB::run($topics_query, [$topicid])->fetch(PDO::FETCH_ASSOC);
         if (!$res) {
             return false;
         }
@@ -66,9 +43,10 @@ class PostsLogic
     public static function getTopicPages($topicid, $current_user)
     {
         // Get Post Data
-        $count = DB::fetchColumn('forum_posts', 'COUNT(id)', ['topicid='], [$topicid]);
+        $posts_query = "SELECT count(id) FROM `forum_posts` WHERE topicid = ?";
+        $count =  DB::run($posts_query, [$topicid])->fetchColumn();
         list($pager, $limit) = pagination(15, $count, URLROOT . "/post/$topicid?");
-        $query =   "SELECT forum_posts.id,
+        $posts_query =  "SELECT forum_posts.id,
                         forum_posts.topicid,
                         forum_posts.userid,
                         forum_posts.added,
@@ -89,10 +67,11 @@ class PostsLogic
                         likes.liked,
                         likes.type
 					*/
-        $stmt = DB::run($query)->fetchAll();
+        $stmt = DB::run($posts_query)->fetchAll();
 
         // Get Topic Data
-        $arr = TopicsLogic::fetchRow('*', ['id='], [$topicid]);
+        $topics_query = "SELECT * FROM `forum_topics` WHERE id = ?";
+        $arr = DB::run($topics_query, [$topicid])->fetch(PDO::FETCH_ASSOC);
         $levels = ForumsLogic::getForumAccessLevels($arr['forumid']) or showMessage('forum', 'issue with access');
         $maypost = $current_user->class >= $levels["write"] ? true : false;
 
@@ -100,22 +79,27 @@ class PostsLogic
         $pvkey_var = "f_".$topicid;
         $views = $_SESSION[$pvkey_var] == 1 ? $arr["views"] + 0 : $arr["views"] + 1;
         $_SESSION[$pvkey_var] = 1;
-        TopicsLogic::update(['views'], ['id='], [$views,$topicid]);
+        $topics_query = "UPDATE forum_topics SET views = ? WHERE id=?";
+        DB::run($topics_query, [$views,$topicid]);
 
         // Check if user has access to this forum
-        $arr2 = ForumsLogic::fetchRow('*', ['id='], [$arr['forumid']]);
+        $forums_query = "SELECT * FROM `forum_forums` WHERE id = ?";
+        $arr2 = DB::run($forums_query, [$arr['forumid']])->fetch(PDO::FETCH_ASSOC);
         if (!$arr2 || $current_user->class < $arr2["minclassread"] && $arr2["guest_read"] == "no") {
             showMessage('forum', LANG["NO_PERMISSION"]);
         }
 
         // Update Last Read
         if ($current_user->id) {
-            $lpr = ReadLogic::fetchColumn('lastpostread', ['userid=','topicid='], [$current_user->id,$topicid]);
+            $readposts_query = "SELECT lastpostread FROM `forum_readposts` WHERE userid = ? AND topicis=?";
+            $lpr = DB::run($readposts_query, [$current_user->id,$topicid])->fetchColumn();
             if (!$lpr) {
-               DB::insert(' forum_readposts', ['userid'=>$current_user->id, 'topicid'=>$topicid]);
+                $readposts_query = "INSERT INTO `forum_readposts` (userid, topicid) VALUES (?,?)";
+                DB::run($readposts_query, [$current_user->id, 'topicid'=>$topicid]);
             }
         }
-        $fname = ForumCatsLogic::fetchRow('name', ['id='], [$arr['forumid']]);
+        $forumcats_query = "SELECT name FROM `forumcats` WHERE id = ?";
+        $fname = DB::run($forumcats_query, [$arr['forumid']])->fetch(PDO::FETCH_ASSOC);
 
         $array = [
             'locked' => $arr["locked"] == 'yes',
@@ -148,17 +132,20 @@ class PostsLogic
 		    showMessage('forum', "Sanity check: You are about to delete a post. Click <a href='" . URLROOT . "/post/delete/$postid/1'>here</a> if you are sure.");
         }
 
-        $topicid = DB::fetchColumn('forum_posts', 'topicid', ['id='], [$postid]);
+        $posts_query = "SELECT 'topicid' FROM `forum_posts` WHERE id = ?";
+        $topicid = DB::run($posts_query, [$postid])->fetchColumn();
 
         // We can not delete the post if it is the only one of the topic
-        $arr = DB::fetchColumn('forum_posts', 'COUNT(id)', ['topicid='], [$topicid]);
+        $posts_query = "SELECT count(id) FROM `forum_posts` WHERE topicid = ?";
+        $arr = DB::run($posts_query, [$topicid])->fetchColumn();
         if ($arr == 1) {
             $msg = sprintf(LANG["FORUMS_DEL_POST_ONLY_POST"], $topicid);
             showMessage('forum', $msg);
         }
 
         // Delete post
-        DB::delete('forum_posts', ['id'=>$postid]);
+        $posts_query = "DELETE FROM forum_posts WHERE id' = ?";
+        DB::run($posts_query, [$postid]);
         AttachmentsLogic::deleteAll($topicid, true);
         PostsLogic::updateTopicLastPost($topicid);
         showMessage(("post/$topicid"), LANG["DEL_COMPLETE"]);
@@ -181,7 +168,8 @@ class PostsLogic
         }
 
         //Make sure topic exists and is unlocked
-        $arr = TopicsLogic::fetchRow('*', ['id ='], [$topicid]);
+        $topics_query = "SELECT * FROM `forum_topics` WHERE id = ?";
+        $arr = DB::run($topics_query, [$topicid])->fetch(PDO::FETCH_ASSOC);
         if ($arr["locked"] == 'yes') {
             showMessage('forum', LANG["LOCKED"]);
         }
@@ -189,7 +177,8 @@ class PostsLogic
         $forumid = $arr["forumid"];
 
         // Insert the new post
-        $postid = PostsLogic::insert(['topicid'=>$topicid, 'userid'=>$current_user->id, 'added'=>CONFIG['TT_DATE'], 'body'=>$body]);
+        $posts_query = "INSERT INTO forum_posts (topicid,userid,added,body) VALUES (?, ?, ?, ?)";
+        $postid = DB::run($posts_query, [$topicid, $current_user->id, CONFIG['TT_DATE'], $body]);
 
         // attachments
         $data['topicid'] = $topicid;
@@ -217,7 +206,8 @@ class PostsLogic
         }
 
         // Get Topic Data
-        $arr = PostsLogic::fetchRow('*', ['id ='], [$postid]);
+        $posts_query = "SELECT * FROM `forum_posts` WHERE id = ?";
+        $arr = DB::run($posts_query, [$postid])->fetch(PDO::FETCH_ASSOC);
         if (!$arr) {
             showMessage('forum', LANG["MISSING_ID"]. $postid);
         }
@@ -228,7 +218,8 @@ class PostsLogic
         }
 
         // Edit Post
-        DB::update('forum_posts', ['body', 'editedat', 'editedby'], ['id='], [$body,CONFIG['TT_DATE'],$current_user->id,$postid]);
+        $posts_query = "UPDATE forum_posts SET body = ? AND editedat = ? AND editedby = ? WHERE id=?";
+        DB::run($posts_query, [$body,CONFIG['TT_DATE'],$current_user->id,$postid]);
         $data['current_user'] = $current_user;
         $data['topicid'] = $arr['topicid'];
         $data['postid'] = $postid;

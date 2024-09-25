@@ -39,7 +39,8 @@ class EmailLogic
         }
         
         // Send Email
-        $res = DB::run("SELECT u.email FROM users u LEFT JOIN `groups` g ON u.class = g.group_id WHERE u.enabled = 'yes' AND u.status = 'confirmed' AND u.class IN ($ids)");
+        $users_query = "SELECT u.email FROM users u LEFT JOIN `groups` g ON u.class = g.group_id WHERE u.enabled = 'yes' AND u.status = 'confirmed' AND u.class IN ($ids)";
+        $res = DB::run($users_query);
         $siteemail = CONFIG['SITEEMAIL'];
         while ($row = $res->fetch(PDO::FETCH_ASSOC)) {
             $TTMail = new TTMail();

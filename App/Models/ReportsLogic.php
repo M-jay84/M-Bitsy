@@ -59,17 +59,21 @@ class ReportsLogic
 
         // Pagination
         if ($switch['where'] != '') {
-            $count = DB::run("SELECT count(id) FROM reports WHERE $switch[where]")->fetchColumn();
+            $reports_query = "SELECT count(id) FROM reports WHERE $switch[where]";
+            $count = DB::run($reports_query)->fetchColumn();
             list($pager, $limit) = pagination(25, $count, "$switch[pager]&amp;");
-            $stmt = DB::run("SELECT reports.id, reports.dealtwith, reports.dealtby, reports.addedby, reports.votedfor, reports.votedfor_xtra, reports.reason, reports.type, users.username, reports.complete 
+            $reports_query = "SELECT reports.id, reports.dealtwith, reports.dealtby, reports.addedby, reports.votedfor, reports.votedfor_xtra, reports.reason, reports.type, users.username, reports.complete 
                             FROM `reports` INNER JOIN users ON reports.addedby = users.id 
-                            WHERE $switch[where] ORDER BY reports.id DESC $limit")->fetchAll();
+                            WHERE $switch[where] ORDER BY reports.id DESC $limit";
+            $stmt = DB::run($reports_query)->fetchAll();
         } else {
-            $count = DB::fetchColumn('reports', 'count(id)', '');
+            $reports_query = "SELECT count(id) FROM `reports`";
+            $count = DB::run($reports_query)->fetchColumn();
             list($pager, $limit) = pagination(25, $count, "$switch[pager]&amp;");
-            $stmt = DB::run("SELECT reports.id, reports.dealtwith, reports.dealtby, reports.addedby, reports.votedfor, reports.votedfor_xtra, reports.reason, reports.type, users.username, reports.complete 
+            $reports_query = "SELECT reports.id, reports.dealtwith, reports.dealtby, reports.addedby, reports.votedfor, reports.votedfor_xtra, reports.reason, reports.type, users.username, reports.complete 
                             FROM `reports` INNER JOIN users ON reports.addedby = users.id 
-                            ORDER BY reports.id DESC $limit")->fetchAll();         
+                            ORDER BY reports.id DESC $limit";
+            $stmt = DB::run($reports_query)->fetchAll();         
         }
 
         $array = ['stmt'=>$stmt,'pager'=>$pager];
@@ -80,7 +84,8 @@ class ReportsLogic
     public static function update($userid)
     {
         $ids = Validate::multiIds('ids');
-        DB::run("UPDATE reports SET complete = '1', dealtwith = '1', dealtby = ".$userid." WHERE id IN ($ids)");
+        $reports_query = "UPDATE reports SET complete = '1', dealtwith = '1', dealtby = ".$userid." WHERE id IN ($ids)";
+        DB::run($reports_query);
         showMessage('adminreport', LANG["ACTION_COMPLETE"]);
      }
 
@@ -89,17 +94,14 @@ class ReportsLogic
     {
         
         $ids = Validate::multiIds('ids');
-        $stmt = DB::deleteByIds('reports', ['complete ='], $ids , 'id', [1]);
+        $reports_query = "DELETE FROM `reports` WHERE complete =? `id` IN (?)";
+
+        // todo
+        //
+        DB::run($reports_query, [$ids, 1]);
         showMessage('adminreport', LANG["SUCCESS"]);
     }
-	
-    // Delete Report
-    public static function delete($where)
-    {
-        $stmt = DB::delete('reports', $where);
-        return $stmt;
-    }
-	
+
     // Add Report
     public static function reportItem($current_user)
     {
@@ -123,14 +125,18 @@ class ReportsLogic
                 showMessage(URLROOT, LANG["YOU_MUST_ENTER_A_REASON"]);
             }
 
-            $res = DB::fetchColumn('reports', 'count(id)', ['addedby=', 'votedfor=', 'type='], [$current_user->id, $id, $type]);
+            $reports_query = "SELECT count(id) FROM `reports` WHERE addedby =? AND votedfor=? AND type=? ";
+            $res = DB::run($reports_query, [$current_user->id, $id, $type])->fetchColumn();
             if (!$res) {
                 if ($type == 'forum') {
-                    DB::insert('reports', ['addedby' => $current_user->id, 'votedfor' => $id, 'votedfor_xtra' => $postid, 'type' => $type, 'reason' => $reason]);
+                    $reports_query = "INSERT INTO `reports` (addedby,votedfor,votedfor_xtra,type,reason) VALUES (?,?,?,?,?)";
+                    DB::run($reports_query, [$current_user->id, $id, $postid, $type, $reason]);
                 } elseif ($type == 'other' || $type == 'req' || $type == 'comment') {
-                    DB::insert('reports', ['addedby' => $current_user->id, 'votedfor' => $postid, 'votedfor_xtra' => 0, 'type' => $type, 'reason' => $reason]);
+                    $reports_query = "INSERT INTO `reports` (addedby,votedfor,votedfor_xtra,type,reason) VALUES (?,?,?,?,?)";
+                    DB::run($reports_query, [$current_user->id, $id, 0, $type, $reason]);
                 } else {
-                    DB::insert('reports', ['addedby' => $current_user->id, 'votedfor' => $id, 'votedfor_xtra' => 0, 'type' => $type, 'reason' => $reason]);
+                    $reports_query = "INSERT INTO `reports` (addedby,votedfor,votedfor_xtra,type,reason) VALUES (?,?,?,?,?)";
+                    DB::run($reports_query, [$current_user->id, $id, 0, $type, $reason]);
                 }
                     showMessage(URLROOT, "$type: $id, $postid Reason: " . htmlspecialchars($reason) . "<p>Successfully Reported</p>");
             } else {

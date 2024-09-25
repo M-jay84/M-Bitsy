@@ -1,4 +1,6 @@
 <?php
+
+use App\Libs\DB;
 use App\Models\ReadLogic;
 use App\Models\AttachmentsLogic;
 ?>
@@ -29,7 +31,8 @@ use App\Models\AttachmentsLogic;
             if ($pn == $pc) {
                 print("<a name='last'></a>\n");
                 if ($row['id'] > $INFO['lpr'] && $USER->id == true) {
-                    ReadLogic::update(['lastpostread'], ['userid=', 'topicid='], [$row['id'],$USER->id,$TOPICID]);
+                    $readposts_query = "UPDATE forum_readposts SET lastpostread = ? WHERE userid=? AND topicis=?";
+                    DB::run($readposts_query, [$row['id'],$USER->id,$TOPICID]);
                 }
             }
             // Details

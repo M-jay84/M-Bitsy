@@ -10,49 +10,33 @@ use App\Models\ForumsLogic;
 use App\Models\PostsLogic;
 use App\Models\ReadLogic;
 use App\Models\ShoutboxLogic;
+use PDO;
 
 /*
 *  Topics Table Data
 */
 class TopicsLogic
 {	
-    // Fetch Topic Column
-    public static function fetchColumn($columns = '*', $where = '', $values = '', $other = '')
-    {
-        $stmt = DB::newSelect('forum_topics', $columns, $where, $values, $other)->fetchColumn();
-		return $stmt;
-	}
-	
-    // Fetch All Topics
-    public static function fetchAll($columns = '*', $where = '', $values = '', $other = '')
-    {
-        $stmt = DB::newSelect('forum_topics', $columns, $where, $values, $other);
-		return $stmt;
-	}
-		
-    // Fetch Topic Row
-    public static function fetchRow($columns = '*', $where = '', $values = '', $other = '')
-    {
-        $stmt = DB::fetchRow('forum_topics', $columns, $where, $values, $other);
-		return $stmt;
-	}
-	
+
     // Get Topics
     public static function getForumTopics($forumid, $current_user)
     {
         // Pagination
-        $count = DB::fetchColumn('forum_topics', 'count(id)', ['forumid='], [$forumid]);
+        $topics_query = "SELECT count(id) FROM `forum_topics` WHERE forumid = ?";
+        $count = DB::run($topics_query, [$forumid])->fetchColumn();
         list($pager, $limit) = pagination(25, $count, URLROOT . "/topic/$forumid&");
-        $topics = DB::fetchAll('forum_topics', '*', ['forumid='], [$forumid], "ORDER BY lastpost DESC $limit");
-
+        $topics_query = "SELECT * FROM `forum_topics` WHERE forumid=? ORDER BY lastpost DESC $limit";
+        $topics = DB::run($topics_query, [$forumid]);
         foreach ($topics as $arr) {
-            $arr1 = ForumsLogic::fetchRow('*', ['id='], [$forumid]);
+            $forums_query = "SELECT * FROM `forum_forums` WHERE id=?";
+            $arr1 = DB::run($forums_query, [$forumid])->fetch(PDO::FETCH_ASSOC);
 
             if (!$arr1['name'] || $current_user->class < $arr1["minclassread"] && $arr1["guest_read"] == "no") {
                 showMessage('forum', LANG["FORUMS_NOT_PERMIT"]);
             }
 
-            $arr2 = PostsLogic::fetchColumn('count(id)', ['topicid='], [$arr['id']]);
+            $post_query = "SELECT count(id) FROM `forum_posts` WHERE topicid =?";
+            $arr2 = DB::run($post_query, [$arr['id']])->fetchColumn();
             $object[$arr['id']]['id'] = $arr['id'];
             $object[$arr['id']]['userid'] = $arr['userid'];
             $object[$arr['id']]['subject'] = $arr['subject'];
@@ -66,7 +50,8 @@ class TopicsLogic
             $object[$arr['id']]['replys'] = $arr2;
 
             if ($_SESSION) {
-                $r = ReadLogic::fetchRow('lastpostread', ['userid=', 'topicid='], [$current_user->id, $arr['id']]);
+                $readposts_query = "SELECT lastpostread FROM `forum_readposts` WHERE userid=? AND topicid=?";
+                $r = DB::run($readposts_query, [$current_user->id, $arr['id']])->fetch(PDO::FETCH_ASSOC);
                 $a = $r;
             }
             if ($new = !$a || $arr['lastpost'] > $a[0]) {
@@ -76,7 +61,8 @@ class TopicsLogic
     
             $object[$arr['id']]['read'] = $topicpic;
             
-            $arr3 = PostsLogic::fetchRow('*', ['topicid='], [$arr['id']], 'ORDER BY id DESC LIMIT 1');
+            $posts_query = "SELECT * FROM `forum_posts` WHERE topicid=? ORDER BY id DESC LIMIT 1";
+            $arr3 = DB::run($posts_query, [$arr['id']])->fetch(PDO::FETCH_ASSOC);
             $object[$arr['id']]['lastuserpost'] = "by&nbsp;".coloredname($arr3['userid'])."<br />".user_timezone_date($arr3['added'])."</span>";
             
             $object[$arr['id']]['added'] = $arr1['added'];
@@ -90,8 +76,10 @@ class TopicsLogic
             showMessage(URLROOT, LANG["FORUM_AVAILABLE"));
         }
         */
-        $fname = ForumCatsLogic::fetchRow('name', ['id='], [$forumid]);
-        $tname = ForumsLogic::fetchRow('name', ['id='], [$forumid]);
+        $forumcats_query = "SELECT name FROM `forumcats` WHERE Id=?";
+        $fname = DB::run($forumcats_query, [$forumid])->fetch(PDO::FETCH_ASSOC);
+        $forums_query = "SELECT name FROM `forum_forums` WHERE Id=?";
+        $tname = DB::run($forums_query, [$forumid])->fetch(PDO::FETCH_ASSOC);
 
         $array = [
             'topics' => $object,
@@ -122,15 +110,18 @@ class TopicsLogic
         }
 
         // Create Topic / Reply
-        DB::insert('forum_topics', ['userid'=>$current_user->id, 'forumid'=>$forumid, 'subject'=>$subject]);
+        $topics_query = "INSERT INTO `forum_topics` (userid, $forumid, $subject) VALUES (?,?,?)";
+        DB::run($topics_query, [$current_user->id, $forumid, $subject]);
         $topicid = DB::lastInsertId() or showMessage('forum', "Topics id n/a");
 
         // Insert the new post
-        PostsLogic::insert(['topicid'=>$topicid, 'userid'=>$current_user->id, 'added'=>CONFIG['TT_DATE'], 'body'=>$body]);
+        $posts_query = "INSERT INTO forum_posts (topicid,userid,added,body) VALUES (?,?,?,?)";
+        DB::run($posts_query, [$topicid, $current_user->id, CONFIG['TT_DATE'], $body]);
         $postid = DB::lastInsertId();
 
         // Update topic last post
-        DB::update('forum_topics', ['lastpost'], ['id='], [$postid, $topicid]);
+        $topics_query = "UPDATE forum_topics SET lastpost = ? WHERE id=?";
+        DB::run($topics_query, [$postid, $topicid]);
 
         $data['topicid'] = $topicid;
         $data['postid'] = $postid;
@@ -139,8 +130,8 @@ class TopicsLogic
         AttachmentsLogic::set_attachment($data);
         // Insert Shout
         $msg_shout = "New Forum Topic: [url=" . URLROOT . "/post/" . $topicid . "]" . $subject . "[/url] posted by [color=".$current_user->Color."]".$current_user->username."[/color].";
-        ShoutboxLogic::insert(['userid'=>0, 'date'=>CONFIG['TT_DATE'], 'user'=>'System', 'message'=>$msg_shout]);
-
+        $shoutbox_query = "INSERT INTO shoutbox (userid,date,user,message) VALUES (?,?,?,?)";
+        DB::run($shoutbox_query, [0, CONFIG['TT_DATE'], 'System', $msg_shout]);
         Url("post/$topicid", true); // die; todo
     }
 
@@ -156,23 +147,15 @@ class TopicsLogic
             showMessage('forum', "Sanity check: You are about to delete a topic. Click <a href='" . URLROOT . "/topic/delete/$topicid/1'>here</a> if you are sure.");
         }
 
-        DB::delete('forum_topics', ['id'=>$topicid]);
-        PostsLogic::delete(['topicid'=>$topicid]);
-        ReadLogic::delete(['topicid'=>$topicid]);
+        $topics_query= "DELETE FROM forum_topics WHERE id' = ?";
+        DB::run($topics_query, [$topicid]);
+        $posts_query = "DELETE FROM `forum_posts` WHERE topicid=?";
+        DB::run($posts_query, [$topicid]);
+        $readposts_query = "DELETE FROM `forum_readposts` WHERE topicid = ?";
+        DB::run($readposts_query, [$topicid]);
+
         AttachmentsLogic::deleteAll($topicid);
         showMessage('forum', LANG["DEL_COMPLETE"]);
-    }
-
-    // Delete Post
-    public static function delete($id)
-    {
-        DB::delete('forum_topics', ['id'=>$id]);
-    }
-
-    // Update Topic
-    public static function update($cols, $where, $values)
-    {
-        DB::update('forum_topics', $cols, $where, $values);
     }
 
     // Rename a Topic Submit
@@ -190,7 +173,8 @@ class TopicsLogic
         }
 
         // Update
-        TopicsLogic::update(['subject'], ['id='], [$subject,$topicid]);
+        $topics_query = "UPDATE forum_topics SET subject = ? WHERE id=?";
+        DB::run($topics_query, [$subject,$topicid]);
         showMessage(("post/$topicid"), LANG["NAME_UPDATED"]);
     }
 
@@ -206,7 +190,9 @@ class TopicsLogic
         }
 
         // Check Permisson To View
-        $arr = ForumsLogic::fetchRow('minclasswrite', ['id ='], [$forumid]);
+        $forums_query = "SELECT minclasswrite FROM `forum_forums` WHERE id=?";
+        $arr = DB::run($forums_query, [$forumid])->fetch(PDO::FETCH_ASSOC);
+
         if ($arr->rowCount() != 1) {
             showMessage('forum', LANG["NOTHING_FOUND"]);
         }
@@ -215,12 +201,14 @@ class TopicsLogic
         }
 
         // Move Topic
-        $arr = TopicsLogic::fetchRow('subject,forumid', ['id ='], $topicid);
+        $forumcats_query = "SELECT subject,forumid FROM `forumcats` WHERE id=?";
+        $arr = DB::run($forumcats_query, [$topicid])->fetch(PDO::FETCH_ASSOC);
         if ($arr->rowCount() != 1) {
             showMessage('forum', LANG["NOTHING_FOUND"]);
         }
         if ($arr["forumid"] != $forumid) {
-            TopicsLogic::update(['forumid', 'moved'], ['id='], [$forumid,'yes',$topicid]);
+            $topics_query = "UPDATE forum_topics SET forumid = ? AND moved =? WHERE id=?";
+            DB::run($topics_query, [$forumid,'yes',$topicid]);
         }
 
         Url("topic/$forumid", true);
@@ -249,7 +237,8 @@ class TopicsLogic
         }
 
         // Update
-        TopicsLogic::update($action, ['id='], $values);
+        $topics_query = "UPDATE forum_topics SET $action =? WHERE id=?";
+        DB::run($topics_query, $values);
         Url("topic/$forumid", true);
     }
 

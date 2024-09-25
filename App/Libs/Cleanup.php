@@ -4,6 +4,7 @@ namespace App\Libs;
 
 use App\Libs\DB;
 use App\Models\MessagesLogic;
+use PDO;
 
 /*
 * Clean Old Data (10 mins)
@@ -13,9 +14,10 @@ class Cleanup
     // Automatic System Update Function
     public static function autoClean()
     {
-        $row = DB::fetchRow('tasks', 'last_time', ['task ='], ['cleanup']);
+        $task_query = "SELECT last_time FROM `tasks` WHERE task = ?";
+        $row = DB::run($task_query, ['cleanup'])->fetch(PDO::FETCH_ASSOC);
         if (!$row) {
-            DB::insert('tasks', ['task =','last_time ='], ['cleanup',CONFIG['TT_TIME']]);
+            DB::run($task_query, ['cleanup', CONFIG['TT_TIME']]);
             return;
         }
 
@@ -23,7 +25,8 @@ class Cleanup
             return;
         }
 
-        $planned_clean = DB::update('tasks', ['last_time'], ['task=', 'last_time ='], [CONFIG['TT_TIME'], 'cleanup', $row['last_time']]);
+        $task_query = "UPDATE `tasks` SET last_time =? WHERE task=? AND last_time=?  ";
+        $planned_clean = DB::run($task_query, [CONFIG['TT_TIME'], 'cleanup', $row['last_time']]);
         if (!$planned_clean) {
             return;
         }
@@ -58,35 +61,42 @@ class Cleanup
     public static function deletePeers()
     {
         $deadtime = date("Y-m-d H:i:s", CONFIG['TT_TIME'] - CONFIG['ANNOUNCEINTERVAL']);
-        DB::run("DELETE FROM peers WHERE last_action < ?", [$deadtime]);
+        $peers_query = "DELETE FROM `peers` WHERE last_action < ?";
+        DB::run($peers_query, [$deadtime]);
     }
 
     // LOCAL TORRENTS - MAKE NON-ACTIVE/OLD TORRENTS INVISIBLE
     public static function makeInvisible()
     {
         $deadtime = CONFIG['TT_TIME'] - CONFIG['MAXDEADTORRENTTIMEOUT'];
-        DB::run("UPDATE torrents SET visible=?
-                 WHERE visible=? AND last_action < FROM_UNIXTIME(?) AND seeders = ? AND leechers = ? AND external !=?",
+        $torrents_query = "UPDATE `torrents` SET visible=?
+                 WHERE visible=? AND last_action < FROM_UNIXTIME(?) AND seeders = ? AND leechers = ? AND external !=?";
+        DB::run($torrents_query,
                  ['no', 'yes', $deadtime, 0, 0, 'yes']);
     }
 
     // Set Bonus every hour
     public static function bonus()
     {
-        $row = DB::fetchRow('tasks', 'last_time', ['task='], ['bonus']);
+        $tasks_query = "SELECT last_time FROM `tasks` WHERE task = ?";
+        $row = DB::run($tasks_query, ['bonus'])->fetch(PDO::FETCH_ASSOC);
         if (!$row) {
-            DB::insert('tasks', [ 'task'=>'bonus','last_time'=>CONFIG['TT_TIME']]);
+            $tasks_query = "INSERT INTO `tasks` (task, last_time) VALUES (?,?)";
+            DB::run($tasks_query, ['bonus', CONFIG['TT_TIME']]);
         }
         if ($row['last_time'] + CONFIG['ADDBONUS'] < CONFIG['TT_TIME']) {
-            $res1 = DB::run("SELECT DISTINCT userid as peer, (
-                                SELECT DISTINCT COUNT( torrent )
-                             FROM peers
-                             WHERE seeder = ?  AND userid = peer) 
-                             AS count
-                             FROM peers WHERE seeder = ?", ['yes', 'yes'])->fetchAll();
+            $peers_query = "SELECT DISTINCT userid as peer, (
+                SELECT DISTINCT COUNT( torrent )
+             FROM peers
+             WHERE seeder = ?  AND userid = peer) 
+             AS count
+             FROM peers WHERE seeder = ?";
+            $res1 = DB::run($peers_query, ['yes', 'yes'])->fetchAll();
             foreach ($res1 as $row) {
-                DB::run("UPDATE users SET seedbonus = seedbonus + '" . (CONFIG['BONUSPERTIME'] * $row['count']) . "' WHERE id = ?", [$row['peer']]);
-                DB::update(' tasks', ['last_time'], ['task='], [CONFIG['TT_TIME'], 'bonus']);
+                $users_query = "UPDATE `users` SET seedbonus = seedbonus + '" . (CONFIG['BONUSPERTIME'] * $row['count']) . "' WHERE id = ?";
+                DB::run($users_query, [$row['peer']]);
+                $tasks_query = "UPDATE `tasks` SET last_time =? WHERE task=? AND last_time=?  ";
+                DB::run($tasks_query, [CONFIG['TT_TIME'], 'bonus', $row['last_time']]);
             }
         }
     }
@@ -94,10 +104,12 @@ class Cleanup
     // Reset VIP Until
     public static function vipUntil()
     {
-        $rowv1 = DB::fetchAll('users', 'id, oldclass', ['vipuntil <', 'oldclass !='], [CONFIG['TT_DATE'], 0]);
+        $users_query = "SELECT id, oldclass FROM `users` WHERE vipuntil <? AND oldclass !=?";
+        $rowv1 = DB::run($users_query, [CONFIG['TT_DATE'], 0]);
         foreach ($rowv1 as $rowv) {
-            MessagesLogic::insert(['sender'=>0, 'receiver'=>$rowv['id'], 'added'=>CONFIG['TT_DATE'], 'subject'=> 'Your VIP class stay has just expired', 'msg'=>'Your VIP class stay has just expired']);
-            DB::update('users', ['class','oldclass','vipuntil'], 'vipuntil <', [$rowv['oldclass'], 0, null, CONFIG['TT_DATE']]);
+            MessagesLogic::newinsert(['sender'=>0, 'receiver'=>$rowv['id'], 'added'=>CONFIG['TT_DATE'], 'subject'=> 'Your VIP class stay has just expired', 'msg'=>'Your VIP class stay has just expired']);
+            $users_query = "UPDATE `users` SET class=? AND oldclass=? AND vipuntil=? WHERE vipuntil <=?";
+            DB::run($users_query, [$rowv['oldclass'], 0, null, CONFIG['TT_DATE']]);
         }
     }
 
@@ -105,25 +117,31 @@ class Cleanup
     public static function pendingUser()
     {
         $deadtime = CONFIG['TT_TIME'] - CONFIG['SIGNUPTIMEOUT'];
-        DB::run("DELETE FROM users WHERE status = ? AND added < FROM_UNIXTIME(?)", ['pending', $deadtime]);
+        $users_query = "DELETE FROM `users` WHERE status = ? AND added < FROM_UNIXTIME(?)";
+        DB::run($users_query, ['pending', $deadtime]);
     }
 
     // Delete Old Logs
     public static function deleteLogs()
     {
         $ts = CONFIG['TT_TIME'] - CONFIG['LOGCLEAN']  * 86400;
-        DB::run("DELETE FROM log WHERE added < FROM_UNIXTIME(?)", [$ts]);
+        $log_query = "DELETE FROM `log` WHERE added < FROM_UNIXTIME(?)";
+        DB::run($log_query, [$ts]);
     }
 
     // Set Free Leech
     public static function freeleech()
     {
         if (CONFIG['FREELEECHGBON']);{
-            $query = DB::fetchAll('torrents', 'id,name', ['banned =', 'freeleech =', 'size >='], ['no', 0, CONFIG['FREELEECHGB']]);
+            $torrents_query = "SELECT id, name FROM `torrents` WHERE banned=? AND freeleech =? AND size >=? ";
+            $query = DB::run($torrents_query, ['no', 0, CONFIG['FREELEECHGB']]);
             if ($query) {
                 foreach ($query as $row) {
-                    DB::update('torrents', ['freeleech'], ['id='], [1, $row['id']]);
-                    DB::insert('log', ['added'=>CONFIG['TT_DATE'], 'txt'=>"Freeleech added on  <a href='torrent/$row[id]'>$row[name]</a> because it is bigger than " . CONFIG['FREELEECHGB'] . ""]);
+                    $torrents_query = "UPDATE `torrents` SET freeleech =? WHERE id=?";
+                    DB::run($torrents_query, [1, $row['id']]);
+                    $log_query = "INSERT INTO `log` (added, txt) VALUES (?,?)";
+                    DB::run($log_query,
+                    [CONFIG['TT_DATE'], "Freeleech added on  <a href='torrent/$row[id]'>$row[name]</a> because it is bigger than " . CONFIG['FREELEECHGB'] . ""]);
                 }
             }
         }
@@ -134,32 +152,42 @@ class Cleanup
     {
         $downloaded = CONFIG['RATIOWARN_MINGIGS'] * 1024 * 1024 * 1024;
         // ADD RATIO WARNING
-        $res = DB::fetchAll('users', 'id,username', ['class <=', 'warned =', 'enabled=', 'uploaded / downloaded <', 'downloaded >='], [CONFIG['_UPLOADER'], 'no', 'yes', CONFIG['RATIOWARNMINRATIO'], $downloaded]);
+        $users_query = "SELECT id, username FROM `users` WHERE class <=? AND warned =? AND enabled =? AND uploaded / downloaded < =? AND downloaded >=?";
+        $res =DB::run($users_query, [CONFIG['_UPLOADER'], 'no', 'yes', CONFIG['RATIOWARNMINRATIO'], $downloaded]);
         if ($res) {
             $reason = "Auto Leech warning has been added You have been warned because of having low ratio. You need to get a " . CONFIG['RATIOWARNMINRATIO'] . " before next " . CONFIG['RATIOWARN_DAYSTOWARN'] . " days or your account may be banned.";
             $expiretime = date("Y-m-d H:i:s", CONFIG['TT_TIME'] + (86400 * CONFIG['RATIOWARN_DAYSTOWARN']));
             $msg = "".LANG['YOUVE_WARNED_BY']." " . $_SESSION['username'] . " - Reason: " . $reason . " - Expiry: " . $expiretime . "";
             foreach ($res as $arr) {
-                DB::insert('warnings', ['userid'=>$arr['id'], 'reason'=>$reason, 'added'=>CONFIG['TT_DATE'],'expiry'=>$expiretime,'warnedby'=>0,'type'=>'Poor Ratio']);
+                $warnings_query = "INSERT INTO `warnings` (userid, reason, added,expiry,warnedby,type) VALUES (?,?,?,?,?,?)";
+                DB::run($warnings_query, [$arr['id'], $reason, CONFIG['TT_DATE'],$expiretime,0,'Poor Ratio']);
+
             }
         }
         // REMOVE RATIO WARNING
-        $res1 = DB::run("SELECT users.id, users.username FROM users INNER JOIN warnings ON users.id=warnings.userid
-                         WHERE type=? AND active = ? AND warned = ?  AND enabled=? AND uploaded / downloaded >= ? AND downloaded >= ?", ['Poor Ratio', 'yes', 'yes', 'yes', CONFIG['RATIOWARNMINRATIO'], $downloaded])->fetchAll();
+        $users_query = "SELECT users.id, users.username FROM `users` INNER JOIN warnings ON users.id=warnings.userid
+                         WHERE type=? AND active = ? AND warned = ? AND enabled=? AND uploaded / downloaded >= ? AND downloaded >= ?";
+        $res1 = DB::run($users_query, ['Poor Ratio', 'yes', 'yes', 'yes', CONFIG['RATIOWARNMINRATIO'], $downloaded])->fetchAll();
         if ($res1) {
             $reason = "Auto Leech warning has been removed Your warning of low ratio has been removed. We highly recommend you to keep a your ratio up to not be warned again.\n";
             foreach ($res1 as $arr1) {
-                DB::insert('warnings', ['id'=>$arr1['id'], 'reason'=>$reason,'warned'=>'no']);
+                $warnings_query = "INSERT INTO `warnings` (id, reason, warned) VALUES (?,?,?)";
+                DB::run($warnings_query, [$arr1['id'], $reason, 'no']);
             }
         }
         // BAN RATIO WARNED USERS
-        $res = DB::run("SELECT users.id, users.username, UNIX_TIMESTAMP(warnings.expiry) AS expiry FROM users INNER JOIN warnings ON users.id=warnings.userid
-                        WHERE type=? AND active = ? AND class = ? AND enabled=? AND warned = ? AND uploaded / downloaded < ? AND downloaded >= ?", ['Poor Ratio', 'yes', 1, 'yes', 'yes', CONFIG['RATIOWARNMINRATIO'], $downloaded])->fetchAll();
+        $users_query = "SELECT users.id, users.username, UNIX_TIMESTAMP(warnings.expiry) AS expiry FROM users INNER JOIN warnings ON users.id=warnings.userid
+                        WHERE type=? AND active = ? AND class = ? AND enabled=? AND warned = ? AND uploaded / downloaded < ? AND downloaded >= ?";
+        $res = DB::run($users_query, ['Poor Ratio', 'yes', 1, 'yes', 'yes', CONFIG['RATIOWARNMINRATIO'], $downloaded])->fetchAll();
         if ($res) {
             foreach ($res as $arr) {
                 if (CONFIG['TT_TIME'] - $arr["expiry"] >= 0) {
-                    DB::update('users', ['warned','enabled'], ['id='], ['no', 'no', $arr['id']]);
-                    DB::insert('log', ['added'=>CONFIG['TT_DATE'], 'txt'=>"User <a href='" . URLROOT . "/profile/" . $arr["id"] . "'>" . coloredname($arr["id"]) . "</a> has been banned (Auto Leech warning)."]);
+                    $users_query = "UPDATE `users` SET warned=? AND enabled=? WHERE id=?";
+                    DB::run($users_query, ['no', 'no', $arr['id']]);
+                    $log_query = "INSERT INTO `log` (added, txt) VALUES (?,?)";
+                    DB::run($log_query,
+                    [CONFIG['TT_DATE'], "User <a href='" . URLROOT . "/profile/" . $arr["id"] . "'>" . coloredname($arr["id"]) . "</a> has been banned (Auto Leech warning)."]);
+
                 }
             }
         }
@@ -169,13 +197,18 @@ class Cleanup
     public static function expiredWarn()
     {
         // REMOVE EXPIRED WARNINGS
-        $res = DB::run("SELECT users.id, users.username, warnings.expiry FROM users INNER JOIN warnings ON users.id=warnings.userid
-                    WHERE type != ? AND warned = ?  AND enabled=? AND warnings.active = ? AND warnings.expiry < ?", ['Poor Ratio', 'yes', 'yes', 'yes', CONFIG['TT_DATE']])->fetchAll();
+        $users_query = "SELECT users.id, users.username, warnings.expiry FROM users INNER JOIN warnings ON users.id=warnings.userid
+                    WHERE type != ? AND warned = ? AND enabled=? AND warnings.active = ? AND warnings.expiry < ?";
+        $res = DB::run($users_query, ['Poor Ratio', 'yes', 'yes', 'yes', CONFIG['TT_DATE']])->fetchAll();
         if ($res) {
             foreach ($res as $arr1) {
-                DB::update('users', ['warned'], ['id='], ['no', $arr1['id']]);
-                DB::run("UPDATE warnings SET active = ? WHERE userid = ? AND expiry < ?", ['no', $arr1['id'], CONFIG['TT_DATE']]);
-                DB::insert('log', ['added'=>CONFIG['TT_DATE'], 'txt'=>"Removed warning for $arr1[username]. Expiry: $arr1[expiry]"]);
+                $users_query = "UPDATE `users` SET warned=? WHERE id=?";
+                DB::run($users_query, ['no', $arr1['id']]);
+                $warnings_query = "UPDATE `warnings` SET active = ? WHERE userid = ? AND expiry < ?";
+                DB::run($warnings_query, ['no', $arr1['id'], CONFIG['TT_DATE']]);
+                $log_query = "INSERT INTO `log` (added, txt) VALUES (?,?)";
+                DB::run($log_query,
+                    [CONFIG['TT_DATE'], "Removed warning for $arr1[username]. Expiry: $arr1[expiry]"]);
             }
         }
     }
@@ -184,7 +217,8 @@ class Cleanup
     public static function isWarned()
     {
         // UPDATE USERS THAT STILL HAVE ACTIVE WARNINGS
-        DB::run("UPDATE users SET warned = 'yes' WHERE warned = 'no' AND id IN (SELECT userid FROM warnings WHERE active = 'yes')");
+        $users_query = "UPDATE `users` SET warned = 'yes' WHERE warned = 'no' AND id IN (SELECT userid FROM warnings WHERE active = 'yes')";
+        DB::run($users_query);
     }
 
     // Invite update function
@@ -193,9 +227,10 @@ class Cleanup
         $time = CONFIG['TT_TIME'] - ($interval * 86400);
         $minlimit = $minlimit * 1024 * 1024 * 1024;
         $maxlimit = $maxlimit * 1024 * 1024 * 1024;
-        $res = DB::fetchAll('users', 'id,username,class,invites',
-                         ['enabled=', 'status =', 'downloaded >=', 'downloaded <', 'uploaded / downloaded >=', 'warned =', "UNIX_TIMESTAMP(invitedate) <="],
-                        ['yes', 'confirmed', $minlimit, $maxlimit, $minratio, 'no', $time]);
+        $users_query = "SELECT id,username,class,invites FROM `users` WHERE enabled=? AND status =?
+        AND downloaded >=? AND uploaded / downloaded >=? AND warned=? AND downloaded >=? AND UNIX_TIMESTAMP(invitedate) <=";
+        $res = DB::run($users_query,
+        ['yes', 'confirmed', $minlimit, $maxlimit, $minratio, 'no', $time]);
         if ($res) {
             foreach ($res as $arr) {
                 $maxninvites = $maxinvites[$arr['class']];
@@ -205,8 +240,11 @@ class Cleanup
                 if (($maxninvites - $arr['invites']) < $invites) {
                     $invites = $maxninvites - $arr['invites'];
                 }
-                DB::run("UPDATE users SET invites = invites+$invites, invitedate = NOW() WHERE id=$arr[id]");
-                DB::insert('log', ['added'=>CONFIG['TT_DATE'], 'txt'=>"Gave $invites invites to $arr[username]"]);
+                $users_query = "UPDATE `users` SET invites = invites+$invites, invitedate = NOW() WHERE id=$arr[id]";
+                DB::run($users_query);
+                $log_query = "INSERT INTO `log` (added, txt) VALUES (?,?)";
+                DB::run($log_query,
+                    [CONFIG['TT_DATE'], "Gave $invites invites to $arr[username]"]);
             }
         }
     }
@@ -224,50 +262,66 @@ class Cleanup
         $length = CONFIG['HNR_DEADLINE'] * 86400; // 7 days
         $seedtime = CONFIG['HNR_SEEDTIME'] * 3600; // 48 hours
         // Update Snatched
-        DB::run("UPDATE snatched SET hnr = ? WHERE completed = ? AND hnr = ? AND upload < download AND $timenow - $length > start_time AND $seedtime > last_time AND done=?", ['yes', 'yes', 'no', 'no']);
-        DB::run("UPDATE `snatched` SET `hnr` = ? WHERE `hnr` = ? AND upload >= download", ['no', 'yes']);
-        DB::run("UPDATE `snatched` SET `hnr` = ? WHERE `hnr` = ? AND last_time >= ?", ['no', 'yes', $seedtime]);
+        $snatched_query = "UPDATE snatched SET hnr = ? WHERE completed = ? AND hnr = ? AND upload < download AND $timenow - $length > start_time AND $seedtime > last_time AND done=?";
+        DB::run($snatched_query, ['yes', 'yes', 'no', 'no']);
+        $snatched_query = "UPDATE `snatched` SET `hnr` = ? WHERE `hnr` = ? AND upload >= download";
+        DB::run($snatched_query, ['no', 'yes']);
+        $snatched_query = "UPDATE `snatched` SET `hnr` = ? WHERE `hnr` = ? AND last_time >= ?";
+        DB::run($snatched_query, ['no', 'yes', $seedtime]);
         // Do We Have Snatched
-        $a = DB::fetchAll('snatched', 'DISTINCT uid', ['hnr =', 'done='], ['yes', 'no']);
+        $snatched_query = "SELECT DISTINCT uid FROM `snatched` WHERE hnr=? AND done=?";
+        $a =  DB::run($snatched_query, ['yes', 'no']);
         if ($a):
             foreach ($a as $b):
                 
                 // Check User
                 $user = $b['uid'];
-                $count = DB::fetchColumn('snatched', 'count(hnr)', ['uid =', 'hnr ='], [$user, 'yes']);
+                $snatched_query = "SELECT count(hnr) FROM `snatched` WHERE uid=? ND hnr=?";
+                $count = DB::run($snatched_query, [$user, 'yes'])->fetchColumn();
                 $expiretime = date("Y-m-d H:i:s", $timenow + $length);
                 // Check Wrning
-                $f = DB::fetchRow('warnings', 'type, active', ['userid ='], [$user]);
+                $warnings_query = "SELECT type, active FROM `warnings` WHERE userid=? ";
+                $f = DB::run($warnings_query, [$user])->fetch(PDO::FETCH_ASSOC);
                 $type = $f['type'];
                 // Warn
                 if ($count >= CONFIG['HNR_WARN'] && $type != "HnR"):
                     $reason = "" . LANG["CLEANUP_WARNING_FOR_ACCUMULATING"] . " " . CONFIG['HNR_WARN'] . " H&R.";
                     $subject = "" . LANG["CLEANUP_WARNING_FOR_H&R"] . "";
                     $msg = "" . LANG["CLEANUP_YOU_HAVE_BEEN_WARNEWD_ACCUMULATED"] . " " . CONFIG['HNR_WARN'] . " " . LANG["CLEANUP_H&R_INVITE_CHECK_RULE"] . "\n[color=red]" . LANG["CLEANUP_MSG_WARNING_7_DAYS_BANNED"] . "[/color]";
-                    $rov = DB::fetchRow('users', 'enabled', ['id ='], [$user]);
+                    $users_query = "SELECT enabled FROM `users` WHERE id = ?";
+                    $rov =DB::run($users_query, [$user])->fetch(PDO::FETCH_ASSOC);
 
                     if ($rov["enabled"] == "yes"):
-                        DB::update('users', ['warned'], ['id='], ['yes', $user]);
-                        DB::delete('warnings', ['userid'=>$user, 'reason'=>$reason, 'added'=>CONFIG['TT_DATE'],'expiry'=>$expiretime,'warnedby'=>0,'type'=>'HnR']);
-                        MessagesLogic::insert(['sender'=>0, 'receiver'=>$user, 'added'=>CONFIG['TT_DATE'],'msg'=>$msg,'subject'=>$subject]);
+                        $users_query = "UPDATE users SET warned=? WHERE id=?";
+                        DB::run($users_query, ['yes', $user]);
+                        MessagesLogic::newinsert(['sender'=>0, 'receiver'=>$user, 'added'=>CONFIG['TT_DATE'],'msg'=>$msg,'subject'=>$subject]);
                     endif;
                 endif;
                 // Unwarn
                 if ($count < CONFIG['HNR_WARN'] && $type == "HnR"):
                     $subject = "" . LANG["CLEANUP_REMOVAL_OF_H&R_WARNING"] . "";
                     $msg = "" . LANG["CLEANUP_YOU_NOW_HAVE_LESS_THAN"] . " " . CONFIG['HNR_WARN'] . " H&R.\n" . LANG["CLEANUP_YOUR_WARNING_FOR_H&R_HAS_REMOVED"] . "";
-                    DB::update('users', ['warned'], ['id='], ['no', $user]);
-                    DB::delete('warnings', ['userid' =>$user, 'type' => 'HnR']);
-                    MessagesLogic::insert(['sender'=>0, 'receiver'=>$user, 'added'=>CONFIG['TT_DATE'],'msg'=>$msg,'subject'=>$subject]);
+                    $users_query = "UPDATE users SET warned=? WHERE id=?";
+                    DB::run($users_query, ['no', $user]);
+                    $warnings_query = "DELETE FROM `warnings` WHERE userid = ? AND  type=?";
+                    DB::run($warnings_query, [$user, 'HnR']);
+                    MessagesLogic::newinsert(['sender'=>0, 'receiver'=>$user, 'added'=>CONFIG['TT_DATE'],'msg'=>$msg,'subject'=>$subject]);
                 endif;
                 // Ban
                 if ($count >= CONFIG['HNR_BAN']):
-                    $h = DB::fetchRow('users', 'username, email, modcomment', ['id ='], [$user]);
+                    $users_query = "SELECT username, email, modcomment FROM `users`  WHERE id = ?";
+                    $h = DB::run($users_query, [$user])->fetch(PDO::FETCH_ASSOC);
+                    
                     $modcomment = $h[2];
                     $modcomment = date("d/m/Y") . " - " . LANG["CLEANUP_BANNED_FOR"] . " " . $count . " H&R.\n " . $modcomment;
-                    DB::update(' users', ['enabled','warned','modcomment'], ['id='], ['no', 'no', $modcomment, $user]);
-                    DB::delete('warnings', ['userid' =>$user, 'type' => 'HnR']);
-                    DB::insert('log', ['added'=>CONFIG['TT_DATE'], 'txt'=>LANG["CLEANUP_THE_MEMBER"] . " <a href='account-details.php?id=" . $user . "'>" . $h[0] . "</a> " . LANG["CLEANUP_HAS_BEEN_BANNED_REASON"] . " " . $count . " H&R."]);
+                    $users_query = "UPDATE users SET enabled=? AND warned=? AND modcomment=? WHERE id=?";
+                    DB::run($users_query, ['no', 'no', $modcomment, $user]);
+                    $warnings_query = "DELETE FROM warnings WHERE userid' = ? AND type";
+                    DB::run($warnings_query, [$user, 'HnR']);
+                    $log_query = "INSERT INTO `log` (added, txt) VALUES (?,?)";
+                    DB::run($log_query,
+                    [CONFIG['TT_DATE'], LANG["CLEANUP_THE_MEMBER"] . " <a href='account-details.php?id=" . $user . "'>" . $h[0] . "</a> " . LANG["CLEANUP_HAS_BEEN_BANNED_REASON"] . " " . $count . " H&R."]);
+
                     $sitename = URLROOT;
                     $body = file_get_contents(VIEW_PATH . "/user/email/hitnrunban.php");
                     $body = str_replace("%count%", $count, $body);
@@ -277,8 +331,9 @@ class Cleanup
                 endif;
                 // Download Ban
                 if ($count >= CONFIG['HNR_STOP_DL']){
-                    DB::update(' users', ['downloadbanned'], ['id=', 'downloadbanned='], ['yes', $user, 'no']);
-                    MessagesLogic::insert(['sender'=>0, 'receiver'=>$user, 'added'=>CONFIG['TT_DATE'],'msg'=>'Too many Hit & Runs. You are Download Banned','subject'=>'Download Banned']);
+                    $users_query = "UPDATE users SET downloadbanned=? WHERE id=? AND downloadbanned=? ";
+                    DB::run($users_query, ['yes', $user, 'no']);
+                    MessagesLogic::newinsert(['sender'=>0, 'receiver'=>$user, 'added'=>CONFIG['TT_DATE'],'msg'=>'Too many Hit & Runs. You are Download Banned','subject'=>'Download Banned']);
                 }
             endforeach;
         endif;
@@ -291,67 +346,80 @@ class Cleanup
         $delay2 = date("Y-m-d H:i:s", CONFIG['TT_TIME'] - 1 * 1); # Joined > 1 month
         
         // auto promote by gb
-        $res = DB::fetchAll('users', ['id', 'username'], ['class =', 'uploaded / downloaded >'], [1, $minratio]);
+        $users_query = "SELECT id,username FROM `users` WHERE class =? AND uploaded / downloaded >";
+        $res = DB::run($users_query,  [1, $minratio]);
         foreach ($res as $arr) {
-            $res_classname = DB::fetchRow('groups', 'level', ['group_id ='], [CONFIG['_POWERUSER']], 'LIMIT 1');
+            $groups_query = "SELECT level FROM `groups` WHERE group_id=? LIMIT 1";
+            $res_classname = DB::run($groups_query, [CONFIG['_POWERUSER']])->fetch(PDO::FETCH_ASSOC);
             if ($res_classname->rowCount() == 1) {
                 $arr_classname = $res_classname;
                 $new_classname = "$arr_classname[level]";
             }
             $username = $arr['username'];
-            DB::update('users', ['class'], ['id='], [CONFIG['_POWERUSER'], $arr['id']]);
+            $users_query = "UPDATE users SET class=? WHERE id =?";
+            DB::run($users_query, [CONFIG['_POWERUSER'], $arr['id']]);
             $msgg = '[b]Congratulations[/b], you were automatically promoted to [b]Member[/b] class. Please note that if your ratio drops below [b]" . $minratio . "[/b] at any time,  you will be demoted to [b]Leecher[/b]';
-            MessagesLogic::insert(['sender'=>0, 'receiver'=>$arr['id'], 'added'=>CONFIG['TT_DATE'],'msg'=>$msgg,'subject'=>"You have been promoted as " . $new_classname . ""]);
+            MessagesLogic::newinsert(['sender'=>0, 'receiver'=>$arr['id'], 'added'=>CONFIG['TT_DATE'],'msg'=>$msgg,'subject'=>"You have been promoted as " . $new_classname . ""]);
             unset($res, $arr, $res_classname, $arr_classname,$new_classname);
         }
 
         // auto demote to leecher
-        $res = DB::fetchAll('users', ['id','username','modcomment'], ['class <', 'uploaded / downloaded <'], [4, $minratio]);
+        $users_query = "SELECT id,username,modcomment FROM `users` WHERE class <? AND uploaded / downloaded <";
+        $res = DB::run($users_query,  [4, $minratio]);
         foreach ($res as $arr) {
             $username = $arr['username'];
             $modcomment = $arr['modcomment'];
             $modcomment2 = date("d-M-Y") . " - Has been demoted by System to Leecher \n";
             $modcomment = $modcomment2 . "" . $modcomment;
             $modcom = $modcomment;
-            DB::run("UPDATE users SET class = 1, modcomment = CONCAT($modcom,modcomment) WHERE id = $arr[id]");
+            $users_query = "UPDATE users SET class = 1, modcomment = CONCAT($modcom,modcomment) WHERE id = $arr[id]";
+            DB::run($users_query);
             $msgg = 'You were automatically demoted to [b]Leecher[/b]. That happened because your ratio dropped below [b]" . $minratio . "[/b]';
-            MessagesLogic::insert(['sender'=>0, 'receiver'=>$arr['id'], 'added'=>CONFIG['TT_DATE'],'msg'=>$msgg,'subject'=> 'You have been demoted to Leecher']);
-            DB::insert('log', ['added'=>CONFIG['TT_DATE'], 'txt'=>"<a href=/account-details.php?id=$arr[id]><b>$username</b></a> has been demoted by System to <b>Leecher</b> class"]);
+            MessagesLogic::newinsert(['sender'=>0, 'receiver'=>$arr['id'], 'added'=>CONFIG['TT_DATE'],'msg'=>$msgg,'subject'=> 'You have been demoted to Leecher']);
+            $log_query = "INSERT INTO `log` (added, txt) VALUES (?,?)";
+            DB::run($log_query,
+                    [CONFIG['TT_DATE'], "<a href=/account-details.php?id=$arr[id]><b>$username</b></a> has been demoted by System to <b>Leecher</b> class"]);
         }
         
         // auto promote to class 3
-        $res = DB::run("SELECT id, username FROM users WHERE (class = 1 || class = 2) AND warned = 'no' AND added < $delay2 AND uploaded >= $gigs AND uploaded >= downloaded");
+        $users_query = "SELECT id, username FROM users WHERE (class = 1 || class = 2) AND warned = 'no' AND added < $delay2 AND uploaded >= $gigs AND uploaded >= downloaded";
+        $res = DB::run($users_query);
         foreach ($res as $arr) {
-            $res_classname = DB::fetchRow('groups', 'level', ['group_id ='], [3], 'LIMIT 1');
+            $groups_query = "SELECT level FROM `groups` WHERE group_id=? LIMIT 1";
+            $res_classname = DB::run($groups_query, [3])->fetch(PDO::FETCH_ASSOC);
             if ($res_classname->rowCount() == 1) {
                 $arr_classname = $res_classname;
                 $new_classname = "$arr_classname[level]";
             }
             $username = $arr['username'];
-            DB::update(' users', ['class'], ['id='], [3, $arr['id']]);
+            $users_query = "UPDATE users SET class=? WHERE id=?";
+            DB::run($users_query, [3, $arr['id']]);
             $msgg = '[b]Congratulations[/b], you were automatically promoted to [b]Power User[/b] class. Please note that if your ratio drops below [b]" . $minratio . "[/b] at any time,  you will be demoted to [b]Leecher[/b]';
-            MessagesLogic::insert(['sender'=>0, 'receiver'=>$arr['owner'], 'added'=>CONFIG['TT_DATE'],'msg'=>$msgg,'subject'=> '[b]Congratulations[/b]']);
+            MessagesLogic::newinsert(['sender'=>0, 'receiver'=>$arr['owner'], 'added'=>CONFIG['TT_DATE'],'msg'=>$msgg,'subject'=> '[b]Congratulations[/b]']);
             unset($res, $arr, $res_classname, $arr_classname,$new_classname);
         }
 
         // uploader mod test
-        $query = DB::run("SELECT torrents.owner, COUNT(*)  AS counta 
+        $torrents_query = "SELECT torrents.owner, COUNT(*) AS counta 
                           FROM torrents 
                           INNER JOIN users ON (torrents.owner=users.id) 
-                          WHERE users.class < 2  AND users.donated = 0 and torrents.banned = 'no' AND torrents.added > DATE_SUB(NOW(), INTERVAL 15 DAY) 
-                          GROUP BY torrents.owner");
+                          WHERE users.class < 2  AND users.donated = 0 AND torrents.banned = 'no' AND torrents.added > DATE_SUB(NOW(), INTERVAL 15 DAY) 
+                          GROUP BY torrents.owner";
+        $query = DB::run($torrents_query);
         foreach ($query as $UP){
             if ($UP['counta'] > 3){
-                DB::update(' users', ['class'], ['id='], [CONFIG['_POWERUSER'], $UP['owner']]);
+                $users_query = "UPDATE users SET class=? WHERE id=?";
+                DB::run($users_query, [CONFIG['_POWERUSER'], $UP['owner']]);
                 $subject = 'Automatic Promotion To Uploader Status';
                 $msg = 'Hello you did 1 upload, you are promoted to Uploader, Bravo !!! ';
-                MessagesLogic::insert(['sender'=>0, 'receiver'=>$UP['owner'], 'added'=>CONFIG['TT_DATE'], 'subject'=> $subject,'msg'=>$msg, 'unread'=>'yes', 'location'=>'in']);
+                MessagesLogic::newinsert(['sender'=>0, 'receiver'=>$UP['owner'], 'added'=>CONFIG['TT_DATE'], 'subject'=> $subject,'msg'=>$msg, 'unread'=>'yes', 'location'=>'in']);
             }
         }
 
         // Uploader demote if he did not upload 1 torrent over 2 week
         foreach ($query as $up){
-            $query2 = DB::run("SELECT name, added, DATE_SUB(NOW(), INTERVAL 15 DAY) AS date_expiration FROM torrents WHERE owner = $up[id]");
+            $torrents_query = "SELECT name, added, DATE_SUB(NOW(), INTERVAL 15 DAY) AS date_expiration FROM torrents WHERE owner = $up[id]";
+            $query2 = DB::run($torrents_query);
             foreach ($query2 as $up2) {
                 if ($up2["added"] > $up2["date_expiration"]){
                     $nbre = 0 + 1;
@@ -361,10 +429,11 @@ class Cleanup
             }
         }
         if ($nbre < 1) {
-            DB::update(' users', ['class'], ['id='], [2, $up['id']]);
+            $users_query = "UPDATE users SET class=? WHERE id=?";
+            DB::run($users_query, [2, $up['id']]);
             $subject = 'Automatic Downgrading to Member Status';
             $msg = 'You have not uploaded in the last fortnight so you have been demoted from uploader.';
-            MessagesLogic::insert(['sender'=>0, 'receiver'=>$up['id'], 'added'=>CONFIG['TT_DATE'], 'subject'=> $subject,'msg'=>$msg, 'unread'=>'yes', 'location'=>'in']);
+            MessagesLogic::newinsert(['sender'=>0, 'receiver'=>$up['id'], 'added'=>CONFIG['TT_DATE'], 'subject'=> $subject,'msg'=>$msg, 'unread'=>'yes', 'location'=>'in']);
         }
     }
 

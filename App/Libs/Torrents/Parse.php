@@ -89,12 +89,14 @@ class Parse
 
         if ($seeders !== 0) {
             // Update the Torrent
-            DB::update('torrents', ['leechers','seeders','times_completed','last_action','visible','announcelist'], ['id='],
-                                      [$leechers, $seeders, $completed, CONFIG['TT_DATE'], 'yes', $var2, $id]
+            $torrents_query = "UPDATE torrents SET leechers = ? AND seeders = ? AND times_completed = ? AND last_action = ? AND 
+             visible = ? AND announcelist = ? WHERE id=?";
+            DB::run($torrents_query, [$leechers, $seeders, $completed, CONFIG['TT_DATE'], 'yes', $var2, $id]
             );
         } else {
             // Its Dead :(
-            DB::update('torrents', ['last_action'], ['id='], [CONFIG['TT_DATE'], $id]);
+            $torrents_query = "UPDATE torrents SET torrent = ? WHERE id=?";
+            DB::run($torrents_query, [CONFIG['TT_DATE'], $id]);
         }
     }
 
@@ -105,9 +107,10 @@ class Parse
         //set_time_limit(15);
 
         // Rescrape 10 Torrents Every X Days. (Default: 2 days)
-        $stmt = DB::fetchAll('torrents', ['id','info_hash','last_action','announcelist'],
-                                ['external=', 'last_action <='],
-                                ['yes', 86400], 'DATE_SUB(UTC_TIMESTAMP(), INTERVAL 2 DAY)', "LIMIT 10");
+        $torrents_query = "SELECT id,info_hash,last_action,announcelist FROM `torrents` 
+                        WHERE external=? AND last_action <=? DATE_SUB(UTC_TIMESTAMP(), INTERVAL 2 DAY) LIMIT 10";
+        $stmt = DB::run($torrents_query, ['external=', 'last_action <='],
+                                ['yes', 86400]);
 
         foreach ($stmt as $tor) {
             self::ScrapeId($tor['id'], $tor['announcelist'], $tor['info_hash']);

@@ -20,7 +20,8 @@ class UsersLogic
     public static function confirmReg()
     {
         $ids = Validate::multiIds('ids');
-        DB::run("UPDATE `users` SET `status` = ? WHERE `status` = ? AND `invited_by` = ? AND `id` IN (?)", ['confirmed', 'pending', 0, $ids])->fetchAll();
+        $users_query = "UPDATE `users` SET `status` = ? WHERE `status` = ? AND `invited_by` = ? AND `id` IN (?)";
+        DB::run($users_query, ['confirmed', 'pending', 0, $ids])->fetchAll();
         showMessage('adminconfirmreg', LANG["ACTION_COMPLETE"]);
     }
 
@@ -62,12 +63,15 @@ class UsersLogic
 
         $data = ['query' => $query, 'q' => $q];
         // Pagination
-        $count = DB::run("SELECT COUNT(*) FROM users WHERE $data[query]")->fetchcolumn();
+        $users_query = "SELECT COUNT(*) FROM users WHERE $data[query]";
+        $count = DB::run($users_query)->fetchcolumn();
         list($pager, $limit) = pagination(25, $count, URLROOT . "/members?$data[q]&");
-        $results = DB::run("SELECT users.*, groups.level FROM users INNER JOIN `groups` ON groups.group_id=users.class WHERE $data[query] ORDER BY username $limit")->fetchAll();
+        $users_query = "SELECT users.*, groups.level FROM users INNER JOIN `groups` ON groups.group_id=users.class WHERE $data[query] ORDER BY username $limit";
+        $results = DB::run($users_query)->fetchAll();
 
         // Get Group Data
-        $res = GroupsLogic::fetchAll('group_id, level', '', 'ORDER BY group_id ASC');
+        $groups_query = "SELECT group_id, level FROM `groups` ORDER BY group_id ASC";
+        $res = DB::run($groups_query);
 
         $array = [
             'groups' => $res,
@@ -81,30 +85,38 @@ class UsersLogic
     // Function That Removes All From An Account
     public static function deleteUser($userid)
     {
-        DB::delete('users', ['id' => $userid]);
-        WarningsLogic::delete(['userid' => $userid]);
-        DB::delete('ratings', ['user' => $userid]);
-        DB::delete('peers', ['userid' => $userid]);
-        ReportsLogic::delete(['addedby' => $userid]);
-        ReportsLogic::delete(['votedfor' => $userid, 'type' => 'user']);
-        ReadLogic::delete(['userid' => $userid]);
-        DB::delete('pollanswers', ['userid' => $userid]);
-        DB::delete('snatched', ['uid' => $userid]);
+        $users_query = "DELETE FROM users WHERE id' = ?";
+        DB::run($users_query, [$userid]);
+        $warnings_query = "DELETE FROM warnings WHERE userid' => ?";
+        DB::run($warnings_query, [$userid]);
+        $ratings_query = "DELETE FROM ratings WHERE user";
+        DB::run($ratings_query, [$userid]);
+        $peers_query = "DELETE FROM peers WHERE userid' = ? ";
+        DB::run($peers_query, [$userid]);
+        $reports_query = "DELETE FROM `reports` WHERE votedfor = ? AND type=?";
+        DB::run($reports_query, [$userid, 'user']);
+        $readposts_query = "DELETE FROM `forum_readposts` WHERE userid=?";
+        DB::run($readposts_query, [$userid]);
+        $snatched_query = "DELETE FROM snatched WHERE uid' = ?";
+        DB::run($snatched_query, [$userid]);
     }
 
     // Message ajax member search
     public static function getUserName()
     {
-        $stmt = DB::run("SELECT id,username FROM users WHERE username like '" . $_POST["keyword"] . "%' ORDER BY username LIMIT 0,6");
+        $users_query = "SELECT id,username FROM users WHERE username LIKE '" . $_POST["keyword"] . "%' ORDER BY username LIMIT 0,6";
+        $stmt = DB::run($users_query);
 		return $stmt;
 	}
 	
     // Message ajax member search
     public static function usersToConfirm()
     {
-        $count = DB::fetchColumn('users', 'count(id)', ['status =', 'invited_by ='], ['pending',0]);
+        $peers_query = "SELECT count(id) FROM `peers` WHERE status = ? AND invited_by !=";
+        $count = DB::run($peers_query, ['pending',0])->fetchColumn();
         list($pager, $limit) = pagination(25, $count, 'adminconfirmreg?');
-        $users = DB::newSelect('users', 'id,username,email,added,ip', ['status =','invited_by ='], ['pending',0], "ORDER BY `added` DESC $limit");
+        $users_query = "SELECT id,username,email,added,ip FROM `users` WHERE status=? AND invited_by=? ORDER BY `added` DESC $limit";
+        $users = DB::run($users_query, ['pending',0]);
         
         $stmt = ['users'=>$users,'count'=>$count,'pager'=>$pager];
 		return $stmt;
@@ -115,8 +127,8 @@ class UsersLogic
         $dt = date("Y-m-d H:i:s", CONFIG['TT_TIME'] - ($cday * 86400));
         
         // Get Users Data
-        $users = DB::newSelect('users', 'id,username,class,email,uploaded,downloaded,last_access,ip,added', 
-                                ['last_access<','status=','enabled='] , [$dt, 'confirmed', 'yes'], "ORDER BY last_access DESC");
+        $users_query = "SELECT id,username,class,email,uploaded,downloaded,last_access,ip,added FROM `users` WHERE last_access<? AND status=? AND enabled=? ORDER BY  last_access DESC";
+        $users = DB::run($users_query, [$dt, 'confirmed', 'yes']);
         $count = $users->rowCount();
         $stmt = ['users'=>$users,'count'=>$count,'days'=>$cday];
 		return $stmt;
@@ -126,9 +138,11 @@ class UsersLogic
     public static function selectWhereIn($option = false)
     {
         if ($option) {
-			$stmt = DB::run("SELECT id, email , username, added, last_access FROM users WHERE id IN (" . implode(", ", $_POST['userid']) . ") ORDER BY last_access DESC ");
+            $users_query = "SELECT id, email , username, added, last_access FROM users WHERE id IN (" . implode(", ", $_POST['userid']) . ") ORDER BY last_access DESC ";
+			$stmt = DB::run($users_query);
 		} else {
-			$stmt = DB::run("SELECT id, modcomment FROM users WHERE id IN (" . implode(", ", $_POST['userid']) . ") ORDER BY id DESC ");
+            $users_query = "SELECT id, modcomment FROM users WHERE id IN (" . implode(", ", $_POST['userid']) . ") ORDER BY id DESC ";
+			$stmt = DB::run($users_query);
 		}
 		return $stmt;
 	}
@@ -159,7 +173,8 @@ class UsersLogic
             // Delete
             if ($action == "deluser" && (!empty($_POST["userid"]))) {
                 $ids = implode(", ", $_POST['userid']);
-                DB::deleteByIds('users', 'id', $ids);
+                $users_query = "DELETE FROM `users` WHERE `id` IN (?)";
+                DB::run($users_query, [$ids]);
                 showMessage('admininactive', LANG["SUCCESS"]);
             }
 
@@ -171,7 +186,8 @@ class UsersLogic
                     $cname = $username;
                     $modcomment = $arr["modcomment"];
                     $modcomment = date("Y-m-d") . " - Disabled for inactivity by $cname.n" . $modcomment;
-                    DB::update('users', ['modcomment', 'enabled'], ['id='], [$modcomment,'no',$id]);
+                    $users_query = "UPDATE users SET modcomment = ? AND enabled = ? WHERE id=?";
+                    DB::run($users_query, [$modcomment,'no',$id]);
                 }
                 showMessage('admininactive', LANG["UPDATE_COMPLETE"]);
             }

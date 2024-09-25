@@ -4,12 +4,14 @@ namespace App\Controllers\User;
 
 use App\Libs\Auth;
 use App\Libs\Controller;
+use App\Libs\DB;
 use App\Libs\SimpleThumbnail;
 use App\Libs\Validate;
 use App\Models\LogsLogic;
 use App\Models\MessagesLogic;
 use App\Models\TorrentsLogic;
 use App\Models\TorrentTagLogic;
+use PDO;
 
 /*
 * Torrent Controller
@@ -43,13 +45,15 @@ class Torrent extends Controller
             $pvkey_var = "t_" . $id;
             $views = $_SESSION[$pvkey_var] == 1 ? $torrent["views"] + 0 : $torrent["views"] + 1;
             $_SESSION[$pvkey_var] = 1;
-            TorrentsLogic::update(['views'], ['id='], [$views, $id]);
+            $torrents_query = "UPDATE `torrents` SET views = ? WHERE id=?";
+            DB::run($torrents_query, [$views, $id]); 
             $this->redirect("torrent/$id");
         }
 
         // Add Bump
         if ($action == 'bump') {
-            TorrentsLogic::update(['added'], ['id='], [CONFIG['TT_DATE'], $id]);
+            $torrents_query = "UPDATE `torrents` SET added = ? WHERE id=?";
+            DB::run($torrents_query, [CONFIG['TT_DATE'], $id]);
             showMessage("torrent/$id", LANG["ACTION_COMPLETE"]);
         }
 
@@ -77,7 +81,8 @@ class Torrent extends Controller
     {
     
         // Get Torrent Data
-        $row = TorrentsLogic::fetchRow('owner,image2,image1', ['id ='], [$id]);
+        $torrents_query = "SELECT owner,image2,image1 FROM `torrents` WHERE id=? ";
+        $row = DB::run($torrents_query, [$id])->fetch(PDO::FETCH_ASSOC);
 
         if ($this->current_user->control_panel == "no" && $this->current_user->id != $id) {
             showMessage(URLROOT, LANG["NO_PERMISSION"]);
@@ -141,7 +146,8 @@ class Torrent extends Controller
 
             $tags = $_POST['tags'];
             if ($tags) {
-                TorrentTagLogic::insert(['torrentid' => $id, 'type1' => $tags[0], 'type2' => $tags[1], 'type3' => $tags[2]]);
+                $torrenttag_query = "INSERT INTO `torrenttag` (torrentid, type1, type2, type3) VALUES (?,?,?,?)";
+                DB::run($torrenttag_query, [$id, $tags[0], $tags[1], $tags[2]]);
             }
 
             // Images
@@ -198,14 +204,15 @@ class Torrent extends Controller
         }
 
         // Delete Torrent
-        $owner = TorrentsLogic::fetchRow('name, owner', ['id ='], $torrentid);
+        $torrent_query = "SELECT name,owner FROM `torrents` WHERE id=?";
+        $owner = DB::run($torrent_query, [$torrentid])->fetch(PDO::FETCH_ASSOC);
         TorrentsLogic::deleteTorrent($torrentid, $this->current_user->id);
         LogsLogic::write($this->current_user->username . " has deleted torrent: ID:$torrentid - " . htmlspecialchars($torrentname) . " - Reason: " . htmlspecialchars($delreason));
         unlink(UPLOAD_PATH . "/torrents/$torrentid.torrent");
 
         if ($this->current_user->id=== $owner['owner']) {
             $msg_shout = "Your torrent " . $torrentname . " has been deleted by " . $this->current_user->username . "/nReason: " . $_POST["delreason"] . "";
-            MessagesLogic::insert(['sender' => 0, 'receiver' => $owner['owner'], 'added' => CONFIG['TT_DATE'], 'subject' => 'Torrent Deleted', 'msg' => $msg_shout, 'unread' => 'yes', 'location' => 'in']);
+            MessagesLogic::newinsert(['sender' => 0, 'receiver' => $owner['owner'], 'added' => CONFIG['TT_DATE'], 'subject' => 'Torrent Deleted', 'msg' => $msg_shout, 'unread' => 'yes', 'location' => 'in']);
         }
 
         showMessage("peer/seeding/$owner[owner]", htmlspecialchars($torrentname) . " " . LANG["DEL_ERROR"]);

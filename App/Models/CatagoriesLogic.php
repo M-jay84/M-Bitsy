@@ -11,12 +11,6 @@ use App\Models\TorrentsLogic;
 */
 class CatagoriesLogic
 {
-    // Fetch All Catagories
-    public static function fetchAll($columns = '*', $where = '', $values = '', $other = '')
-    {
-        $stmt = DB::newSelect('categories', $columns, $where, $values, $other);
-		return $stmt;
-	}
 
     // Admin Delete Catagorie
     public static function deleteAndUpdateTorrent($id, $sure = 0)
@@ -24,13 +18,16 @@ class CatagoriesLogic
         if ($sure) {
             // Move Any Torrents to Other Cat & Delete Cat
             $newcatid = Validate::Input('newcat', 'int');
-            TorrentsLogic::update(['category'], ['category='], [$newcatid, $id]); //move torrents to a new cat
-            DB::delete('categories', ['id' => $id]);
+            $torrents_query = "UPDATE torrents SET category = ? WHERE category=?";
+            DB::run($torrents_query, [$newcatid, $id]); //move torrents to a new cat
+            $categories_query = "DELETE FROM `categories` WHERE id = ?";
+            DB::run($categories_query, [$id]);
             showMessage('admincategorie', LANG["DEL_COMPLETE"]);
         } else {
             // Select Cat 2 Move Kept Torrent Too
             showMessage('admincategorie', 
-                "<form method='post' action='" .  URLROOT . "/admincategorie/delete/$id/sure'>                                 <div class='tt_blockcenter rounded'>
+                "<form method='post' action='" .  URLROOT . "/admincategorie/delete/$id/sure'>                                 
+                <div class='tt_blockcenter rounded'>
                 <b>Category ID to move all Torrent To: </b>
                 <input type='text' name='newcat' /> (Cat ID)<br><br>
                 <p class='text-center'>
@@ -57,7 +54,11 @@ class CatagoriesLogic
         
         if (!$id) {
             // Insert Categorie
-            $ins = DB::insert('categories', ['name' => $name, 'parent_cat' => $parent_cat, 'sort_index' => $sort_index, 'image' => $image]);
+
+            $categories_query = "INSERT INTO `categories` (name,parent_cat,sort_index,image) VALUES (?,?,?,?)";
+            $ins =  DB::run($categories_query,
+            [$name, $parent_cat, $sort_index, $image]);
+
             if ($ins) {
                 showMessage('admincategorie', LANG["SUCCESS"]);
             } else {
@@ -65,7 +66,8 @@ class CatagoriesLogic
             }
         } else {
             // Update
-            DB::update('categories', ['parent_cat','name','sort_index','image'], ['id='], [$parent_cat, $name, $sort_index, $image, $id]);
+            $categories_query = "UPDATE categories SET parent_cat = ? AND name = ? AND sort_index = ?  AND image = ? WHERE id=?";
+            DB::run($categories_query, [$parent_cat, $name, $sort_index, $image, $id]);
             showMessage('admincategorie', LANG["SUCCESS"]);
         }
     }
@@ -73,7 +75,8 @@ class CatagoriesLogic
     // Get Parent
     public static function getCatByParent()
     {
-        $row = DB::run("SELECT distinct parent_cat FROM categories ORDER BY parent_cat");
+        $categories_query = "SELECT distinct parent_cat FROM categories ORDER BY parent_cat";
+        $row = DB::run($categories_query);
         return $row;
     }
 
@@ -81,7 +84,8 @@ class CatagoriesLogic
     public static function genreList()
     {
         $ret = array();
-        $res = DB::fetchAll('categories', 'id, name, parent_cat', '', 'ORDER BY parent_cat ASC, sort_index ASC');
+        $categories_query = "SELECT id, name, parent_cat FROM `categories` ORDER BY parent_cat ASC, sort_index ASC";
+        $res = DB::run($categories_query);
         foreach ($res as $row) {
             $ret[] = $row;
         }

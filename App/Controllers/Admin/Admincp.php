@@ -27,7 +27,7 @@ class Admincp extends Controller
     {
         // Data For View
         $data = [
-            'page_title' => LANG['STAFF'],
+            'TITLE' => LANG['STAFF'],
             'current_user' => $this->current_user
         ];
 

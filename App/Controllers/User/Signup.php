@@ -34,7 +34,6 @@ class Signup extends Controller
         }
 
         if (!empty($_POST)) {
-            // Sign Account Up
             AccountsLogic::signupUser();
         } else {
             $data = [

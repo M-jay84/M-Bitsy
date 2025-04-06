@@ -48,6 +48,8 @@ class EmailLogic
         }
 
         LogsLogic::write("<b><font color='Magenta'>A Mass E-Mail</font> was sent by (<font color='Navy'>".$current_user->username."</font>) $msg_log<b>");
+        
+        showMessage('adminemail', "<b><font color='#ff0000'>Mass mail sent....</font></b>");
     }
 
 }

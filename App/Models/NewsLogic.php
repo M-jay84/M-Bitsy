@@ -39,6 +39,14 @@ class NewsLogic
         showMessage('adminnews', LANG["ACTION_COMPLETE"]);
     }
 
+    // Admin Delete Catagorie
+    public static function getAll()
+    {
+        $news_query = "SELECT * FROM `news` ORDER BY added DESC";
+        $news = DB::run($news_query);
+        return $news;
+    }
+
     // Admin Delete News
     public static function delete($id, $userid)
     {

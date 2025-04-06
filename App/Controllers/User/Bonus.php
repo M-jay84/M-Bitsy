@@ -4,7 +4,6 @@ namespace App\Controllers\User;
 
 use App\Libs\Auth;
 use App\Libs\Controller;
-use App\Libs\DB;
 use App\Models\BonusLogic;
 
 /*
@@ -45,34 +44,30 @@ class Bonus extends Controller
         } else {
             showMessage('bonus', LANG["NOTHING_FOUND"]);
         }
-        showMessage('bonus', LANG["SUCCESS"]);
     }
     
     // Bonus Edit/Add Form Submit
     public function update()
     {
         if ($this->current_user->isStaff) {
-            if (!empty($_POST)) {
-                BonusLogic::insertOrUpdate();
-            } else {
-                showMessage('bonus', LANG["NOTHING_FOUND"]);
-            }
-        } else {
             showMessage(URLROOT, LANG["NO_PERMISSION"]);
-        } 
-        showMessage('bonus', LANG["SUCCESS"]);
+        }
+
+        if (!empty($_POST)) {
+            BonusLogic::insertOrUpdate();
+        } else {
+            showMessage('bonus', LANG["NOTHING_FOUND"]);
+        }
     }
 
     // Delete Bonus By Link $id
     public function delete($id)
     {
         if ($this->current_user->isStaff) {
-            $bonus_query = "DELETE FROM `bonus` WHERE id' = ?";
-            DB::run($bonus_query, [$id]);
+            BonusLogic::deleteone($id);
         } else {
             showMessage(URLROOT, LANG["NO_PERMISSION"]);
         }
-        showMessage('bonus', LANG["SUCCESS"]);
     }
 
 }

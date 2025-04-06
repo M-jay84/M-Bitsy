@@ -1,6 +1,6 @@
-<?php block_begin($page_title) ?>
+<?php block_begin($TITLE) ?>
 <p class='text-center'>
-    <?php echo sprintf(LANG['PENDING_REGS'], number_format($V_count)); ?>
+    <?php echo sprintf(LANG['PENDING_REGS'], number_format($COUNT)); ?>
 </p>
 <form id="confirmreg" class='p-1' method="post" action="<?= Url('adminconfirmreg/submit') ?>">
     <div class='table-responsive'>
@@ -15,7 +15,7 @@
                 </tr>
             </thead>
             <tbody> 
-            <?php foreach ($V_users as $row) : ?>
+            <?php foreach ($USERS as $row) : ?>
                 <tr>
                     <td><?= coloredname($row["id"]); ?></td>
                     <td><?= $row["email"]; ?></td>
@@ -31,5 +31,5 @@
         <input type="submit" class='btn btn-sm ttbtn' value="<?= LANG['CONFIRM'] ?>" />
     </div>
 </form>
-<?= $V_pager ?>
+<?= $PAGER ?>
 <?php block_end() ?>

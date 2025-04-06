@@ -14,7 +14,7 @@ class Logout extends Controller
     public function index()
     {
         Auth::destroy_cookies();
-        $this->redirect('login');
+        header("Location: " . "login", true, 302);
     }
 
 }

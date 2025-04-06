@@ -27,7 +27,6 @@ class Login extends Controller
     public function index()
     {
         if (!empty($_POST)) {
-            // Log User In
             AccountsLogic::login();
         }
     

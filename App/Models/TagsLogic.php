@@ -35,8 +35,8 @@ class TagsLogic
       DB::run($tags_query, [$name, $colour]);
       showMessage('admintag', LANG['SUCCESS']);
     } else {
-      $torrents_query = "UPDATE torrents SET name = ? AND colour = ? WHERE id=?";
-      DB::run($torrents_query, [$name,$colour,$id]);
+      $tags_query = "UPDATE tags SET name = ? AND colour = ? WHERE id=?";
+      DB::run($tags_query, [$name,$colour,$id]);
       showMessage('admintag', LANG['SUCCESS']);
     }
     

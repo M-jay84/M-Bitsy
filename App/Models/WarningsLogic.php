@@ -43,8 +43,15 @@ class WarningsLogic
     }
 
     // Delete All Warnings
-    public static function deleteAll($data)
+    public static function deleteAll($userid, $current_user)
     {
+        // Set Data
+        $data = [
+            'current_user' => $current_user,
+            'userid' => $userid,
+            'post_id' => Validate::multiIds("ids")
+        ];
+
         if ($data['current_user']->control_panel == "yes") {
             $warnings_query = "SELECT count(id) FROM `warnings` WHERE userid=? ";
             $count = DB::run($warnings_query, [$data['userid']])->fetchColumn();

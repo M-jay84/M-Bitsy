@@ -31,8 +31,9 @@ class PostsLogic
     // Returns the forum ID of a topic, or false on error
     public static function getTopicForum($topicid)
     {
-        $topics_query = "SELECT 'forumid' FROM `forum_topics` WHERE id = ?";
+        $topics_query = "SELECT forumid FROM `forum_topics` WHERE id = ?";
         $res = DB::run($topics_query, [$topicid])->fetch(PDO::FETCH_ASSOC);
+
         if (!$res) {
             return false;
         }
@@ -91,11 +92,11 @@ class PostsLogic
 
         // Update Last Read
         if ($current_user->id) {
-            $readposts_query = "SELECT lastpostread FROM `forum_readposts` WHERE userid = ? AND topicis=?";
+            $readposts_query = "SELECT lastpostread FROM `forum_readposts` WHERE userid = ? AND topicid=?";
             $lpr = DB::run($readposts_query, [$current_user->id,$topicid])->fetchColumn();
             if (!$lpr) {
                 $readposts_query = "INSERT INTO `forum_readposts` (userid, topicid) VALUES (?,?)";
-                DB::run($readposts_query, [$current_user->id, 'topicid'=>$topicid]);
+                DB::run($readposts_query, [$current_user->id, $topicid]);
             }
         }
         $forumcats_query = "SELECT name FROM `forumcats` WHERE id = ?";
@@ -178,17 +179,19 @@ class PostsLogic
 
         // Insert the new post
         $posts_query = "INSERT INTO forum_posts (topicid,userid,added,body) VALUES (?, ?, ?, ?)";
-        $postid = DB::run($posts_query, [$topicid, $current_user->id, CONFIG['TT_DATE'], $body]);
+        DB::run($posts_query, [$topicid, $current_user->id, CONFIG['TT_DATE'], $body]);
+        $postid = DB::lastInsertId();
 
         // attachments
         $data['topicid'] = $topicid;
         $data['postid'] = $postid;
+
         AttachmentsLogic::set_attachment($data);
 
         // Update topic last post
         PostsLogic::updateTopicLastPost($topicid);
 
-        showMessage(("post/$topicid/last/#post$postid"), true);
+        showMessage("post/$topicid/last/#post$postid", LANG["SUCCESS"]);
     }
 
     // Post Edit Form Submit

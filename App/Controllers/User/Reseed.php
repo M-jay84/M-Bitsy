@@ -29,6 +29,7 @@ class Reseed extends Controller
         if ($this->current_user->view_torrents != "yes" && CONFIG['MEMBERSONLY']) {
             showMessage(URLROOT, LANG["NO_TORRENT_VIEW"]);
         }
+
         TorrentsLogic::reseed($id, $this->current_user);
     }
 

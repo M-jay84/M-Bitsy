@@ -4,7 +4,6 @@ namespace App\Controllers\Admin;
 
 use App\Libs\Auth;
 use App\Libs\Controller;
-use App\Libs\DB;
 use App\Models\CatagoriesLogic;
 
 /*
@@ -32,9 +31,7 @@ class Admincategorie extends Controller
             CatagoriesLogic::insertOrUpdate();
         } else {
             // Show All Catagories
-            $categories_query = "SELECT * FROM `categories` ORDER BY parent_cat ASC, sort_index ASC";
-            $cats = DB::run($categories_query);
-        
+            $cats = CatagoriesLogic::getAll();
             // Data For View
             $data = [
                 'TITLE' => LANG["CATEGORIES"],
@@ -49,7 +46,6 @@ class Admincategorie extends Controller
     // Categorie Delete
     public function delete($id, $sure = 0)
     {
-        // Delete Catagorie
         CatagoriesLogic::deleteAndUpdateTorrent($id, $sure);
     }
 

@@ -60,6 +60,7 @@ class Profile extends Controller
         if (!$this->current_user->isStaff or $this->current_user->id != $id) {
             showMessage(URLROOT, LANG["NO_PERMISSION"]);
         }
+
         if (!empty($_POST)) {
             ProfileLogic::submit($id, $this->current_user);
         } else {
@@ -73,6 +74,7 @@ class Profile extends Controller
         if (!$this->current_user->isStaff) {
             showMessage(URLROOT, LANG["NO_PERMISSION"]);
         }
+
         if (!empty($_POST)) {
             ProfileLogic::adminSubmited($id, $this->current_user);
         } else {
@@ -86,6 +88,7 @@ class Profile extends Controller
         if (!$this->current_user->isStaff) {
             showMessage(URLROOT, LANG["NO_PERMISSION"]);
         }
+
         if (!empty($id)) {
             ProfileLogic::deleteprofile($id, $this->current_user);
         } else {

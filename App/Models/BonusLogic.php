@@ -77,10 +77,11 @@ class BonusLogic
             case 'VIP':
                 $vipuntil = ($current_user->vipuntil != null) ? $vipuntil = date("Y-m-d H:i:s", strtotime($current_user->vipuntil) + (30 * 86400)) : $vipuntil = date("Y-m-d H:i:s", CONFIG['TT_TIME'] + (30 * 86400));
                 $oldclass = ($current_user->vipuntil != null) ? $oldclass =$current_user->oldclass : $oldclass = $current_user->class;
-                $users_query = "UPDATE users SET class = ? AND oldclass = ? AND vipuntil = ?WHERE id=?";
+                $users_query = "UPDATE users SET class = ? AND oldclass = ? AND vipuntil = ? WHERE id=?";
                 DB::run($users_query, [3, $oldclass, $vipuntil, $current_user->id]);
                 break;
         }
+        showMessage('bonus', LANG["SUCCESS"]);
     }
 
     // Insert Bonus Or Update Bonus
@@ -104,5 +105,16 @@ class BonusLogic
             $bonus_query = "UPDATE bonus SET title=? AND descr=? AND cost=? AND value=? AND type=?  WHERE id=?";
             DB::run($bonus_query, [$title, $descr, $cost, $value, $type, $id]);
         }
+
+        showMessage('bonus', LANG["SUCCESS"]);
+    }
+
+    
+    // Insert Bonus Or Update Bonus
+    public static function deleteone($id)
+    {
+        $bonus_query = "DELETE FROM `bonus` WHERE id' = ?";
+        DB::run($bonus_query, [$id]);
+        showMessage('bonus', LANG["SUCCESS"]);
     }
 }

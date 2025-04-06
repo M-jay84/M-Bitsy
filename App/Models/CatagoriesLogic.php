@@ -38,6 +38,14 @@ class CatagoriesLogic
 
     }
 
+    // Admin Delete Catagorie
+    public static function getAll()
+    {
+        $categories_query = "SELECT * FROM `categories` ORDER BY parent_cat ASC, sort_index ASC";
+        $cats = DB::run($categories_query);
+        return $cats;
+    }
+
     // Admin Add/Edit Catagorie
     public static function insertOrUpdate()
     {

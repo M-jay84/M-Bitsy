@@ -4,7 +4,6 @@ namespace App\Controllers\Admin;
 
 use App\Libs\Auth;
 use App\Libs\Controller;
-use App\Libs\DB;
 use App\Models\NewsLogic;
 
 /*
@@ -32,8 +31,7 @@ class Adminnews extends Controller
             NewsLogic::insertOrUpdate();
         } else {
             // Show All News
-            $news_query = "SELECT * FROM `news` ORDER BY added DESC";
-            $news = DB::run($news_query);
+            $news = NewsLogic::getAll();
 
             // Data For View
             $data = [

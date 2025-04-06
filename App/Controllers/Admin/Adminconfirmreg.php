@@ -31,10 +31,10 @@ class Adminconfirmreg extends Controller
 
         // Data For View
         $data = [
-            'page_title' => LANG["REG_CONFIRM"],
-            'V_count' => $users['count'],
-            'V_pager' => $users['pager'],
-            'V_users' => $users['users']
+            'TITLE' => LANG["REG_CONFIRM"],
+            'COUNT' => $users['count'],
+            'PAGER' => $users['pager'],
+            'USER' => $users['users']
         ];
 
         // Load View
@@ -44,7 +44,11 @@ class Adminconfirmreg extends Controller
     // Confirm Users Submit
     public function submit()
     {
-        UsersLogic::confirmReg();
+        if (!empty($_POST)) {
+            UsersLogic::confirmReg();
+        } else {
+            showMessage(URLROOT, LANG["NOTHING_SELECTED"]);
+        }
     }
     
 }

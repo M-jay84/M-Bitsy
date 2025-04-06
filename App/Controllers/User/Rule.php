@@ -42,12 +42,12 @@ class Rule extends Controller
     {
         if (!$this->current_user->isStaff) {
             showMessage('rule', LANG["NO_PERMISSION"]);
+        }
+
+        if (!empty($_POST)) {
+            RulesLogic::insertOrUpdate($this->current_user->username);
         } else {
-            if (!empty($_POST)) {
-                RulesLogic::insertOrUpdate($this->current_user->username);
-            } else {
-                showMessage('rule', LANG["NOTHING_SELECTED"]);
-            }
+            showMessage('rule', LANG["NOTHING_SELECTED"]);
         }
     }
 

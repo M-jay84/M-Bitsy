@@ -94,19 +94,31 @@ class Message extends Controller
     // Create/Reply Message Form Submit
     public function submit()
     {
-        MessagesLogic::insertByType($this->current_user->id);
+        if (!empty($_POST)) {
+            MessagesLogic::insertByType($this->current_user->id);
+        } else {
+            showMessage(URLROOT, LANG["NOTHING_FOUND"]);
+        }
     }
 
     // Message Edit
     public function update($id)
     {
-        MessagesLogic::update($id, $this->current_user->id);
+        if (!empty($_POST)) {
+            MessagesLogic::update($id, $this->current_user->id);
+        } else {
+            showMessage(URLROOT, LANG["NOTHING_FOUND"]);
+        }
     }
 
     // Delete/MarkRead Message Submit
     public function delete($type = 0)
     {
-        MessagesLogic::delete($type, $this->current_user->id);
+        if (!empty($_POST)) {
+            MessagesLogic::delete($type, $this->current_user->id);
+        } else {
+            showMessage(URLROOT, LANG["NOTHING_FOUND"]);
+        }
     }
 
 }

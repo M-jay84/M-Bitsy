@@ -152,7 +152,8 @@ class Cleanup
     {
         $downloaded = CONFIG['RATIOWARN_MINGIGS'] * 1024 * 1024 * 1024;
         // ADD RATIO WARNING
-        $users_query = "SELECT id, username FROM `users` WHERE class <=? AND warned =? AND enabled =? AND uploaded / downloaded < =? AND downloaded >=?";
+        $users_query = "SELECT id, username FROM `users` WHERE class <=? AND warned =? AND enabled =? AND uploaded / downloaded < ? AND downloaded >=?";
+
         $res =DB::run($users_query, [CONFIG['_UPLOADER'], 'no', 'yes', CONFIG['RATIOWARNMINRATIO'], $downloaded]);
         if ($res) {
             $reason = "Auto Leech warning has been added You have been warned because of having low ratio. You need to get a " . CONFIG['RATIOWARNMINRATIO'] . " before next " . CONFIG['RATIOWARN_DAYSTOWARN'] . " days or your account may be banned.";
@@ -227,8 +228,12 @@ class Cleanup
         $time = CONFIG['TT_TIME'] - ($interval * 86400);
         $minlimit = $minlimit * 1024 * 1024 * 1024;
         $maxlimit = $maxlimit * 1024 * 1024 * 1024;
-        $users_query = "SELECT id,username,class,invites FROM `users` WHERE enabled=? AND status =?
-        AND downloaded >=? AND uploaded / downloaded >=? AND warned=? AND downloaded >=? AND UNIX_TIMESTAMP(invitedate) <=";
+    
+        $users_query = "SELECT id, username, class, invites 
+                        FROM users 
+                        WHERE enabled = ? AND status = ? AND downloaded >= ? 
+                        AND downloaded < ? AND uploaded / downloaded >= ? AND warned = ? 
+                        AND UNIX_TIMESTAMP(invitedate) <= ?";
         $res = DB::run($users_query,
         ['yes', 'confirmed', $minlimit, $maxlimit, $minratio, 'no', $time]);
         if ($res) {

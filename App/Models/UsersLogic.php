@@ -108,11 +108,24 @@ class UsersLogic
         $stmt = DB::run($users_query);
 		return $stmt;
 	}
+
+    // Message ajax member search
+    public static function gmaxUser()
+    {
+        // Check Max Users
+        $invite_query = "SELECT count(id) FROM `users` WHERE enabled = ?";
+        $users = DB::run($invite_query, ['yes'])->fetchColumn();
+        if ($users >= CONFIG['MAXUSERSINVITE']) {
+            showMessage(URLROOT, "Sorry, The current user account limit (" . number_format(CONFIG['MAXUSERSINVITE']) . ") has been reached. Inactive accounts are pruned all the time, please check back again later...");
+        }
+
+		return true;
+	}
 	
     // Message ajax member search
     public static function usersToConfirm()
     {
-        $peers_query = "SELECT count(id) FROM `peers` WHERE status = ? AND invited_by !=";
+        $peers_query = "SELECT count(id) FROM `users` WHERE status = ? AND invited_by !=?";
         $count = DB::run($peers_query, ['pending',0])->fetchColumn();
         list($pager, $limit) = pagination(25, $count, 'adminconfirmreg?');
         $users_query = "SELECT id,username,email,added,ip FROM `users` WHERE status=? AND invited_by=? ORDER BY `added` DESC $limit";

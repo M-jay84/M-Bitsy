@@ -10,9 +10,11 @@ use App\Libs\DB;
 class TasksLogic
 {
     // Insert Task
-    public static function clearshoutbox($sure = '')
+    public static function updateTask($task)
     {
-        ShoutboxLogic::truncate($sure);
+        $task_query = "UPDATE tasks SET last_time = ? WHERE task=?";
+        DB::run($task_query, [CONFIG['TT_TIME'],$task]);
+        return;
 	}
 	
 }

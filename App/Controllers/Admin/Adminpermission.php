@@ -4,7 +4,6 @@ namespace App\Controllers\Admin;
 
 use App\Libs\Auth;
 use App\Libs\Controller;
-use App\Libs\DB;
 use App\Models\PermissionsLogic;
 
 /*
@@ -31,8 +30,7 @@ class Adminpermission extends Controller
             PermissionsLogic::insertOrUpdate();
         } else {
             // Get Permissions
-            $permissions_query = "SELECT * FROM `permissions` ORDER BY permission_id";
-            $permissions = DB::run($permissions_query); 
+            $permissions = PermissionsLogic::getAll();
 		
             // Data For View
             $data = [

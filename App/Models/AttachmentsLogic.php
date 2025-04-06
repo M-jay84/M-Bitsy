@@ -15,7 +15,7 @@ class AttachmentsLogic
     {
         $file = UPLOAD_PATH . "/attachment/$hash.data";
         $attachments_query = "SELECT filename FROM attachments WHERE id = ?";
-        $attachment =  DB::run($attachments_query, [$id])->fetch();
+        $attachment =  DB::run($attachments_query, [$id])->fetchColumn();
         $extension = substr($attachment['filename'], -3);
         $array = [
             'id' => $id,

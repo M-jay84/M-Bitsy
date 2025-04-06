@@ -50,7 +50,11 @@ class Adminmessage extends Controller
     // Message Form Submit
     public function delete()
     {
-        MessagesLogic::deleteByIds();
+        if (!empty($_POST)) {
+            MessagesLogic::deleteByIds();
+        } else {
+            showMessage(URLROOT, LANG["NOTHING_SELECTED"]);
+        }
     }
 
 }

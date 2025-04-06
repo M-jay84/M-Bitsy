@@ -4,7 +4,6 @@ namespace App\Controllers\User;
 
 use App\Libs\Auth;
 use App\Libs\Controller;
-use App\Libs\Validate;
 use App\Models\WarningsLogic;
 
 /*
@@ -52,8 +51,12 @@ class Warning extends Controller
             showMessage("profile/$userid", LANG["NO_PERMISSION"]);
         }
 
-        // Add New Warning
-        WarningsLogic::newwarn($userid);
+        if(!empty($_POST)) {
+            // Add New Warning
+            WarningsLogic::newwarn($userid);
+        } else {
+            showMessage("warning/$userid", LANG["NOTHING_SELECTED"]);
+        }
     }
 
     // Delete User Warning
@@ -64,14 +67,11 @@ class Warning extends Controller
             showMessage("profile/$userid", LANG["NO_PERMISSION"]);
         }
 
-        // Set Data
-        $data = [
-            'current_user' => $this->current_user,
-            'userid' => $userid,
-            'post_id' => Validate::multiIds("ids")
-        ];
-
-        // Delete Warning/s
-        WarningsLogic::deleteAll($data);
+        if(!empty($_POST)) {
+            // Delete Warning/s
+            WarningsLogic::deleteAll($userid, $this->current_user);
+        } else {
+            showMessage("warning/$userid", LANG["NOTHING_SELECTED"]);
+        }
     }
 }

@@ -33,25 +33,4 @@ class Controller
         return;
     }
 
-    // Redirect
-    public function redirect($url)
-    {
-        if ($url != URLROOT) {
-            $url = URLROOT . '/' . $url;
-        } else {
-            $url = URLROOT;
-        }
-        if (!headers_sent()) {
-            header("Location: " . $url, true, 302);
-            exit();
-        } else {
-            echo '<script type="text/javascript">';
-            echo 'window.location.href="' . $url . '";';
-            echo '</script>';
-            echo '<noscript>';
-            echo '<meta http-equiv="refresh" content="3; url=' . $url . '" />';
-            echo '</noscript>';
-            exit();
-        }
-    }
 }

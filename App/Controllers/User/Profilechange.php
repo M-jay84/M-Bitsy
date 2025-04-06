@@ -23,7 +23,7 @@ class Profilechange extends Controller
         }
     }
 
-    public function index() {die;}
+    public function index(){die;}
 
     // Profile Avatar Upload Submit
     public function changeavatar($user_id)

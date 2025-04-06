@@ -51,7 +51,11 @@ class Adminforum extends Controller
     // Add/Edit Forum
     public function submit()
     {
-        ForumsLogic::insertOrUpdateForum();
+        if (!empty($_POST)) {
+            ForumsLogic::insertOrUpdateForum();
+        } else {
+            showMessage(URLROOT, LANG["NOTHING_SELECTED"]);
+        }
     }
 
     // Delete Forum

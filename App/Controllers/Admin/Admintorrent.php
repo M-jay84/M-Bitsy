@@ -24,7 +24,7 @@ class Admintorrent extends Controller
     }
 
     // Torrents
-    public function index($type = '') // todo like %?%
+    public function index($type = '')
     {
         // Check User Input
         $search = (!empty($_GET["search"])) ? htmlspecialchars(trim($_GET["search"])) : "";

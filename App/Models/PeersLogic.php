@@ -14,6 +14,10 @@ class PeersLogic
     // Get Peers
     public static function getPeers($type, $id, $current_user, $pagination = false)
     {
+
+        $user_query = "SELECT id,username,privacy FROM `users` WHERE id = ?";
+        $user =  DB::run($user_query, [$id])->fetch(PDO::FETCH_ASSOC);
+
         if ($current_user->view_users != "yes" && $current_user->id != $id && $current_user->class < CONFIG['_UPLOADER'] && $type == ('seeding' || 'leeching')) {
             showMessage(URLROOT, LANG["NO_USER_VIEW"]);
         }
@@ -67,7 +71,8 @@ class PeersLogic
             'stmt' => $stmt,
             'pager' => $pager,
             'count' => $count,
-            'title' => $title
+            'title' => $title,
+            'user' => $user
         ];
     
         return $array;

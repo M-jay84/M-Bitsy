@@ -4,8 +4,8 @@ namespace App\Controllers\User;
 
 use App\Libs\Auth;
 use App\Libs\Controller;
-use App\Libs\DB;
 use App\Models\InvitesLogic;
+use App\Models\UsersLogic;
 
 /*
 * Invite Controller
@@ -38,11 +38,7 @@ class Invite extends Controller // todo
         }
 
         // Check Max Users
-        $invite_query = "SELECT count(id) FROM `users` WHERE enabled = ?";
-        $users = DB::run($invite_query, ['yes'])->fetchColumn();
-        if ($users >= CONFIG['MAXUSERSINVITE']) {
-            showMessage(URLROOT, "Sorry, The current user account limit (" . number_format(CONFIG['MAXUSERSINVITE']) . ") has been reached. Inactive accounts are pruned all the time, please check back again later...");
-        }
+        UsersLogic::gmaxUser();
 
         // Data For View
         $data = [
@@ -61,7 +57,6 @@ class Invite extends Controller // todo
         } else {
             showMessage(URLROOT, LANG["NOTHING_FOUND"]);
         }
-        showMessage(URLROOT, LANG["SUCCESS"]);
     }
 
     // User Invitee's

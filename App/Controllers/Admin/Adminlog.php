@@ -43,7 +43,11 @@ class Adminlog extends Controller
     // Delete Form
     public function delete()
     {
-        LogsLogic::delete();
+        if (!empty($_POST)) {
+            LogsLogic::delete();
+        } else {
+            showMessage(URLROOT, LANG["NOTHING_SELECTED"]);
+        }
     }
 
 }

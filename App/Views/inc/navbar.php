@@ -33,9 +33,8 @@
                 FROM messages 
                 LEFT JOIN users ON users.id=messages.sender 
                 LEFT JOIN `groups` ON groups.group_id=users.class
-                WHERE receiver=" . $_SESSION['id'] . " and unread='yes' AND location IN ('in','both')"
-                ;
-                $arr = DB::run($message_query)->fetchAll();
+                WHERE receiver=? and unread='yes' AND location IN ('in','both') LIMIT 3";
+                $arr = DB::run($message_query, [$_SESSION['id']])->fetchAll();
                 $unreadmail = count($arr);
                 ?>
 

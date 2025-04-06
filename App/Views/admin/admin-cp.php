@@ -8,7 +8,7 @@
     <meta name="author" content="M-jay">
     <meta name="description" content="M-BiTsy is a feature packed and highly customisable PHP/PDO/MVC Based BitTorrent tracker." />
     <meta name="keywords" content="https://github.com/M-jay84/M-BiTsy" />
-    <title><?= $data['page_title'] ?></title>
+    <title><?= $TITLE ?></title>
     <!-- Bootstrap & Core CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://kit.fontawesome.com/2da665f0cd.js" crossorigin="anonymous"></script>

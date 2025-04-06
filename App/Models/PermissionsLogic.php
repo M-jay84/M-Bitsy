@@ -24,6 +24,14 @@ class PermissionsLogic
         showMessage('adminpermission', LANG["DEL_COMPLETE"]);
     }
 
+    // Admin Delete Catagorie
+    public static function getAll()
+    {
+        $permissions_query = "SELECT * FROM `permissions` ORDER BY permission_id";
+        $permissions = DB::run($permissions_query); 
+        return $permissions;
+    }
+
     // Admin Add/Update Permissions
     public static function insertOrUpdate()
     {

@@ -5,7 +5,6 @@ namespace App\Controllers\User;
 use App\Libs\Auth;
 use App\Libs\Controller;
 use App\Libs\DB;
-use App\Models\UsersLogic;
 
 /*
 * Top Ten Controller
@@ -92,7 +91,7 @@ class Topten extends Controller
     public function index($limit = 10)
     {
         $data = [
-            'page_title' => LANG["TOP_10"],
+            'TITLE' => LANG["TOP_10"],
             'V_info' => $this->sql($limit)
         ];
         

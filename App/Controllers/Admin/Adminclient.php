@@ -43,7 +43,12 @@ class Adminclient extends Controller
     // Add Client Record
     public function submit()
     {
-        ClientsLogic::insert();
+        if (!empty($_POST)) {
+            // Add/Edit Catagories
+            ClientsLogic::insert();
+        } else {
+            showMessage(URLROOT, LANG["NOTHING_SELECTED"]);
+        }
     }
 
     // Delete Client Record

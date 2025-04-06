@@ -110,7 +110,7 @@ class TopicsLogic
         }
 
         // Create Topic / Reply
-        $topics_query = "INSERT INTO `forum_topics` (userid, $forumid, $subject) VALUES (?,?,?)";
+        $topics_query = "INSERT INTO `forum_topics` (userid, forumid, subject) VALUES (?,?,?)";
         DB::run($topics_query, [$current_user->id, $forumid, $subject]);
         $topicid = DB::lastInsertId() or showMessage('forum', "Topics id n/a");
 

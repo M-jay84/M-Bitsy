@@ -47,6 +47,10 @@ class Admintag extends Controller
   // Delete Tags
   public function delete()
   {
-    TagsLogic::delete();
+    if (!empty($_POST)) {
+      TagsLogic::delete();
+    } else {
+      showMessage(URLROOT, LANG["NOTHING_SELECTED"]);
+    }
   }
 }

@@ -47,7 +47,11 @@ class AdminforumCat extends Controller
     // Add/Edit Cat
     public function submit()
     {
-        ForumsLogic::insertOrUpdate();
+        if (!empty($_POST)) {
+            ForumsLogic::insertOrUpdate();
+        } else {
+            showMessage(URLROOT, LANG["NOTHING_SELECTED"]);
+        }
     }
 
     // Delete Forum Cat Submit

@@ -43,14 +43,11 @@ class Adminemail extends Controller
     // Mass Email Submit
     public function sendemail()
     {
-        // Check User Input
         if (!empty($_POST)) {
             EmailLogic::emailAll($this->current_user);
-            showMessage('adminemail', "<b><font color='#ff0000'>Mass mail sent....</font></b>");
         } else {
             showMessage(URLROOT, LANG['NOTHING_FOUND']);
         }
-
     }
 
 }

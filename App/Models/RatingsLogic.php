@@ -28,8 +28,8 @@ class RatingsLogic
                 2 => LANG["PRETTY_BAD"],
                 1 => LANG["SUCKS"],
             ];
-            $torrents_query = "SELECT rating, added FROM `torrents` WHERE torrent=? AND user=?";
-            $res = DB::run($torrents_query, [$id, $userid])->fetch(PDO::FETCH_ASSOC);
+            $reports_query = "SELECT rating, added FROM `reports` WHERE torrent=? AND user=?";
+            $res = DB::run($reports_query, [$id, $userid])->fetch(PDO::FETCH_ASSOC);
             $row = $res;
             if ($row) {
                 $rating .= "<i>(" . LANG["YOU_RATED"] . " \"" . $row["rating"] . " - " . $ratings[$row["rating"]] . "\")</i>";

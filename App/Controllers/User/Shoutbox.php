@@ -3,9 +3,7 @@
 namespace App\Controllers\User;
 
 use App\Libs\Auth;
-use App\Libs\Cleanup;
 use App\Libs\Controller;
-use App\Libs\DB;
 use App\Models\ShoutboxLogic;
 
 /*
@@ -40,7 +38,11 @@ class Shoutbox extends Controller
     // Add Shout Submit
     public function add()
     {
-        ShoutboxLogic::add($this->current_user);
+        if (!empty($_POST)) {
+            ShoutboxLogic::add($this->current_user);
+        } else {
+            showMessage(URLROOT, LANG["NOTHING_FOUND"]);
+        }
     }
 
     // Delete Shout Submit
@@ -52,7 +54,11 @@ class Shoutbox extends Controller
     // Edit Shout Default Page
     public function edit()
     {
-        ShoutboxLogic::edit($this->current_user);
+        if (!empty($_POST)) {
+            ShoutboxLogic::edit($this->current_user);
+        } else {
+            showMessage(URLROOT, LANG["NOTHING_FOUND"]);
+        }
     }
 
     // Shoutbox History Default Page

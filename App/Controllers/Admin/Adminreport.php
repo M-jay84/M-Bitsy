@@ -45,9 +45,7 @@ class Adminreport extends Controller
     {
         if ($_POST["mark"]) {
             ReportsLogic::update($this->current_user->id);
-        }
-        
-        if ($_POST["delete"]) {
+        } elseif ($_POST["delete"]) {
             ReportsLogic::deleteByIds();
         }
 

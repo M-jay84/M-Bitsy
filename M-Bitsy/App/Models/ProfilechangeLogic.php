@@ -25,7 +25,7 @@ class ProfilechangeLogic
         }
 
         if (in_array($ext, $allowedfiles)) {
-            move_uploaded_file($_FILES['file']['tmp_name'], "uploaded/avatars/$user_id.$ext");
+            move_uploaded_file($_FILES['file']['tmp_name'], "uploads/avatars/$user_id.$ext");
             $avatar = URLROOT . "/uploaded/avatars/$user_id.$ext";
             $users_query = "UPDATE users SET avatar=? WHERE id=?";
             DB::run($users_query, [$avatar, $user_id]);

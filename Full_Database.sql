@@ -666,7 +666,8 @@ CREATE TABLE `snatched` (
   KEY `tid` (`tid`),
   KEY `uid` (`uid`)
 ) ENGINE=MyISAM;
--------------------------------------------------------
+
+-- --------------------------------------------------------
 
 --
 -- Table structure for table `tags`
